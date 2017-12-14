@@ -1,7 +1,10 @@
+#! /usr/bin/env bash
+set -euo pipefail
+
 #instead of being run like:
-#sh quick.sh
+#`sh quick.sh [repository]`
 #this should be run as:
-#. quick.sh
+#`. quick.sh [repository]` OR `source quick.sh [repository]`
 
 #note, the following information is for example purposes
 #one should replace wherever a comment indicates to
@@ -13,5 +16,9 @@ owner="kkhan01"
 #set equal to whatever the repository's name is
 dir="shell_scripts"
 
-git clone https://github.com/"$owner"/"$dir".git
-cd ./"$dir"
+# set the repository as the first argument if available
+repository="${1:-${owner}/${dir}}"
+
+git clone https://github.com/"${repository}".git
+cd "$(basename "${repository}")"
+
