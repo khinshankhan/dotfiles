@@ -1,3 +1,11 @@
+#Customizing the display
+##move this to after the if statement for the PS for better ettiquette, thought you could technically get rid of the if
+bold=$(tput bold)
+normal=$(tput sgr0)
+top="⮳ " #"╭" #"╔═"
+bottom="⮱ " #"╰" #"╚═"
+PS1="${bold}$top${normal}\w\n${bold}$bottom${normal}$ "
+
 #Display Redirection
 export DISPLAY=localhost:0.0
 
