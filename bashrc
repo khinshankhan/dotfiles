@@ -33,12 +33,6 @@ cwrn="${green}\w${white}"
 #all together now
 PS1="$top[\`${SELECT}\`]$cwrn\n$bottom$ "
 
-#Display Redirection
-export DISPLAY=localhost:0.0
-
-#Daily Commands
-alias work="cd ~/Documents/code/current"
-
 #Git
 ##clone a repo (http) by specifying repo and then username (or using defaults)
 function http() {
@@ -52,6 +46,16 @@ function repolist() {
     curl "https://api.github.com/users/$USER/repos?per_page=100" | grep -o 'git@[^"]*' > list.txt;
     sed -i -e 's/git@/http:\/\//g' ./list.txt;
     #sed 's/\.git/ /g' ./list.txt; #removes the .git
+}
+
+#Emacs
+##have spacemacs files in .spacemacs/.emacs.d
+function spacemacs() {
+    HOME=~/spacemacs emacs "$@"
+}
+##kind of niche, but Zamansky's tutorials from http://cestlaz.github.io/stories/emacs/ in .zemacs/.emacs.d
+function zemacs() {
+    emacs -Q -l .zemacs/.emacs.d/init.el "$@"
 }
 
 #NOT FULLY FUNCTION YET
