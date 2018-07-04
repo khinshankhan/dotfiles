@@ -29,9 +29,9 @@ top="⮳ " #"╭" #"╔═"
 bottom="⮱ " #"╰" #"╚═"
 top="${bold}$top${normal}"
 bottom="${bold}$bottom${normal}"
-cwrn="${green}\w${white}"
+cwrn="${green}\w${normal}"
 #all together now
-PS1="$top[\`${SELECT}\`]$cwrn\n$bottom$ "
+PS1="$top[${yellow}\u@\h${normal}][\`${SELECT}\`]\n$bottom$cwrn\n  $ ${white}"
 
 #Git
 ##clone a repo (http) by specifying repo and then username (or using defaults)
