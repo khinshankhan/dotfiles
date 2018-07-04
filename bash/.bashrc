@@ -29,7 +29,7 @@ top="⮳ " #"╭" #"╔═"
 bottom="⮱ " #"╰" #"╚═"
 top="${bold}$top${normal}"
 bottom="${bold}$bottom${normal}"
-cwrn="${green}\w${normal}"
+cwrn="${green}[\$(git branch 2>/dev/null | grep '^*' | colrm 1 2)] \w${normal}"
 #all together now
 PS1="$top[${yellow}\u@\h${normal}][\`${SELECT}\`]\n$bottom$cwrn\n  $ ${white}"
 
