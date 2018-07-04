@@ -56,7 +56,7 @@ function spacemacs() {
 }
 ##kind of niche, but Zamansky's tutorials from http://cestlaz.github.io/stories/emacs/ in .zemacs/.emacs.d
 function zemacs() {
-    emacs -Q -l .zemacs/.emacs.d/init.el "$@"
+    emacs -Q -l ~/.zemacs/.emacs.d/init.el "$@"
 }
 
 #NOT FULLY FUNCTION YET
