@@ -50,6 +50,7 @@ function repolist() {
 
 #Emacs
 ##have spacemacs files in .spacemacs/.emacs.d
+##git clone git@github.com:syl20bnr/spacemacs.git ~/.spacemacs/.emacs.d
 function spacemacs() {
     HOME=~/spacemacs emacs "$@"
 }
