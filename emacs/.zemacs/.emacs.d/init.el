@@ -6,6 +6,10 @@
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
 
+;; enable all default disabled commands (not recommended to newbies)
+;; https://www.emacswiki.org/emacs/DisabledCommands
+(setq disabled-command-function nil)
+
 (require 'package)
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
