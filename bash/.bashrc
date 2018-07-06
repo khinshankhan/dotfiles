@@ -51,8 +51,12 @@ bottom="⮱ " #"╰" #"╚═"
 top="${bold}$top${normal}"
 bottom="${bold}$bottom${normal}"
 cwrn="${green}[\$(git branch 2>/dev/null | grep '^*' | colrm 1 2)] \w${normal}"
+#get the date and time.
+#See `man bash` in section 'PROMPTING' for a list of all backslash-escaped special characters
+#For the specifcs of what the % characters are, look at `man 3 strftime`
+date="\D{%m/%d|%I:%M}"
 #all together now
-PS1="$top[${yellow}\u@\h${normal}][\`${SELECT}\`]\n$bottom$cwrn\n  $ ${white}"
+PS1="$top[${yellow}\u@\h${normal}][\`${SELECT}\`] ${date}\n$bottom$cwrn\n  $ ${white}"
 
 #Git
 ##########
