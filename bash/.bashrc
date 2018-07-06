@@ -65,13 +65,14 @@ PS1="$top[${yellow}\u@\h${normal}][\`${SELECT}\`] ${date}\n$bottom$cwrn\n  $ ${w
 ##########
 ##clone a repo (http) by specifying repo and then username (or using defaults)
 function http() {
-    REPO="${1:-"scripts"}"
-    USER="${2:-"kkhan01"}"
-    git clone "https://github.com/$USER/$REPO.git";
+    REPO=${1:-"scripts"}
+    USER=${2:-"kkhan01"}
+    NAME=${3:-$REPO}
+    git clone "https://github.com/$USER/$REPO.git" $NAME;
 }
 ##list out 100 repos associated with a github user (alphabetical into list.txt)
 function repolist() {
-    USER="${1:-"kkhan01"}"
+    USER=${1:-"kkhan01"}
     curl "https://api.github.com/users/$USER/repos?per_page=100" | grep -o 'git@[^"]*' > list.txt;
     sed -i -e 's/git@/http:\/\//g' ./list.txt;
     #sed 's/\.git/ /g' ./list.txt; #removes the .git
