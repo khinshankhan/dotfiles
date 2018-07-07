@@ -77,7 +77,7 @@ function gbranch(){
 
 #Emacs
 ##have spacemacs files in .spacemacs/.emacs.d
-##git clone git@github.com:syl20bnr/spacemacs.git ~/.spacemacs/.emacs.d
+##git clone https://github.com/syl20bnr/spacemacs ~/.spacemacs/.emacs.d
 function spacemacs() {
     HOME=~/spacemacs emacs "$@"
 }
