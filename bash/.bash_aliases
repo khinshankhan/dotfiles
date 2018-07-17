@@ -76,10 +76,9 @@ function gbranch(){
 }   
 
 #Emacs
-##have spacemacs files in .spacemacs/.emacs.d
-##git clone https://github.com/syl20bnr/spacemacs ~/.spacemacs/.emacs.d
+##git clone https://github.com/syl20bnr/spacemacs ~/.spacemacs.d/.emacs.d
 function spacemacs() {
-    HOME=~/.spacemacs emacs "$@"
+    HOME=~/.spacemacs.d emacs "$@"
 }
 ##kind of niche, but Zamansky's tutorials from http://cestlaz.github.io/stories/emacs/ in .zemacs/.emacs.d
 function zemacs() {
