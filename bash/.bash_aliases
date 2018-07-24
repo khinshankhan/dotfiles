@@ -89,7 +89,7 @@ function zemacs() {
 alias ed="spacemacs --daemon"
 alias e="emacsclient -t"
 alias ec="emacsclient -c -n"
-alias emacsbare="emacs -n w -Q --eval \"(load-theme 'wombat)\""
+alias emacsbare="emacs -nw -Q --eval \"(load-theme 'wombat)\""
 alias eb="emacsbare"
 
 #NOT FULLY FUNCTION YET
