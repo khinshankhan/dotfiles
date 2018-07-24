@@ -51,6 +51,11 @@ function prompt(){
 }
 prompt
 
+#Versatile functions
+function ka() {
+    killall -9 "$@"
+}
+
 #Git
 ##########
 # Note:
@@ -86,11 +91,16 @@ function zemacs() {
 }
 
 ##server
-alias ed="spacemacs --daemon"
+function ed() {
+    typeofemacs=${1:-"spacemacs"}
+    $typeofemacs --daemon
+}
+alias ek="ka emacs"
 alias e="emacsclient -t"
 alias ec="emacsclient -c -n"
-alias emacsbare="emacs -nw -Q --eval \"(load-theme 'wombat)\""
 alias eb="emacsbare"
+alias emacsbare="emacs -nw -Q --eval \"(load-theme 'manoj-dark)\""
+
 
 #NOT FULLY FUNCTION YET
 
