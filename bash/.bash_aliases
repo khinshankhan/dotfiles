@@ -85,6 +85,13 @@ function zemacs() {
     emacs -Q -l ~/.zemacs/.emacs.d/init.el "$@"
 }
 
+##server
+alias ed="spacemacs --daemon"
+alias e="emacsclient -t"
+alias ec="emacsclient -c -n"
+alias emacsbare="emacs -n w -Q --eval \"(load-theme 'wombat)\""
+alias eb="emacsbare"
+
 #NOT FULLY FUNCTION YET
 
 ##SSH with display
