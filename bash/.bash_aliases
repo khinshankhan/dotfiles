@@ -28,33 +28,19 @@ CYAN='\[\e[1;36m\]'
 
 ## customized command prompt display
 function prompt(){
+
     local SMILEY="${WHITE}:)${NORMAL}"
     local FROWNY="${RED}:(${NORMAL}"
     #determine status of last command
     local SELECT="if [ \$? = 0 ]; then echo \"${SMILEY}\"; else echo \"${FROWNY}\"; fi"
     local status="[\`${SELECT}\`]"
-    #various aspects of command prompt
-    local top="⮳ " #"╭" #"╔═"
-    local bottom="⮱ " #"╰" #"╚═"
-    local top="${bold}$top${normal}"
-    local bottom="${bold}$bottom${normal}"
-    local cwrn="${green} \w${normal}"
-    #get the date and time.
-    #See `man bash` in section 'PROMPTING' for a list of all backslash-escaped special characters
-    #For the specifcs of what the % characters are, look at `man 3 strftime`
-    local date="\D{%m/%d}"
-    local time="\D{%I:%M}"
-    local rn="[${yellow}$date${white}|${yellow}$time${normal}]"
-    local ourinfo="[${yellow}\u@\h${normal}]"
-    #all together now
-    export PS1="$top$ourinfo $rn $status\n$bottom$cwrn $ ${white}"
+
+    RESETC="\\[$(tput sgr0)\\]"
+    USERI="$RESETC[\\[$(tput setaf 6)\\]\\u@\\h$RESETC]"
+    RCWD="\\[$(tput setaf 2)\\]\\w$RESETC"
+    export PS1="$USERI $RCWD\n$status$ $RESETC"
 }
 prompt
-
-#Versatile functions
-function ka() {
-    killall -9 "$@"
-}
 
 #Git
 ##########
@@ -81,6 +67,7 @@ function gbranch(){
 }   
 
 #Emacs
+##have spacemacs files in .spacemacs/.emacs.d
 ##git clone https://github.com/syl20bnr/spacemacs ~/.spacemacs.d/.emacs.d
 function spacemacs() {
     HOME=~/.spacemacs.d emacs "$@"
@@ -90,16 +77,13 @@ function zemacs() {
     emacs -Q -l ~/.zemacs/.emacs.d/init.el "$@"
 }
 
-##server
-function ed() {
-    typeofemacs=${1:-"spacemacs"}
-    $typeofemacs --daemon
+#helpful aliases
+alias here="nautilus ."
+alias sus="./~/i3exit.sh suspend"
+
+function pdfc(){
+    libreoffice --convert-to "pdf" "$@"	
 }
-alias ek="ka emacs"
-alias e="emacsclient -t"
-alias ec="emacsclient -c -n"
-alias eb="emacsbare"
-alias emacsbare="emacs -nw -Q --eval \"(load-theme 'manoj-dark)\""
 
 
 #NOT FULLY FUNCTION YET
