@@ -193,15 +193,15 @@ __git_ps1_show_upstream ()
 	if [[ -z "$verbose" ]]; then
 		case "$count" in
 		"") # no upstream
-			p+="" ;;
+			p="" ;;
 		"0	0") # equal to upstream
-			p+="=" ;;
+			p="=" ;;
 		"0	"*) # ahead of upstream
-			p+=">" ;;
+			p=">" ;;
 		*"	0") # behind upstream
-			p+="<" ;;
+			p="<" ;;
 		*)	    # diverged from upstream
-			p+="<>" ;;
+			p="<>" ;;
 		esac
 	else
 		case "$count" in
@@ -500,11 +500,6 @@ __git_ps1 ()
 		fi
 
 		if [ -n "${GIT_PS1_SHOWUPSTREAM-}" ]; then
-		     	# add a space if w and i were blank
-			if [[ -z $w ]] && [[ -z $i ]] && [[ -z $u ]]
-			then
-				p=" "
-			fi
 			__git_ps1_show_upstream
 		fi
 	fi
@@ -522,8 +517,8 @@ __git_ps1 ()
 		b="\${__git_ps1_branch_name}"
 	fi
 
-	local f="$w$i$s$u"
-	local gitstring="$c$b${f:+$z$f}$r$p"
+	local f="$w$i$s$u$p"
+	local gitstring="$c$b${f:+$z$f}$r"
 
 	if [ $pcmode = yes ]; then
 		if [ "${__git_printf_supports_v-}" != yes ]; then
