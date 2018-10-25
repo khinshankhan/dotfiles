@@ -485,11 +485,6 @@ __git_ps1 ()
 			if [ -z "$short_sha" ] && [ -z "$i" ]; then
 				i="#"
 			fi
-			# add a space if w and i were blank
-			if [[ -z $w ]] && [[ -z $i ]]
-			then
-			   p=" "
-			fi
 		fi
 		if [ -n "${GIT_PS1_SHOWSTASHSTATE-}" ] &&
 		   git rev-parse --verify --quiet refs/stash >/dev/null
@@ -505,6 +500,11 @@ __git_ps1 ()
 		fi
 
 		if [ -n "${GIT_PS1_SHOWUPSTREAM-}" ]; then
+		     	# add a space if w and i were blank
+			if [[ -z $w ]] && [[ -z $i ]] && [[ -z $u ]]
+			then
+				p=" "
+			fi
 			__git_ps1_show_upstream
 		fi
 	fi
