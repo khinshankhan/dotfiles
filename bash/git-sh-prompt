@@ -517,7 +517,7 @@ __git_ps1 ()
 		b="\${__git_ps1_branch_name}"
 	fi
 
-	local f="$w$i$s$u$p"
+	local f="$w$i$s$u$r$p"
 	local gitstring="$c$b${f:+$z$f}$r"
 
 	if [ $pcmode = yes ]; then
