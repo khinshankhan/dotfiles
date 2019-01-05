@@ -17,10 +17,13 @@ alias sus="./~/i3exit.sh suspend"
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 
+alias hunter_login="firefox http://www.hunter.cuny.edu/myhunter/email"
+
+alias img_compare="compare -compose src invert.pgm pixelate.pgm diff.png"
+alias cls="clear"
+
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias ......="cd ../../../../.."
-
-alias hunter_login="firefox http://www.hunter.cuny.edu/myhunter/email"
