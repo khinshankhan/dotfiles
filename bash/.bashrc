@@ -9,7 +9,7 @@ fi
 [[ -f /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
 [[ -e /etc/bash/bashrc.d/bash_completion.sh ]] && source /etc/bash/bashrc.d/bash_completion.sh
 
-for file in ~/.bash_{aliases,functions,exports,local}; do
+for file in ~/.bash_{prompt,aliases,functions,exports,local}; do
     if [ -r "$file" ] && [ -f "$file" ]; then
         source "$file"
     fi
