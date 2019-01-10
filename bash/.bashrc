@@ -53,3 +53,5 @@ eval "$(rbenv init -)"
 
 eval "$(stack --bash-completion-script stack)"
 
+export PATH=$PATH:${HOME}/development/flutter/bin
+export ANDROID_HOME=~/Android/Sdk
