@@ -36,12 +36,15 @@ shopt -s globstar                               # `**` matches all files and dir
 shopt -s histappend                             # Append to history file instead of overwriting
 shopt -s no_empty_cmd_completion                # Do not search for completions if line is empty
 
+
 export HISTCONTROL="$HISTCONTROL erasedups:ignoreboth"
 export HISTFILESIZE=
 export HISTIGNORE="?:??:ls:[bf]g:exit:pwd:clear:mount:umount:history"
 export HISTSIZE=
 
+
 export EDITOR="zemacs -nw"
+
 export PATH=$PATH:${HOME}/.myscripts
 
 export NVM_DIR="$HOME/.nvm"
@@ -49,6 +52,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 export PATH="$HOME/.rbenv/bin:$PATH"
+
 eval "$(rbenv init -)"
 
 eval "$(stack --bash-completion-script stack)"
