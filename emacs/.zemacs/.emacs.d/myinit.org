@@ -1,0 +1,82 @@
+#+STARTIP: overview
+
+* Encoding
+  
+  #+BEGIN_SRC emacs-lisp
+;; begone utf 16
+(setq-default locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+  #+END_SRC
+* Backups
+  
+  #+BEGIN_SRC emacs-lisp
+(setq-default backup-inhibited t
+              auto-save-default nil
+              create-lockfiles nil
+              make-backup-files nil)
+  #+END_SRC
+* Basic package
+  
+  #+BEGIN_SRC emacs-lisp
+(require 'package)
+;;(setq package-enable-at-startup nil)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+(setq-default use-package-always-ensure t)
+#+END_SRC
+
+* Custom Variables
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+* GUI
+
+#+BEGIN_SRC emacs-lisp
+(when (window-system)
+  ;;(menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1))
+#+END_SRC
+
+* Appearance
+** Font
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+** Theme
+
+#+BEGIN_SRC emacs-lisp
+(use-package spacemacs-common
+    :ensure spacemacs-theme
+    :config (load-theme 'spacemacs-dark t))
+#+END_SRC
+
+** Modeline
+
+#+BEGIN_SRC emacs-lisp
+(line-number-mode t)
+(column-number-mode t)
+
+(use-package doom-modeline
+  :custom
+  (doom-modeline-python-executable "python3.7")
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-version t)
+  :config
+  (doom-modeline-mode))
+#+END_SRC
