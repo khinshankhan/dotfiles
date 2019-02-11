@@ -1,1 +1,1 @@
-(org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
+(org-babel-load-file (concat user-emacs-directory "myinit.org"))
