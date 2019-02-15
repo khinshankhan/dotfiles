@@ -45,6 +45,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (when (window-system)
+  (setq inhibit-startup-message t)
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
   (tool-bar-mode -1))
