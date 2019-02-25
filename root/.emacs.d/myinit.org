@@ -1,7 +1,7 @@
 #+STARTIP: overview
 
 * Encoding
-  
+
   #+BEGIN_SRC emacs-lisp
 ;; begone utf 16
 (setq-default locale-coding-system 'utf-8)
@@ -11,7 +11,7 @@
 (prefer-coding-system 'utf-8)
   #+END_SRC
 * Backups
-  
+
   #+BEGIN_SRC emacs-lisp
 (setq-default backup-inhibited t
               auto-save-default nil
@@ -19,7 +19,7 @@
               make-backup-files nil)
   #+END_SRC
 * Basic package
-  
+
   #+BEGIN_SRC emacs-lisp
 (require 'package)
 ;;(setq package-enable-at-startup nil)
@@ -33,42 +33,47 @@
 (eval-when-compile
   (require 'use-package))
 (setq-default use-package-always-ensure t)
-#+END_SRC
+  #+END_SRC
 
 * Custom Variables
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 
-#+END_SRC
+  #+END_SRC
 
 * GUI
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (when (window-system)
   (setq inhibit-startup-message t)
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
   (tool-bar-mode -1))
-#+END_SRC
+  #+END_SRC
 
 * Appearance
 ** Font
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 
-#+END_SRC
+   #+END_SRC
 
 ** Theme
 
-#+BEGIN_SRC emacs-lisp
-(use-package spacemacs-common
-    :ensure spacemacs-theme
-    :config (load-theme 'spacemacs-dark t))
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     ;; (use-package spacemacs-common
+     ;;     :ensure spacemacs-theme
+     ;;     :config (load-theme 'spacemacs-dark t))
+(use-package doom-themes
+  :config
+  (doom-themes-org-config)
+  (load-theme 'doom-spacegrey t))
+
+   #+END_SRC
 
 ** Modeline
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
 
@@ -80,11 +85,11 @@
   (doom-modeline-version t)
   :config
   (doom-modeline-mode))
-#+END_SRC
+   #+END_SRC
 * Interface
 ** Splash Screen
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package dashboard
   :custom
   (dashboard-banner-logo-title
@@ -93,18 +98,18 @@
   (dashboard-startup-banner 'logo)
   :config
   (dashboard-setup-startup-hook))
-#+END_SRC
+   #+END_SRC
 
 ** Scratch buffer
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (setq-default initial-major-mode 'lisp-interaction-mode)
 ;;(setq-default initial-major-mode 'python-mode)
-#+END_SRC
+   #+END_SRC
 
 ** Lines
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (setq-default transient-mark-mode t
               visual-line-mode t)
 
@@ -116,35 +121,35 @@
   (linum-format " %d ")
   :config
   (set-face-underline 'linum nil))
-#+END_SRC
+   #+END_SRC
 
 ** Scrolling
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (setq-default scroll-margin 0
               scroll-conservatively 10000
               scroll-preserve-screen-position t
               mouse-wheel-progressive-speed nil)
-#+END_SRC
+   #+END_SRC
 
 ** Confirmation messages
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (defalias 'yes-or-no-p (lambda (&rest _) t))
 (setq-default confirm-kill-emacs nil)
-#+END_SRC
+   #+END_SRC
 
 ** Bells
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (setq-default visible-bell nil
               audible-bell nil
               ring-bell-function 'ignore)
-#+END_SRC
+   #+END_SRC
 
 * Completion Frontend
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (use-package ivy
   :demand
   :bind
@@ -164,10 +169,10 @@
 (use-package swiper
   :bind
   ("C-s" . swiper))
-#+END_SRC
+  #+END_SRC
 * Org
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (use-package org
   :ensure nil
   :custom
@@ -179,11 +184,11 @@
    '((python . t)
      (R . t)
      (ocaml . t))))
-#+END_SRC
+  #+END_SRC
 
 * Programming
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (use-package aggressive-indent
   :config
   (global-aggressive-indent-mode 1))
@@ -199,22 +204,22 @@
   (require 'smartparens-config))
 
 (show-paren-mode t)
-#+END_SRC
+  #+END_SRC
 
 ** Git
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package magit
   :bind
   ("C-c g" . magit-status))
 
 (use-package gitignore-mode
   :mode ("\\.gitignore\\'" . gitignore-mode))
-#+END_SRC
+   #+END_SRC
 
 ** Company
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package company
   :bind
   ("C-SPC" . company-complete)
@@ -237,11 +242,11 @@
   (company-idle-delay 120)
   :config
   (global-company-mode t))
-#+END_SRC
+   #+END_SRC
 
 ** Flycheck
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package flycheck
   :custom-face
   (flycheck-info ((t (:underline (:style line :color "#80FF80")))))
@@ -290,11 +295,11 @@
     :fringe-face 'flycheck-fringe-error
     :error-list-face 'flycheck-error-list-error)
   (global-flycheck-mode t))
-#+END_SRC
+   #+END_SRC
 
 ** Python
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package pip-requirements)
 
 (use-package python
@@ -313,11 +318,11 @@
   :after company
   :config
   (add-to-list 'company-backends 'company-jedi))
-#+END_SRC
+   #+END_SRC
 
 ** OCaml
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :mode ("\\.ml[ly]\\'" . tuareg-menhir-mode)
   :custom
@@ -329,11 +334,11 @@
   :config
   (when (file-exists-p "~/.emacs.d/opam-user-setup.el")
     (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")))
-#+END_SRC
+   #+END_SRC
 
 ** C
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package cc-mode
   :ensure nil
   :hook
@@ -347,22 +352,22 @@
   :after company
   :config
   (add-to-list 'company-backends 'company-c-headers))
-#+END_SRC
+   #+END_SRC
 
 ** R
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package ess
   :pin melpa-stable
   :mode
   ("\\.[rR]\\'" . R-mode)
   :config
   (require 'ess-site))
-#+END_SRC
+   #+END_SRC
 
 * Text Editing
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (setq-default require-final-newline t)
 (global-subword-mode 1)
 (delete-selection-mode t)
@@ -372,11 +377,11 @@
   :config
   (use-package yasnippet-snippets)
   (yas-global-mode 1))
-#+END_SRC
+  #+END_SRC
 
 * Text Navigation
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (use-package avy
   :bind
   ("C-'" . avy-goto-char-2)
@@ -388,10 +393,10 @@
   ("C-x C-w" . ace-window)
   :custom
   (aw-keys '(?a ?o ?e ?u ?h ?t ?n ?s)))
-#+END_SRC
+  #+END_SRC
 * Bindings
 
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (define-key key-translation-map (kbd "C-t") (kbd "C-x"))
 (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
 
@@ -400,11 +405,11 @@
 (bind-key* "C-c w" 'ign/split-window-right)
 (bind-key* "C-c t" 'ign/term-toggle)
 (bind-key* "M-/" 'hippie-expand)
-#+END_SRC
+  #+END_SRC
 
 ** Which-key
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (use-package which-key
   :demand
   :config
@@ -412,11 +417,10 @@
   :bind
   ("C-h m" . which-key-show-major-mode)
   ("C-h b" . which-key-show-top-level))
-#+END_SRC
+   #+END_SRC
 * Community
 ** Browser
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (setq-default browse-url-browser-function 'browse-url-chromium)
-#+END_SRC
-
+   #+END_SRC
