@@ -45,9 +45,9 @@ module-margin-right = 2
 
 font-0 = Open Sans:pixelsize=10;1
 font-1 = unifont:fontformat=truetype:size=6:antialias=false;0
-font-2 = siji:pixelsize=12;1
+font-2 = siji:pixelsize=13;1
 
-modules-left = i3 
+modules-left = i3
 ;modules-left = bspwm i3
 ;modules-center = mpd
 modules-right = xbacklight volume wlan xkeyboard memory cpu battery temperature date powermenu
@@ -206,7 +206,7 @@ label = %percentage_used%%
 type = custom/script
 interval = 60
 exec = "nmcli d show wlp2s0 | grep 'GENERAL.CONNECTION' | awk '{ print $2 }'"
-format-prefix = " "
+; format-prefix = " "
 format-prefix-foreground = ${colors.foreground}
 ; type = internal/network
 ; interface = wlp2s0
