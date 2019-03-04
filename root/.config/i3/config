@@ -208,6 +208,9 @@ bindsym $mod+r mode "resize"
 # bind rofi to mod + d
 bindsym $mod+d exec rofi -show run
 
+# bind mlocate to mod + Shift + d
+bindsym $mod+Shift+d exec locate ~ | rofi -threads 0 -width 100 -dmenu -i -p "locate:" | xargs -r -0 xdg-open
+
 # wallpaper using feh, and turn off borders + window table i think
 exec --no-startup-id exec bash $HOME/.fehbg
 for_window [class=".*"] border pixel 0
