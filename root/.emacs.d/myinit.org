@@ -61,13 +61,11 @@
 ** Theme
 
    #+BEGIN_SRC emacs-lisp
-     ;; (use-package spacemacs-common
-     ;;     :ensure spacemacs-theme
-     ;;     :config (load-theme 'spacemacs-dark t))
+   
 (use-package doom-themes
   :config
   (doom-themes-org-config)
-  (load-theme 'doom-spacegrey t))
+  (load-theme 'doom-nord t))
 
    #+END_SRC
 
