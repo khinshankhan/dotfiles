@@ -60,12 +60,10 @@
 ** Theme
 
    #+BEGIN_SRC emacs-lisp
-   
 (use-package doom-themes
   :config
   (doom-themes-org-config)
   (load-theme 'doom-nord t))
-
    #+END_SRC
 
 ** Modeline
