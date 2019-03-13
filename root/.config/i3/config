@@ -270,5 +270,10 @@ bindsym $mod+Shift+e mode "$mode_system"
 bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/Pictures/'
 bindsym Control+Print exec gnome-screenshot -i
 
+bindsym $mod+Shift+Return exec emacs
+
+exec emacsclient -a "" -c
+bindsym $mod+backslash exec emacsclient -a "" -c
+
 bindcode Shift+50 exec setxkbmap -layout dvorak
 bindcode Shift+62 exec setxkbmap -layout us
