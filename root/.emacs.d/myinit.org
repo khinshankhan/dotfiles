@@ -44,7 +44,7 @@
   (require 'use-package))
 (setq-default use-package-always-ensure t)
 
-;; let's you try packages before using them
+;; lets you try packages before using them
 (use-package try
        :ensure t)
 #+END_SRC
