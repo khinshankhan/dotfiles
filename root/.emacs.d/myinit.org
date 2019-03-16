@@ -1,4 +1,18 @@
+#+STARTIP: overview
 
+* Custom/ Personal Variables
+
+#+BEGIN_SRC emacs-lisp
+(when (file-exists-p "~/.emacs.d/personal/settings.el")
+      (load-file "~/.emacs.d/personal/settings.el"))
+#+END_SRC
+
+* Encoding
+
+#+BEGIN_SRC emacs-lisp
+;; begone utf 16
+(setq-default locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
@@ -12,26 +26,13 @@
               make-backup-files nil)
 #+END_SRC
 * Basic package
-#+STARTIP: overview
 
-* Custom/ Personal Variables
-
-#+BEGIN_SRC emacs-lisp
-(when (file-exists-p "~/.emacs.d/personal/settings.el")
-(load-file "~/.emacs.d/personal/settings.el"))
-#+END_SRC
-
-* Encoding
-
-#+BEGIN_SRC emacs-lisp
-;; begone utf 16
-(setq-default locale-coding-system 'utf-8)
-(set-terminal-coding-system 'utf-8)
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 ;;(setq package-enable-at-startup nil)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 (package-initialize)
 
 ;; Bootstrap use-package
@@ -45,7 +46,7 @@
 
 ;; let's you try packages before using them
 (use-package try
-	:ensure t)
+       :ensure t)
 #+END_SRC
 
 * GUI
@@ -184,8 +185,14 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((python . t)
+     (emacs-lisp . t)
+     (shell . t)
+     (js . t)
      (R . t)
-     (ocaml . t))))
+     (ocaml . t)
+     (org . t)
+     (latex . t )
+     )))
 
 (setenv "BROWSER" "chromium-browser")
 
@@ -235,7 +242,11 @@
 #+BEGIN_SRC emacs-lisp
 (use-package magit
   :bind
-  ("C-c g" . magit-status))
+  ("C-x g" . magit-status))
+
+;; need help figuring this one out
+;;(use-package git-timemachine
+;;  :ensure t)
 
 (use-package gitignore-mode
   :mode ("\\.gitignore\\'" . gitignore-mode))
@@ -378,6 +389,21 @@
   (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
 
+** C++
+
+#+BEGIN_SRC emacs-lisp
+(use-package ggtags
+:ensure t
+:config
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+              (ggtags-mode 1))))
+)
+
+(add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+#+END_SRC
+
 ** R
 
 #+BEGIN_SRC emacs-lisp
@@ -389,14 +415,30 @@
   (require 'ess-site))
 #+END_SRC
 
+** Clojure
+#+BEGIN_SRC emacs-lisp
+(use-package cider
+  :ensure t)
+#+END_SRC
+
 * Text Editing
 
 #+BEGIN_SRC emacs-lisp
 (setq-default require-final-newline t)
-(global-subword-mode 1)
+(global-subword-mode t)
 (delete-selection-mode t)
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
+#+END_SRC
 
+** Expand Region
+#+BEGIN_SRC emacs-lisp
+(use-package expand-region
+  :bind
+  ("C-=" . er/expand-region))
+#+END_SRC
+
+** Yasnippet
+#+BEGIN_SRC emacs-lisp
 (use-package yasnippet
   :config
   (use-package yasnippet-snippets)
@@ -420,9 +462,10 @@
 #+END_SRC
 * Bindings
 
-#+BEGIN_SRC emacs-lisp-byte-compile
+#+BEGIN_SRC emacs-lisp
 (keyboard-translate ?\C-t ?\C-x)
-(keyboard-translate ?\C-x ?\C-t)
+;;hmm, good for dvorak but not qwerty. but do i really need this key bind?
+;;(keyboard-translate ?\C-x ?\C-t)
 
 (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
 (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
@@ -431,7 +474,6 @@
 (bind-key* "C-x k" 'ign:delete-window)
 (bind-key* "C-c i" 'auto-insert)
 (bind-key* "C-c w" 'ign:split-window-right)
-(bind-key* "C-c t" 'ign:term-toggle)
 (bind-key* "M-/" 'hippie-expand)
 #+END_SRC
 
