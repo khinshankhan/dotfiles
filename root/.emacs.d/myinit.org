@@ -89,6 +89,54 @@
   :config
   (doom-modeline-mode))
 #+END_SRC
+
+* Functions
+** Definitions
+#+BEGIN_SRC emacs-lisp
+(defun ign:split-window-right ()
+  (interactive)
+  (split-window-right)
+  (balance-windows))
+
+(defun ign:split-window-below ()
+  (interactive)
+  (split-window-below)
+  (balance-windows))
+
+(defun ign:delete-window ()
+  (interactive)
+  (delete-window)
+  (balance-windows))
+
+(defun ign:delete-buffer ()
+  (interactive)
+  (ido-kill-buffer))
+
+(defun ign:popwin-term (name)
+  (popwin:display-buffer-1
+   (or (get-buffer name)
+       (save-window-excursion
+         (multi-term)))
+   :default-config-keywords '(:height 15 :position :bottom :noselect nil :stick t))
+   (rename-buffer name))
+
+(defun ign:term-toggle ()
+  (interactive)
+  (if (get-buffer "*term*")
+     (progn (switch-to-buffer "*term*")
+            (kill-buffer-and-window))
+    (ign:popwin-term "*term*")))
+
+(defun ign:fill-or-unfill ()
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+#+END_SRC
+
 * Interface
 ** Splash Screen
 
@@ -501,7 +549,8 @@
 (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
 
 (use-package bind-key)
-(bind-key* "C-x k" 'ign:delete-window)
+(bind-key* "C-x w" 'ign:delete-window)
+(bind-key* "C-x k" 'ign:delete-buffer)
 (bind-key* "C-c i" 'auto-insert)
 (bind-key* "C-c w" 'ign:split-window-right)
 (bind-key* "M-/" 'hippie-expand)
