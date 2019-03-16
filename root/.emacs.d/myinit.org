@@ -3,7 +3,8 @@
 * Custom/ Personal Variables
 
 #+BEGIN_SRC emacs-lisp
-
+(when (file-exists-p "~/.emacs.d/personal/settings.el")
+(load-file "~/.emacs.d/personal/settings.el"))
 #+END_SRC
 
 * Encoding
