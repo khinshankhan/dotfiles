@@ -1,3 +1,17 @@
+
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+#+END_SRC
+* Backups
+
+#+BEGIN_SRC emacs-lisp
+(setq-default backup-inhibited t
+              auto-save-default nil
+              create-lockfiles nil
+              make-backup-files nil)
+#+END_SRC
+* Basic package
 #+STARTIP: overview
 
 * Custom/ Personal Variables
@@ -13,20 +27,6 @@
 ;; begone utf 16
 (setq-default locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-selection-coding-system 'utf-8)
-(prefer-coding-system 'utf-8)
-#+END_SRC
-* Backups
-
-#+BEGIN_SRC emacs-lisp
-(setq-default backup-inhibited t
-              auto-save-default nil
-              create-lockfiles nil
-              make-backup-files nil)
-#+END_SRC
-* Basic package
-
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 ;;(setq package-enable-at-startup nil)
@@ -420,14 +420,18 @@
 #+END_SRC
 * Bindings
 
-#+BEGIN_SRC emacs-lisp
-(define-key key-translation-map (kbd "C-t") (kbd "C-x"))
+#+BEGIN_SRC emacs-lisp-byte-compile
+(keyboard-translate ?\C-t ?\C-x)
+(keyboard-translate ?\C-x ?\C-t)
+
 (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
+(define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
 
 (use-package bind-key)
-(bind-key* "C-x C-k" 'ign/kill-and-balance-window)
-(bind-key* "C-c w" 'ign/split-window-right)
-(bind-key* "C-c t" 'ign/term-toggle)
+(bind-key* "C-x k" 'ign:delete-window)
+(bind-key* "C-c i" 'auto-insert)
+(bind-key* "C-c w" 'ign:split-window-right)
+(bind-key* "C-c t" 'ign:term-toggle)
 (bind-key* "M-/" 'hippie-expand)
 #+END_SRC
 
