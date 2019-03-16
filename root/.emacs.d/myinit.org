@@ -438,11 +438,17 @@
 #+END_SRC
 
 ** Yasnippet
+*** basic
 #+BEGIN_SRC emacs-lisp
 (use-package yasnippet
   :config
   (use-package yasnippet-snippets)
   (yas-global-mode 1))
+#+END_SRC
+*** auto-yasnippet
+#+BEGIN_SRC emacs-lisp
+(use-package auto-yasnippet
+:ensure t)
 #+END_SRC
 
 * Text Navigation
@@ -475,6 +481,8 @@
 (bind-key* "C-c i" 'auto-insert)
 (bind-key* "C-c w" 'ign:split-window-right)
 (bind-key* "M-/" 'hippie-expand)
+
+(global-set-key (kbd "C-c m") 'recompile)
 #+END_SRC
 
 ** Which-key
