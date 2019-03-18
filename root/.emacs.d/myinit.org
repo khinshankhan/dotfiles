@@ -1,3 +1,5 @@
+#+TITLE: An Emacs Configuration
+#+AUTHOR: Khinshan Khan
 #+STARTIP: overview
 
 * Custom/ Personal Variables
@@ -256,15 +258,19 @@
     :config
     (org-babel-do-load-languages
      'org-babel-load-languages
-     '((python . t)
+     '(
        (emacs-lisp . t)
-       (shell . t)
+       (gnuplot . t)
        (js . t)
-       (R . t)
+       (latex . t )
        (ocaml . t)
        (org . t)
-       (latex . t )
+       (python . t)
+       (shell . t)
+       (R . t)
        )))
+
+  (use-package px)
 
   (setenv "BROWSER" "chromium-browser")
 
@@ -404,45 +410,6 @@
     (global-flycheck-mode t))
 #+END_SRC
 
-** Python
-
-#+BEGIN_SRC emacs-lisp
-  (use-package pip-requirements)
-
-  (use-package python
-    :after flycheck
-    :ensure nil
-    :interpreter ("ipython3" . python-mode)
-    :custom
-    (python-indent 4)
-    (python-shell-interpreter-args "--simple-prompt -i")
-    (python-fill-docstring-style 'pep-257)
-    (py-split-window-on-execute t)
-    (flycheck-python-pylint-executable "python3")
-    (flycheck-python-pycompile-executable "python3"))
-
-  (use-package company-jedi
-    :after company
-    :config
-    (add-to-list 'company-backends 'company-jedi))
-#+END_SRC
-
-** OCaml
-
-#+BEGIN_SRC emacs-lisp
-  (use-package tuareg
-    :mode ("\\.ml[ly]\\'" . tuareg-menhir-mode)
-    :custom
-    (tuareg-match-patterns-aligned t)
-    (tuareg-indent-align-with-first-arg t))
-
-  (use-package merlin
-    :hook (tuareg-mode . merlin-mode)
-    :config
-    (when (file-exists-p "~/.emacs.d/opam-user-setup.el")
-      (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")))
-#+END_SRC
-
 ** C
 
 #+BEGIN_SRC emacs-lisp
@@ -476,6 +443,56 @@
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
 #+END_SRC
 
+** GNU Plot
+#+BEGIN_SRC emacs-lisp
+  (use-package gnuplot)
+  (use-package gnuplot-mode)
+#+END_SRC
+** Clojure
+#+BEGIN_SRC emacs-lisp
+  (use-package cider
+    :ensure t)
+#+END_SRC
+
+** OCaml
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tuareg
+    :mode ("\\.ml[ly]\\'" . tuareg-menhir-mode)
+    :custom
+    (tuareg-match-patterns-aligned t)
+    (tuareg-indent-align-with-first-arg t))
+
+  (use-package merlin
+    :hook (tuareg-mode . merlin-mode)
+    :config
+    (when (file-exists-p "~/.emacs.d/opam-user-setup.el")
+      (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")))
+#+END_SRC
+
+** Python
+
+#+BEGIN_SRC emacs-lisp
+  (use-package pip-requirements)
+
+  (use-package python
+    :after flycheck
+    :ensure nil
+    :interpreter ("ipython3" . python-mode)
+    :custom
+    (python-indent 4)
+    (python-shell-interpreter-args "--simple-prompt -i")
+    (python-fill-docstring-style 'pep-257)
+    (py-split-window-on-execute t)
+    (flycheck-python-pylint-executable "python3")
+    (flycheck-python-pycompile-executable "python3"))
+
+  (use-package company-jedi
+    :after company
+    :config
+    (add-to-list 'company-backends 'company-jedi))
+#+END_SRC
+
 ** R
 
 #+BEGIN_SRC emacs-lisp
@@ -487,11 +504,6 @@
     (require 'ess-site))
 #+END_SRC
 
-** Clojure
-#+BEGIN_SRC emacs-lisp
-  (use-package cider
-    :ensure t)
-#+END_SRC
 
 * Text Editing
 
