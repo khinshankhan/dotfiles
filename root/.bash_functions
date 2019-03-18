@@ -7,12 +7,21 @@
 # If you don't put double quotes around your variables, your function will break if they have a space in them (we want this behavior for these functions!)
 ##########
 ##clone a repo (http) by specifying repo and then username (or using defaults)
-function http() {
-    REPO=${1:-"scripts"}
+function ghttp() (
+    REPO=${1:-"kkhan01.github.io"}
     USER=${2:-"kkhan01"}
     NAME=${3:-$REPO}
     git clone "https://github.com/$USER/$REPO.git" $NAME;
-}
+)
+
+##clone a repo (http) by specifying repo and then username (or using defaults)
+function gssh() (
+    REPO=${1:-"kkhan01.github.io"}
+    USER=${2:-"kkhan01"}
+    NAME=${3:-$REPO}
+    git clone "git@github.com:$USER/$REPO.git" $NAME;
+)
+
 ##list out 100 repos associated with a github user (alphabetical into list.txt)
 function repolist() {
     USER=${1:-"kkhan01"}
