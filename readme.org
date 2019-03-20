@@ -16,7 +16,19 @@ cd ~/dotfiles
 ** Install specific programs with symlinks
 (let PROGRAM be the placeholder you replace, eg to install emacs you
 would replace PROGRAM with emacs in the following block)
+#+BEGIN_SRC sh
+git clone https://github.com/kkhan01/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./install PROGRAM
+#+END_SRC
 ** Install specific programs without symlinks
+(let PROGRAM be the placeholder you replace, eg to install emacs you
+would replace PROGRAM with emacs in the following block)
+#+BEGIN_SRC sh
+git clone https://github.com/kkhan01/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+cp -r PROGRAM ~/
+#+END_SRC
 * How you can contribute
 Feel free to fork and make a pull request. I check github quite often,
 so I'll reply if I want any clarification, and accept/ reject (rejections
