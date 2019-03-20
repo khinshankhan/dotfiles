@@ -1,0 +1,104 @@
+#+STARTIP: overview
+
+* interface Tweaks
+  #+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t)
+(tool-bar-mode -1)
+(fset 'yes-or-no-p 'y-or-n-p)
+(global-set-key (kbd "<f5>") 'revert-buffer)
+;; enable all default disabled commands (not recommended to newbies)
+;; https://www.emacswiki.org/emacs/disabledcommands
+(setq disabled-command-function nil)
+  #+END_SRC
+  
+* try
+  #+BEGIN_SRC emacs-lisp
+(use-package try
+  :ensure t)
+  #+END_SRC
+  
+* theme
+  #+BEGIN_SRC emacs-lisp
+(use-package spacemacs-theme
+  :defer t
+  :init (load-theme 'spacemacs-dark t))
+  #+END_SRC
+* which key
+  Brings up some help
+  #+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :ensure t 
+  :config
+  (which-key-mode))
+  #+END_SRC
+  
+* help with buffer
+  #+BEGIN_SRC emacs-lisp
+;;(defalias 'list-buffers 'ibuffer)
+(defalias 'list-buffers 'ibuffer-other-window)
+
+;; If you like a tabbar 
+;;(use-package tabbar
+;;  :ensure t
+					;  :config
+;;  (tabbar-mode 1))
+
+
+(use-package ace-window
+  :ensure t
+  :init
+  (progn
+    (global-set-key [remap other-window] 'ace-window)
+    (custom-set-faces
+     '(aw-leading-char-face
+       ((t (:inherit ace-jump-face-foreground :height 3.0))))) 
+    ))
+  #+END_SRC
+
+* search  
+  #+BEGIN_SRC emacs-lisp
+  ;; it looks like counsel is a requirement for swiper
+  (use-package counsel
+  :ensure t
+  )
+  
+  (use-package ivy
+  :ensure t
+  :diminish (ivy-mode)
+  :bind (("C-x b" . ivy-switch-buffer))
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-display-style 'fancy))
+  
+  
+  (use-package swiper
+  :ensure try
+  :bind (("C-s" . swiper)
+  ("C-r" . swiper)
+  ("C-c C-r" . ivy-resume)
+  ("M-x" . counsel-M-x)
+  ("C-x C-f" . counsel-find-file))
+  :config
+  (progn
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-display-style 'fancy)
+  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+  ))
+  
+  ;; if you like avy... i dont
+  ;; (use-package avy
+  ;;   :ensure t
+  ;;   :bind ("M-s" . avy-goto-word-1)) ;; changed from char as per jcs
+  
+  (use-package auto-complete
+  :ensure t
+  :init
+  (progn
+  (ac-config-default)
+  (global-auto-complete-mode t)
+  ))
+  #+END_SRC
+  
+  
