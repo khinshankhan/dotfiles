@@ -1,3 +1,12 @@
-ALL README FILES ARE IN THE PROCESS OF BEING CONVERTED TO ORG FILES.
+#+TITLE: Guidelines
+#+AUTHOR: Khinshan Khan
+#+STARTIP: overview
 
-You should also check [this](https://github.com/kkhan01/.myscripts) out for my custom scripts for everyday use.
+* Mini Prelude
+
+* Installing
+
+* How you can contribute
+Feel free to fork and make a pull request. I check github quite often,
+so I'll reply if I want any clarification, and accept/ reject (rejections
+will receive a justified reason as to why they were rejected).
