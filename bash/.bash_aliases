@@ -29,3 +29,7 @@ alias .....="cd ../../../.."
 alias ......="cd ../../../../.."
 
 alias oops='sudo !!'
+
+alias keyb="sudo dpkg-reconfigure keyboard-configuration"
+
+alias e="emacsclient -a '' -c"
