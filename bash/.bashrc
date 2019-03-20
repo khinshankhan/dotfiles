@@ -43,8 +43,9 @@ export HISTIGNORE="?:??:ls:[bf]g:exit:pwd:clear:mount:umount:history"
 export HISTSIZE=
 
 
-export EDITOR="zemacs -nw"
+export EDITOR="emacs"
 
+export PATH=$PATH:${HOME}/bin
 export PATH=$PATH:${HOME}/.myscripts
 
 export NVM_DIR="$HOME/.nvm"
@@ -61,3 +62,5 @@ export PATH=$PATH:${HOME}/development/flutter/bin
 export ANDROID_HOME=~/Android/Sdk
 
 export NO_AT_BRIDGE=1
+
+eval `opam env`
