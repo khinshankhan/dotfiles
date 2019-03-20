@@ -325,7 +325,7 @@
   ;; need help figuring this one out
   (use-package git-timemachine
     :bind
-    ("C-c t" 'git-timemachine))
+    ("C-c t" . git-timemachine))
 
   (use-package gitignore-mode
     :mode ("\\.gitignore\\'" . gitignore-mode))
