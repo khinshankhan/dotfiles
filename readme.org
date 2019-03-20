@@ -3,9 +3,16 @@
 #+STARTIP: overview
 
 * Mini Prelude
-
+You should also check [[https://github.com/kkhan01/.myscripts][this]] out for some of my custom scripts I use everyday.
 * Installing
-
+There are two install (you'll have to manually install the programs,
+ this only hosts my configs) methods, made for users' ease.
+** Install everything with symlinks
+#BEGIN_SRC shell
+./install
+#END_SRC
+** Install specific programs with symlinks
+** Install specific programs without symlinks
 * How you can contribute
 Feel free to fork and make a pull request. I check github quite often,
 so I'll reply if I want any clarification, and accept/ reject (rejections
