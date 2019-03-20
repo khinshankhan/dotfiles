@@ -320,7 +320,7 @@
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :bind
-    ("C-x g" . magit-status))
+    ("C-c g" . magit-status))
 
   ;; need help figuring this one out
   ;;(use-package git-timemachine
