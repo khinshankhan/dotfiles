@@ -8,11 +8,11 @@ You should also check [[https://github.com/kkhan01/.myscripts][this]] out for so
 There are two install (you'll have to manually install the programs,
  this only hosts my configs) methods, made for users' ease.
 ** Install everything with symlinks
-#BEGIN_SRC sh
+#+BEGIN_SRC sh
 git clone https://github.com/kkhan01/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install
-#END_SRC
+#+END_SRC
 ** Install specific programs with symlinks
 (let PROGRAM be the placeholder you replace, eg to install emacs you
 would replace PROGRAM with emacs in the following block)
