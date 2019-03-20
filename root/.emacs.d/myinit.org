@@ -323,8 +323,9 @@
     ("C-c g" . magit-status))
 
   ;; need help figuring this one out
-  ;;(use-package git-timemachine
-  ;;  :ensure t)
+  (use-package git-timemachine
+    :bind
+    ("C-c t" 'git-timemachine))
 
   (use-package gitignore-mode
     :mode ("\\.gitignore\\'" . gitignore-mode))
