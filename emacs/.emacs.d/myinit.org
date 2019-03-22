@@ -409,6 +409,16 @@
       :fringe-face 'flycheck-fringe-error
       :error-list-face 'flycheck-error-list-error)
     (global-flycheck-mode t))
+
+  (use-package flycheck-clang-analyzer
+    :ensure t
+    :after flycheck
+    :config (flycheck-clang-analyzer-setup))
+#+END_SRC
+
+** Misc Helpers
+#+BEGIN_SRC emacs-lisp
+
 #+END_SRC
 
 ** C
