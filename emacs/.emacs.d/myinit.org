@@ -418,7 +418,10 @@
 
 ** Misc Helpers
 #+BEGIN_SRC emacs-lisp
+(use-package demangle-mode)
 
+(use-package modern-cpp-font-lock
+  :ensure t)
 #+END_SRC
 
 ** C
@@ -452,6 +455,7 @@
     )
 
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
 #+END_SRC
 
 ** GNU Plot
@@ -541,7 +545,7 @@
     (yas-global-mode 1))
 #+END_SRC
 *** auto-yasnippet
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle off
   (use-package auto-yasnippet
     :ensure t)
 #+END_SRC
