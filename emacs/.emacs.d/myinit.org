@@ -605,3 +605,11 @@
   (setq browse-url-generic-args '("--incognito"))
   (setq browse-url-generic-program "chromium-browser")
 #+END_SRC
+
+** Discord
+
+#+BEGIN_SRC emacs-lisp :tangle off
+  (use-package elcord
+    :config
+    (elcord-mode))
+#+END_SRC
