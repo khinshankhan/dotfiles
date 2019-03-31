@@ -46,6 +46,10 @@
     (require 'use-package))
   (setq-default use-package-always-ensure t)
 
+  ;; keyword, allows you to ensure system binaries exist alongside your package declarations
+  (use-package use-package-ensure-system-package
+    :ensure t)
+
   ;; lets you try packages before using them
   (use-package try
     :ensure t)
@@ -64,7 +68,6 @@
 ** Font
 
 #+BEGIN_SRC emacs-lisp
-
 #+END_SRC
 
 ** Theme
@@ -483,6 +486,12 @@
     :config
     (when (file-exists-p "~/.emacs.d/opam-user-setup.el")
       (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")))
+
+  (use-package ocp-indent
+    :ensure-system-package (ocp-indent . "opam install ocp-indent")
+    :after (tuareg)
+    :commands (ocp-indent-caml-mode-setup)
+    :hook (tuareg-mode . ocp-indent-caml-mode-setup))
 #+END_SRC
 
 ** Python
