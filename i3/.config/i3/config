@@ -223,7 +223,7 @@ mode "$mode_system" {
 bindsym $mod+Shift+e mode "$mode_system"
 
 # Screen Shots
-bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/Pictures/screenshots'
+bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/Pictures/screenshots/'
 bindsym Control+Print exec gnome-screenshot -i
 
 #keep workspace 9 floating
@@ -241,5 +241,6 @@ exec emacs --daemon
 bindsym $mod+backslash exec emacsclient -a "" -c
 
 # switch between layouts quickly
-bindcode Shift+50 exec setxkbmap -layout dvorak
+#bindcode Shift+50 exec setxkbmap -layout dvorak
+bindcode Shift+50 exec setxkbmap us -variant colemak
 bindcode Shift+62 exec setxkbmap -layout us
