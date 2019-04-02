@@ -615,7 +615,7 @@
   (bind-key* "M-/" 'hippie-expand)
 
   ;; will set up bookmarks later.. maybe
-  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgnotes/notes.org")))
+  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
 
   (global-set-key (kbd "C-c m") 'recompile)
 #+END_SRC
