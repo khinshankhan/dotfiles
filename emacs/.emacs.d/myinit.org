@@ -318,7 +318,9 @@
     :config
     (require 'smartparens-config))
 
-  (show-paren-mode t)
+  (use-package paren
+    :config
+    (show-paren-mode t))
 #+END_SRC
 
 ** Git
