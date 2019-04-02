@@ -273,8 +273,6 @@
 
   (use-package px)
 
-  (setenv "BROWSER" "chromium-browser")
-
   (use-package org-bullets
     :config
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
@@ -299,7 +297,26 @@
 ** General
 *** Projectile
 #+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :demand t
+    :bind
+    (:map projectile-mode-map
+          ("C-c p" . projectile-command-map))
+    :custom
+    (projectile-project-search-path '("~/Projects/"))
+    ;; ignore set up: https://www.youtube.com/watch?v=qpv9i_I4jYU
+    (projectile-indexing-method 'hybrid)
+    (projectile-sort-order 'access-time)
+    (projectile-enable-caching t)
+    (projectile-require-project-root t)
+    (projectile-completion-system 'ivy)
+    :config
+    (projectile-mode t)
+    ;;(setq projectile-completion-system 'ivy)
+    (counsel-projectile-mode))
 
+  (use-package counsel-projectile
+    :after (counsel projectile))
 #+END_SRC
 
 *** Interactive
