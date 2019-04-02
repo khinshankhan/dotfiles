@@ -33,7 +33,7 @@
   (require 'package)
   ;;(setq package-enable-at-startup nil)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
 
@@ -44,7 +44,10 @@
 
   (eval-when-compile
     (require 'use-package))
-  (setq-default use-package-always-ensure t)
+
+  (use-package use-package
+    :config
+    (setq use-package-always-ensure t))
 
   ;; keyword, allows you to ensure system binaries exist alongside your package declarations
   (use-package use-package-ensure-system-package
