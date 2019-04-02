@@ -589,13 +589,13 @@
     :bind
     ("C-'" . avy-goto-char-2)
     :custom
-    (avy-keys '(?a ?o ?e ?u ?h ?t ?n ?s)))
+    (avy-keys '(?a ?r ?s ?t ?n ?e ?i ?o)))
 
   (use-package ace-window
     :bind
     ("C-x C-w" . ace-window)
     :custom
-    (aw-keys '(?a ?o ?e ?u ?h ?t ?n ?s)))
+    (aw-keys '(?a ?r ?s ?t ?n ?e ?i ?i)))
 #+END_SRC
 * Bindings
 
@@ -613,6 +613,9 @@
   (bind-key* "C-c i" 'auto-insert)
   (bind-key* "C-c w" 'ign:split-window-right)
   (bind-key* "M-/" 'hippie-expand)
+
+  ;; will set up bookmarks later.. maybe
+  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgnotes/notes.org")))
 
   (global-set-key (kbd "C-c m") 'recompile)
 #+END_SRC
