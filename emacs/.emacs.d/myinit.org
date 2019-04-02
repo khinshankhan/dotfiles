@@ -432,6 +432,7 @@
   :ensure t)
 #+END_SRC
 
+* Languages
 ** C
 
 #+BEGIN_SRC emacs-lisp
@@ -466,17 +467,17 @@
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
 #+END_SRC
 
-** GNU Plot
-#+BEGIN_SRC emacs-lisp
-  (use-package gnuplot)
-  (use-package gnuplot-mode)
-#+END_SRC
 ** Clojure
 #+BEGIN_SRC emacs-lisp
   (use-package cider
     :ensure t)
 #+END_SRC
 
+** GNU Plot
+#+BEGIN_SRC emacs-lisp
+  (use-package gnuplot)
+  (use-package gnuplot-mode)
+#+END_SRC
 ** OCaml
 
 #+BEGIN_SRC emacs-lisp
@@ -532,7 +533,6 @@
     :config
     (require 'ess-site))
 #+END_SRC
-
 
 * Text Editing
 
