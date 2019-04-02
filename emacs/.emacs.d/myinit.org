@@ -9,7 +9,7 @@
     (load-file (concat user-emacs-directory "personal/settings.el")))
 #+END_SRC
 
-* COMMENT Encoding
+* Encoding
 
 #+BEGIN_SRC emacs-lisp
   ;; begone utf 16
