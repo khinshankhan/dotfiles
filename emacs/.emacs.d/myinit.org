@@ -338,6 +338,10 @@
   (use-package paren
     :config
     (show-paren-mode t))
+
+  (use-package move-text
+    :config
+    (move-text-default-bindings))
 #+END_SRC
 
 ** Git
