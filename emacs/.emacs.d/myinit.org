@@ -5,11 +5,11 @@
 * Custom/ Personal Variables
 
 #+BEGIN_SRC emacs-lisp
-  (when (file-exists-p "~/.emacs.d/personal/settings.el")
-    (load-file "~/.emacs.d/personal/settings.el"))
+  (when (file-exists-p (concat user-emacs-directory "personal/settings.el"))
+    (load-file (concat user-emacs-directory "personal/settings.el")))
 #+END_SRC
 
-* Encoding
+* COMMENT Encoding
 
 #+BEGIN_SRC emacs-lisp
   ;; begone utf 16
@@ -438,6 +438,8 @@
   (use-package flycheck-clang-analyzer
     :after flycheck
     :config (flycheck-clang-analyzer-setup))
+
+  (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
 #+END_SRC
 
 ** Misc Helpers
