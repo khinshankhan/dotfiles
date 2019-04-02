@@ -296,7 +296,13 @@
 #+END_SRC
 
 * Programming
+** General
+*** Projectile
+#+BEGIN_SRC emacs-lisp
 
+#+END_SRC
+
+*** Interactive
 #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent
     :config
