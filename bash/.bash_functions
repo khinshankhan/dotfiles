@@ -42,11 +42,6 @@ function pdfc(){
     libreoffice --convert-to "pdf" "$@"
 }
 
-## kind of niche, but use files in .zemacs/.emacs.d as emacs
-function zemacs(){
-    HOME=~/.zemacs.d emacs "$@"
-}
-
 ## SSH with display
 << --MULTILINE-COMMENT--
 function sssh() {
