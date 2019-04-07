@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+# name: post
+# key: post
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# --
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:nil broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:t email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:nil toc:nil todo:t |:t
+#+TITLE:
+#+DATE: <`(format-time-string "%Y-%m-%d")` `(format-time-string "%a")`>
+#+AUTHOR: `user-full-name`
+#+EMAIL: `user-mail-address`
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.1 (Org mode 9.1.9)
+
+#title:
+#date: `(format-time-string "%Y-%m-%d")`$0
+#descr: $0another post
+#tags: [discussion]
