@@ -616,6 +616,7 @@
   (bind-key* "C-c i" 'auto-insert)
   (bind-key* "C-c w" 'ign:split-window-right)
   (bind-key* "M-/" 'hippie-expand)
+  (bind-key* "C-;" 'company-yasnippet)
 
   ;; will set up bookmarks later.. maybe
   (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
