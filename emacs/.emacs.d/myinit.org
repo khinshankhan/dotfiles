@@ -67,6 +67,13 @@
 #+END_SRC
 
 * Appearance
+
+** Cursor
+#+BEGIN_SRC emacs-lisp
+  (setq-default cursor-type '(hbar . 1))
+  (setq-default cursor-in-non-selected-windows nil)
+#+END_SRC
+
 ** Font
 
 #+BEGIN_SRC emacs-lisp
