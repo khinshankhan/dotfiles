@@ -8,7 +8,7 @@
 #+OPTIONS: d:(not "LOGBOOK") date:nil e:t email:nil f:t inline:t num:t
 #+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
 #+OPTIONS: timestamp:nil title:nil toc:nil todo:t |:t
-#+TITLE:
+#+TITLE: `(capitalize (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`
 #+DATE: <`(format-time-string "%Y-%m-%d")` `(format-time-string "%a")`>
 #+AUTHOR: `user-full-name`
 #+EMAIL: `user-mail-address`
@@ -17,7 +17,7 @@
 #+EXCLUDE_TAGS: noexport
 #+CREATOR: Emacs 26.1 (Org mode 9.1.9)
 
-#title:
-#date: `(format-time-string "%Y-%m-%d")`$0
-#descr: $0another post
+#title: $0`(capitalize (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`
+#date: `(format-time-string "%Y-%m-%d")`
+#descr: another post
 #tags: [discussion]
