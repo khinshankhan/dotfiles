@@ -634,6 +634,9 @@
 
   (global-set-key (kbd "<f5>") 'revert-buffer)
 
+  ;; soft wrap lines for org mode, disabled by default for tables
+  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
+
   ;; will set up bookmarks later.. maybe
   (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
 
