@@ -7,6 +7,8 @@
 #+BEGIN_SRC emacs-lisp
   (when (file-exists-p (concat user-emacs-directory "personal/settings.el"))
     (load-file (concat user-emacs-directory "personal/settings.el")))
+
+  (defconst custom-file "/dev/zero")
 #+END_SRC
 
 * Encoding
