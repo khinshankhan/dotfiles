@@ -78,7 +78,7 @@
 
 ** Font
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle off
 (set-face-attribute 'default nil
                     :family "Iosevka Term-12"
                     :height 120
