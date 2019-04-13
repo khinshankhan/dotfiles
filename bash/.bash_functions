@@ -20,27 +20,27 @@ function gssh() (
 )
 
 ## list out 100 repos associated with a github user (alphabetical into list.txt)
-function repolist() {
+function repolist() (
     USER=${1:-"kkhan01"}
     curl "https://api.github.com/users/$USER/repos?per_page=100" | grep -o 'git@[^"]*' > list.txt;
     sed -i -e 's/git@/http:\/\//g' ./list.txt;
     #sed 's/\.git/ /g' ./list.txt; #removes the .git
-}
+)
 
 # Emacs
 
 ## have spacemacs files in .spacemacs/.emacs.d
 ## git clone https://github.com/syl20bnr/spacemacs ~/.spacemacs.d/.emacs.d
-function spacemacs() {
+function spacemacs() (
     HOME=~/.spacemacs.d emacs "$@"
-}
+)
 
 # Misc
 
 ## convert any file (eg a .cc) to a pdf
-function pdfc(){
+function pdfc()(
     libreoffice --convert-to "pdf" "$@"
-}
+)
 
 ## SSH with display
 << --MULTILINE-COMMENT--
