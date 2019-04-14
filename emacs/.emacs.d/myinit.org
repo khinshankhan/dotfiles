@@ -78,10 +78,10 @@
 
 ** Font
 
-#+BEGIN_SRC emacs-lisp :tangle off
+#+BEGIN_SRC emacs-lisp
 (set-face-attribute 'default nil
-                    :family "Iosevka Term-12"
-                    :height 120
+                    :family "Iosevka"
+                    :height 110
                     :weight 'normal
                     :width 'normal)
 #+END_SRC
