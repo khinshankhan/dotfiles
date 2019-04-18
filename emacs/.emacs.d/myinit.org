@@ -9,6 +9,8 @@
     (load-file (concat user-emacs-directory "personal/settings.el")))
 
   (defconst custom-file "/dev/zero")
+  (defconst ign:python-executable "python3")
+  (defconst ign:ipython-executable "ipython3")
 #+END_SRC
 
 * Encoding
@@ -103,7 +105,7 @@
 
   (use-package doom-modeline
     :custom
-    (doom-modeline-python-executable "python3.7")
+    (doom-modeline-python-executable ign:python-executable)
     (doom-modeline-icon t)
     (doom-modeline-major-mode-icon t)
     (doom-modeline-version t)
@@ -132,21 +134,6 @@
   (defun ign:delete-buffer ()
     (interactive)
     (ido-kill-buffer))
-
-  (defun ign:popwin-term (name)
-    (popwin:display-buffer-1
-     (or (get-buffer name)
-         (save-window-excursion
-           (multi-term)))
-     :default-config-keywords '(:height 15 :position :bottom :noselect nil :stick t))
-    (rename-buffer name))
-
-  (defun ign:term-toggle ()
-    (interactive)
-    (if (get-buffer "*term*")
-        (progn (switch-to-buffer "*term*")
-               (kill-buffer-and-window))
-      (ign:popwin-term "*term*")))
 
   (defun ign:fill-or-unfill ()
     (interactive)
@@ -183,7 +170,9 @@
 
 #+BEGIN_SRC emacs-lisp
   (setq-default transient-mark-mode t
-                visual-line-mode t)
+                visual-line-mode t
+                indent-tabs-mode nil
+                tab-width 4)
 
   (global-hl-line-mode 1)
 
