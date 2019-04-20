@@ -291,7 +291,7 @@
 
   (setq org-file-apps
         (append '(
-                  ("\\.pdf\\'" . "evince %s")
+                  ("\\.pdf\\'" . "epdfview %s")
                   ("\\.x?html?\\'" . "/usr/bin/chromium-browser %s")
                   ) org-file-apps ))
 
