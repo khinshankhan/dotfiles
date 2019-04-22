@@ -6,6 +6,10 @@ bg = #5e81ac
 fg = #eceff4
 
 salmon = #f08080
+
+red = #ff0000
+yellow = #ffff00
+lgreen = #9eff9e
 ;== General ========================================================
 
 [bar/main]
@@ -23,12 +27,13 @@ font-0 = "Source Code Pro Regular:pixelsize=12;3"
 font-1 = "Iosevka Nerd Font:pixelsize=13;3"
 font-2 = "Source Han Sans JP:pixelsize=13;3"
 font-3 = "FontAwesome:pixelsize=10:0"
+font-4 = siji:pixelsize=13;1
 
 ;== Module Positions ========================================================
 
-modules-left = shan workspaces title
+modules-left = workspaces title
 modules-center = weather
-modules-right = date
+modules-right = battery date
 
 ;== Modules ========================================================
 
@@ -76,13 +81,41 @@ format-prefix = " | "
 ; this was measuered for my laptop, to not interfere with weather module
 label-maxlen = 72
 
+;== Battery
+[module/battery]
+type = internal/battery
+battery = BAT0
+adapter = AC
+full-at = 99
+
+format-charging = <animation-charging> <label-charging>
+format-charging-underline = #ffb52a
+
+format-discharging = <ramp-capacity> <label-discharging>
+format-discharging-underline = ${self.format-charging-underline}
+
+format-full-prefix = " "
+format-full-underline = ${self.format-charging-underline}
+
+ramp-capacity-0 = 
+ramp-capacity-0-foreground = ${color.red}
+ramp-capacity-1 = 
+ramp-capacity-1-foreground = ${color.yellow}
+ramp-capacity-2 = 
+ramp-capacity-2-foreground = ${color.lgreen}
+
+animation-charging-0 = 
+animation-charging-1 = 
+animation-charging-2 = 
+animation-charging-framerate = 750
+
 ;== Time ========================================================
 [module/date]
 type = internal/date
 interval = 1
 
-date =
-date-alt = " %Y-%m-%d | "
+date = " | "
+date-alt = " | %Y-%m-%d | "
 
 time = %H:%M
 time-alt = %H:%M:%S
