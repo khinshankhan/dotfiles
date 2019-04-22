@@ -27,7 +27,7 @@ font-0 = "Source Code Pro Regular:pixelsize=12;3"
 font-1 = "Iosevka Nerd Font:pixelsize=13;3"
 font-2 = "Source Han Sans JP:pixelsize=13;3"
 font-3 = "FontAwesome:pixelsize=10:0"
-font-4 = siji:pixelsize=13;1
+font-4 = "siji:pixelsize=13;1"
 
 ;== Module Positions ========================================================
 
