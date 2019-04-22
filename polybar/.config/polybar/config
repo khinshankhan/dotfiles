@@ -107,8 +107,8 @@ animation-charging-framerate = 750
 type = internal/date
 interval = 1
 
-date = " |"
-date-alt = " | %Y-%m-%d |"
+date =
+date-alt = " %Y-%m-%d |"
 
 time = %H:%M
 time-alt = %H:%M:%S
@@ -116,6 +116,6 @@ time-alt = %H:%M:%S
 format-background =
 format-underline = #0a6cf5
 
-label = "%date% %time% | "
+label = " |%date% %time% | "
 
 ;== EOF ========================================================
