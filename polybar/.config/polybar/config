@@ -5,8 +5,24 @@
 bg = #5e81ac
 fg = #eceff4
 
-salmon = #f08080
+white = #FFFFFF
+silver = #C0C0C0
+gray = #808080
+black = #000000
+red = #FF0000
+maroon = #800000
+yellow = #FFFF00
+olive = #808000
+lime = #00FF00
+green = #008000
+aqua = #00FFFF
+teal = #008080
+blue = #0000FF
+navy = #000080
+fuchia = #FF00FF
+purple = #800080
 
+salmon = #f08080
 ;== General ========================================================
 
 [bar/main]
@@ -29,7 +45,7 @@ font-3 = "FontAwesome:pixelsize=10:0"
 
 modules-left = shan workspaces title
 modules-center = weather
-modules-right =
+modules-right = date
 
 ;== Modules ========================================================
 
@@ -74,5 +90,21 @@ tail = true
 type = internal/xwindow
 format = <label>
 format-prefix = " | "
+
+;==
+[module/date]
+type = internal/date
+interval = 1
+
+date =
+date-alt = " %Y-%m-%d | "
+
+time = %H:%M
+time-alt = %H:%M:%S
+
+format-background =
+format-underline = #0a6cf5
+
+label = %date% %time%
 
 ;== EOF ========================================================
