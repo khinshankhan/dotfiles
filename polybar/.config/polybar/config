@@ -4,22 +4,22 @@
 [color]
 bg = #5e81ac
 fg = #eceff4
+; transparent
+t = #00000000
 
 salmon = #f08080
 
 red = #ff0000
 yellow = #ffff00
 lgreen = #9eff9e
-;== General ========================================================
 
+;== General ========================================================
 [bar/main]
 monitor = ${env:MONITOR:eDP1}
 width = 100%
-height = 27
-offset-x = 1.5%
-offset-y = 0.5%
+height = 30
 
-background = #00000000
+background = ${color.t}
 foreground = ${color.fg}
 
 ;== Custom Fonts, From Dreameh ========================================================
@@ -35,15 +35,8 @@ modules-left = workspaces title
 modules-center = weather
 modules-right = battery date
 
-;== Modules ========================================================
-
-;== Fake to see to see offset +++
-[module/shan]
-type = custom/text
-content = shanny boy
-content-padding = 1
-content-background = ${color.salmon}
-content-margin = 1
+tray-position = right
+tray-padding = 0
 
 ;== Workspace Numbers ========================================================
 [module/workspaces]
@@ -81,7 +74,7 @@ format-prefix = " | "
 ; this was measuered for my laptop, to not interfere with weather module
 label-maxlen = 72
 
-;== Battery
+;== Battery ========================================================
 [module/battery]
 type = internal/battery
 battery = BAT0
@@ -114,8 +107,8 @@ animation-charging-framerate = 750
 type = internal/date
 interval = 1
 
-date = " | "
-date-alt = " | %Y-%m-%d | "
+date = " |"
+date-alt = " | %Y-%m-%d |"
 
 time = %H:%M
 time-alt = %H:%M:%S
@@ -123,6 +116,6 @@ time-alt = %H:%M:%S
 format-background =
 format-underline = #0a6cf5
 
-label = %date% %time%
+label = "%date% %time% | "
 
 ;== EOF ========================================================
