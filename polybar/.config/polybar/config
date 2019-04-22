@@ -12,7 +12,7 @@ salmon = #f08080
 [bar/main]
 monitor = ${env:MONITOR:eDP1}
 width = 100%
-height = 35
+height = 27
 offset-x = 1.5%
 offset-y = 0.5%
 
@@ -27,7 +27,7 @@ font-3 = "FontAwesome:pixelsize=10:0"
 
 ;== Module Positions ========================================================
 
-modules-left = shan workspaces
+modules-left = shan workspaces title
 modules-center = weather
 modules-right =
 
@@ -59,7 +59,7 @@ strip-wsnumbers = true
 format = <label-state>
 label-focused-foreground = ${color.salmon}
 
-;== Weather
+;== Weather ========================================================
 [module/weather]
 type = custom/script
 interval = 10
@@ -68,5 +68,11 @@ format-prefix = "  "
 format-prefix-foreground = #3ec13f
 exec = eval ~/.config/polybar/scripts/weather
 tail = true
+
+;== Focus Title ========================================================
+[module/title]
+type = internal/xwindow
+format = <label>
+format-prefix = " | "
 
 ;== EOF ========================================================
