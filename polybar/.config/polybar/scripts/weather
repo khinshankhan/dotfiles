@@ -1,0 +1,36 @@
+#!/home/shan/venv/bin/python3
+# -*- coding: utf-8 -*-
+
+# Procedure
+# Surf to https://openweathermap.org/city
+# Fill in your CITY
+# e.g. Antwerp Belgium
+# Check url
+# https://openweathermap.org/city/2803138
+# you will the city code at the end
+# create an account on this website
+# create an api key (free)
+
+# api keys -- khanshan, limited to 60
+# https://home.openweathermap.org/api_keys
+
+
+import requests
+
+CITY = "5128581"
+API_KEY = "db7abbf73fd2ef7cb278b4eeef37a544"
+
+#UNITS, UNIT_KEY = "Metric", "C"
+UNITS, UNIT_KEY = "Imperial", "F"
+
+try:
+    REQ = requests.get("http://api.openweathermap.org/data/2.5/weather?id={}&appid={}&units={}".format(CITY, API_KEY, UNITS))
+    # HTTP CODE = OK
+    if REQ.status_code == 200:
+        CURRENT = REQ.json()["weather"][0]["description"].capitalize()
+        TEMP = int(float(REQ.json()["main"]["temp"]))
+        print("{}, {} °{}".format(CURRENT, TEMP, UNIT_KEY))
+    else:
+        print("Error: BAD HTTP STATUS CODE " + str(REQ.status_code))
+except (ValueError, IOError):
+    print("Error: Network or Stolen")

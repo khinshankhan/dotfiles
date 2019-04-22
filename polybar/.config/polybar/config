@@ -28,12 +28,12 @@ font-3 = "FontAwesome:pixelsize=10:0"
 ;== Module Positions ========================================================
 
 modules-left = shan workspaces
-modules-center =
+modules-center = weather
 modules-right =
 
 ;== Modules ========================================================
 
-;== Fake to see offset +++
+;== Fake to see to see offset +++
 [module/shan]
 type = custom/text
 content = shanny boy
@@ -58,5 +58,15 @@ strip-wsnumbers = true
 
 format = <label-state>
 label-focused-foreground = ${color.salmon}
+
+;== Weather
+[module/weather]
+type = custom/script
+interval = 10
+format = <label>
+format-prefix = "  "
+format-prefix-foreground = #3ec13f
+exec = eval ~/.config/polybar/scripts/weather
+tail = true
 
 ;== EOF ========================================================
