@@ -23,6 +23,7 @@
   (set-selection-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 #+END_SRC
+
 * Backups
 
 #+BEGIN_SRC emacs-lisp
@@ -31,6 +32,7 @@
                 create-lockfiles nil
                 make-backup-files nil)
 #+END_SRC
+
 * Basic package
 
 #+BEGIN_SRC emacs-lisp
@@ -73,6 +75,7 @@
 * Appearance
 
 ** Cursor
+
 #+BEGIN_SRC emacs-lisp
   (setq-default cursor-type '(hbar . 1))
   (setq-default cursor-in-non-selected-windows nil)
@@ -114,7 +117,9 @@
 #+END_SRC
 
 * Functions
+
 ** Definitions
+
 #+BEGIN_SRC emacs-lisp
   (defun ign:split-window-right ()
     (interactive)
@@ -146,6 +151,7 @@
 #+END_SRC
 
 * Interface
+
 ** Splash Screen
 
 #+BEGIN_SRC emacs-lisp
@@ -233,6 +239,7 @@
 #+END_SRC
 
 ** All the Icons
+
 #+BEGIN_SRC emacs-lisp
   (use-package all-the-icons
     :defer 0.5)
@@ -300,8 +307,11 @@
 #+END_SRC
 
 * Programming
+
 ** General
+
 *** Projectile
+
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
     :demand t
@@ -326,6 +336,7 @@
 #+END_SRC
 
 *** Interactive
+
 #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent
     :config
@@ -453,6 +464,7 @@
 #+END_SRC
 
 ** Misc Helpers
+
 #+BEGIN_SRC emacs-lisp
 (use-package demangle-mode)
 
@@ -494,15 +506,24 @@
 #+END_SRC
 
 ** Clojure
+
 #+BEGIN_SRC emacs-lisp
   (use-package cider)
 #+END_SRC
 
 ** GNU Plot
+
 #+BEGIN_SRC emacs-lisp
   (use-package gnuplot)
   (use-package gnuplot-mode)
 #+END_SRC
+
+** Haskell
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
 ** OCaml
 
 #+BEGIN_SRC emacs-lisp
@@ -593,6 +614,7 @@
 #+END_SRC
 
 ** Expand Region
+
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
     :bind
@@ -600,14 +622,18 @@
 #+END_SRC
 
 ** Yasnippet
+
 *** basic
+
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :config
     (use-package yasnippet-snippets)
     (yas-global-mode 1))
 #+END_SRC
+
 *** auto-yasnippet
+
 #+BEGIN_SRC emacs-lisp :tangle off
   (use-package auto-yasnippet)
 #+END_SRC
@@ -627,6 +653,7 @@
     :custom
     (aw-keys '(?a ?r ?s ?t ?n ?e ?i ?i)))
 #+END_SRC
+
 * Bindings
 
 #+BEGIN_SRC emacs-lisp
@@ -668,6 +695,7 @@
     ("C-h b" . which-key-show-top-level))
 #+END_SRC
 * Community
+
 ** Browser
 
 #+BEGIN_SRC emacs-lisp
