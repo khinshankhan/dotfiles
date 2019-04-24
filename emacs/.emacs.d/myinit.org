@@ -521,7 +521,8 @@
 ** Haskell
 
 #+BEGIN_SRC emacs-lisp
-
+  (use-package haskell-mode
+    :mode "\\.hs\\'")
 #+END_SRC
 
 ** OCaml
