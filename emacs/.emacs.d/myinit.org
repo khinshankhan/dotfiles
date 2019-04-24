@@ -229,7 +229,7 @@
 
   (use-package swiper
     :bind
-    ("C-s" . swiper))
+    ("C-s" . swiper-isearch))
 #+END_SRC
 
 ** All the Icons
@@ -529,18 +529,37 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package pip-requirements)
+  (use-package sphinx-doc
+    :hook
+    (python-mode . sphinx-doc-mode))
 
   (use-package python
-    :after flycheck
     :ensure nil
-    :interpreter ("ipython3" . python-mode)
+    :after flycheck
     :custom
     (python-indent 4)
+    (python-shell-interpreter ign:ipython-executable)
     (python-shell-interpreter-args "--simple-prompt -i")
     (python-fill-docstring-style 'pep-257)
-    (py-split-window-on-execute t)
-    (flycheck-python-pylint-executable "python3")
-    (flycheck-python-pycompile-executable "python3"))
+    (gud-pdb-command-name (concat ign:python-executable " -m gdb"))
+    (py-split-window-on-execute t))
+
+  (use-package elpy
+    :after company
+    :bind
+    (:map python-mode-map
+          ("C-c d" . elpy-goto-definition)
+          ("C-c e" . elpy-multiedit-python-symbol-at-point)
+          ("C-c f" . elpy-black-fix-code))
+    :hook (python-mode . elpy-mode)
+    :custom
+    (elpy-rpc-python-command ign:python-executable)
+    :config
+    (delete 'elpy-module-highlight-indentation elpy-modules)
+    (delete 'elpy-module-flymake elpy-modules)
+    (delete 'elpy-module-company elpy-modules)
+    (add-to-list 'company-backends #'elpy-company-backend)
+    (elpy-enable))
 
   (use-package company-jedi
     :after company
