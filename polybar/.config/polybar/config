@@ -12,6 +12,7 @@ salmon = #f08080
 red = #ff0000
 yellow = #ffff00
 lgreen = #9eff9e
+blue = #0000ff
 
 ;== General ========================================================
 [bar/main]
@@ -91,15 +92,18 @@ format-full-prefix = " "
 format-full-underline = ${self.format-charging-underline}
 
 ramp-capacity-0 = 
-ramp-capacity-0-foreground = ${color.red}
 ramp-capacity-1 = 
-ramp-capacity-1-foreground = ${color.yellow}
 ramp-capacity-2 = 
+ramp-capacity-0-foreground = ${color.red}
+ramp-capacity-1-foreground = ${color.yellow}
 ramp-capacity-2-foreground = ${color.lgreen}
 
 animation-charging-0 = 
 animation-charging-1 = 
 animation-charging-2 = 
+animation-charging-0-foreground = ${color.blue}
+animation-charging-1-foreground = ${color.blue}
+animation-charging-2-foreground = ${color.blue}
 animation-charging-framerate = 750
 
 ;== Time ========================================================
@@ -107,11 +111,11 @@ animation-charging-framerate = 750
 type = internal/date
 interval = 1
 
-date =
-date-alt = " %Y-%m-%d |"
+date = " %Y-%m-%d |"
+date-alt =
 
-time = %H:%M
-time-alt = %H:%M:%S
+time = %H:%M:%S
+time-alt = %H:%M
 
 format-background =
 format-underline = #0a6cf5
