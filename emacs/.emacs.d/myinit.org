@@ -507,19 +507,24 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package tuareg
+    :ensure-system-package ((opam . opam)
+                            (tuareg . "opam install tuareg -y")
+                            (ocamlmerlin . "opam install merlin -y")
+                            (ocp-indent . "opam install ocp-indent -y"))
+    :after (company)
     :mode ("\\.ml[ly]\\'" . tuareg-menhir-mode)
     :custom
     (tuareg-match-patterns-aligned t)
     (tuareg-indent-align-with-first-arg t))
 
   (use-package merlin
+    :after (tuareg)
     :hook (tuareg-mode . merlin-mode)
     :config
     (when (file-exists-p "~/.emacs.d/opam-user-setup.el")
       (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")))
 
   (use-package ocp-indent
-    :ensure-system-package (ocp-indent . "opam install ocp-indent")
     :after (tuareg)
     :commands (ocp-indent-caml-mode-setup)
     :hook (tuareg-mode . ocp-indent-caml-mode-setup))
@@ -625,7 +630,7 @@
 * Bindings
 
 #+BEGIN_SRC emacs-lisp
-  (keyboard-translate ?\C-t ?\C-x)
+  ;;(keyboard-translate ?\C-t ?\C-x)
   ;;hmm, good for dvorak but not qwerty. but do i really need this key bind?
   ;;(keyboard-translate ?\C-x ?\C-t)
 
