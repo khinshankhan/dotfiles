@@ -283,10 +283,9 @@
 
   (use-package px)
 
-  ;; slows down on arch/ manjaro, requires some research
-  ;; (use-package org-bullets
-  ;;   :config
-  ;;   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  (use-package org-bullets
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
   (custom-set-variables
    '(org-directory "~/.orgfiles")
