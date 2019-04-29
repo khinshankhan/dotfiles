@@ -265,7 +265,9 @@
     :ensure nil
     :custom
     (org-src-fontify-natively t)
-    (org-babel-python-command "python3")
+    (org-pretty-entities t)
+    (org-hide-emphasis-markers t)
+    (org-babel-python-command "ipython3 -i --simple-prompt")
     :config
     (org-babel-do-load-languages
      'org-babel-load-languages
@@ -281,12 +283,10 @@
        (R . t)
        )))
 
-  (use-package px)
+  (use-package org-bullets
+    :hook
+    (org-mode . org-bullets-mode))
 
-  ;; slows down on arch/ manjaro, requires some research
-  ;; (use-package org-bullets
-  ;;   :config
-  ;;   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
   (custom-set-variables
    '(org-directory "~/.orgfiles")
