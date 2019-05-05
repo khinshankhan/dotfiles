@@ -552,6 +552,13 @@
     :mode "\\.hs\\'")
 #+END_SRC
 
+** Lua
+#+BEGIN_SRC emacs-lisp
+  (use-package lua-mode
+    :mode (("\\.lua\\'" . lua-mode))
+    :config (add-hook 'lua-mode-hook #'company-mode))
+#+END_SRC
+
 ** OCaml
 
 #+BEGIN_SRC emacs-lisp
