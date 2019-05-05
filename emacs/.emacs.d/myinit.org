@@ -472,6 +472,22 @@
 (use-package modern-cpp-font-lock)
 #+END_SRC
 
+** TRAMP
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tramp
+    :ensure nil
+    :config
+    ;; faster than scp
+    (setq tramp-default-method "ssh")
+    (add-to-list 'tramp-default-user-alist
+                 '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
+                 '(nil nil "shan")) ;; fallback login
+
+    (setq password-cache-expiry nil)
+    )
+#+END_SRC
+
 * Languages
 ** C
 
