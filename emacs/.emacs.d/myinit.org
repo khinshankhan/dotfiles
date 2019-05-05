@@ -5,8 +5,8 @@
 * Custom/ Personal Variables
 
 #+BEGIN_SRC emacs-lisp
-  (when (file-exists-p (concat user-emacs-directory "personal/settings.el"))
-    (load-file (concat user-emacs-directory "personal/settings.el")))
+  (setq-default user-full-name "Khinshan Khan"
+                user-mail-address "khinshan.khan@gmail.com")
 
   (defconst custom-file "/dev/zero")
   (defconst ign:python-executable "python3")
