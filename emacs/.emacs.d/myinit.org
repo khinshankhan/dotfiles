@@ -736,10 +736,16 @@
 ** Browser
 
 #+BEGIN_SRC emacs-lisp
-  ;(setq-default browse-url-browser-function 'browse-url-chromium)
-  (setq browse-url-browser-function 'browse-url-generic)
-  (setq browse-url-generic-args '("--incognito"))
-  (setq browse-url-generic-program "chromium-browser")
+  ;;(setq-default browse-url-browser-function 'browse-url-chromium)
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-args '("--incognito")
+        browse-url-generic-program "chromium")
+
+  (defun browse-lucky (start end)
+    (interactive "r")
+    (let ((q (buffer-substring-no-properties start end)))
+      (browse-url-generic (concat "http://www.google.com/search?btnI&q="
+                                  (url-hexify-string q)))))
 #+END_SRC
 
 ** Discord
