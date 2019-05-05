@@ -148,6 +148,10 @@
                       (point-max))
              fill-column)))
       (call-interactively #'fill-paragraph)))
+
+  (defun ign/reload ()
+    (interactive)
+    (load-file (concat user-emacs-directory "init.el")))
 #+END_SRC
 
 * Interface
