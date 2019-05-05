@@ -621,6 +621,15 @@
     (add-to-list 'company-backends 'company-jedi))
 #+END_SRC
 
+** Juypter
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ein
+    :custom
+    (ein:completion-backend 'ein:use-company-jedi-backends)
+    (ein:use-auto-complete-superpack t))
+#+END_SRC
+
 ** R
 
 #+BEGIN_SRC emacs-lisp
