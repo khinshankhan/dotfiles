@@ -490,6 +490,12 @@
 
     (setq password-cache-expiry nil)
     )
+
+  ;; this hook makes remote projectile a little lighter
+  (add-hook 'find-file-hook
+            (lambda ()
+              (when (file-remote-p default-directory)
+                (setq-local projectile-mode-line "Projectile"))))
 #+END_SRC
 
 * Languages
