@@ -419,3 +419,6 @@ mode "$mode_gaps_outer" {
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
+
+#keep workspace 9 floating
+for_window [workspace="8"] floating enable
