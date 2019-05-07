@@ -8,3 +8,4 @@ PERL_MM_OPT="INSTALL_BASE=/home/shan/perl5"; export PERL_MM_OPT;
 export NVM_DIR="$HOME/.nvm"                            # You can change this if you want.
 export NVM_SOURCE="/usr/share/nvm"                     # The AUR package installs it to here.
 [ -s "$NVM_SOURCE/nvm.sh" ] && . "$NVM_SOURCE/nvm.sh"  # Load NVM
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
