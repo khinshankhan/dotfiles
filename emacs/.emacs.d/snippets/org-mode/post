@@ -5,7 +5,7 @@
 # --
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
 #+OPTIONS: author:nil broken-links:nil c:nil creator:nil
-#+OPTIONS: d:(not "LOGBOOK") date:nil e:t email:nil f:t inline:t num:t
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:nil email:nil f:t inline:t num:t
 #+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
 #+OPTIONS: timestamp:nil title:nil toc:nil todo:t |:t
 #+TITLE: `(capitalize (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`
@@ -15,7 +15,7 @@
 #+LANGUAGE: en
 #+SELECT_TAGS: export
 #+EXCLUDE_TAGS: noexport
-#+CREATOR: Emacs 26.1 (Org mode 9.1.9)
+#+CREATOR: Emacs 26.2 (Org mode 9.1.9)
 
 #title: $0`(capitalize (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`
 #date: `(format-time-string "%Y-%m-%d")`

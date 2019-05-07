@@ -528,8 +528,8 @@
                   (ggtags-mode 1))))
     )
 
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++14")))
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++14")))
 #+END_SRC
 
 ** Clojure
@@ -757,8 +757,9 @@
 
 ** Discord
 
-#+BEGIN_SRC emacs-lisp :tangle off
+#+BEGIN_SRC emacs-lisp
   (use-package elcord
+    :if (executable-find "discord")
     :config
     (elcord-mode))
 #+END_SRC
