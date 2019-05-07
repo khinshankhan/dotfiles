@@ -326,9 +326,12 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package org
+    :mode
+    ("\\.\\(org\\|ORG\\)\\'" . org-mode)
     :ensure nil
     :custom
     (org-src-fontify-natively t)
+    (org-src-tab-acts-natively t)
     (org-pretty-entities t)
     (org-hide-emphasis-markers t)
     (org-babel-python-command "ipython3 -i --simple-prompt")
@@ -364,11 +367,11 @@
   (setq org-file-apps
         (append '(
                   ("\\.pdf\\'" . "epdfview %s")
-                  ("\\.x?html?\\'" . "/usr/bin/chromium-browser %s")
+                  ("\\.x?html?\\'" . "/usr/bin/chromium %s")
                   ) org-file-apps ))
 
   (use-package ox-gfm
-    :after org)
+    :after (org))
 #+END_SRC
 
 * Programming
@@ -528,7 +531,7 @@
     (global-flycheck-mode t))
 
   (use-package flycheck-clang-analyzer
-    :after flycheck
+    :after (flycheck)
     :config (flycheck-clang-analyzer-setup))
 
   (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
@@ -578,7 +581,7 @@
     (c-basic-offset 4))
 
   (use-package company-c-headers
-    :after company
+    :after (company)
     :config
     (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
@@ -662,7 +665,7 @@
 
   (use-package python
     :ensure nil
-    :after flycheck
+    :after (flycheck)
     :custom
     (python-indent 4)
     (python-shell-interpreter ign:ipython-executable)
@@ -672,7 +675,7 @@
     (py-split-window-on-execute t))
 
   (use-package elpy
-    :after company
+    :after (company)
     :bind
     (:map python-mode-map
           ("C-c d" . elpy-goto-definition)
@@ -689,7 +692,7 @@
     (elpy-enable))
 
   (use-package company-jedi
-    :after company
+    :after (company)
     :config
     (add-to-list 'company-backends 'company-jedi))
 #+END_SRC
@@ -782,8 +785,6 @@
   (bind-key* "C-c i" 'auto-insert)
   (bind-key* "M-/" 'hippie-expand)
   (bind-key* "C-;" 'company-yasnippet)
-
-  (global-set-key (kbd "<f5>") 'revert-buffer)
 
   ;; soft wrap lines for org mode, disabled by default for org tables
   ;; we may need to remap this key later, since C-z suspends in other modes
