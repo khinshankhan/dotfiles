@@ -305,6 +305,8 @@
 ** All the Icons
 
 #+BEGIN_SRC emacs-lisp
+  ;; remember to refresh
+  ;; https://github.com/domtronn/all-the-icons.el
   (use-package all-the-icons
     :defer 0.5)
 
