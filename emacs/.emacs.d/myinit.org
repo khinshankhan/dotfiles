@@ -2,15 +2,11 @@
 #+AUTHOR: Khinshan Khan
 #+STARTIP: overview
 
-* Custom/ Personal Variables
+* Personal Variables
 
 #+BEGIN_SRC emacs-lisp
   (setq-default user-full-name "Khinshan Khan"
                 user-mail-address "khinshan.khan@gmail.com")
-
-  (defconst custom-file "/dev/zero")
-  (defconst ign:python-executable "python3")
-  (defconst ign:ipython-executable "ipython3")
 #+END_SRC
 
 * Encoding
@@ -59,61 +55,8 @@
   ;; https://github.com/jwiegley/use-package#use-package-ensure-system-package
   (use-package use-package-ensure-system-package)
 
-  ;; lets you try packages before using them
+  ;; lets you try packages before installing them
   (use-package try)
-#+END_SRC
-
-* GUI
-
-#+BEGIN_SRC emacs-lisp
-  (setq inhibit-startup-message t)
-  (menu-bar-mode -1)
-  (toggle-scroll-bar -1)
-  (tool-bar-mode -1)
-#+END_SRC
-
-* Appearance
-
-** Cursor
-
-#+BEGIN_SRC emacs-lisp
-  (setq-default cursor-type '(hbar . 1))
-  (setq-default cursor-in-non-selected-windows nil)
-#+END_SRC
-
-** Font
-
-#+BEGIN_SRC emacs-lisp
-(set-face-attribute 'default nil
-                    :family "Iosevka"
-                    :height 110
-                    :weight 'normal
-                    :width 'normal)
-#+END_SRC
-
-** Theme
-
-#+BEGIN_SRC emacs-lisp
-  (use-package doom-themes
-    :config
-    (doom-themes-org-config)
-    (load-theme 'doom-nord t))
-#+END_SRC
-
-** Modeline
-
-#+BEGIN_SRC emacs-lisp
-  (line-number-mode t)
-  (column-number-mode t)
-
-  (use-package doom-modeline
-    :custom
-    (doom-modeline-python-executable ign:python-executable)
-    (doom-modeline-icon t)
-    (doom-modeline-major-mode-icon t)
-    (doom-modeline-version t)
-    :config
-    (doom-modeline-mode))
 #+END_SRC
 
 * Functions
@@ -149,9 +92,105 @@
              fill-column)))
       (call-interactively #'fill-paragraph)))
 
-  (defun ign/reload ()
+  (defun ign:refresh-buffer ()
+    (interactive)
+    (revert-buffer :ignore-auto :noconfirm))
+
+  (defun ign:reload ()
     (interactive)
     (load-file (concat user-emacs-directory "init.el")))
+
+  (defun ign:toggle-mark ()
+    (interactive)
+    (if (region-active-p)
+        (deactivate-mark)
+      (push-mark nil nil t)))
+
+  (defun ign:toggle-mark-rectangle ()
+    (interactive)
+    (if (region-active-p)
+        (deactivate-mark)
+      (rectangle-mark-mode)))
+
+  (defun ign:first-occurence (f list)
+    (let ((head (car list))
+          (tail (cdr list)))
+      (if (or (not head) (funcall f head))
+          head
+        (ign:first-occurence f tail))))
+
+  (defmacro ign:find-executables (list)
+    (ign:first-occurence #'executable-find list))
+#+END_SRC
+
+* Custom Variables
+
+#+BEGIN_SRC emacs-lisp
+  (defconst custom-file "/dev/zero")
+  (defconst ign:python-executable "python3")
+  (defconst ign:ipython-executable "ipython3")
+  (defconst ign:cl-executable (ign:find-executables ("sbcl" "lisp" "ccl")))
+#+END_SRC
+
+* System
+
+#+BEGIN_SRC emacs-lisp
+  (when (>= emacs-major-version 26)
+    (setq-default confirm-kill-processes nil))
+#+END_SRC
+
+* GUI
+
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-message t)
+  (menu-bar-mode 0)
+  (toggle-scroll-bar 0)
+  (tool-bar-mode 0)
+#+END_SRC
+
+* Appearance
+
+** Cursor
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default cursor-type '(hbar . 1))
+  (setq-default cursor-in-non-selected-windows nil)
+#+END_SRC
+
+** Font
+
+#+BEGIN_SRC emacs-lisp
+  (when (member "Iosevka" (font-family-list))
+    (set-face-attribute 'default nil
+                        :family "Iosevka"
+                        :height 110
+                        :weight 'normal
+                        :width 'normal))
+#+END_SRC
+
+** Theme
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :config
+    (doom-themes-org-config)
+    (load-theme 'doom-nord t))
+#+END_SRC
+
+** Modeline
+
+#+BEGIN_SRC emacs-lisp
+  (line-number-mode t)
+  (column-number-mode t)
+
+  (use-package doom-modeline
+    :custom
+    (doom-modeline-python-executable ign:python-executable)
+    (doom-modeline-icon t)
+    (doom-modeline-major-mode-icon t)
+    (doom-modeline-version t)
+    :config
+    (doom-modeline-mode))
 #+END_SRC
 
 * Interface
@@ -162,9 +201,12 @@
   (use-package dashboard
     :custom
     (dashboard-banner-logo-title
-     (format "[Emacs ready in %.2f seconds with %d garbage collections.]"
-             (float-time (time-subtract after-init-time before-init-time)) gcs-done))
+     (format "[Emacs ready in %.2f seconds with %d packages loaded and %d garbage collections.]"
+             (float-time (time-subtract after-init-time before-init-time))
+             (length package-activated-list) gcs-done))
     (dashboard-startup-banner 'logo)
+    (dashboard-items '((recents  . 5)
+                       (projects . 5)))
     :config
     (dashboard-setup-startup-hook))
 #+END_SRC
@@ -172,8 +214,8 @@
 ** Scratch buffer
 
 #+BEGIN_SRC emacs-lisp
-  (setq-default initial-major-mode 'lisp-interaction-mode)
   ;;(setq-default initial-major-mode 'python-mode)
+  (setq-default initial-major-mode 'lisp-interaction-mode)
 #+END_SRC
 
 ** Lines
@@ -185,13 +227,31 @@
                 tab-width 4)
 
   (global-hl-line-mode 1)
+#+END_SRC
 
+** Line Numbers
+
+#+BEGIN_SRC emacs-lisp
   (use-package linum
-    :hook (prog-mode . linum-mode)
+    :ensure nil
+    :if (< emacs-major-version 26)
+    :hook
+    (prog-mode . linum-mode)
     :custom
     (linum-format " %d ")
     :config
     (set-face-underline 'linum nil))
+
+  (use-package display-line-numbers
+    :ensure nil
+    :if (>= emacs-major-version 26)
+    :hook
+    (prog-mode . display-line-numbers-mode)
+    :custom
+    (display-line-numbers-type 'relative)
+    (display-line-numbers-current-absolute t)
+    (display-line-numbers-width 2)
+    (display-line-numbers-widen t))
 #+END_SRC
 
 ** Scrolling
@@ -407,6 +467,12 @@
     (company-idle-delay 120)
     :config
     (global-company-mode t))
+
+  (use-package company-quickhelp
+    :demand t
+    :after (company)
+    :config
+    (company-quickhelp-mode))
 #+END_SRC
 
 ** Flycheck
@@ -637,7 +703,7 @@
     (ein:use-auto-complete-superpack t))
 #+END_SRC
 
-** R
+** R & Julia
 
 #+BEGIN_SRC emacs-lisp
   (use-package ess
@@ -701,8 +767,8 @@
 * Bindings
 
 #+BEGIN_SRC emacs-lisp
+  ;; good for dvorak and colemak
   ;;(keyboard-translate ?\C-t ?\C-x)
-  ;;hmm, good for dvorak but not qwerty. but do i really need this key bind?
   ;;(keyboard-translate ?\C-x ?\C-t)
 
   (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
@@ -711,14 +777,16 @@
   (use-package bind-key)
   (bind-key* "C-x w" 'ign:delete-window)
   (bind-key* "C-x k" 'ign:delete-buffer)
-  (bind-key* "C-c i" 'auto-insert)
   (bind-key* "C-c w" 'ign:split-window-right)
+
+  (bind-key* "C-c i" 'auto-insert)
   (bind-key* "M-/" 'hippie-expand)
   (bind-key* "C-;" 'company-yasnippet)
 
   (global-set-key (kbd "<f5>") 'revert-buffer)
 
-  ;; soft wrap lines for org mode, disabled by default for tables
+  ;; soft wrap lines for org mode, disabled by default for org tables
+  ;; we may need to remap this key later, since C-z suspends in other modes
   (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
 
   ;; will set up bookmarks later.. maybe
@@ -731,13 +799,13 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
-    :demand
     :config
     (which-key-mode)
     :bind
     ("C-h m" . which-key-show-major-mode)
     ("C-h b" . which-key-show-top-level))
 #+END_SRC
+
 * Community
 
 ** Browser
