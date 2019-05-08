@@ -121,6 +121,12 @@
 
   (defmacro ign:find-executables (list)
     (ign:first-occurence #'executable-find list))
+
+  (defun ign:save-proper ()
+    (interactive)
+    (delete-trailing-whitespace)
+    (save-buffer))
+
 #+END_SRC
 
 * Custom Variables
@@ -725,7 +731,7 @@
   (setq-default require-final-newline t)
   (global-subword-mode t)
   (delete-selection-mode t)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace)
+  ;;(add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
 
 ** Expand Region
@@ -783,6 +789,7 @@
   (bind-key* "C-x w" 'ign:delete-window)
   (bind-key* "C-x k" 'ign:delete-buffer)
   (bind-key* "C-c w" 'ign:split-window-right)
+  (bind-key* "C-x C-s" 'ign:save-proper)
 
   (bind-key* "C-c i" 'auto-insert)
   (bind-key* "M-/" 'hippie-expand)
