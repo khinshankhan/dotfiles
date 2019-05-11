@@ -639,28 +639,70 @@
 ** OCaml
 
 #+BEGIN_SRC emacs-lisp
+  (use-package opam
+    :ensure-system-package (ocaml
+                            opam)
+    :init
+    (progn
+      (opam-init)))
+
   (use-package tuareg
-    :ensure-system-package ((opam . opam)
-                            (tuareg . "opam install tuareg -y")
-                            (ocamlmerlin . "opam install merlin -y")
-                            (ocp-indent . "opam install ocp-indent -y"))
+    :demand t
     :after (company)
-    :mode ("\\.ml[ly]\\'" . tuareg-menhir-mode)
+    :mode
+    (("\\.ml[ip]?\\'" . tuareg-mode)
+     ("\\.mly\\'" . tuareg-menhir-mode)
+     ("[./]opam_?\\'" . tuareg-opam-mode)
+     ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
+     ("\\.eliomi?\\'" . tuareg-mode))
+    :bind (:map tuareg-mode-map
+                ;; ("C-M-f" . smie-forward-sexp-command)
+                ;; ("C-M-b" . smie-backward-sexp-command)
+                ("C-c C-e" . tuareg-eval-buffer)
+                ("C-c C-z" . utop))
     :custom
     (tuareg-match-patterns-aligned t)
     (tuareg-indent-align-with-first-arg t))
 
   (use-package merlin
-    :after (tuareg)
+    :ensure-system-package ((ocamlmerlin . "opam install merlin -y")
+                            ("~/.emacs.d/opam-user-setup.el" . "opam user-setup install"))
+    :after (opam tuareg)
     :hook (tuareg-mode . merlin-mode)
+    :bind (:map merlin-mode-map
+                ("M-."        . merlin-locate)
+                ("M-,"        . merlin-pop-stack)
+                ("M-?"        . merlin-occurrences)
+                ("C-c C-j"    . merlin-jump)
+                ("C-c i"      . merlin-locate-ident)
+                ("C-c C-d"    . merlin-document)
+                ("C-c <up>"   . merlin-type-enclosing-go-up)
+                ("C-c <down>" . merlin-type-enclosing-go-down))
+    :custom
+    (merlin-completion-with-doc t)
     :config
-    (when (file-exists-p "~/.emacs.d/opam-user-setup.el")
-      (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")))
+    (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el"))
 
   (use-package ocp-indent
+    :ensure-system-package (ocp-indent . "opam install ocp-indent -y")
     :after (tuareg)
     :commands (ocp-indent-caml-mode-setup)
     :hook (tuareg-mode . ocp-indent-caml-mode-setup))
+
+  (use-package utop
+    :ensure-system-package (utop . "opam install utop")
+    :after (opam)
+    :hook (tuareg-mode . utop-minor-mode)
+    :commands utop-minor-mode
+    :custom
+    (utop-edit-command nil))
+
+  (use-package flycheck-ocaml
+    :after (merlin)
+    :init (flycheck-ocaml-setup)
+    :custom
+    (merlin-error-after-save nil)
+    (flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
 
 ** Python
