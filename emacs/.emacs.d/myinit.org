@@ -653,8 +653,7 @@
     :ensure-system-package (ocaml
                             opam)
     :init
-    (progn
-      (opam-init)))
+    (opam-init))
 
   (use-package tuareg
     :after (company)
@@ -664,11 +663,6 @@
      ("[./]opam_?\\'" . tuareg-opam-mode)
      ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
      ("\\.eliomi?\\'" . tuareg-mode))
-    :bind (:map tuareg-mode-map
-                ;; ("C-M-f" . smie-forward-sexp-command)
-                ;; ("C-M-b" . smie-backward-sexp-command)
-                ("C-c C-e" . tuareg-eval-buffer)
-                ("C-c C-z" . utop))
     :custom
     (tuareg-match-patterns-aligned t)
     (tuareg-indent-align-with-first-arg t))
@@ -678,16 +672,18 @@
                             ("~/.emacs.d/opam-user-setup.el" . "opam user-setup install"))
     :after (opam tuareg)
     :hook (tuareg-mode . merlin-mode)
-    :bind (:map merlin-mode-map
-                ("M-."        . merlin-locate)
-                ("M-,"        . merlin-pop-stack)
-                ("M-?"        . merlin-occurrences)
-                ("C-c C-j"    . merlin-jump)
-                ("C-c i"      . merlin-locate-ident)
-                ("C-c C-d"    . merlin-document)
-                ("C-c <up>"   . merlin-type-enclosing-go-up)
-                ("C-c <down>" . merlin-type-enclosing-go-down))
+    :bind
+    (:map merlin-mode-map
+          ("M-."        . merlin-locate)
+          ("M-,"        . merlin-pop-stack)
+          ("M-?"        . merlin-occurrences)
+          ("C-c C-j"    . merlin-jump)
+          ("C-c i"      . merlin-locate-ident)
+          ("C-c C-d"    . merlin-document)
+          ("C-c <up>"   . merlin-type-enclosing-go-up)
+          ("C-c <down>" . merlin-type-enclosing-go-down))
     :custom
+    (merlin-error-after-save nil)
     (merlin-completion-with-doc t)
     :config
     (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el"))
@@ -695,18 +691,24 @@
   (use-package ocp-indent
     :ensure-system-package (ocp-indent . "opam install ocp-indent -y")
     :after (tuareg)
-    :commands (ocp-indent-caml-mode-setup)
-    :hook (tuareg-mode . ocp-indent-caml-mode-setup))
+    :commands
+    (ocp-indent-caml-mode-setup)
+    :hook
+    (tuareg-mode . ocp-indent-caml-mode-setup))
 
   (use-package utop
     :ensure-system-package (utop . "opam install utop -y")
     :after (opam)
-    :hook (tuareg-mode . utop-minor-mode)
-    :commands utop-minor-mode
+    :hook
+    (tuareg-mode . utop-minor-mode)
+    :bind
+    (:map tuareg-mode-map
+          ("C-c C-c" . ign:utop-eval-phrase)
+          ("C-c C-z" . utop))
     :custom
     (utop-edit-command nil))
 
-  (defun ign/utop-eval-phrase ()
+  (defun ign:utop-eval-phrase ()
     "Eval the surrounding Caml phrase (or block) in utop."
     (interactive)
     (utop-prepare-for-eval)
@@ -720,9 +722,9 @@
 
   (use-package flycheck-ocaml
     :after (merlin)
-    :init (flycheck-ocaml-setup)
+    :init
+    (flycheck-ocaml-setup)
     :custom
-    (merlin-error-after-save nil)
     (flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
 
