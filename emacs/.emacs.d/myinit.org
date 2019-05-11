@@ -633,7 +633,7 @@
     :ensure-system-package (clojure))
 
   (use-package elein
-    :ensure-system-package (lein))
+    :ensure-system-package (lein . leiningen))
 #+END_SRC
 
 ** GNU Plot
