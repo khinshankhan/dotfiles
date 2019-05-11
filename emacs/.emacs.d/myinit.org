@@ -49,7 +49,11 @@
 
   (use-package use-package
     :config
-    (setq use-package-always-ensure t))
+    (setq-default use-package-always-defer nil
+                  use-package-always-ensure t
+                  use-package-always-demand t))
+
+  (setq-default byte-compile-warnings nil)
 
   ;; keyword, allows you to ensure system binaries exist alongside your package declarations
   ;; https://github.com/jwiegley/use-package#use-package-ensure-system-package
