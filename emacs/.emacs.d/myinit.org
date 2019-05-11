@@ -601,6 +601,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package ggtags
+    :ensure-system-package (global)
     :config
     (add-hook 'c-mode-common-hook
               (lambda ()
@@ -693,12 +694,24 @@
     :hook (tuareg-mode . ocp-indent-caml-mode-setup))
 
   (use-package utop
-    :ensure-system-package (utop . "opam install utop")
+    :ensure-system-package (utop . "opam install utop -y")
     :after (opam)
     :hook (tuareg-mode . utop-minor-mode)
     :commands utop-minor-mode
     :custom
     (utop-edit-command nil))
+
+  (defun ign/utop-eval-phrase ()
+    "Eval the surrounding Caml phrase (or block) in utop."
+    (interactive)
+    (utop-prepare-for-eval)
+    (let ((end (point)))
+      (save-excursion
+        (let ((triple (funcall utop-discover-phrase)))
+          (utop-eval (car triple) (cdr triple))))
+      (when utop-skip-after-eval-phrase
+        (goto-char end)
+        (funcall utop-next-phrase-beginning))))
 
   (use-package flycheck-ocaml
     :after (merlin)
