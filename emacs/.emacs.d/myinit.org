@@ -398,6 +398,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
+    :ensure-system-package (grep)
     :bind
     (:map projectile-mode-map
           ("C-c p" . projectile-command-map))
@@ -451,16 +452,21 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit
+    :ensure-system-package (git)
     :bind
     ("C-c g" . magit-status))
 
   ;; need help figuring this one out
   (use-package git-timemachine
+    :ensure-system-package (git)
     :bind
     ("C-c t" . git-timemachine))
 
   (use-package gitignore-mode
-    :mode ("\\.gitignore\\'" . gitignore-mode))
+    :mode "\\.gitignore\\'")
+
+  (use-package gitconfig-mode
+    :mode "\\.gitconfig\\'")
 #+END_SRC
 
 ** Company
@@ -566,6 +572,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package tramp
+    :ensure-system-package (ssh)
     :ensure nil
     :config
     ;; faster than scp
@@ -622,14 +629,21 @@
 ** Clojure
 
 #+BEGIN_SRC emacs-lisp
-  (use-package cider)
+  (use-package cider
+    :ensure-system-package (clojure))
+
+  (use-package elein
+    :ensure-system-package (lein))
 #+END_SRC
 
 ** GNU Plot
 
 #+BEGIN_SRC emacs-lisp
-  (use-package gnuplot)
-  (use-package gnuplot-mode)
+  (use-package gnuplot
+    :ensure-system-package (gnuplot))
+  (use-package gnuplot-mode
+    :mode
+    ("\\.gp\\'" "\\.gnuplot\\'"))
 #+END_SRC
 
 ** Haskell
@@ -774,6 +788,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package ein
+    :ensure-system-package (jupyter)
     :custom
     (ein:completion-backend 'ein:use-company-jedi-backends)
     (ein:use-auto-complete-superpack t))
