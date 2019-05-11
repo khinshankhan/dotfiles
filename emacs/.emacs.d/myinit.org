@@ -131,6 +131,11 @@
     (remove-hook 'before-save-hook #'delete-trailing-whitespace)
     (save-buffer)
     (add-hook 'before-save-hook #'delete-trailing-whitespace))
+
+  (defun ign:edit-config ()
+    (interactive)
+    (find-file
+     (concat user-emacs-directory "myinit.org")))
 #+END_SRC
 
 * Custom Variables
