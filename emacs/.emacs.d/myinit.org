@@ -292,7 +292,6 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
-    :demand
     :bind
     (:map ivy-minibuffer-map
           ("RET" . ivy-alt-done))
@@ -394,7 +393,6 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :demand t
     :bind
     (:map projectile-mode-map
           ("C-c p" . projectile-command-map))
@@ -487,7 +485,6 @@
     (global-company-mode t))
 
   (use-package company-quickhelp
-    :demand t
     :after (company)
     :config
     (company-quickhelp-mode))
@@ -655,7 +652,6 @@
       (opam-init)))
 
   (use-package tuareg
-    :demand t
     :after (company)
     :mode
     (("\\.ml[ip]?\\'" . tuareg-mode)
