@@ -693,7 +693,7 @@ it, and returns its index or nil"
     (opam-init))
 
   (use-package tuareg
-    :ensure-system-package ('ign:tuareg-installed . "opam install tuareg -y")
+    :ensure-system-package (ign:tuareg-installed . "opam install tuareg -y")
     :after (company)
     :mode
     (("\\.ml[ip]?\\'" . tuareg-mode)
