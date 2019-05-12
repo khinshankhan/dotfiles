@@ -141,6 +141,22 @@
     (interactive)
     (find-file
      (concat user-emacs-directory "myinit.org")))
+
+  (defun ign:ecmd-output (cmd &optional arg)
+    "Takes in an elisp command and checks if it has a valid string output when ran.
+  Arguments are optional, should the command require them. It should be noted that
+  if the command returns a string with bad input, this function still returns t."
+    (if (stringp arg)
+        (not (= (length
+                 (funcall cmd arg)) 0))
+      (not (= (length
+               (funcall cmd)) 0))))
+
+;; this is going to get abused, since indices should evaluate to t
+(defun ign:sso(cmd arg)
+  "substring-shell-output, checks if running a given command has a substring in
+it, and returns its index or nil"
+  (cl-search arg (shell-command-to-string cmd)))
 #+END_SRC
 
 * Custom Variables
@@ -150,6 +166,7 @@
   (defconst ign:python-executable "python3")
   (defconst ign:ipython-executable "ipython3")
   (defconst ign:cl-executable (ign:find-executables ("sbcl" "lisp" "ccl")))
+  (setq ign:tuareg-installed (not (not (ign:sso "opam list" "tuareg"))))
 #+END_SRC
 
 * System
@@ -670,11 +687,13 @@
 #+BEGIN_SRC emacs-lisp
   (use-package opam
     :ensure-system-package (ocaml
-                            opam)
+                            opam
+                            ("~/.emacs.d/opam-user-setup.el" . "opam user-setup install"))
     :init
     (opam-init))
 
   (use-package tuareg
+    :ensure-system-package ('ign:tuareg-installed . "opam install tuareg -y")
     :after (company)
     :mode
     (("\\.ml[ip]?\\'" . tuareg-mode)
@@ -687,8 +706,7 @@
     (tuareg-indent-align-with-first-arg t))
 
   (use-package merlin
-    :ensure-system-package ((ocamlmerlin . "opam install merlin -y")
-                            ("~/.emacs.d/opam-user-setup.el" . "opam user-setup install"))
+    :ensure-system-package ((ocamlmerlin . "opam install merlin -y"))
     :after (opam tuareg)
     :hook (tuareg-mode . merlin-mode)
     :bind
