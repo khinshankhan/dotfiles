@@ -24,7 +24,7 @@ Enforce UTF-8 as the default coding system for all files, comint processes and b
 #+END_SRC
 
 ** Backups
-Stops the pesky ~~~ and  ~#~ files. It's more powerful to manually save than autosave as well.
+Stops the pesky =~= and  ~#~ files. It's more powerful to manually save than autosave as well.
 #+BEGIN_SRC emacs-lisp
   (setq-default backup-inhibited t
                 auto-save-default nil
