@@ -68,20 +68,25 @@
 ** Definitions
 
 #+BEGIN_SRC emacs-lisp
+  (defun ign:before (to-call-before f)
+    (funcall to-call-before)
+    (funcall f))
+
+  (defun ign:after (to-call-after f)
+    (funcall f)
+    (funcall to-call-after))
+
   (defun ign:split-window-right ()
     (interactive)
-    (split-window-right)
-    (balance-windows))
+    (ign:after #'balance-windows #'split-window-right))
 
   (defun ign:split-window-below ()
     (interactive)
-    (split-window-below)
-    (balance-windows))
+    (ign:after #'balance-windows #'split-window-below))
 
   (defun ign:delete-window ()
     (interactive)
-    (delete-window)
-    (balance-windows))
+    (ign:after #'balance-windows #'delete-window))
 
   (defun ign:delete-buffer ()
     (interactive)
