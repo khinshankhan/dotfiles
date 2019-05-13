@@ -144,19 +144,30 @@
 
   (defun ign:ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-  Arguments are optional, should the command require them. It should be noted that
-  if the command returns a string with bad input, this function still returns t."
+    Arguments are optional, should the command require them. It should be noted that
+    if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
       (not (= (length
                (funcall cmd)) 0))))
 
-;; this is going to get abused, since indices should evaluate to t
-(defun ign:sso(cmd arg)
-  "substring-shell-output, checks if running a given command has a substring in
-it, and returns its index or nil"
-  (cl-search arg (shell-command-to-string cmd)))
+  ;; this is going to get abused, since indices should evaluate to t
+  (defun ign:sso(cmd arg)
+    "substring-shell-output, checks if running a given command has a substring in
+  it, and returns its index or nil"
+    (cl-search arg (shell-command-to-string cmd)))
+
+  (defmacro ign/ensure-dispatch (expr)
+    (if (stringp expr)
+        `'(t . ,expr)
+      `',expr))
+
+  (defmacro ign/if (predicate then &optional else)
+    (if (eval predicate) `(ign/ensure-dispatch ,then) (or `(ign/ensure-dispatch ,else) ''ls)))
+
+  (defmacro ign/unless (predicate then &optional else)
+    (if (eval (not predicate)) `(ign/ensure-dispatch ,then) (or `(ign/ensure-dispatch ,else) ''ls)))
 #+END_SRC
 
 * Custom Variables
@@ -166,7 +177,6 @@ it, and returns its index or nil"
   (defconst ign:python-executable "python3")
   (defconst ign:ipython-executable "ipython3")
   (defconst ign:cl-executable (ign:find-executables ("sbcl" "lisp" "ccl")))
-  (setq ign:tuareg-installed (not (not (ign:sso "opam list" "tuareg"))))
 #+END_SRC
 
 * System
@@ -692,18 +702,19 @@ it, and returns its index or nil"
     :init
     (opam-init))
 
-  (use-package tuareg
-    :ensure-system-package (ign:tuareg-installed . "opam install tuareg -y")
-    :after (company)
-    :mode
-    (("\\.ml[ip]?\\'" . tuareg-mode)
-     ("\\.mly\\'" . tuareg-menhir-mode)
-     ("[./]opam_?\\'" . tuareg-opam-mode)
-     ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
-     ("\\.eliomi?\\'" . tuareg-mode))
-    :custom
-    (tuareg-match-patterns-aligned t)
-    (tuareg-indent-align-with-first-arg t))
+  (eval `(use-package tuareg
+           :ensure-system-package
+           ,(ign/if (not (ign:sso "opam list" "tuareg")) "opam install tuareg -y")
+           :after (company)
+           :mode
+           (("\\.ml[ip]?\\'" . tuareg-mode)
+            ("\\.mly\\'" . tuareg-menhir-mode)
+            ("[./]opam_?\\'" . tuareg-opam-mode)
+            ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
+            ("\\.eliomi?\\'" . tuareg-mode))
+           :custom
+           (tuareg-match-patterns-aligned t)
+           (tuareg-indent-align-with-first-arg t)))
 
   (use-package merlin
     :ensure-system-package ((ocamlmerlin . "opam install merlin -y"))
