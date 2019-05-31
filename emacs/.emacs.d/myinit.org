@@ -34,9 +34,12 @@
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   ;;(setq package-enable-at-startup nil)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+  (add-to-list 'package-archives
+               '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives
+               '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  (add-to-list 'package-archives
+               '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
 
   ;; Bootstrap use-package
@@ -63,36 +66,44 @@
   (use-package try)
 #+END_SRC
 
+
 * Functions
 
 ** Definitions
 
 #+BEGIN_SRC emacs-lisp
   (defun ign/before (to-call-before f)
+    "Run TO-CALL-BEFORE then run F."
     (funcall to-call-before)
     (funcall f))
 
   (defun ign/after (to-call-after f)
+    "Run F then run TO-CALL-AFTER."
     (funcall f)
     (funcall to-call-after))
 
   (defun ign/split-window-right ()
+    "Create a new window split to the right and balance the windows."
     (interactive)
     (ign/after #'balance-windows #'split-window-right))
 
   (defun ign/split-window-below ()
+    "Create a new window split below and balance the windows."
     (interactive)
     (ign/after #'balance-windows #'split-window-below))
 
   (defun ign/delete-window ()
+    "Delete the current window and balance the windows."
     (interactive)
     (ign/after #'balance-windows #'delete-window))
 
   (defun ign/delete-buffer ()
+    "Delete the current buffer and go to next most recent buffer."
     (interactive)
     (ido-kill-buffer))
 
   (defun ign/fill-or-unfill ()
+    "Fill or unfill based on the previous command."
     (interactive)
     (let ((fill-column
            (if (eq last-command 'endless/fill-or-unfill)
@@ -102,50 +113,62 @@
       (call-interactively #'fill-paragraph)))
 
   (defun ign/refresh-buffer ()
+    "Refresh the current buffer."
     (interactive)
     (revert-buffer :ignore-auto :noconfirm))
 
   (defun ign/reload ()
+    "Reload the configuration file."
     (interactive)
     (load-file (concat user-emacs-directory "init.el")))
 
+  (defun ign/edit-config ()
+    "Reload the configuration file."
+    (interactive)
+    (find-file
+     (concat user-emacs-directory "myinit.org")))
+
   (defun ign/toggle-mark ()
+    "Pop a mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
     (if (region-active-p)
         (deactivate-mark)
       (push-mark nil nil t)))
 
   (defun ign/toggle-mark-rectangle ()
+    "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
     (if (region-active-p)
         (deactivate-mark)
       (rectangle-mark-mode)))
 
   (defun ign/first-occurence (f list)
+    "Return the first occurence in LIST which, when applied to PREDICATE returns t."
     (let ((head (car list))
           (tail (cdr list)))
       (if (or (not head) (funcall f head))
           head
         (ign/first-occurence f tail))))
 
+  (defun ign/last-occurence (predicate list)
+    "Return the last occurence in LIST which, when applied to PREDICATE returns t."
+    (ign/first-occurence predicate (reverse list)))
+
   (defmacro ign/find-executables (list)
+    "Return the first occurence in LIST whose value corresponds to an executable."
     (ign/first-occurence #'executable-find list))
 
   (defun ign/save-proper ()
+    "Save the current buffer and remove trailing whitespace if called interactively."
     (interactive)
     (remove-hook 'before-save-hook #'delete-trailing-whitespace)
     (save-buffer)
     (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
-  (defun ign/edit-config ()
-    (interactive)
-    (find-file
-     (concat user-emacs-directory "myinit.org")))
-
   (defun ign/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-    Arguments are optional, should the command require them. It should be noted that
-    if the command returns a string with bad input, this function still returns t."
+                Arguments are optional, should the command require them. It should be noted that
+                if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -155,9 +178,10 @@
   ;; this is going to get abused, since indices should evaluate to t
   (defun ign/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-  it, and returns its index or nil"
+              it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
+  ;; macros to potentially give use-package more control to the user
   (defmacro ign/ensure-dispatch (expr)
     (if (stringp expr)
         `'(t . ,expr)
@@ -169,6 +193,7 @@
   (defmacro ign/unless (predicate then &optional else)
     (if (eval (not predicate)) `(ign/ensure-dispatch ,then) (or `(ign/ensure-dispatch ,else) ''ls)))
 #+END_SRC
+
 
 * Custom Variables
 
