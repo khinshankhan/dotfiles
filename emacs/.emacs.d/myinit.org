@@ -199,6 +199,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (defconst custom-file "/dev/zero")
+  (defconst ign/config-path (concat user-emacs-directory "config.org"))
   (defconst ign/python-executable "python3")
   (defconst ign/ipython-executable "ipython3")
   (defconst ign/cl-executable (ign/find-executables ("sbcl" "lisp" "ccl")))
@@ -271,14 +272,21 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package dashboard
+    :bind
+    (:map dashboard-mode-map
+          ("n" . widget-forward)
+          ("p" . widget-backward))
     :custom
     (dashboard-banner-logo-title
-     (format "[Emacs ready in %.2f seconds with %d packages loaded and %d garbage collections.]"
+     (format ""
              (float-time (time-subtract after-init-time before-init-time))
              (length package-activated-list) gcs-done))
     (dashboard-startup-banner 'logo)
-    (dashboard-items '((recents  . 5)
-                       (projects . 5)))
+    (dashboard-items '((recents  . 5)))
+    (dashboard-set-heading-icons t)
+    (dashboard-set-file-icons t)
+    (dashboard-set-init-info t)
+    (dashboard-center-content t)
     :config
     (dashboard-setup-startup-hook))
 #+END_SRC
