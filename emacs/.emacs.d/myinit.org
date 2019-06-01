@@ -865,7 +865,10 @@
 ** Python
 
 #+BEGIN_SRC emacs-lisp
-  (use-package pip-requirements)
+  (use-package pip-requirements
+    :mode
+    ("requirements\\.txt" . pip-requirements-mode))
+
   (use-package sphinx-doc
     :hook
     (python-mode . sphinx-doc-mode))
@@ -873,22 +876,23 @@
   (use-package python
     :ensure nil
     :after (flycheck)
+    :mode
+    ("\\.py[iw]?\\'" . python-mode)
     :custom
     (python-indent 4)
     (python-shell-interpreter ign/ipython-executable)
     (python-shell-interpreter-args "--simple-prompt -i")
     (python-fill-docstring-style 'pep-257)
-    (gud-pdb-command-name (concat ign/python-executable " -m gdb"))
+    (gud-pdb-command-name (concat ign/python-executable " -m pdb"))
     (py-split-window-on-execute t))
 
   (use-package elpy
     :after (company)
+    :hook
+    (python-mode . elpy-mode)
     :bind
     (:map python-mode-map
-          ("C-c d" . elpy-goto-definition)
-          ("C-c e" . elpy-multiedit-python-symbol-at-point)
-          ("C-c f" . elpy-black-fix-code))
-    :hook (python-mode . elpy-mode)
+          ("C-c C-c" . elpy-shell-send-top-statement))
     :custom
     (elpy-rpc-python-command ign/python-executable)
     :config
