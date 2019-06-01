@@ -409,7 +409,8 @@
     :defer 0.5
     :config
     ;; remember to refresh ocassionally, not sure if i want this to stay
-    (all-the-icons-install-fonts))
+    (if (eq (random 4) 1)
+        (all-the-icons-install-fonts)))
 
   (use-package all-the-icons-ivy
     :after (all-the-icons ivy counsel counsel-projectile)
