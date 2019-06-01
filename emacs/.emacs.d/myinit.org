@@ -305,6 +305,7 @@
 #+BEGIN_SRC emacs-lisp
   ;;(setq-default initial-major-mode 'python-mode)
   (setq-default initial-major-mode 'lisp-interaction-mode)
+  (setq initial-scratch-message "")
 #+END_SRC
 
 ** Lines
