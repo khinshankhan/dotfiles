@@ -66,7 +66,6 @@
   (use-package try)
 #+END_SRC
 
-
 * Functions
 
 ** Definitions
@@ -198,7 +197,6 @@
   (defmacro ign/unless (predicate then &optional else)
     (if (eval (not predicate)) `(ign/ensure-dispatch ,then) (or `(ign/ensure-dispatch ,else) ''ls)))
 #+END_SRC
-
 
 * Custom Variables
 
@@ -409,7 +407,7 @@
     :defer 0.5
     :config
     ;; remember to refresh ocassionally, not sure if i want this to stay
-    (if (eq (random 4) 1)
+    (if (eq (random 11) 1)
         (all-the-icons-install-fonts)))
 
   (use-package all-the-icons-ivy
@@ -439,7 +437,6 @@
     (add-hook 'dired-mode-hook 'dired-collapse-mode))
 #+END_SRC
 
-
 * Org
 
 #+BEGIN_SRC emacs-lisp
@@ -447,17 +444,31 @@
     :mode
     ("\\.\\(org\\|ORG\\)\\'" . org-mode)
     :ensure nil
+    :hook
+    (org-babel-after-execute . org-redisplay-inline-images)
     :custom
+    (org-file-apps
+     '((auto-mode . emacs)
+       ("\\.x?html?\\'" . "/usr/bin/chromium %s")
+       ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
+
+    (org-directory "~/.orgfiles")
+    (org-default-notes-file (concat org-directory "/notes.org"))
+    (org-export-html-postamble nil)
+
+    (org-image-actual-width 480)
     (org-src-fontify-natively t)
     (org-src-tab-acts-natively t)
     (org-pretty-entities t)
     (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
     (org-babel-python-command "ipython3 -i --simple-prompt")
+    (org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
     :config
+    (use-package ob-ipython)
     (org-babel-do-load-languages
      'org-babel-load-languages
-     '(
-       (emacs-lisp . t)
+     '((emacs-lisp . t)
        (gnuplot . t)
        (js . t)
        (latex . t )
@@ -472,24 +483,14 @@
     :hook
     (org-mode . org-bullets-mode))
 
+  (use-package px)
 
-  (custom-set-variables
-   '(org-directory "~/.orgfiles")
-   '(org-default-notes-file (concat org-directory "/notes.org"))
-   '(org-export-html-postamble nil)
-   '(org-hide-leading-stars t)
-   '(org-startup-folded (quote overview))
-   '(org-startup-indented t)
-   )
-
-  (setq org-file-apps
-        (append '(
-                  ("\\.pdf\\'" . "epdfview %s")
-                  ("\\.x?html?\\'" . "/usr/bin/chromium %s")
-                  ) org-file-apps ))
+  (use-package htmlize)
 
   (use-package ox-gfm
     :after (org))
+
+  (use-package ox-pandoc)
 #+END_SRC
 
 * Programming
