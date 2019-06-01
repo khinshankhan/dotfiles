@@ -274,7 +274,10 @@
 ** Splash Screen
 
 #+BEGIN_SRC emacs-lisp
+  (use-package page-break-lines)
+
   (use-package dashboard
+    :after (page-break-lines)
     :bind
     (:map dashboard-mode-map
           ("n" . widget-forward)
@@ -291,8 +294,6 @@
     (dashboard-center-content t)
     :config
     (setq dashboard-items '((recents  . 5)
-                            (projects . 5)
-                            (bookmarks . 5)
                             (agenda . 5)
                             ))
 
@@ -437,9 +438,9 @@
     (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
   ;; https://fuco1.github.io/2017-07-15-Collapse-unique-nested-paths-in-dired-with-dired-collapse-mode.html
-  (use-package dired-collapse
-    :init
-    (add-hook 'dired-mode-hook 'dired-collapse-mode))
+  ;; (use-package dired-collapse
+  ;;   :init
+  ;;   (add-hook 'dired-mode-hook 'dired-collapse-mode))
 #+END_SRC
 
 * Org
