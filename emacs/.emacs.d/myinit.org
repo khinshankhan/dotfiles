@@ -912,7 +912,8 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package ein
-    :ensure-system-package (jupyter)
+    :mode
+    (".*\\.ipynb\\'" . ein:ipynb-mode)
     :custom
     (ein:completion-backend 'ein:use-company-jedi-backends)
     (ein:use-auto-complete-superpack t))
