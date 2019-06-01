@@ -501,7 +501,6 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :ensure-system-package (grep)
     :bind
     (:map projectile-mode-map
           ("C-c p" . projectile-command-map))
@@ -515,12 +514,13 @@
     (projectile-completion-system 'ivy)
     :config
     (projectile-mode t)
-    ;;(setq projectile-completion-system 'ivy)
     (counsel-projectile-mode))
 
   (use-package counsel-projectile
     :after (counsel projectile))
 #+END_SRC
+
+#+RESULTS:
 
 *** Interactive
 
@@ -533,10 +533,12 @@
     (prog-mode . aggressive-indent-mode))
 
   (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
+    :hook
+    (prog-mode . rainbow-delimiters-mode))
 
   (use-package smartparens
-    :hook (prog-mode . smartparens-mode)
+    :hook
+    (prog-mode . smartparens-mode)
     :custom
     (sp-escape-quotes-after-insert nil)
     :config
@@ -555,13 +557,11 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :ensure-system-package (git)
     :bind
     ("C-c g" . magit-status))
 
   ;; need help figuring this one out
   (use-package git-timemachine
-    :ensure-system-package (git)
     :bind
     ("C-c t" . git-timemachine))
 
@@ -577,24 +577,31 @@
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :bind
-    ("C-SPC" . company-complete)
+    ("C-/" . company-complete)
     (:map company-active-map
+          ("C-/" . company-other-backend)
+          ("M-n" . nil)
+          ("M-p" . nil)
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :custom-face
-    (company-tooltip ((t (:foreground "#ABB2BF" :background "#30343C"))))
-    (company-tooltip-annotation ((t (:foreground "#ABB2BF" :background "#30343C"))))
-    (company-tooltip-selection ((t (:foreground "#ABB2BF" :background "#393F49"))))
-    (company-tooltip-mouse ((t (:background "#30343C"))))
-    (company-tooltip-common ((t (:foreground "#ABB2BF" :background "#30343C"))))
-    (company-tooltip-common-selection ((t (:foreground "#ABB2BF" :background "#393F49"))))
-    (company-preview ((t (:background "#30343C"))))
-    (company-preview-common ((t (:foreground "#ABB2BF" :background "#30343C"))))
-    (company-scrollbar-fg ((t (:background "#30343C"))))
-    (company-scrollbar-bg ((t (:background "#30343C"))))
-    (company-template-field ((t (:foreground "#282C34" :background "#C678DD"))))
+    (company-tooltip ((t (:foreground "#abb2bf" :background "#30343c"))))
+    (company-tooltip-annotation ((t (:foreground "#abb2bf" :background "#30343c"))))
+    (company-tooltip-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
+    (company-tooltip-mouse ((t (:background "#30343c"))))
+    (company-tooltip-common ((t (:foreground "#abb2bf" :background "#30343c"))))
+    (company-tooltip-common-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
+    (company-preview ((t (:background "#30343c"))))
+    (company-preview-common ((t (:foreground "#abb2bf" :background "#30343c"))))
+    (company-scrollbar-fg ((t (:background "#30343c"))))
+    (company-scrollbar-bg ((t (:background "#30343c"))))
+    (company-template-field ((t (:foreground "#282c34" :background "#c678dd"))))
     :custom
-    (company-idle-delay 120)
+    (company-require-match 'never)
+    (company-dabbrev-downcase nil)
+    (company-tooltip-align-annotations t)
+    (company-idle-delay 128)
+    (company-minimum-prefix-length 128)
     :config
     (global-company-mode t))
 
@@ -602,6 +609,10 @@
     :after (company)
     :config
     (company-quickhelp-mode))
+
+  (use-package company-box
+    :after (company)
+    :hook (company-mode . company-box-mode))
 #+END_SRC
 
 ** Flycheck
@@ -666,9 +677,13 @@
 ** Misc Helpers
 
 #+BEGIN_SRC emacs-lisp
-(use-package demangle-mode)
+  (use-package demangle-mode)
 
-(use-package modern-cpp-font-lock)
+  (use-package modern-cpp-font-lock)
+
+  (use-package academic-phrases)
+
+  (use-package powerthesaurus)
 #+END_SRC
 
 ** TRAMP
