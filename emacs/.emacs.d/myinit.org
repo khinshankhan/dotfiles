@@ -774,8 +774,10 @@
 ** Lua
 #+BEGIN_SRC emacs-lisp
   (use-package lua-mode
+    :after (company)
     :mode (("\\.lua\\'" . lua-mode))
-    :config (add-hook 'lua-mode-hook #'company-mode))
+    :hook
+    (lua-mode . company-mode))
 #+END_SRC
 
 ** OCaml
