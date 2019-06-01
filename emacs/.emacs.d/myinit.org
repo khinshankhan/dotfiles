@@ -690,7 +690,6 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package tramp
-    :ensure-system-package (ssh)
     :ensure nil
     :config
     ;; faster than scp
@@ -732,7 +731,6 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package ggtags
-    :ensure-system-package (global)
     :config
     (add-hook 'c-mode-common-hook
               (lambda ()
@@ -747,18 +745,16 @@
 ** Clojure
 
 #+BEGIN_SRC emacs-lisp
-  (use-package cider
-    :ensure-system-package (clojure))
+  (use-package cider)
 
-  (use-package elein
-    :ensure-system-package (lein . leiningen))
+  (use-package elein)
 #+END_SRC
 
 ** GNU Plot
 
 #+BEGIN_SRC emacs-lisp
-  (use-package gnuplot
-    :ensure-system-package (gnuplot))
+  (use-package gnuplot)
+
   (use-package gnuplot-mode
     :mode
     ("\\.gp\\'" "\\.gnuplot\\'"))
@@ -851,7 +847,6 @@
     (utop-edit-command nil))
 
   (use-package dune)
-  (use-package dune-flymake)
 
   (use-package ocp-indent
     :after (tuareg utop)
