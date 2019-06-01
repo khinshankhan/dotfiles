@@ -72,6 +72,11 @@
 ** Definitions
 
 #+BEGIN_SRC emacs-lisp
+  (defun ign/do-nothing ()
+    "Do nothing."
+    (interactive)
+    nil)
+
   (defun ign/before (to-call-before f)
     "Run TO-CALL-BEFORE then run F."
     (funcall to-call-before)
@@ -167,8 +172,8 @@
 
   (defun ign/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                Arguments are optional, should the command require them. It should be noted that
-                if the command returns a string with bad input, this function still returns t."
+                  Arguments are optional, should the command require them. It should be noted that
+                  if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -178,7 +183,7 @@
   ;; this is going to get abused, since indices should evaluate to t
   (defun ign/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-              it, and returns its index or nil"
+                it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   ;; macros to potentially give use-package more control to the user
@@ -363,10 +368,25 @@
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
     :bind
+    ([switch-to-buffer] . ivy-switch-buffer)
     (:map ivy-minibuffer-map
-          ("RET" . ivy-alt-done))
+          ([remap xref-find-definitions] . ign/do-nothing)
+          ([remap xref-find-definitions-other-frame] . ign/do-nothing)
+          ([remap xref-find-definitions-other-window] . ign/do-nothing)
+          ([remap xref-find-references] . ign/do-nothing)
+          ([remap xref-find-apropos] . ign/do-nothing)
+          ("<return>" . ivy-alt-done))
     :custom
-    (ivy-initial-inputs-alist nil))
+    (ivy-use-virtual-buffers t)
+    (ivy-count-format "%d/%d ")
+    (ivy-height 20)
+    (ivy-display-style 'fancy)
+    (ivy-format-function 'ivy-format-function-line)
+    (ivy-re-builders-alist
+     '((t . ivy--regex-plus)))
+    (ivy-initial-inputs-alist nil)
+    :config
+    (ivy-mode))
 
   (use-package counsel
     :bind
@@ -384,24 +404,40 @@
 ** All the Icons
 
 #+BEGIN_SRC emacs-lisp
-  ;; remember to refresh
   ;; https://github.com/domtronn/all-the-icons.el
   (use-package all-the-icons
-    :defer 0.5)
+    :defer 0.5
+    :config
+    ;; remember to refresh ocassionally, not sure if i want this to stay
+    (all-the-icons-install-fonts))
 
   (use-package all-the-icons-ivy
-    :after (all-the-icons ivy)
-    :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window ivy-switch-buffer))
+    :after (all-the-icons ivy counsel counsel-projectile)
     :config
-    (add-to-list 'all-the-icons-ivy-file-commands 'counsel-dired-jump)
-    (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-library)
+    (setq all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window
+                                              ivy-switch-buffer))
+    (setq all-the-icons-ivy-file-commands '(counsel-dired-jump
+                                            counsel-find-file
+                                            counsel-file-jump
+                                            counsel-find-library
+                                            counsel-git
+                                            counsel-projectile-find-dir
+                                            counsel-projectile-find-file
+                                            counsel-recentf))
     (all-the-icons-ivy-setup))
 
 
-  (use-package all-the-icons-dired)
+  (use-package all-the-icons-dired
+    :diminish all-the-icons-dired-mode
+    :init
+    (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
-  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+  ;; https://fuco1.github.io/2017-07-15-Collapse-unique-nested-paths-in-dired-with-dired-collapse-mode.html
+  (use-package dired-collapse
+    :init
+    (add-hook 'dired-mode-hook 'dired-collapse-mode))
 #+END_SRC
+
 
 * Org
 
@@ -981,7 +1017,7 @@
 
 ** Discord
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle off
   (use-package elcord
     :if (executable-find "discord")
     :config
