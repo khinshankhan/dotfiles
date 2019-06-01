@@ -406,7 +406,7 @@
     ("C-s" . swiper-isearch))
 #+END_SRC
 
-** All the Icons
+** All the Icons & Dired
 
 #+BEGIN_SRC emacs-lisp
   ;; https://github.com/domtronn/all-the-icons.el
@@ -442,6 +442,9 @@
   ;; (use-package dired-collapse
   ;;   :init
   ;;   (add-hook 'dired-mode-hook 'dired-collapse-mode))
+
+  (setq dired-recursive-deletes 'always)
+  (setq dired-recursive-copies 'always)
 #+END_SRC
 
 * Org
