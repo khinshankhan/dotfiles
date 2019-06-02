@@ -946,6 +946,35 @@
     (require 'ess-site))
 #+END_SRC
 
+** Web Dev
+*** VueJS
+#+BEGIN_SRC emacs-lisp
+  (defun vuejs-api ()
+    "Open VueJS API"
+    (interactive)
+    (browse-url "https://vuejs.org/v2/api/"))
+
+  (defun vuejs-guide ()
+    "Open VueJS Guide"
+    (interactive)
+    (browse-url "https://vuejs.org/v2/guide/"))
+
+  (defun vuejs-style-guide ()
+    "Open VueJS Style Guide"
+    (interactive)
+    (browse-url "https://vuejs.org/v2/style-guide/"))
+
+  (defun vuejs-cookbook ()
+    "Open VueJS Cookbook"
+    (interactive)
+    (browse-url "https://vuejs.org/v2/cookbook/"))
+
+  (defun vuejs-examples ()
+    "Open some VueJS Examples"
+    (interactive)
+    (browse-url "https://vuejs.org/v2/examples/"))
+#+END_SRC
+
 * Text Editing
 
 #+BEGIN_SRC emacs-lisp
