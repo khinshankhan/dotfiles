@@ -132,6 +132,12 @@
     (find-file
      (concat user-emacs-directory "myinit.org")))
 
+  (defun ign/sudo-edit (file-name)
+    "Like find file, but opens the file as root."
+    (interactive "FSudo Find File: ")
+    (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+      (find-file tramp-file-name)))
+
   (defun ign/toggle-mark ()
     "Pop a mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
@@ -171,8 +177,8 @@
 
   (defun ign/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                  Arguments are optional, should the command require them. It should be noted that
-                  if the command returns a string with bad input, this function still returns t."
+                    Arguments are optional, should the command require them. It should be noted that
+                    if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -182,7 +188,7 @@
   ;; this is going to get abused, since indices should evaluate to t
   (defun ign/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-                it, and returns its index or nil"
+                  it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   ;; macros to potentially give use-package more control to the user
@@ -948,6 +954,8 @@
   (delete-selection-mode t)
   (add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
+
+* Language Augmentation
 
 ** Expand Region
 
