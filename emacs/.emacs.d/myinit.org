@@ -469,7 +469,7 @@
     :custom
     (org-file-apps
      '((auto-mode . emacs)
-       ("\\.x?html?\\'" . "/usr/bin/chromium %s")
+       ("\\.x?html?\\'" . "/usr/bin/chromium --incognito %s")
        ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
 
     (org-directory "~/.orgfiles")
