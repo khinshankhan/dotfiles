@@ -471,7 +471,7 @@
     :custom
     (org-file-apps
      '((auto-mode . emacs)
-       ("\\.x?html?\\'" . "/usr/bin/chromium --incognito %s")
+       ("\\.x?html?\\'" . "/usr/bin/firefox -private-window %s")
        ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
 
     (org-directory "~/.orgfiles")
@@ -1080,8 +1080,8 @@
 #+BEGIN_SRC emacs-lisp
   ;;(setq-default browse-url-browser-function 'browse-url-chromium)
   (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-args '("--incognito")
-        browse-url-generic-program "chromium")
+        browse-url-generic-args '("-pirvate-window")
+        browse-url-generic-program "firefix")
 
   (defun browse-lucky (start end)
     (interactive "r")
