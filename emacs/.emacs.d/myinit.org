@@ -1053,8 +1053,10 @@
   (bind-key* "C-;" 'company-yasnippet)
 
   ;; soft wrap lines for org mode, disabled by default for org tables
-  ;; we may need to remap this key later, since C-z suspends in other modes
-  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
+  ;; we may need to remap this key later
+  (global-set-key "\C-z" nil)
+  (global-set-key "\C-x\C-z" nil)
+
 
   ;; will set up bookmarks later.. maybe
   (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
