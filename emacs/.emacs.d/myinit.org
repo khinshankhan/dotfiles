@@ -2,6 +2,62 @@
 #+AUTHOR: Khinshan Khan
 #+STARTIP: overview
 
+* Table of Contents                                                     :TOC:
+- [[#personal-variables][Personal Variables]]
+- [[#encoding][Encoding]]
+- [[#backups][Backups]]
+- [[#basic-package][Basic package]]
+- [[#functions][Functions]]
+  - [[#definitions][Definitions]]
+- [[#custom-variables][Custom Variables]]
+- [[#system][System]]
+- [[#gui][GUI]]
+- [[#appearance][Appearance]]
+  - [[#cursor][Cursor]]
+  - [[#font][Font]]
+  - [[#theme][Theme]]
+  - [[#modeline][Modeline]]
+- [[#interface][Interface]]
+  - [[#splash-screen][Splash Screen]]
+  - [[#scratch-buffer][Scratch buffer]]
+  - [[#lines][Lines]]
+  - [[#line-numbers][Line Numbers]]
+  - [[#scrolling][Scrolling]]
+  - [[#confirmation-messages][Confirmation messages]]
+  - [[#bells][Bells]]
+- [[#completion-frontend][Completion Frontend]]
+  - [[#all-the-icons--dired][All the Icons & Dired]]
+- [[#org][Org]]
+- [[#programming][Programming]]
+  - [[#general][General]]
+  - [[#git][Git]]
+  - [[#company][Company]]
+  - [[#flycheck][Flycheck]]
+  - [[#misc-helpers][Misc Helpers]]
+  - [[#tramp][TRAMP]]
+- [[#languages][Languages]]
+  - [[#c][C]]
+  - [[#c-1][C++]]
+  - [[#clojure][Clojure]]
+  - [[#gnu-plot][GNU Plot]]
+  - [[#haskell][Haskell]]
+  - [[#lua][Lua]]
+  - [[#ocaml][OCaml]]
+  - [[#python][Python]]
+  - [[#juypter][Juypter]]
+  - [[#r--julia][R & Julia]]
+  - [[#web-dev][Web Dev]]
+- [[#text-editing][Text Editing]]
+- [[#language-augmentation][Language Augmentation]]
+  - [[#expand-region][Expand Region]]
+  - [[#yasnippet][Yasnippet]]
+- [[#text-navigation][Text Navigation]]
+- [[#bindings][Bindings]]
+  - [[#which-key][Which-key]]
+- [[#community][Community]]
+  - [[#browser][Browser]]
+  - [[#discord][Discord]]
+
 * Personal Variables
 
 #+BEGIN_SRC emacs-lisp
@@ -500,6 +556,11 @@
        (shell . t)
        (R . t)
        )))
+
+  (use-package toc-org
+    :after org
+    :hook
+    (org-mode . toc-org-enable))
 
   (use-package org-bullets
     :hook
