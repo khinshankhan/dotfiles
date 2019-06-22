@@ -547,13 +547,6 @@
 *** Interactive
 
 #+BEGIN_SRC emacs-lisp
-  (use-package aggressive-indent
-    :custom
-    (aggressive-indent-comments-too t)
-    (aggressive-indent-dont-indent-if t)
-    :hook
-    (prog-mode . aggressive-indent-mode))
-
   (use-package rainbow-delimiters
     :hook
     (prog-mode . rainbow-delimiters-mode))
@@ -736,9 +729,6 @@
 #+BEGIN_SRC emacs-lisp
   (use-package cc-mode
     :ensure nil
-    :hook
-    (c-mode . (lambda () (setq indent-tabs-mode t)
-                (global-aggressive-indent-mode -1)))
     :custom
     (c-default-style "linux")
     (c-basic-offset 4))
