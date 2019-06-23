@@ -4,6 +4,7 @@
 
 * Table of Contents                                                     :TOC:
 - [[#personal-variables][Personal Variables]]
+- [[#garbage-collection][Garbage Collection]]
 - [[#encoding][Encoding]]
 - [[#backups][Backups]]
 - [[#basic-package][Basic package]]
@@ -63,6 +64,22 @@
 #+BEGIN_SRC emacs-lisp
   (setq-default user-full-name "Khinshan Khan"
                 user-mail-address "khinshan.khan@gmail.com")
+#+END_SRC
+
+* Garbage Collection
+
+#+BEGIN_SRC emacs-lisp :tangle off
+  (eval-and-compile
+    (defun srs|revert-gc ()
+      (setq gc-cons-threshold 16777216
+            gc-cons-percentage 0.1
+            file-name-handler-alist last-file-name-handler-alist))
+
+    (setq gc-cons-threshold 402653184
+          gc-cons-percentage 0.6
+          file-name-handler-alist nil)
+
+    (add-hook 'emacs-startup-hook 'srs|revert-gc))
 #+END_SRC
 
 * Encoding
@@ -482,7 +499,7 @@
     :defer 0.5
     :config
     ;; remember to refresh ocassionally, not sure if i want this to stay
-    (if (eq (random 11) 1)
+    (if (eq (random 51) 1)
         (all-the-icons-install-fonts)))
 
   (use-package all-the-icons-ivy
