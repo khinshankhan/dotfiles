@@ -14,6 +14,7 @@
 - [[#system][System]]
 - [[#gui][GUI]]
 - [[#appearance][Appearance]]
+  - [[#beacon][Beacon]]
   - [[#cursor][Cursor]]
   - [[#font][Font]]
   - [[#theme][Theme]]
@@ -307,6 +308,14 @@
 #+END_SRC
 
 * Appearance
+
+** Beacon
+
+#+BEGIN_SRC emacs-lisp
+  (use-package beacon
+    :config
+    (beacon-mode))
+#+END_SRC
 
 ** Cursor
 
