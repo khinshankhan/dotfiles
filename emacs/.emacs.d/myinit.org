@@ -1205,7 +1205,7 @@
   ;; we may need to remap this key later
   (global-set-key "\C-z" nil)
   (global-set-key "\C-x\C-z" nil)
-
+  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
 
   ;; will set up bookmarks later.. maybe
   (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
