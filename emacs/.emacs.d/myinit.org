@@ -52,6 +52,7 @@
 - [[#language-augmentation][Language Augmentation]]
   - [[#expand-region][Expand Region]]
   - [[#yasnippet][Yasnippet]]
+  - [[#spell-checking][Spell Checking]]
 - [[#text-navigation][Text Navigation]]
 - [[#bindings][Bindings]]
   - [[#which-key][Which-key]]
@@ -1083,6 +1084,26 @@
 
 #+BEGIN_SRC emacs-lisp :tangle off
   (use-package auto-yasnippet)
+#+END_SRC
+
+** Spell Checking
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flyspell
+    :hook ((text-mode . flyspell-mode)
+           (prog-mode . flyspell-prog-mode)))
+
+  (use-package flyspell-popup
+    :after (flyspell)
+    :preface
+    (defun ign/flyspell-next-word()
+      "Jump to next miss-pelled word and pop-up correction"
+      (interactive)
+      (flyspell-goto-next-error)
+      (flyspell-popup-correct))
+    :bind
+    (:map flyspell-mode-map
+          ("C-," . ign/flyspell-next-word)))
 #+END_SRC
 
 * Text Navigation
