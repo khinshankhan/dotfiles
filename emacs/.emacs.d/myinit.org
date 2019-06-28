@@ -148,42 +148,42 @@
 ** Definitions
 
 #+BEGIN_SRC emacs-lisp
-  (defun ign/do-nothing ()
+  (defun muh/do-nothing ()
     "Do nothing."
     (interactive)
     nil)
 
-  (defun ign/before (to-call-before f)
+  (defun muh/before (to-call-before f)
     "Run TO-CALL-BEFORE then run F."
     (funcall to-call-before)
     (funcall f))
 
-  (defun ign/after (to-call-after f)
+  (defun muh/after (to-call-after f)
     "Run F then run TO-CALL-AFTER."
     (funcall f)
     (funcall to-call-after))
 
-  (defun ign/split-window-right ()
+  (defun muh/split-window-right ()
     "Create a new window split to the right and balance the windows."
     (interactive)
-    (ign/after #'balance-windows #'split-window-right))
+    (muh/after #'balance-windows #'split-window-right))
 
-  (defun ign/split-window-below ()
+  (defun muh/split-window-below ()
     "Create a new window split below and balance the windows."
     (interactive)
-    (ign/after #'balance-windows #'split-window-below))
+    (muh/after #'balance-windows #'split-window-below))
 
-  (defun ign/delete-window ()
+  (defun muh/delete-window ()
     "Delete the current window and balance the windows."
     (interactive)
-    (ign/after #'balance-windows #'delete-window))
+    (muh/after #'balance-windows #'delete-window))
 
-  (defun ign/delete-buffer ()
+  (defun muh/delete-buffer ()
     "Delete the current buffer and go to next most recent buffer."
     (interactive)
     (ido-kill-buffer))
 
-  (defun ign/fill-or-unfill ()
+  (defun muh/fill-or-unfill ()
     "Fill or unfill based on the previous command."
     (interactive)
     (let ((fill-column
@@ -193,66 +193,66 @@
              fill-column)))
       (call-interactively #'fill-paragraph)))
 
-  (defun ign/refresh-buffer ()
+  (defun muh/refresh-buffer ()
     "Refresh the current buffer."
     (interactive)
     (revert-buffer :ignore-auto :noconfirm))
 
-  (defun ign/reload ()
+  (defun muh/reload ()
     "Reload the configuration file."
     (interactive)
     (load-file (concat user-emacs-directory "init.el")))
 
-  (defun ign/edit-config ()
+  (defun muh/edit-config ()
     "Reload the configuration file."
     (interactive)
     (find-file
      (concat user-emacs-directory "myinit.org")))
 
-  (defun ign/sudo-edit (file-name)
+  (defun muh/sudo-edit (file-name)
     "Like find file, but opens the file as root."
     (interactive "FSudo Find File: ")
     (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
       (find-file tramp-file-name)))
 
-  (defun ign/toggle-mark ()
+  (defun muh/toggle-mark ()
     "Pop a mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
     (if (region-active-p)
         (deactivate-mark)
       (push-mark nil nil t)))
 
-  (defun ign/toggle-mark-rectangle ()
+  (defun muh/toggle-mark-rectangle ()
     "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
     (if (region-active-p)
         (deactivate-mark)
       (rectangle-mark-mode)))
 
-  (defun ign/first-occurence (f list)
+  (defun muh/first-occurence (f list)
     "Return the first occurence in LIST which, when applied to PREDICATE returns t."
     (let ((head (car list))
           (tail (cdr list)))
       (if (or (not head) (funcall f head))
           head
-        (ign/first-occurence f tail))))
+        (muh/first-occurence f tail))))
 
-  (defun ign/last-occurence (predicate list)
+  (defun muh/last-occurence (predicate list)
     "Return the last occurence in LIST which, when applied to PREDICATE returns t."
-    (ign/first-occurence predicate (reverse list)))
+    (muh/first-occurence predicate (reverse list)))
 
-  (defmacro ign/find-executables (list)
+  (defmacro muh/find-executables (list)
     "Return the first occurence in LIST whose value corresponds to an executable."
-    (ign/first-occurence #'executable-find list))
+    (muh/first-occurence #'executable-find list))
 
-  (defun ign/save-proper ()
+  (defun muh/save-proper ()
     "Save the current buffer and remove trailing whitespace if called interactively."
     (interactive)
     (remove-hook 'before-save-hook #'delete-trailing-whitespace)
     (save-buffer)
     (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
-  (defun ign/ecmd-output (cmd &optional arg)
+  (defun muh/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
                     Arguments are optional, should the command require them. It should be noted that
                     if the command returns a string with bad input, this function still returns t."
@@ -263,32 +263,32 @@
                (funcall cmd)) 0))))
 
   ;; this is going to get abused, since indices should evaluate to t
-  (defun ign/sso(cmd arg)
+  (defun muh/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
                   it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   ;; macros to potentially give use-package more control to the user
-  (defmacro ign/ensure-dispatch (expr)
+  (defmacro muh/ensure-dispatch (expr)
     (if (stringp expr)
         `'(t . ,expr)
       `',expr))
 
-  (defmacro ign/if (predicate then &optional else)
-    (if (eval predicate) `(ign/ensure-dispatch ,then) (or `(ign/ensure-dispatch ,else) ''ls)))
+  (defmacro muh/if (predicate then &optional else)
+    (if (eval predicate) `(muh/ensure-dispatch ,then) (or `(muh/ensure-dispatch ,else) ''ls)))
 
-  (defmacro ign/unless (predicate then &optional else)
-    (if (eval (not predicate)) `(ign/ensure-dispatch ,then) (or `(ign/ensure-dispatch ,else) ''ls)))
+  (defmacro muh/unless (predicate then &optional else)
+    (if (eval (not predicate)) `(muh/ensure-dispatch ,then) (or `(muh/ensure-dispatch ,else) ''ls)))
 #+END_SRC
 
 * Custom Variables
 
 #+BEGIN_SRC emacs-lisp
   (defconst custom-file "/dev/zero")
-  (defconst ign/config-path (concat user-emacs-directory "config.org"))
-  (defconst ign/python-executable "python3")
-  (defconst ign/ipython-executable "ipython3")
-  (defconst ign/cl-executable (ign/find-executables ("sbcl" "lisp" "ccl")))
+  (defconst muh/config-path (concat user-emacs-directory "config.org"))
+  (defconst muh/python-executable "python3")
+  (defconst muh/ipython-executable "ipython3")
+  (defconst muh/cl-executable (muh/find-executables ("sbcl" "lisp" "ccl")))
 #+END_SRC
 
 * System
@@ -352,7 +352,7 @@
 
   (use-package doom-modeline
     :custom
-    (doom-modeline-python-executable ign/python-executable)
+    (doom-modeline-python-executable muh/python-executable)
     (doom-modeline-icon t)
     (doom-modeline-major-mode-icon t)
     (doom-modeline-version t)
@@ -470,11 +470,11 @@
     :bind
     ([switch-to-buffer] . ivy-switch-buffer)
     (:map ivy-minibuffer-map
-          ([remap xref-find-definitions] . ign/do-nothing)
-          ([remap xref-find-definitions-other-frame] . ign/do-nothing)
-          ([remap xref-find-definitions-other-window] . ign/do-nothing)
-          ([remap xref-find-references] . ign/do-nothing)
-          ([remap xref-find-apropos] . ign/do-nothing)
+          ([remap xref-find-definitions] . muh/do-nothing)
+          ([remap xref-find-definitions-other-frame] . muh/do-nothing)
+          ([remap xref-find-definitions-other-window] . muh/do-nothing)
+          ([remap xref-find-references] . muh/do-nothing)
+          ([remap xref-find-apropos] . muh/do-nothing)
           ("<return>" . ivy-alt-done))
     :custom
     (ivy-use-virtual-buffers t)
@@ -925,7 +925,7 @@
   (use-package utop
     :after (opam)
     :preface
-    (defun ign/utop-eval-phrase ()
+    (defun muh/utop-eval-phrase ()
       "Eval the surrounding Caml phrase (or block) in utop."
       (interactive)
       (utop-prepare-for-eval)
@@ -940,7 +940,7 @@
     (tuareg-mode . utop-minor-mode)
     :bind
     (:map tuareg-mode-map
-          ("C-c C-c" . ign/utop-eval-phrase)
+          ("C-c C-c" . muh/utop-eval-phrase)
           ("C-c C-z" . utop))
     (:map utop-mode-map
           ("C-c C-g" . nil)
@@ -984,10 +984,10 @@
     ("\\.py[iw]?\\'" . python-mode)
     :custom
     (python-indent 4)
-    (python-shell-interpreter ign/ipython-executable)
+    (python-shell-interpreter muh/ipython-executable)
     (python-shell-interpreter-args "--simple-prompt -i")
     (python-fill-docstring-style 'pep-257)
-    (gud-pdb-command-name (concat ign/python-executable " -m pdb"))
+    (gud-pdb-command-name (concat muh/python-executable " -m pdb"))
     (py-split-window-on-execute t))
 
   (use-package elpy
@@ -998,7 +998,7 @@
     (:map python-mode-map
           ("C-c C-c" . elpy-shell-send-top-statement))
     :custom
-    (elpy-rpc-python-command ign/python-executable)
+    (elpy-rpc-python-command muh/python-executable)
     :config
     (delete 'elpy-module-highlight-indentation elpy-modules)
     (delete 'elpy-module-flymake elpy-modules)
@@ -1150,20 +1150,20 @@
                 (setq arg 0))
             (forward-word)))))
 
-    (defun ign/flyspell-next-word()
+    (defun muh/flyspell-next-word()
       "Jump to next miss-pelled word and pop-up correction"
       (interactive)
       (flyspell-goto-next-error)
       (flyspell-popup-correct))
-    (defun ign/flyspell-prev-word()
+    (defun muh/flyspell-prev-word()
       "Jump to prev miss-pelled word and pop-up correction"
       (interactive)
       (flyspell-goto-previous-error (char-after 1))
       (flyspell-popup-correct))
     :bind
     (:map flyspell-mode-map
-          ("C-," . ign/flyspell-next-word)
-          ("C-M-," . ign/flyspell-prev-word)))
+          ("C-," . muh/flyspell-next-word)
+          ("C-M-," . muh/flyspell-prev-word)))
 #+END_SRC
 
 * Text Navigation
@@ -1193,9 +1193,9 @@
   (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
 
   (use-package bind-key)
-  (bind-key* "C-x w" 'ign/delete-window)
-  (bind-key* "C-x k" 'ign/delete-buffer)
-  (bind-key* "C-c w" 'ign/split-window-right)
+  (bind-key* "C-x w" 'muh/delete-window)
+  (bind-key* "C-x k" 'muh/delete-buffer)
+  (bind-key* "C-c w" 'muh/split-window-right)
 
   (bind-key* "C-c i" 'auto-insert)
   (bind-key* "M-/" 'hippie-expand)
