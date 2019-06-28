@@ -780,6 +780,10 @@
 ** Misc Helpers
 
 #+BEGIN_SRC emacs-lisp
+  (use-package speed-type)
+
+  (use-package origami)
+
   (use-package demangle-mode)
 
   (use-package modern-cpp-font-lock)
