@@ -60,6 +60,7 @@
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
+  - [[#wakatime][Wakatime]]
 
 * Personal Variables
 
@@ -1250,4 +1251,14 @@
     :if (executable-find "discord")
     :config
     (elcord-mode))
+#+END_SRC
+
+** Wakatime
+#+BEGIN_SRC emacs-lisp
+  (use-package wakatime-mode
+    :custom
+    (wakatime-cli-path "/usr/bin/wakatime")
+    (wakatime-api-key  "f7b49b71-33d4-42bc-82fc-42f775341ed0")
+    :init
+    (global-wakatime-mode))
 #+END_SRC
