@@ -313,6 +313,8 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package beacon
+    :hook
+    (focus-in . beacon-blink)
     :config
     (beacon-mode))
 #+END_SRC
