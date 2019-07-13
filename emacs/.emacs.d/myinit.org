@@ -1166,7 +1166,7 @@ fine.
     :custom
     (highlight-indent-guides-method 'character)
     (highlight-indent-guides-responsive 'stack)
-    (highlight-indent-guides-character ?\⧞))
+    (highlight-indent-guides-character ?\λ))
 #+END_SRC
 
 * Language Augmentation
