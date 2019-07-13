@@ -38,8 +38,7 @@
   - [[#misc-helpers][Misc Helpers]]
   - [[#tramp][TRAMP]]
 - [[#languages][Languages]]
-  - [[#c][C]]
-  - [[#c-1][C++]]
+  - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
   - [[#gnu-plot][GNU Plot]]
   - [[#haskell][Haskell]]
@@ -860,31 +859,41 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 #+END_SRC
 
 * Languages
-** C
+** C/ C++
 
 #+BEGIN_SRC emacs-lisp
   (use-package cc-mode
     :ensure nil
     :custom
+    (cc-search-directories '("."
+                             "/usr/include"
+                             "usr/local/include/*"
+                             "../*/include"
+                             "../*/lib"))
     (c-default-style "linux")
     (c-basic-offset 4))
+
+  (use-package ggtags
+    :hook
+    (c-mode . ggtags-mode)
+    (c++-mode . ggtags-mode))
+
+  (use-package irony
+    :hook
+    (c-mode . irony-mode)
+    (c++-mode . irony-mode)
+    (irony-mode . irony-cdb-autosetup-compile-options))
+
+  (use-package company-irony
+    :after
+    (irony company)
+    :config
+    (add-to-list 'company-backends 'company-irony))
 
   (use-package company-c-headers
     :after (company)
     :config
     (add-to-list 'company-backends 'company-c-headers))
-#+END_SRC
-
-** C++
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ggtags
-    :config
-    (add-hook 'c-mode-common-hook
-              (lambda ()
-                (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-                  (ggtags-mode 1))))
-    )
 
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++14")))
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++14")))
