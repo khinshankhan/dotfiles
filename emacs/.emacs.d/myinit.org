@@ -375,7 +375,8 @@
     :bind
     (:map dashboard-mode-map
           ("n" . widget-forward)
-          ("p" . widget-backward))
+          ("p" . widget-backward)
+          ("R" . muh/reload))
     :custom
     (dashboard-banner-logo-title
      (format ""
@@ -387,6 +388,31 @@
     (dashboard-set-init-info t)
     (dashboard-center-content t)
     (dashboard-set-footer nil)
+
+    (dashboard-set-navigator t)
+    (dashboard-navigator-buttons
+     `((
+
+        (,(and (display-graphic-p)
+               (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
+         ""
+         "GH Repos"
+         (lambda (&rest _) (browse-url-generic "https://github.com/kkhan01?tab=repositories")))
+
+        (,(and (display-graphic-p)
+               (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
+         ""
+         "Update emacs"
+         (lambda (&rest _) (auto-package-update-now)))
+
+        (,(and (display-graphic-p)
+               (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
+         ""
+         "Restart emacs"
+         (lambda (&rest _) (muh/reload)))
+
+        )))
+
     :config
     (setq dashboard-items '((recents  . 5)
                             ;; (bookmarks . 5)
@@ -1043,27 +1069,27 @@
   (defun vuejs-api ()
     "Open VueJS API"
     (interactive)
-    (browse-url "https://vuejs.org/v2/api/"))
+    (browse-url-generic "https://vuejs.org/v2/api/"))
 
   (defun vuejs-guide ()
     "Open VueJS Guide"
     (interactive)
-    (browse-url "https://vuejs.org/v2/guide/"))
+    (browse-url-generic "https://vuejs.org/v2/guide/"))
 
   (defun vuejs-style-guide ()
     "Open VueJS Style Guide"
     (interactive)
-    (browse-url "https://vuejs.org/v2/style-guide/"))
+    (browse-url-generic "https://vuejs.org/v2/style-guide/"))
 
   (defun vuejs-cookbook ()
     "Open VueJS Cookbook"
     (interactive)
-    (browse-url "https://vuejs.org/v2/cookbook/"))
+    (browse-url-generic "https://vuejs.org/v2/cookbook/"))
 
   (defun vuejs-examples ()
     "Open some VueJS Examples"
     (interactive)
-    (browse-url "https://vuejs.org/v2/examples/"))
+    (browse-url-generic "https://vuejs.org/v2/examples/"))
 #+END_SRC
 
 * Text Editing
@@ -1234,8 +1260,8 @@
 #+BEGIN_SRC emacs-lisp
   ;;(setq-default browse-url-browser-function 'browse-url-chromium)
   (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-args '("-pirvate-window")
-        browse-url-generic-program "firefox")
+        browse-url-generic-args '("--incognito")
+        browse-url-generic-program "chromium")
 
   (defun browse-lucky (start end)
     (interactive "r")
