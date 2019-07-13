@@ -1097,6 +1097,11 @@
 
 *** Lean Prover
 
+Install lean using [[https://github.com/leanprover/lean/blob/master/doc/make/index.md][generic build instructions]] (don't worry about warnings or anything).
+Next copy the binaries (eg =lean= in =lean/bin=) to =/usr/local/bin= and copy the entire lean
+folder (repo?) to =/usr/local/lib=. Restart (terminal/ emacs)and everything should work
+fine.
+
 #+BEGIN_SRC emacs-lisp
   (use-package lean-mode
     :mode "\\.lean\\'"
