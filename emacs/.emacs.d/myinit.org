@@ -1159,6 +1159,14 @@ fine.
   (global-subword-mode t)
   (delete-selection-mode t)
   (add-hook 'before-save-hook #'delete-trailing-whitespace)
+
+  (use-package highlight-indent-guides
+    :hook
+    (prog-mode . highlight-indent-guides-mode)
+    :custom
+    (highlight-indent-guides-method 'character)
+    (highlight-indent-guides-responsive 'stack)
+    (highlight-indent-guides-character ?\⧞))
 #+END_SRC
 
 * Language Augmentation
