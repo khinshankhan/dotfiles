@@ -1293,6 +1293,8 @@ fine.
 #+BEGIN_SRC emacs-lisp :tangle off
   (use-package elcord
     :if (executable-find "discord")
+    :custom
+    (elcord-use-major-mode-as-main-icon t)
     :config
     (elcord-mode))
 #+END_SRC
