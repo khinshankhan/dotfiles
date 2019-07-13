@@ -67,12 +67,16 @@
 
 * Personal Variables
 
+Me, myself, and I.
+
 #+BEGIN_SRC emacs-lisp
   (setq-default user-full-name "Khinshan Khan"
                 user-mail-address "khinshan.khan@gmail.com")
 #+END_SRC
 
 * Garbage Collection
+
+Dangerous stuff, tangled off because it's kind of unpredictable.
 
 #+BEGIN_SRC emacs-lisp :tangle off
   (eval-and-compile
@@ -90,8 +94,9 @@
 
 * Encoding
 
+Begone utf 16!
+
 #+BEGIN_SRC emacs-lisp
-  ;; begone utf 16
   (setq-default locale-coding-system 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
@@ -101,6 +106,8 @@
 
 * Backups
 
+I don't particularly need backup files, and =~= + =#= files are a pain to clean anyways.
+
 #+BEGIN_SRC emacs-lisp
   (setq-default backup-inhibited t
                 auto-save-default nil
@@ -109,6 +116,9 @@
 #+END_SRC
 
 * Basic package
+
+Set up all the archives to pull from and use-package config. The =try= packages lets you try packages before
+installing them.
 
 #+BEGIN_SRC emacs-lisp
   (require 'package)
@@ -123,7 +133,6 @@
                '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
 
-  ;; Bootstrap use-package
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package))
@@ -139,15 +148,14 @@
 
   (setq-default byte-compile-warnings nil)
 
-  ;; keyword, allows you to ensure system binaries exist alongside your package declarations
-  ;; https://github.com/jwiegley/use-package#use-package-ensure-system-package
   (use-package use-package-ensure-system-package)
 
-  ;; lets you try packages before installing them
   (use-package try)
 #+END_SRC
 
 * Functions
+
+Personal functions, some packages are reliant on these, so it goes on top.
 
 ** Definitions
 
@@ -287,6 +295,8 @@
 
 * Custom Variables
 
+Variables based on environment, some packages are reliant on these, so it goes on top.
+
 #+BEGIN_SRC emacs-lisp
   (defconst custom-file "/dev/zero")
   (defconst muh/config-path (concat user-emacs-directory "config.org"))
@@ -303,6 +313,8 @@
 #+END_SRC
 
 * GUI
+
+You need to experience keyboard to realize keyboard master race. (fn + f10 if need be for options though)
 
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-message t)
@@ -1250,6 +1262,8 @@ fine.
 
 * Bindings
 
+Personal bindings, on bottom since some are reliant on packages. I need to choose between qwerty and colemak.
+
 #+BEGIN_SRC emacs-lisp
   ;; good for dvorak and colemak
   ;;(keyboard-translate ?\C-t ?\C-x)
@@ -1281,6 +1295,8 @@ fine.
 
 ** Which-key
 
+Display available keybindings in a popup.
+
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
     :config
@@ -1294,8 +1310,9 @@ fine.
 
 ** Browser
 
+Control how links and browser-url-generic function works (also for links).
+
 #+BEGIN_SRC emacs-lisp
-  ;;(setq-default browse-url-browser-function 'browse-url-chromium)
   (setq browse-url-browser-function 'browse-url-generic
         browse-url-generic-args '("--incognito")
         browse-url-generic-program "chromium")
@@ -1309,6 +1326,8 @@ fine.
 
 ** Discord
 
+Discord rich presence based on emacs + file editing. (tangled off so I don't get distracted)
+
 #+BEGIN_SRC emacs-lisp :tangle off
   (use-package elcord
     :if (executable-find "discord")
@@ -1319,6 +1338,9 @@ fine.
 #+END_SRC
 
 ** Wakatime
+
+Moniter my  coding activity.
+
 #+BEGIN_SRC emacs-lisp
   (use-package wakatime-mode
     :custom
