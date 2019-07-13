@@ -47,6 +47,7 @@
   - [[#ocaml][OCaml]]
   - [[#python][Python]]
   - [[#juypter][Juypter]]
+  - [[#latex][LaTeX]]
   - [[#pkgbuilds][pkgbuilds]]
   - [[#r--julia][R & Julia]]
   - [[#web-dev][Web Dev]]
@@ -1052,6 +1053,15 @@
     :custom
     (ein:completion-backend 'ein:use-company-jedi-backends)
     (ein:use-auto-complete-superpack t))
+#+END_SRC
+
+** LaTeX
+
+#+BEGIN_SRC emacs-lisp
+  (use-package auctex)
+  (use-package auctex-latexmk
+    :init
+    (auctex-latexmk-setup))
 #+END_SRC
 
 ** pkgbuilds
