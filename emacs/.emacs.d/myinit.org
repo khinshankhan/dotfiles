@@ -47,6 +47,7 @@
   - [[#ocaml][OCaml]]
   - [[#python][Python]]
   - [[#juypter][Juypter]]
+  - [[#pkgbuilds][pkgbuilds]]
   - [[#r--julia][R & Julia]]
   - [[#web-dev][Web Dev]]
   - [[#theorem-provers][Theorem Provers]]
@@ -1051,6 +1052,14 @@
     :custom
     (ein:completion-backend 'ein:use-company-jedi-backends)
     (ein:use-auto-complete-superpack t))
+#+END_SRC
+
+** pkgbuilds
+
+#+BEGIN_SRC emacs-lisp
+  (use-package pkgbuild-mode
+    :mode
+    (("/PKGBUILD/" . pkgbuild-mode)))
 #+END_SRC
 
 ** R & Julia
