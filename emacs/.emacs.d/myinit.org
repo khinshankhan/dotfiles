@@ -23,27 +23,14 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#package-archives][Package Archives]]
   - [[#package-installers][Package Installers]]
 - [[#start-up][Start Up]]
-- [[#encoding][Encoding]]
-- [[#backups][Backups]]
-- [[#functions][Functions]]
-  - [[#definitions][Definitions]]
-- [[#custom-variables][Custom Variables]]
-- [[#system][System]]
-- [[#gui][GUI]]
-- [[#appearance][Appearance]]
-  - [[#beacon][Beacon]]
-  - [[#cursor][Cursor]]
-  - [[#font][Font]]
-  - [[#theme][Theme]]
-  - [[#modeline][Modeline]]
-- [[#interface][Interface]]
-  - [[#splash-screen][Splash Screen]]
-  - [[#scratch-buffer][Scratch buffer]]
-  - [[#lines][Lines]]
-  - [[#line-numbers][Line Numbers]]
-  - [[#scrolling][Scrolling]]
-  - [[#confirmation-messages][Confirmation messages]]
-  - [[#bells][Bells]]
+  - [[#encoding][Encoding]]
+  - [[#backups][Backups]]
+  - [[#functions][Functions]]
+  - [[#custom-variables][Custom Variables]]
+  - [[#system][System]]
+  - [[#gui][GUI]]
+  - [[#appearance][Appearance]]
+  - [[#interface][Interface]]
 - [[#completion-frontend][Completion Frontend]]
   - [[#all-the-icons--dired][All the Icons & Dired]]
 - [[#org][Org]]
@@ -130,8 +117,8 @@ Set up all the archive sources to pull from packages from.
 
 ** Package Installers
 
-=use-package= configuration. Helps clean up rest of the configuration and speeds up startup
-by isolating packages. The =try= package lets you try packages before installing them.
+[[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
+by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
 
 #+BEGIN_SRC emacs-lisp
   (unless (package-installed-p 'use-package)
@@ -156,7 +143,7 @@ by isolating packages. The =try= package lets you try packages before installing
 
 * Start Up
 
-* Encoding
+** Encoding
 
 Begone utf 16!
 
@@ -168,7 +155,7 @@ Begone utf 16!
   (prefer-coding-system 'utf-8)
 #+END_SRC
 
-* Backups
+** Backups
 
 I don't particularly need backup files, and =~= + =#= files are a pain to clean anyways.
 
@@ -179,11 +166,11 @@ I don't particularly need backup files, and =~= + =#= files are a pain to clean 
                 make-backup-files nil)
 #+END_SRC
 
-* Functions
+** Functions
 
 Personal functions, some packages are reliant on these, so it goes on top.
 
-** Definitions
+*** Definitions
 
 #+BEGIN_SRC emacs-lisp
   (defun muh/do-nothing ()
@@ -319,7 +306,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
     (if (eval (not predicate)) `(muh/ensure-dispatch ,then) (or `(muh/ensure-dispatch ,else) ''ls)))
 #+END_SRC
 
-* Custom Variables
+** Custom Variables
 
 Variables based on environment, some packages are reliant on these, so it goes on top.
 
@@ -331,14 +318,14 @@ Variables based on environment, some packages are reliant on these, so it goes o
   (defconst muh/cl-executable (muh/find-executables ("sbcl" "lisp" "ccl")))
 #+END_SRC
 
-* System
+** System
 
 #+BEGIN_SRC emacs-lisp
   (when (>= emacs-major-version 26)
     (setq-default confirm-kill-processes nil))
 #+END_SRC
 
-* GUI
+** GUI
 
 You need to experience keyboard to realize keyboard master race. (fn + f10 if need be for options though)
 
@@ -349,9 +336,9 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (tool-bar-mode 0)
 #+END_SRC
 
-* Appearance
+** Appearance
 
-** Beacon
+*** Beacon
 
 #+BEGIN_SRC emacs-lisp
   (use-package beacon
@@ -361,14 +348,14 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (beacon-mode))
 #+END_SRC
 
-** Cursor
+*** Cursor
 
 #+BEGIN_SRC emacs-lisp
   (setq-default cursor-type '(hbar . 1))
   (setq-default cursor-in-non-selected-windows nil)
 #+END_SRC
 
-** Font
+*** Font
 
 #+BEGIN_SRC emacs-lisp
   (when (member "Iosevka" (font-family-list))
@@ -379,7 +366,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                         :width 'normal))
 #+END_SRC
 
-** Theme
+*** Theme
 
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes
@@ -388,7 +375,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (load-theme 'doom-nord t))
 #+END_SRC
 
-** Modeline
+*** Modeline
 
 #+BEGIN_SRC emacs-lisp
   (line-number-mode t)
@@ -404,9 +391,9 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (doom-modeline-mode))
 #+END_SRC
 
-* Interface
+** Interface
 
-** Splash Screen
+*** Splash Screen
 
 #+BEGIN_SRC emacs-lisp
   (use-package page-break-lines)
@@ -465,7 +452,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (dashboard-setup-startup-hook))
 #+END_SRC
 
-** Scratch buffer
+*** Scratch buffer
 
 #+BEGIN_SRC emacs-lisp
   ;;(setq-default initial-major-mode 'python-mode)
@@ -473,7 +460,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (setq initial-scratch-message nil)
 #+END_SRC
 
-** Lines
+*** Lines
 
 #+BEGIN_SRC emacs-lisp
   (setq-default transient-mark-mode t
@@ -484,7 +471,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (global-hl-line-mode 1)
 #+END_SRC
 
-** Line Numbers
+*** Line Numbers
 
 #+BEGIN_SRC emacs-lisp
   (use-package linum
@@ -509,7 +496,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (display-line-numbers-widen t))
 #+END_SRC
 
-** Scrolling
+*** Scrolling
 
 #+BEGIN_SRC emacs-lisp
   (setq-default scroll-margin 0
@@ -518,14 +505,14 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                 mouse-wheel-progressive-speed nil)
 #+END_SRC
 
-** Confirmation messages
+*** Confirmation messages
 
 #+BEGIN_SRC emacs-lisp
   (defalias 'yes-or-no-p (lambda (&rest _) t))
   (setq-default confirm-kill-emacs nil)
 #+END_SRC
 
-** Bells
+*** Bells
 
 #+BEGIN_SRC emacs-lisp
   (setq-default visible-bell nil
