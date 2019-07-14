@@ -27,12 +27,11 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#backups][Backups]]
   - [[#functions][Functions]]
   - [[#custom-variables][Custom Variables]]
-  - [[#system][System]]
+  - [[#version-specific][Version Specific]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
   - [[#interface][Interface]]
-- [[#completion-frontend][Completion Frontend]]
-  - [[#all-the-icons--dired][All the Icons & Dired]]
+  - [[#completion-frontend][Completion Frontend]]
 - [[#org][Org]]
 - [[#programming][Programming]]
   - [[#general][General]]
@@ -318,7 +317,7 @@ Variables based on environment, some packages are reliant on these, so it goes o
   (defconst muh/cl-executable (muh/find-executables ("sbcl" "lisp" "ccl")))
 #+END_SRC
 
-** System
+** Version Specific
 
 #+BEGIN_SRC emacs-lisp
   (when (>= emacs-major-version 26)
@@ -331,9 +330,11 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-message t)
-  (menu-bar-mode 0)
-  (toggle-scroll-bar 0)
-  (tool-bar-mode 0)
+
+  (when (display-graphic-p)
+    (menu-bar-mode 0)
+    (toggle-scroll-bar 0)
+    (tool-bar-mode 0))
 #+END_SRC
 
 ** Appearance
@@ -370,23 +371,29 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes
+    :if (display-graphic-p)
+    :custom
+    (doom-vibrant-brighter-comments t)
+    (doom-vibrant-brighter-modeline t)
     :config
     (doom-themes-org-config)
     (load-theme 'doom-nord t))
 #+END_SRC
 
-*** Modeline
+*** Mode-Line
 
 #+BEGIN_SRC emacs-lisp
   (line-number-mode t)
   (column-number-mode t)
 
   (use-package doom-modeline
+    :if (display-graphic-p)
     :custom
     (doom-modeline-python-executable muh/python-executable)
     (doom-modeline-icon t)
     (doom-modeline-major-mode-icon t)
     (doom-modeline-version t)
+    (doom-modeline-buffer-file-name-style 'file-name)
     :config
     (doom-modeline-mode))
 #+END_SRC
@@ -520,7 +527,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                 ring-bell-function 'ignore)
 #+END_SRC
 
-* Completion Frontend
+** Completion Frontend
 
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
@@ -558,14 +565,14 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     ("C-s" . swiper-isearch))
 #+END_SRC
 
-** All the Icons & Dired
+*** All the Icons & Dired
+
+[[https://github.com/domtronn/all-the-icons.el][all-the-icons]]
 
 #+BEGIN_SRC emacs-lisp
-  ;; https://github.com/domtronn/all-the-icons.el
   (use-package all-the-icons
     :defer 0.5
     :config
-    ;; remember to refresh ocassionally, not sure if i want this to stay
     (if (eq (random 51) 1)
         (all-the-icons-install-fonts)))
 
