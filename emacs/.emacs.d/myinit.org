@@ -18,10 +18,13 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 * Table of Contents                                                     :TOC:
 - [[#preface][Preface]]
 - [[#personal-variables][Personal Variables]]
-- [[#garbage-collection][Garbage Collection]]
+- [[#initialization][Initialization]]
+  - [[#garbage-collection][Garbage Collection]]
+  - [[#package-archives][Package Archives]]
+  - [[#package-installers][Package Installers]]
+- [[#start-up][Start Up]]
 - [[#encoding][Encoding]]
 - [[#backups][Backups]]
-- [[#basic-package][Basic package]]
 - [[#functions][Functions]]
   - [[#definitions][Definitions]]
 - [[#custom-variables][Custom Variables]]
@@ -87,7 +90,9 @@ Me, myself, and I.
                 user-mail-address "khinshan.khan@gmail.com")
 #+END_SRC
 
-* Garbage Collection
+* Initialization
+
+** Garbage Collection
 
 Dangerous stuff, tangled off because it's kind of unpredictable.
 
@@ -104,6 +109,52 @@ Dangerous stuff, tangled off because it's kind of unpredictable.
 
     (add-hook 'emacs-startup-hook 'srs|revert-gc))
 #+END_SRC
+
+** Package Archives
+
+Set up all the archive sources to pull from packages from.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+  ;;(setq package-enable-at-startup nil)
+  (add-to-list 'package-archives
+               '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives
+               '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  (add-to-list 'package-archives
+               '("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/") t)
+  (add-to-list 'package-archives
+               '("org" . "https://orgmode.org/elpa/") t)
+  (package-initialize)
+#+END_SRC
+
+** Package Installers
+
+=use-package= configuration. Helps clean up rest of the configuration and speeds up startup
+by isolating packages. The =try= package lets you try packages before installing them.
+
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
+  (eval-when-compile
+    (require 'use-package))
+
+  (use-package use-package
+    :config
+    (setq-default use-package-always-defer nil
+                  use-package-always-ensure t
+                  use-package-always-demand t))
+
+  (setq-default byte-compile-warnings nil)
+
+  (use-package use-package-ensure-system-package)
+
+  (use-package try)
+#+END_SRC
+
+* Start Up
 
 * Encoding
 
@@ -126,44 +177,6 @@ I don't particularly need backup files, and =~= + =#= files are a pain to clean 
                 auto-save-default nil
                 create-lockfiles nil
                 make-backup-files nil)
-#+END_SRC
-
-* Basic package
-
-Set up all the archives to pull from and use-package config. The =try= packages lets you try packages before
-installing them.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'package)
-  ;;(setq package-enable-at-startup nil)
-  (add-to-list 'package-archives
-               '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives
-               '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (add-to-list 'package-archives
-               '("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/") t)
-  (add-to-list 'package-archives
-               '("org" . "https://orgmode.org/elpa/") t)
-  (package-initialize)
-
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-
-  (eval-when-compile
-    (require 'use-package))
-
-  (use-package use-package
-    :config
-    (setq-default use-package-always-defer nil
-                  use-package-always-ensure t
-                  use-package-always-demand t))
-
-  (setq-default byte-compile-warnings nil)
-
-  (use-package use-package-ensure-system-package)
-
-  (use-package try)
 #+END_SRC
 
 * Functions
