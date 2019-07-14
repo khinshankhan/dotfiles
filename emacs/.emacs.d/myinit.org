@@ -2,7 +2,21 @@
 #+AUTHOR: Khinshan Khan
 #+STARTIP: overview
 
+* Preface
+
+After using emacs for a while (since my first programming class in high school), I decided to create my own
+configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
+runs, but Windows has proven to be sightly difficult with the package manager.
+
+For more informations about myself, you can visit my website.
+
+To manage package configurations, I use the use-package package from John Wiegley, that I recommend.
+
+This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
+from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
+
 * Table of Contents                                                     :TOC:
+- [[#preface][Preface]]
 - [[#personal-variables][Personal Variables]]
 - [[#garbage-collection][Garbage Collection]]
 - [[#encoding][Encoding]]
