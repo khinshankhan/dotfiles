@@ -1450,7 +1450,7 @@ Discord rich presence based on emacs + file editing. (tangled off so I don't get
 #+BEGIN_SRC emacs-lisp
   (use-package elpa-mirror
     :custom
-    (elpamr-default-output-directory "~/.emacs.d/emacs-package-mirrors"))
+    (elpamr-default-output-directory "~/.emacs.d/emacs-packages-mirrors"))
 #+END_SRC
 
 ** Wakatime
