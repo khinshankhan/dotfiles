@@ -32,12 +32,12 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#appearance][Appearance]]
   - [[#interface][Interface]]
   - [[#completion-frontend][Completion Frontend]]
-- [[#org][Org]]
 - [[#programming][Programming]]
   - [[#general][General]]
   - [[#git][Git]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
+  - [[#lsp][LSP]]
   - [[#misc-helpers][Misc Helpers]]
   - [[#tramp][TRAMP]]
 - [[#languages][Languages]]
@@ -54,6 +54,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#r--julia][R & Julia]]
   - [[#web-dev][Web Dev]]
   - [[#theorem-provers][Theorem Provers]]
+- [[#org][Org]]
 - [[#text-editing][Text Editing]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#expand-region][Expand Region]]
@@ -110,9 +111,13 @@ Set up all the archive sources to pull from packages from.
   (add-to-list 'package-archives
                '("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/") t)
   (add-to-list 'package-archives
+               '("gnu" . "http://elpa.gnu.org/packages/") t)
+  (add-to-list 'package-archives
                '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
 #+END_SRC
+
+#+RESULTS:
 
 ** Package Installers
 
@@ -616,67 +621,6 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (setq dired-recursive-copies 'always)
 #+END_SRC
 
-* Org
-
-#+BEGIN_SRC emacs-lisp
-  (use-package org
-    :mode
-    ("\\.\\(org\\|ORG\\)\\'" . org-mode)
-    :ensure nil
-    :hook
-    (org-babel-after-execute . org-redisplay-inline-images)
-    :custom
-    (org-file-apps
-     '((auto-mode . emacs)
-       ("\\.x?html?\\'" . "/usr/bin/firefox -private-window %s")
-       ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
-
-    (org-directory "~/.orgfiles")
-    (org-default-notes-file (concat org-directory "/notes.org"))
-    (org-export-html-postamble nil)
-
-    (org-image-actual-width 480)
-    (org-src-fontify-natively t)
-    (org-src-tab-acts-natively t)
-    (org-pretty-entities t)
-    (org-hide-emphasis-markers t)
-    (org-startup-with-inline-images t)
-    (org-babel-python-command "ipython3 -i --simple-prompt")
-    (org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
-    :config
-    (use-package ob-ipython)
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((emacs-lisp . t)
-       (gnuplot . t)
-       (js . t)
-       (latex . t )
-       (ocaml . t)
-       (org . t)
-       (python . t)
-       (shell . t)
-       (R . t)
-       )))
-
-  (use-package toc-org
-    :after org
-    :hook
-    (org-mode . toc-org-enable))
-
-  (use-package org-bullets
-    :hook
-    (org-mode . org-bullets-mode))
-
-  (use-package px)
-
-  (use-package htmlize)
-
-  (use-package ox-gfm
-    :after (org))
-
-  (use-package ox-pandoc)
-#+END_SRC
-
 * Programming
 
 ** General
@@ -756,7 +700,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     :bind
     ("C-/" . company-complete)
     (:map company-active-map
-          ("C-/" . company-other-backend)
+          ("M-/" . company-other-backend)
           ("M-n" . nil)
           ("M-p" . nil)
           ("C-n" . company-select-next)
@@ -849,6 +793,53 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     :config (flycheck-clang-analyzer-setup))
 
   (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+#+END_SRC
+
+** LSP
+
+lsp-mode has much potential, might use it for the hard to configure stuff, would prefer if it was slightly better
+though.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-lsp
+    :after (company lsp-mode)
+    :bind
+    (:map lsp-mode-map
+          ("C-/" . company-lsp)
+          ("C-c C-j" . lsp-ui-imenu)
+          ("C-c d" . lsp-find-definition)
+          ("C-c e" . lsp-rename)
+          ("C-c f" . lsp-format-buffer)
+          ("C-c r" . lsp-ui-peek-find-references)
+          ("C-c t" . lsp-find-type-definition))
+    :custom
+    (company-lsp-async t)
+    (company-lsp-enable-snippets nil)
+    (company-lsp-enable-recompletion t)
+    :config
+    (add-to-list 'company-backends #'company-lsp))
+
+  (use-package lsp-mode
+    :custom
+    (lsp-auto-guess-root t)
+    (lsp-before-save-edits t)
+    (lsp-enable-indentation t)
+    (lsp-auto-configure nil)
+    (lsp-enable-snippet nil)
+    (lsp-prefer-flymake nil)
+    :config
+    (require 'lsp-clients))
+
+  (use-package lsp-ui
+    :custom (lsp-ui-flycheck-enable t))
+
+  (use-package dap-mode
+    :after (lsp-mode)
+    :hook lsp-mode
+    :config
+    (dap-mode t)
+    (dap-ui-mode t)
+    (require 'dap-lldb))
 #+END_SRC
 
 ** Misc Helpers
@@ -985,8 +976,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
   (use-package merlin
     :if (file-exists-p "~/.emacs.d/opam-user-setup.el")
-    :after
-    (opam tuareg)
+    :after (opam tuareg)
     :hook
     (tuareg-mode . merlin-mode)
     :bind
@@ -1181,6 +1171,67 @@ fine.
     :bind (:map lean-mode-map
                 ("S-SPC" . company-complete))
     :init (setq lean-rootdir "/usr/local/"))
+#+END_SRC
+
+* Org
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :mode
+    ("\\.\\(org\\|ORG\\)\\'" . org-mode)
+    :ensure nil
+    :hook
+    (org-babel-after-execute . org-redisplay-inline-images)
+    :custom
+    (org-file-apps
+     '((auto-mode . emacs)
+       ("\\.x?html?\\'" . "/usr/bin/firefox -private-window %s")
+       ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
+
+    (org-directory "~/.orgfiles")
+    (org-default-notes-file (concat org-directory "/notes.org"))
+    (org-export-html-postamble nil)
+
+    (org-image-actual-width 480)
+    (org-src-fontify-natively t)
+    (org-src-tab-acts-natively t)
+    (org-pretty-entities t)
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-babel-python-command "ipython3 -i --simple-prompt")
+    (org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+    :config
+    (use-package ob-ipython)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((emacs-lisp . t)
+       (gnuplot . t)
+       (js . t)
+       (latex . t )
+       (ocaml . t)
+       (org . t)
+       (python . t)
+       (shell . t)
+       (R . t)
+       )))
+
+  (use-package toc-org
+    :after org
+    :hook
+    (org-mode . toc-org-enable))
+
+  (use-package org-bullets
+    :hook
+    (org-mode . org-bullets-mode))
+
+  (use-package px)
+
+  (use-package htmlize)
+
+  (use-package ox-gfm
+    :after (org))
+
+  (use-package ox-pandoc)
 #+END_SRC
 
 * Text Editing
