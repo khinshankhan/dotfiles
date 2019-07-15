@@ -1214,6 +1214,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 
 #+BEGIN_SRC emacs-lisp
   (defun setup-tide-mode ()
+    "Setup tide for javascript."
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
@@ -1240,7 +1241,9 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
   (use-package eslint-fix)
 
   (use-package js2-mode
-    :mode "\\.js\\'"
+    :mode
+    ("\\.js\\'" . js2-mode)
+    :interpreter ("node" . js2-mode)
     :hook (js2-mode . js2-imenu-extras-mode)
     :init
     (setq js2-strict-missing-semi-warning t
@@ -1259,7 +1262,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :init
     (setq-default rjsx-basic-offset 2)
     (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__d\
-    irname" "console" "JSON")))
+      irname" "console" "JSON")))
 #+END_SRC
 
 *** React
