@@ -74,8 +74,11 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 Me, myself, and I.
 
 #+BEGIN_SRC emacs-lisp
-  (when (file-exists-p (concat user-emacs-directory "personal/settings.el"))
-    (load-file (concat user-emacs-directory "personal/settings.el")))
+  (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
+  (defconst shan/settings-exist (file-exists-p shan/settings-path))
+
+  (when shan/settings-exist
+    (load-file shan/settings-path))
 #+END_SRC
 
 * Initialization
@@ -193,42 +196,42 @@ Personal functions, some packages are reliant on these, so it goes on top.
 *** Definitions
 
 #+BEGIN_SRC emacs-lisp
-  (defun muh/do-nothing ()
+  (defun shan/do-nothing ()
     "Do nothing."
     (interactive)
     nil)
 
-  (defun muh/before (to-call-before f)
+  (defun shan/before (to-call-before f)
     "Run TO-CALL-BEFORE then run F."
     (funcall to-call-before)
     (funcall f))
 
-  (defun muh/after (to-call-after f)
+  (defun shan/after (to-call-after f)
     "Run F then run TO-CALL-AFTER."
     (funcall f)
     (funcall to-call-after))
 
-  (defun muh/split-window-right ()
+  (defun shan/split-window-right ()
     "Create a new window split to the right and balance the windows."
     (interactive)
-    (muh/after #'balance-windows #'split-window-right))
+    (shan/after #'balance-windows #'split-window-right))
 
-  (defun muh/split-window-below ()
+  (defun shan/split-window-below ()
     "Create a new window split below and balance the windows."
     (interactive)
-    (muh/after #'balance-windows #'split-window-below))
+    (shan/after #'balance-windows #'split-window-below))
 
-  (defun muh/delete-window ()
+  (defun shan/delete-window ()
     "Delete the current window and balance the windows."
     (interactive)
-    (muh/after #'balance-windows #'delete-window))
+    (shan/after #'balance-windows #'delete-window))
 
-  (defun muh/delete-buffer ()
+  (defun shan/delete-buffer ()
     "Delete the current buffer and go to next most recent buffer."
     (interactive)
     (ido-kill-buffer))
 
-  (defun muh/fill-or-unfill ()
+  (defun shan/fill-or-unfill ()
     "Fill or unfill based on the previous command."
     (interactive)
     (let ((fill-column
@@ -238,66 +241,66 @@ Personal functions, some packages are reliant on these, so it goes on top.
              fill-column)))
       (call-interactively #'fill-paragraph)))
 
-  (defun muh/refresh-buffer ()
+  (defun shan/refresh-buffer ()
     "Refresh the current buffer."
     (interactive)
     (revert-buffer :ignore-auto :noconfirm))
 
-  (defun muh/reload ()
+  (defun shan/reload ()
     "Reload the configuration file."
     (interactive)
     (load-file (concat user-emacs-directory "init.el")))
 
-  (defun muh/edit-config ()
+  (defun shan/edit-config ()
     "Reload the configuration file."
     (interactive)
     (find-file
      (concat user-emacs-directory "myinit.org")))
 
-  (defun muh/sudo-edit (file-name)
+  (defun shan/sudo-edit (file-name)
     "Like find file, but opens the file as root."
     (interactive "FSudo Find File: ")
     (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
       (find-file tramp-file-name)))
 
-  (defun muh/toggle-mark ()
+  (defun shan/toggle-mark ()
     "Pop a mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
     (if (region-active-p)
         (deactivate-mark)
       (push-mark nil nil t)))
 
-  (defun muh/toggle-mark-rectangle ()
+  (defun shan/toggle-mark-rectangle ()
     "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
     (interactive)
     (if (region-active-p)
         (deactivate-mark)
       (rectangle-mark-mode)))
 
-  (defun muh/first-occurence (f list)
+  (defun shan/first-occurence (f list)
     "Return the first occurence in LIST which, when applied to PREDICATE returns t."
     (let ((head (car list))
           (tail (cdr list)))
       (if (or (not head) (funcall f head))
           head
-        (muh/first-occurence f tail))))
+        (shan/first-occurence f tail))))
 
-  (defun muh/last-occurence (predicate list)
+  (defun shan/last-occurence (predicate list)
     "Return the last occurence in LIST which, when applied to PREDICATE returns t."
-    (muh/first-occurence predicate (reverse list)))
+    (shan/first-occurence predicate (reverse list)))
 
-  (defmacro muh/find-executables (list)
+  (defmacro shan/find-executables (list)
     "Return the first occurence in LIST whose value corresponds to an executable."
-    (muh/first-occurence #'executable-find list))
+    (shan/first-occurence #'executable-find list))
 
-  (defun muh/save-proper ()
+  (defun shan/save-proper ()
     "Save the current buffer and remove trailing whitespace if called interactively."
     (interactive)
     (remove-hook 'before-save-hook #'delete-trailing-whitespace)
     (save-buffer)
     (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
-  (defun muh/ecmd-output (cmd &optional arg)
+  (defun shan/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
                     Arguments are optional, should the command require them. It should be noted that
                     if the command returns a string with bad input, this function still returns t."
@@ -308,22 +311,22 @@ Personal functions, some packages are reliant on these, so it goes on top.
                (funcall cmd)) 0))))
 
   ;; this is going to get abused, since indices should evaluate to t
-  (defun muh/sso(cmd arg)
+  (defun shan/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
                   it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   ;; macros to potentially give use-package more control to the user
-  (defmacro muh/ensure-dispatch (expr)
+  (defmacro shan/ensure-dispatch (expr)
     (if (stringp expr)
         `'(t . ,expr)
       `',expr))
 
-  (defmacro muh/if (predicate then &optional else)
-    (if (eval predicate) `(muh/ensure-dispatch ,then) (or `(muh/ensure-dispatch ,else) ''ls)))
+  (defmacro shan/if (predicate then &optional else)
+    (if (eval predicate) `(shan/ensure-dispatch ,then) (or `(shan/ensure-dispatch ,else) ''ls)))
 
-  (defmacro muh/unless (predicate then &optional else)
-    (if (eval (not predicate)) `(muh/ensure-dispatch ,then) (or `(muh/ensure-dispatch ,else) ''ls)))
+  (defmacro shan/unless (predicate then &optional else)
+    (if (eval (not predicate)) `(shan/ensure-dispatch ,then) (or `(shan/ensure-dispatch ,else) ''ls)))
 #+END_SRC
 
 ** Custom Variables
@@ -332,10 +335,10 @@ Variables based on environment, some packages are reliant on these, so it goes o
 
 #+BEGIN_SRC emacs-lisp
   (defconst custom-file "/dev/zero")
-  (defconst muh/config-path (concat user-emacs-directory "config.org"))
-  (defconst muh/python-executable "python3")
-  (defconst muh/ipython-executable "ipython3")
-  (defconst muh/cl-executable (muh/find-executables ("sbcl" "lisp" "ccl")))
+  (defconst shan/config-path (concat user-emacs-directory "config.org"))
+  (defconst shan/python-executable "python3")
+  (defconst shan/ipython-executable "ipython3")
+  (defconst shan/cl-executable (shan/find-executables ("sbcl" "lisp" "ccl")))
 #+END_SRC
 
 ** Version Specific
@@ -410,7 +413,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (use-package doom-modeline
     :if (display-graphic-p)
     :custom
-    (doom-modeline-python-executable muh/python-executable)
+    (doom-modeline-python-executable shan/python-executable)
     (doom-modeline-icon t)
     (doom-modeline-major-mode-icon t)
     (doom-modeline-version t)
@@ -432,7 +435,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (:map dashboard-mode-map
           ("n" . widget-forward)
           ("p" . widget-backward)
-          ("R" . muh/reload))
+          ("R" . shan/reload))
     :custom
     (dashboard-banner-logo-title
      (format ""
@@ -465,7 +468,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
          ""
          "Restart emacs"
-         (lambda (&rest _) (muh/reload)))
+         (lambda (&rest _) (shan/reload)))
 
         )))
 
@@ -565,11 +568,11 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     :bind
     ([switch-to-buffer] . ivy-switch-buffer)
     (:map ivy-minibuffer-map
-          ([remap xref-find-definitions] . muh/do-nothing)
-          ([remap xref-find-definitions-other-frame] . muh/do-nothing)
-          ([remap xref-find-definitions-other-window] . muh/do-nothing)
-          ([remap xref-find-references] . muh/do-nothing)
-          ([remap xref-find-apropos] . muh/do-nothing)
+          ([remap xref-find-definitions] . shan/do-nothing)
+          ([remap xref-find-definitions-other-frame] . shan/do-nothing)
+          ([remap xref-find-definitions-other-window] . shan/do-nothing)
+          ([remap xref-find-references] . shan/do-nothing)
+          ([remap xref-find-apropos] . shan/do-nothing)
           ("<return>" . ivy-alt-done))
     :custom
     (ivy-use-virtual-buffers t)
@@ -1023,7 +1026,7 @@ though.
   (use-package utop
     :after (opam)
     :preface
-    (defun muh/utop-eval-phrase ()
+    (defun shan/utop-eval-phrase ()
       "Eval the surrounding Caml phrase (or block) in utop."
       (interactive)
       (utop-prepare-for-eval)
@@ -1038,7 +1041,7 @@ though.
     (tuareg-mode . utop-minor-mode)
     :bind
     (:map tuareg-mode-map
-          ("C-c C-c" . muh/utop-eval-phrase)
+          ("C-c C-c" . shan/utop-eval-phrase)
           ("C-c C-z" . utop))
     (:map utop-mode-map
           ("C-c C-g" . nil)
@@ -1082,10 +1085,10 @@ though.
     ("\\.py[iw]?\\'" . python-mode)
     :custom
     (python-indent 4)
-    (python-shell-interpreter muh/ipython-executable)
+    (python-shell-interpreter shan/ipython-executable)
     (python-shell-interpreter-args "--simple-prompt -i")
     (python-fill-docstring-style 'pep-257)
-    (gud-pdb-command-name (concat muh/python-executable " -m pdb"))
+    (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
     (py-split-window-on-execute t))
 
   (use-package elpy
@@ -1096,7 +1099,7 @@ though.
     (:map python-mode-map
           ("C-c C-c" . elpy-shell-send-top-statement))
     :custom
-    (elpy-rpc-python-command muh/python-executable)
+    (elpy-rpc-python-command shan/python-executable)
     :config
     (delete 'elpy-module-highlight-indentation elpy-modules)
     (delete 'elpy-module-flymake elpy-modules)
@@ -1347,20 +1350,20 @@ fine.
                 (setq arg 0))
             (forward-word)))))
 
-    (defun muh/flyspell-next-word()
+    (defun shan/flyspell-next-word()
       "Jump to next miss-pelled word and pop-up correction"
       (interactive)
       (flyspell-goto-next-error)
       (flyspell-popup-correct))
-    (defun muh/flyspell-prev-word()
+    (defun shan/flyspell-prev-word()
       "Jump to prev miss-pelled word and pop-up correction"
       (interactive)
       (flyspell-goto-previous-error (char-after 1))
       (flyspell-popup-correct))
     :bind
     (:map flyspell-mode-map
-          ("C-," . muh/flyspell-next-word)
-          ("C-M-," . muh/flyspell-prev-word)))
+          ("C-," . shan/flyspell-next-word)
+          ("C-M-," . shan/flyspell-prev-word)))
 #+END_SRC
 
 * Text Navigation
@@ -1392,9 +1395,9 @@ Personal bindings, on bottom since some are reliant on packages. I need to choos
   (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
 
   (use-package bind-key)
-  (bind-key* "C-x w" 'muh/delete-window)
-  (bind-key* "C-x k" 'muh/delete-buffer)
-  (bind-key* "C-c w" 'muh/split-window-right)
+  (bind-key* "C-x w" 'shan/delete-window)
+  (bind-key* "C-x k" 'shan/delete-buffer)
+  (bind-key* "C-c w" 'shan/split-window-right)
 
   (bind-key* "C-c i" 'auto-insert)
   (bind-key* "M-/" 'hippie-expand)
@@ -1470,7 +1473,7 @@ Moniter my  coding activity.
 
 #+BEGIN_SRC emacs-lisp
   (use-package wakatime-mode
-    :if (file-exists-p (concat user-emacs-directory "personal/settings.el"))
+    :if shan/settings-exist
     :custom
     (wakatime-cli-path "/usr/bin/wakatime")
     :init
