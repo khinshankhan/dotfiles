@@ -1165,7 +1165,10 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js
     :hook
-    (js-mode . prettier-js-mode))
+    (js-mode . prettier-js-mode)
+    :custom
+    (prettier-js-args '("--print-width" "100"
+                        "--trailing-comma" "all")))
 
   (use-package web-mode
     :mode
@@ -1239,14 +1242,11 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
   (use-package js2-mode
     :mode "\\.js\\'"
     :hook (js2-mode . js2-imenu-extras-mode)
-    :bind
-    (:map js-mode-map
-          ([remap evil-jump-to-tag] . js2-jump-to-definition))
     :init
-    (setq js2-strict-missing-semi-warning nil
-          js2-missing-semi-one-line-override nil
-          js2-mode-show-parse-errors nil
-          js2-mode-show-strict-warnings nil))
+    (setq js2-strict-missing-semi-warning t
+          js2-missing-semi-one-line-override t
+          js2-mode-show-parse-errors t
+          js2-mode-show-strict-warnings t))
 
   (use-package rjsx-mode
     :mode
@@ -1260,7 +1260,6 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     (setq-default rjsx-basic-offset 2)
     (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__d\
     irname" "console" "JSON")))
-
 #+END_SRC
 
 *** React
