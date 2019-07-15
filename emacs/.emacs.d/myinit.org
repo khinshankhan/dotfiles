@@ -74,8 +74,8 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 Me, myself, and I.
 
 #+BEGIN_SRC emacs-lisp
-  (setq-default user-full-name "Khinshan Khan"
-                user-mail-address "khinshan.khan@gmail.com")
+  (when (file-exists-p (concat user-emacs-directory "personal/settings.el"))
+    (load-file (concat user-emacs-directory "personal/settings.el")))
 #+END_SRC
 
 * Initialization
@@ -496,7 +496,8 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                 indent-tabs-mode nil
                 tab-width 4)
 
-  (global-hl-line-mode 1)
+  (when (display-graphic-p)
+    (global-hl-line-mode t))
 
   (use-package highlight-indent-guides
     :hook
@@ -1469,9 +1470,9 @@ Moniter my  coding activity.
 
 #+BEGIN_SRC emacs-lisp
   (use-package wakatime-mode
+    :if (file-exists-p (concat user-emacs-directory "personal/settings.el"))
     :custom
     (wakatime-cli-path "/usr/bin/wakatime")
-    (wakatime-api-key  "f7b49b71-33d4-42bc-82fc-42f775341ed0")
     :init
     (global-wakatime-mode))
 #+END_SRC
