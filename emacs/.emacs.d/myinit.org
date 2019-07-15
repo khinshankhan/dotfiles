@@ -1184,9 +1184,8 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :config
     ;; Highlight the element under the cursor.
     (setq-default web-mode-enable-current-element-highlight t)
-    (add-hook 'web-mode-hook (lambda ()
-                               (enable-minor-mode
-                                '("\\.js?\\'\\|\\.ts?\\'\\|\\.jsx?\\'\\|\\.tsx?\\'" . prettier-js-mode))))
+    (eval-after-load "web-mode"
+      '(set-face-background 'web-mode-current-element-highlight-face "LightCoral"))
     :custom
     (web-mode-attr-indent-offset 2)
     (web-mode-block-padding 2)
@@ -1203,6 +1202,26 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
      (sgml-mode . emmet-mode)
      (rjsx-mode . emmet-mode)
      (web-mode . emmet-mode)))
+#+END_SRC
+
+*** General
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tide
+    :ensure t
+    :after
+    (typescript-mode company flycheck)
+    :hook
+    ((typescript-mode . tide-setup)
+     (typescript-mode . tide-hl-identifier-mode)
+     (before-save . tide-format-before-save)))
+#+END_SRC
+
+*** React
+
+#+BEGIN_SRC emacs-lisp
+  (use-package react-snippets
+    :after yasnippet)
 #+END_SRC
 
 *** VueJS
