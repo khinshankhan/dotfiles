@@ -401,7 +401,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (doom-vibrant-brighter-modeline t)
     :config
     (doom-themes-org-config)
-    (load-theme 'doom-nord t))
+    (load-theme 'doom-nova t))
 #+END_SRC
 
 *** Mode-Line
@@ -1164,8 +1164,8 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js
-    :custom (prettier-js-args '("--print-width" "100"
-                                "--trailing-comma" "all")))
+    :hook
+    (js-mode . prettier-js-mode))
 
   (use-package web-mode
     :mode
@@ -1202,19 +1202,65 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
      (sgml-mode . emmet-mode)
      (rjsx-mode . emmet-mode)
      (web-mode . emmet-mode)))
+
+  (use-package less-css-mode
+    :mode "\\.less\\'")
 #+END_SRC
 
-*** General
+*** Tide
 
 #+BEGIN_SRC emacs-lisp
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+
   (use-package tide
-    :ensure t
     :after
     (typescript-mode company flycheck)
     :hook
     ((typescript-mode . tide-setup)
      (typescript-mode . tide-hl-identifier-mode)
-     (before-save . tide-format-before-save)))
+     (before-save . tide-format-before-save))
+    :config
+    (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
+    (flycheck-add-next-checker 'tsx-tide 'javascript-eslint))
+#+END_SRC
+
+*** JavaScript
+
+#+BEGIN_SRC emacs-lisp
+  (use-package eslint-fix)
+
+  (use-package js2-mode
+    :mode "\\.js\\'"
+    :hook (js2-mode . js2-imenu-extras-mode)
+    :bind
+    (:map js-mode-map
+          ([remap evil-jump-to-tag] . js2-jump-to-definition))
+    :init
+    (setq js2-strict-missing-semi-warning nil
+          js2-missing-semi-one-line-override nil
+          js2-mode-show-parse-errors nil
+          js2-mode-show-strict-warnings nil))
+
+  (use-package rjsx-mode
+    :mode
+    (("\\.js\\'" . rjsx-mode)
+     ("\\.jsx\\'" . rjsx-mode)
+     ("\\.json\\'" . javascript-mode))
+    :hook
+    (rjsx-mode . setup-tide-mode)
+    :magic ("/\\*\\* @jsx React\\.DOM \\*/" "^import React")
+    :init
+    (setq-default rjsx-basic-offset 2)
+    (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__d\
+    irname" "console" "JSON")))
+
 #+END_SRC
 
 *** React
