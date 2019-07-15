@@ -1160,22 +1160,49 @@ though.
 
 Learn about web-mode: http://web-mode.org/
 
+emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
+
 #+BEGIN_SRC emacs-lisp
+  (use-package prettier-js
+    :custom (prettier-js-args '("--print-width" "100"
+                                "--trailing-comma" "all")))
+
   (use-package web-mode
-    :mode (("\\.html?\\'" . web-mode)
-           ("\\.phtml\\'" . web-mode)
-           ("\\.tpl\\.php\\'" . web-mode)
-           ("\\.[agj]sp\\'" . web-mode)
-           ("\\.as[cp]x\\'" . web-mode)
-           ("\\.erb\\'" . web-mode)
-           ("\\.mustache\\'" . web-mode)
-           ("\\.djhtml\\'" . web-mode))
+    :mode
+    (("\\.html?\\'" . web-mode)
+     ("\\.phtml\\'" . web-mode)
+     ("\\.tpl\\.php\\'" . web-mode)
+     ("\\.blade\\.php\\'" . web-mode)
+     ("\\.php$" . my/php-setup)
+     ("\\.[agj]sp\\'" . web-mode)
+     ("\\.as[cp]x\\'" . web-mode)
+     ("\\.erb\\'" . web-mode)
+     ("\\.mustache\\'" . web-mode)
+     ("\\.djhtml\\'" . web-mode)
+     ("\\.jsx\\'" . web-mode)
+     ("\\.tsx\\'" . web-mode))
     :config
     ;; Highlight the element under the cursor.
     (setq-default web-mode-enable-current-element-highlight t)
-    ;; Key for renaming tags
-    (bind-keys :map web-mode-map
-               ("C-c C-r" . 'mc/mark-sgml-tag-pair)))
+    (add-hook 'web-mode-hook (lambda ()
+                               (enable-minor-mode
+                                '("\\.js?\\'\\|\\.ts?\\'\\|\\.jsx?\\'\\|\\.tsx?\\'" . prettier-js-mode))))
+    :custom
+    (web-mode-attr-indent-offset 2)
+    (web-mode-block-padding 2)
+    (web-mode-css-indent-offset 2)
+    (web-mode-code-indent-offset 2)
+    (web-mode-comment-style 2)
+    (web-mode-enable-current-element-highlight t)
+    (web-mode-markup-indent-offset 2))
+
+  (use-package emmet-mode
+    :hook
+    ((css-mode . emmet-mode)
+     (php-mode . emmet-mode)
+     (sgml-mode . emmet-mode)
+     (rjsx-mode . emmet-mode)
+     (web-mode . emmet-mode)))
 #+END_SRC
 
 *** VueJS
