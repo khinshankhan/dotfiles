@@ -52,7 +52,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#latex][LaTeX]]
   - [[#pkgbuilds][pkgbuilds]]
   - [[#r--julia][R & Julia]]
-  - [[#web-dev][Web Dev]]
+  - [[#web-development][Web Development]]
   - [[#theorem-provers][Theorem Provers]]
 - [[#org][Org]]
 - [[#text-editing][Text Editing]]
@@ -1154,7 +1154,30 @@ though.
     (require 'ess-site))
 #+END_SRC
 
-** Web Dev
+** Web Development
+
+*** HTML, CSS and friends
+
+Learn about web-mode: http://web-mode.org/
+
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :mode (("\\.html?\\'" . web-mode)
+           ("\\.phtml\\'" . web-mode)
+           ("\\.tpl\\.php\\'" . web-mode)
+           ("\\.[agj]sp\\'" . web-mode)
+           ("\\.as[cp]x\\'" . web-mode)
+           ("\\.erb\\'" . web-mode)
+           ("\\.mustache\\'" . web-mode)
+           ("\\.djhtml\\'" . web-mode))
+    :config
+    ;; Highlight the element under the cursor.
+    (setq-default web-mode-enable-current-element-highlight t)
+    ;; Key for renaming tags
+    (bind-keys :map web-mode-map
+               ("C-c C-r" . 'mc/mark-sgml-tag-pair)))
+#+END_SRC
+
 *** VueJS
 #+BEGIN_SRC emacs-lisp
   (defun vuejs-api ()
@@ -1469,7 +1492,7 @@ Discord rich presence based on emacs + file editing. (tangled off so I don't get
 
 ** Wakatime
 
-Moniter my  coding activity.
+Monitor my  coding activity.
 
 #+BEGIN_SRC emacs-lisp
   (use-package wakatime-mode
