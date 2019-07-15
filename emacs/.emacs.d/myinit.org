@@ -99,12 +99,16 @@ Dangerous stuff, tangled off because it's kind of unpredictable.
 #+END_SRC
 
 ** Package Archives
-
-Set up all the archive sources to pull from packages from.
+Special commands, should always be needed.
 
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   ;; (setq package-enable-at-startup nil)
+#+END_SRC
+
+Set up all the archive sources to pull from packages from.
+
+#+BEGIN_SRC emacs-lisp
   (add-to-list 'package-archives
                '("gnu" . "http://elpa.gnu.org/packages/") t)
   (add-to-list 'package-archives
@@ -118,7 +122,18 @@ Set up all the archive sources to pull from packages from.
   (package-initialize)
 #+END_SRC
 
-#+RESULTS:
+These are my personal archives. Tangled off since they're not needed, but in the dire
+cases when a mirror is down, first clone [[https://github.com/kkhan01/emacs-packages-mirrors][this repository]] and run the =rsync.sh= script.
+Then, remove the =:tangle off= flag here and change the links to be relative to the cloned
+repository. And maybe comment out the repositories above this as well.
+
+#+BEGIN_SRC emacs-lisp :tangle off
+  (setq package-archives
+        `(("gnu"   . ,("~/emacs-packages-mirror/gnu/"))
+          ("melpa" . ,("~/emacs-packages-mirror/melpa/"))
+          ("org"   . ,("~/emacs-packages-mirror/org/"))))
+  (package-initialize)
+#+END_SRC
 
 ** Package Installers
 
@@ -657,8 +672,6 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (use-package counsel-projectile
     :after (counsel projectile))
 #+END_SRC
-
-#+RESULTS:
 
 *** Interactive
 
@@ -1428,9 +1441,6 @@ Control how links and browser-url-generic function works (also for links).
       (browse-url-generic (concat "http://www.google.com/search?btnI&q="
                                   (url-hexify-string q)))))
 #+END_SRC
-
-#+RESULTS:
-: browse-lucky
 
 ** Discord
 
