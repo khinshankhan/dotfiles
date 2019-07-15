@@ -15,7 +15,7 @@ To manage package configurations, I use the use-package package from John Wiegle
 This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
 from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
 
-* Table of Contents                                                     :TOC:
+* Table of Contents                                                     :TOC_2:
 - [[#preface][Preface]]
 - [[#personal-variables][Personal Variables]]
 - [[#initialization][Initialization]]
@@ -66,6 +66,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
+  - [[#mirrors][Mirrors]]
   - [[#wakatime][Wakatime]]
 
 * Personal Variables
@@ -103,15 +104,15 @@ Set up all the archive sources to pull from packages from.
 
 #+BEGIN_SRC emacs-lisp
   (require 'package)
-  ;;(setq package-enable-at-startup nil)
+  ;; (setq package-enable-at-startup nil)
+  (add-to-list 'package-archives
+               '("gnu" . "http://elpa.gnu.org/packages/") t)
   (add-to-list 'package-archives
                '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives
                '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (add-to-list 'package-archives
                '("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/") t)
-  (add-to-list 'package-archives
-               '("gnu" . "http://elpa.gnu.org/packages/") t)
   (add-to-list 'package-archives
                '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
@@ -481,6 +482,15 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                 tab-width 4)
 
   (global-hl-line-mode 1)
+
+  (use-package highlight-indent-guides
+    :hook
+    (prog-mode . highlight-indent-guides-mode)
+    :custom
+    (highlight-indent-guides-method 'character)
+    (highlight-indent-guides-responsive 'stack)
+    (highlight-indent-guides-character ?\ß))
+
 #+END_SRC
 
 *** Line Numbers
@@ -1201,6 +1211,8 @@ fine.
     (org-babel-python-command "ipython3 -i --simple-prompt")
     (org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
     :config
+    (add-to-list 'org-structure-template-alist
+                 '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
     (use-package ob-ipython)
     (org-babel-do-load-languages
      'org-babel-load-languages
@@ -1241,14 +1253,6 @@ fine.
   (global-subword-mode t)
   (delete-selection-mode t)
   (add-hook 'before-save-hook #'delete-trailing-whitespace)
-
-  (use-package highlight-indent-guides
-    :hook
-    (prog-mode . highlight-indent-guides-mode)
-    :custom
-    (highlight-indent-guides-method 'character)
-    (highlight-indent-guides-responsive 'stack)
-    (highlight-indent-guides-character ?\λ))
 #+END_SRC
 
 * Language Augmentation
@@ -1425,6 +1429,9 @@ Control how links and browser-url-generic function works (also for links).
                                   (url-hexify-string q)))))
 #+END_SRC
 
+#+RESULTS:
+: browse-lucky
+
 ** Discord
 
 Discord rich presence based on emacs + file editing. (tangled off so I don't get distracted)
@@ -1436,6 +1443,14 @@ Discord rich presence based on emacs + file editing. (tangled off so I don't get
     (elcord-use-major-mode-as-main-icon t)
     :config
     (elcord-mode))
+#+END_SRC
+
+** Mirrors
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elpa-mirror
+    :custom
+    (elpamr-default-output-directory "~/.emacs.d/emacs-package-mirrors"))
 #+END_SRC
 
 ** Wakatime
