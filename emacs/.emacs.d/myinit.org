@@ -54,6 +54,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#r--julia][R & Julia]]
   - [[#web-development][Web Development]]
   - [[#theorem-provers][Theorem Provers]]
+  - [[#yaml][YAML]]
 - [[#org][Org]]
 - [[#text-editing][Text Editing]]
 - [[#language-augmentation][Language Augmentation]]
@@ -1315,6 +1316,19 @@ fine.
     :bind (:map lean-mode-map
                 ("S-SPC" . company-complete))
     :init (setq lean-rootdir "/usr/local/"))
+#+END_SRC
+
+** YAML
+
+#+BEGIN_SRC emacs-lisp
+  (use-package yaml-mode
+    :mode
+    (("\\.params\\'" . yaml-mode)
+     ("\\.yml\\'" . yaml-mode)))
+
+  (use-package flycheck-yamllint
+    :hook
+    (flycheck-mode . flycheck-yamllint-setup))
 #+END_SRC
 
 * Org
