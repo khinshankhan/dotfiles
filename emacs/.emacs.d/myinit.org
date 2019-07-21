@@ -442,7 +442,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
      (format ""
              (float-time (time-subtract after-init-time before-init-time))
              (length package-activated-list) gcs-done))
-    (dashboard-startup-banner (concat user-emacs-directory "personal/umiko-sword-emacs.png"))
+    (dashboard-startup-banner (concat user-emacs-directory "personal/hifumi-sweater-emacs.png"))
     (dashboard-set-heading-icons t)
     (dashboard-set-file-icons t)
     (dashboard-set-init-info t)
