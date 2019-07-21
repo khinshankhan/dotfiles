@@ -108,6 +108,7 @@ Special commands, should always be needed.
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   ;; (setq package-enable-at-startup nil)
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 #+END_SRC
 
 Set up all the archive sources to pull from packages from.
