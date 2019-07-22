@@ -37,9 +37,9 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#git][Git]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
-  - [[#lsp][LSP]]
   - [[#misc-helpers][Misc Helpers]]
   - [[#tramp][TRAMP]]
+  - [[#lsp][LSP]]
 - [[#languages][Languages]]
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
@@ -816,10 +816,6 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
       :fringe-face 'flycheck-fringe-error
       :error-list-face 'flycheck-error-list-error)
     (global-flycheck-mode t))
-
-  (use-package flycheck-clang-analyzer
-    :after (flycheck)
-    :config (flycheck-clang-analyzer-setup))
 #+END_SRC
 
 Here we disable have to disable other checkers to use flycheck
@@ -830,6 +826,44 @@ Here we disable have to disable other checkers to use flycheck
                                              c/c++-gcc))
 #+END_SRC
 
+** Misc Helpers
+
+#+BEGIN_SRC emacs-lisp
+  (use-package speed-type)
+
+  (use-package origami)
+
+  (use-package demangle-mode)
+
+  (use-package modern-cpp-font-lock)
+
+  (use-package academic-phrases)
+
+  (use-package powerthesaurus)
+#+END_SRC
+
+** TRAMP
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tramp
+    :ensure nil
+    :config
+    ;; faster than scp
+    (setq tramp-default-method "ssh")
+    (add-to-list 'tramp-default-user-alist
+                 '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
+                 '(nil nil "shan")) ;; fallback login
+
+    (setq password-cache-expiry nil)
+    )
+
+  ;; this hook makes remote projectile a little lighter
+  (add-hook 'find-file-hook
+            (lambda ()
+              (when (file-remote-p default-directory)
+                (setq-local projectile-mode-line "Projectile"))))
+#+END_SRC
+
 ** LSP
 
 lsp-mode has much potential, might use it for the hard to configure stuff, would prefer if it was slightly better
@@ -837,6 +871,7 @@ though.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
+    :hook ((c-mode c++-mode) . lsp)
     :bind
     (:map lsp-mode-map
           ("C-c d" . lsp-find-definition)
@@ -879,81 +914,30 @@ though.
     (add-to-list 'company-backends #'company-lsp))
 #+END_SRC
 
-** Misc Helpers
-
-#+BEGIN_SRC emacs-lisp
-  (use-package speed-type)
-
-  (use-package origami)
-
-  (use-package demangle-mode)
-
-  (use-package modern-cpp-font-lock)
-
-  (use-package academic-phrases)
-
-  (use-package powerthesaurus)
-#+END_SRC
-
-** TRAMP
-
-#+BEGIN_SRC emacs-lisp
-  (use-package tramp
-    :ensure nil
-    :config
-    ;; faster than scp
-    (setq tramp-default-method "ssh")
-    (add-to-list 'tramp-default-user-alist
-                 '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
-                 '(nil nil "shan")) ;; fallback login
-
-    (setq password-cache-expiry nil)
-    )
-
-  ;; this hook makes remote projectile a little lighter
-  (add-hook 'find-file-hook
-            (lambda ()
-              (when (file-remote-p default-directory)
-                (setq-local projectile-mode-line "Projectile"))))
-#+END_SRC
-
 * Languages
 ** C/ C++
+
+*** General
 
 #+BEGIN_SRC emacs-lisp
   (use-package cc-mode
     :ensure nil
     :custom
-    (cc-search-directories '("."
-                             "/usr/include"
-                             "usr/local/include/*"))
-    (c-default-style "linux")
-    (c-basic-offset 4))
-
-  (use-package ggtags
-    :hook
-    (c-mode . ggtags-mode)
-    (c++-mode . ggtags-mode))
-
-  (use-package irony
-    :hook
-    (c-mode . irony-mode)
-    (c++-mode . irony-mode)
-    (irony-mode . irony-cdb-autosetup-compile-options))
-
-  (use-package company-irony
-    :after
-    (irony company)
+    (c-basic-offset 4)
     :config
-    (add-to-list 'company-backends 'company-irony))
+    (setq c-default-style '((c++-mode  . "stroustrup")
+                            (awk-mode  . "awk")
+                            (java-mode . "java")
+                            (other     . "k&r"))))
+#+END_SRC
 
-  (use-package company-c-headers
-    :after (company)
-    :config
-    (add-to-list 'company-backends 'company-c-headers))
+*** CCLS
 
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++14")))
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++14")))
+#+BEGIN_SRC emacs-lisp :tangle off
+  (use-package (ccls)
+    :after lsp-mode
+    :hook
+    ((c-mode c++-mode) . lsp))
 #+END_SRC
 
 ** Clojure
