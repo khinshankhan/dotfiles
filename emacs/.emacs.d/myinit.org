@@ -594,7 +594,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     ("C-x C-f" . counsel-find-file)
     ("C-h v" . counsel-describe-variable)
     ("C-h f" . counsel-describe-function)
-    ("C-x b" . counsel-ibuffer))
+    ("C-x b" . counsel-switch-buffer))
 
   (use-package swiper
     :bind
@@ -820,8 +820,14 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (use-package flycheck-clang-analyzer
     :after (flycheck)
     :config (flycheck-clang-analyzer-setup))
+#+END_SRC
 
-  (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+Here we disable have to disable other checkers to use flycheck
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc
+                                             c/c++-clang c/c++-cppcheck
+                                             c/c++-gcc))
 #+END_SRC
 
 ** LSP
@@ -830,45 +836,47 @@ lsp-mode has much potential, might use it for the hard to configure stuff, would
 though.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package company-lsp
-    :after (company lsp-mode)
+  (use-package lsp-mode
     :bind
     (:map lsp-mode-map
-          ("C-/" . company-lsp)
-          ("C-c C-j" . lsp-ui-imenu)
           ("C-c d" . lsp-find-definition)
           ("C-c e" . lsp-rename)
-          ("C-c f" . lsp-format-buffer)
-          ("C-c r" . lsp-ui-peek-find-references)
-          ("C-c t" . lsp-find-type-definition))
-    :custom
-    (company-lsp-async t)
-    (company-lsp-enable-snippets nil)
-    (company-lsp-enable-recompletion t)
-    :config
-    (add-to-list 'company-backends #'company-lsp))
-
-  (use-package lsp-mode
+          ("C-c f" . lsp-format-buffer))
     :custom
     (lsp-auto-guess-root t)
     (lsp-before-save-edits t)
     (lsp-enable-indentation t)
     (lsp-auto-configure nil)
     (lsp-enable-snippet nil)
-    (lsp-prefer-flymake nil)
-    :config
-    (require 'lsp-clients))
+    (lsp-prefer-flymake nil))
 
   (use-package lsp-ui
-    :custom (lsp-ui-flycheck-enable t))
-
-  (use-package dap-mode
     :after (lsp-mode)
-    :hook lsp-mode
+    :hook
+    (lsp-mode . lsp-ui-mode)
+    :bind
+    (:map lsp-mode-map
+          ("C-c C-j" . lsp-ui-imenu)
+          ("C-c l" . lsp-ui-flycheck-list)
+          ("C-c r" . lsp-ui-peek-find-references)
+          ("C-c t" . lsp-find-type-definition)
+          ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+          ([remap xref-find-references] . lsp-ui-peek-find-references))
+    :custom
+    (lsp-ui-flycheck-enable t))
+
+  (use-package company-lsp
+    :after (company lsp-mode)
+    :bind
+    (:map lsp-mode-map
+          ("C-/" . company-lsp))
+    :custom
+    (company-lsp-async t)
+    (company-lsp-cache-candidates t)
+    (company-lsp-enable-snippets nil)
+    (company-lsp-enable-recompletion t)
     :config
-    (dap-mode t)
-    (dap-ui-mode t)
-    (require 'dap-lldb))
+    (add-to-list 'company-backends #'company-lsp))
 #+END_SRC
 
 ** Misc Helpers
@@ -918,9 +926,7 @@ though.
     :custom
     (cc-search-directories '("."
                              "/usr/include"
-                             "usr/local/include/*"
-                             "../*/include"
-                             "../*/lib"))
+                             "usr/local/include/*"))
     (c-default-style "linux")
     (c-basic-offset 4))
 
