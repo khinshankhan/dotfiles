@@ -919,8 +919,6 @@ though.
 * Languages
 ** C/ C++
 
-*** General
-
 #+BEGIN_SRC emacs-lisp
   (use-package cc-mode
     :ensure nil
@@ -931,11 +929,7 @@ though.
                             (awk-mode  . "awk")
                             (java-mode . "java")
                             (other     . "k&r"))))
-#+END_SRC
 
-*** CCLS
-
-#+BEGIN_SRC emacs-lisp
   (use-package ccls
     :after (lsp-mode)
     :hook
