@@ -762,7 +762,8 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
   (use-package company-box
     :after (company)
-    :hook (company-mode . company-box-mode))
+    :hook
+    (company-mode . company-box-mode))
 #+END_SRC
 
 ** Flycheck
@@ -871,7 +872,8 @@ though.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
-    :hook ((c-mode c++-mode) . lsp)
+    :hook
+    ((c-mode c++-mode) . lsp)
     :bind
     (:map lsp-mode-map
           ("C-c d" . lsp-find-definition)
@@ -933,9 +935,9 @@ though.
 
 *** CCLS
 
-#+BEGIN_SRC emacs-lisp :tangle off
+#+BEGIN_SRC emacs-lisp
   (use-package ccls
-    :after lsp-mode
+    :after (lsp-mode)
     :hook
     ((c-mode c++-mode) . lsp))
 #+END_SRC
@@ -1051,7 +1053,8 @@ though.
     (:map merlin-mode-map
           ("C-c C-r r" . utop-eval-region)
           ("C-c C-r f" . ocp-indent-buffer))
-    :hook (tuareg-mode . ocp-indent-caml-mode-setup))
+    :hook
+    (tuareg-mode . ocp-indent-caml-mode-setup))
 
   (use-package flycheck-ocaml
     :after merlin
@@ -1236,7 +1239,8 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :mode
     ("\\.js\\'" . js2-mode)
     :interpreter ("node" . js2-mode)
-    :hook (js2-mode . js2-imenu-extras-mode)
+    :hook
+    (js2-mode . js2-imenu-extras-mode)
     :init
     (setq js2-strict-missing-semi-warning t
           js2-missing-semi-one-line-override t
@@ -1254,7 +1258,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :init
     (setq-default rjsx-basic-offset 2)
     (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__d\
-      irname" "console" "JSON")))
+        irname" "console" "JSON")))
 #+END_SRC
 
 *** React
@@ -1425,8 +1429,9 @@ fine.
 
 #+BEGIN_SRC emacs-lisp
   (use-package flyspell
-    :hook ((text-mode . flyspell-mode)
-           (prog-mode . flyspell-prog-mode)))
+    :hook
+    ((text-mode . flyspell-mode)
+     (prog-mode . flyspell-prog-mode)))
 
   (use-package flyspell-popup
     :after (flyspell)
