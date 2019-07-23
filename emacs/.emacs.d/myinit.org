@@ -42,18 +42,18 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#lsp][LSP]]
 - [[#languages][Languages]]
   - [[#c-c][C/ C++]]
+  - [[#containers][Containers]]
   - [[#clojure][Clojure]]
   - [[#gnu-plot][GNU Plot]]
   - [[#haskell][Haskell]]
+  - [[#latex][LaTeX]]
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
-  - [[#python][Python]]
-  - [[#juypter][Juypter]]
-  - [[#latex][LaTeX]]
   - [[#pkgbuilds][pkgbuilds]]
+  - [[#python][Python]]
   - [[#r--julia][R & Julia]]
-  - [[#web-development][Web Development]]
   - [[#theorem-provers][Theorem Provers]]
+  - [[#web-development][Web Development]]
   - [[#yaml][YAML]]
 - [[#org][Org]]
 - [[#text-editing][Text Editing]]
@@ -304,8 +304,8 @@ Personal functions, some packages are reliant on these, so it goes on top.
 
   (defun shan/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                    Arguments are optional, should the command require them. It should be noted that
-                    if the command returns a string with bad input, this function still returns t."
+                        Arguments are optional, should the command require them. It should be noted that
+                        if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -315,7 +315,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
   ;; this is going to get abused, since indices should evaluate to t
   (defun shan/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-                  it, and returns its index or nil"
+                      it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   ;; macros to potentially give use-package more control to the user
@@ -329,6 +329,11 @@ Personal functions, some packages are reliant on these, so it goes on top.
 
   (defmacro shan/unless (predicate then &optional else)
     (if (eval (not predicate)) `(shan/ensure-dispatch ,then) (or `(shan/ensure-dispatch ,else) ''ls)))
+
+  (defun shan/copy-hooks-to (from-hook to-hook)
+    "Copies one list of hooks to another, without the weird nonc circular list problem"
+    (dolist (hook from-hook)
+      (add-hook to-hook hook)))
 #+END_SRC
 
 ** Custom Variables
@@ -917,6 +922,7 @@ though.
 #+END_SRC
 
 * Languages
+
 ** C/ C++
 
 #+BEGIN_SRC emacs-lisp
@@ -934,6 +940,31 @@ though.
     :after (lsp-mode)
     :hook
     ((c-mode c++-mode) . lsp))
+#+END_SRC
+
+** Containers
+
+*** Docker
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dockerfile-mode
+    :mode
+    (("Dockerfile'"       . dockerfile-mode)
+     ("\\.Dockerfile\\'"  . dockerfile-mode))
+    :init
+    (progn
+      (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook)))
+
+  ;; Emacs interface to docker
+  (use-package docker)
+#+END_SRC
+
+*** Kubernetes
+
+#+BEGIN_SRC emacs-lisp
+  (use-package kubernetes
+    :commands
+    (kubernetes-overview))
 #+END_SRC
 
 ** Clojure
@@ -961,11 +992,23 @@ though.
     :mode "\\.hs\\'")
 #+END_SRC
 
+** LaTeX
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tex
+    :ensure auctex)
+
+  (use-package auctex-latexmk
+    :init
+    (auctex-latexmk-setup))
+
+#+END_SRC
 ** Lua
 #+BEGIN_SRC emacs-lisp
   (use-package lua-mode
     :after (company)
-    :mode (("\\.lua\\'" . lua-mode))
+    :mode
+    (("\\.lua\\'" . lua-mode))
     :hook
     (lua-mode . company-mode))
 #+END_SRC
@@ -1056,6 +1099,14 @@ though.
     (flycheck-ocaml-setup))
 #+END_SRC
 
+** pkgbuilds
+
+#+BEGIN_SRC emacs-lisp
+  (use-package pkgbuild-mode
+    :mode
+    (("/PKGBUILD/" . pkgbuild-mode)))
+#+END_SRC
+
 ** Python
 
 #+BEGIN_SRC emacs-lisp
@@ -1102,7 +1153,7 @@ though.
     (add-to-list 'company-backends 'company-jedi))
 #+END_SRC
 
-** Juypter
+*** Juypter
 
 #+BEGIN_SRC emacs-lisp
   (use-package ein
@@ -1111,25 +1162,6 @@ though.
     :custom
     (ein:completion-backend 'ein:use-company-jedi-backends)
     (ein:use-auto-complete-superpack t))
-#+END_SRC
-
-** LaTeX
-
-#+BEGIN_SRC emacs-lisp
-  (use-package tex
-    :ensure auctex)
-
-  (use-package auctex-latexmk
-    :init
-    (auctex-latexmk-setup))
-#+END_SRC
-
-** pkgbuilds
-
-#+BEGIN_SRC emacs-lisp
-  (use-package pkgbuild-mode
-    :mode
-    (("/PKGBUILD/" . pkgbuild-mode)))
 #+END_SRC
 
 ** R & Julia
@@ -1141,6 +1173,23 @@ though.
     ("\\.[rR]\\'" . R-mode)
     :config
     (require 'ess-site))
+#+END_SRC
+
+** Theorem Provers
+
+*** Lean Prover
+
+Install lean using [[https://github.com/leanprover/lean/blob/master/doc/make/index.md][generic build instructions]] (don't worry about warnings or anything).
+Next copy the binaries (eg =lean= in =lean/bin=) to =/usr/local/bin= and copy the entire lean
+folder (repo?) to =/usr/local/lib=. Restart (terminal/ emacs)and everything should work
+fine.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package lean-mode
+    :mode "\\.lean\\'"
+    :bind (:map lean-mode-map
+                ("S-SPC" . company-complete))
+    :init (setq lean-rootdir "/usr/local/"))
 #+END_SRC
 
 ** Web Development
@@ -1288,23 +1337,6 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     "Open some VueJS Examples"
     (interactive)
     (browse-url-generic "https://vuejs.org/v2/examples/"))
-#+END_SRC
-
-** Theorem Provers
-
-*** Lean Prover
-
-Install lean using [[https://github.com/leanprover/lean/blob/master/doc/make/index.md][generic build instructions]] (don't worry about warnings or anything).
-Next copy the binaries (eg =lean= in =lean/bin=) to =/usr/local/bin= and copy the entire lean
-folder (repo?) to =/usr/local/lib=. Restart (terminal/ emacs)and everything should work
-fine.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package lean-mode
-    :mode "\\.lean\\'"
-    :bind (:map lean-mode-map
-                ("S-SPC" . company-complete))
-    :init (setq lean-rootdir "/usr/local/"))
 #+END_SRC
 
 ** YAML
