@@ -934,7 +934,7 @@ though.
 *** CCLS
 
 #+BEGIN_SRC emacs-lisp :tangle off
-  (use-package (ccls)
+  (use-package ccls
     :after lsp-mode
     :hook
     ((c-mode c++-mode) . lsp))
