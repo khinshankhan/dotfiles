@@ -519,7 +519,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     :custom
     (highlight-indent-guides-method 'character)
     (highlight-indent-guides-responsive 'stack)
-    (highlight-indent-guides-character ?\ß))
+    (highlight-indent-guides-character ?\間))
 
 #+END_SRC
 
@@ -881,8 +881,6 @@ though.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
-    :hook
-    ((c-mode c++-mode) . lsp)
     :bind
     (:map lsp-mode-map
           ("C-c d" . lsp-find-definition)
@@ -894,7 +892,14 @@ though.
     (lsp-enable-indentation t)
     (lsp-auto-configure nil)
     (lsp-enable-snippet nil)
-    (lsp-prefer-flymake nil))
+    (lsp-prefer-flymake nil)
+    :config
+    (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
+
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
+                      :major-modes '(python-mode)
+                      :server-id 'pyls)))
 
   (use-package lsp-ui
     :after (lsp-mode)
@@ -1116,45 +1121,25 @@ though.
 #+BEGIN_SRC emacs-lisp
   (use-package pip-requirements
     :mode
-    ("requirements\\.txt" . pip-requirements-mode))
-
-  (use-package sphinx-doc
-    :hook
-    (python-mode . sphinx-doc-mode))
+    ("requirements\\.txt" . pip-requirements-mode)
+    :init
+    (progn
+      (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
 
   (use-package python
     :ensure nil
-    :after (flycheck)
-    :mode
-    ("\\.py[iw]?\\'" . python-mode)
+    :after (lsp)
+    :hook
+    (python-mode . lsp)
     :custom
     (python-indent 4)
-    (python-shell-interpreter shan/ipython-executable)
-    (python-shell-interpreter-args "--simple-prompt -i")
+    (python-shell-interpreter shan/python-executable)
     (python-fill-docstring-style 'pep-257)
     (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
     (py-split-window-on-execute t))
 
-  (use-package elpy
-    :after (company)
-    :hook
-    (python-mode . elpy-mode)
-    :bind
-    (:map python-mode-map
-          ("C-c C-c" . elpy-shell-send-top-statement))
-    :custom
-    (elpy-rpc-python-command shan/python-executable)
-    :config
-    (delete 'elpy-module-highlight-indentation elpy-modules)
-    (delete 'elpy-module-flymake elpy-modules)
-    (delete 'elpy-module-company elpy-modules)
-    (add-to-list 'company-backends #'elpy-company-backend)
-    (elpy-enable))
-
-  (use-package company-jedi
-    :after (company)
-    :config
-    (add-to-list 'company-backends 'company-jedi))
+  (use-package cython-mode)
+  (use-package flycheck-cython)
 #+END_SRC
 
 *** Juypter
