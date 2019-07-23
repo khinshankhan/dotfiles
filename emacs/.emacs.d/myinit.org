@@ -343,6 +343,7 @@ Variables based on environment, some packages are reliant on these, so it goes o
 #+BEGIN_SRC emacs-lisp
   (defconst custom-file "/dev/zero")
   (defconst shan/config-path (concat user-emacs-directory "config.org"))
+  (defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
   (defconst shan/python-executable "python3")
   (defconst shan/ipython-executable "ipython3")
   (defconst shan/cl-executable (shan/find-executables ("sbcl" "lisp" "ccl")))
@@ -448,7 +449,6 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
      (format ""
              (float-time (time-subtract after-init-time before-init-time))
              (length package-activated-list) gcs-done))
-    (dashboard-startup-banner (concat user-emacs-directory "personal/hifumi-sweater-emacs.png"))
     (dashboard-set-heading-icons t)
     (dashboard-set-file-icons t)
     (dashboard-set-init-info t)
@@ -487,7 +487,11 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                             ;; (registers . 5)
                             ))
 
-    (dashboard-setup-startup-hook))
+    (dashboard-setup-startup-hook)
+    :config
+    (setq dashboard-startup-banner (if shan/settings-exist
+                                       (concat user-emacs-directory shan/preferred-logo)
+                                     'logo)))
 #+END_SRC
 
 *** Scratch buffer
