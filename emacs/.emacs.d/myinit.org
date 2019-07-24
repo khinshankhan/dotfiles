@@ -1397,6 +1397,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((ditaa . t)
+       (dot . t)
        (emacs-lisp . t)
        (gnuplot . t)
        (js . t)
