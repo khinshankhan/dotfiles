@@ -1126,10 +1126,10 @@ though.
     :mode
     ("\\.\\(plant\\)?uml\\'" . plantuml-mode)
     :custom
+    (plantuml-default-exec-mode 'jar)
     (plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
     (plantuml-java-options "")
     (plantuml-output-type "png")
-    ;; chart is utf-8
     (plantuml-options "-charset UTF-8"))
 #+END_SRC
 
