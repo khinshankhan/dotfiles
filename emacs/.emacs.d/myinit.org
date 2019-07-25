@@ -893,20 +893,9 @@ though.
     (lsp-prefer-flymake nil)
     :config
     (shan/add-list-to-list 'lsp-language-id-configuration '((python-mode . "python")
-                                                            (caml-mode . "ocaml")
+                                                            (caml-mode   . "ocaml")
                                                             (tuareg-mode . "ocaml")
                                                             (reason-mode . "ocaml")))
-
-    (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
-                      :major-modes '(python-mode)
-                      :server-id 'pyls))
-
-    (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server" "--stdio"))
-                      :major-modes '(reason-mode tuareg-mode caml-mode)
-                      :server-id 'ocamlmerlin-lsp))
-
     (setq lsp-print-io t))
 
   (use-package lsp-ui
@@ -955,6 +944,7 @@ though.
                             (other     . "k&r"))))
 
   (use-package ccls
+    :if (executable-find "ccls")
     :after (lsp-mode)
     :hook
     ((c-mode c++-mode) . lsp))
@@ -1046,7 +1036,7 @@ though.
 
 #+BEGIN_SRC emacs-lisp
   (use-package tuareg
-    :if (executable-find "ocaml")
+    :if (and (executable-find "ocaml") (executable-find "node") t)
     :after (lsp)
     :hook
     (tuareg-mode . lsp)
@@ -1058,7 +1048,12 @@ though.
      ("\\.eliomi?\\'" . tuareg-mode))
     :custom
     (tuareg-match-patterns-aligned t)
-    (tuareg-indent-align-with-first-arg t))
+    (tuareg-indent-align-with-first-arg t)
+    :config
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server" "--stdio"))
+                      :major-modes '(caml-mode tuareg-mode reason-mode)
+                      :server-id 'ocamlmerlin-lsp)))
 #+END_SRC
 
 ** pkgbuilds
@@ -1096,6 +1091,7 @@ though.
 
   (use-package python
     :ensure nil
+    :if (executable-find "pyls")
     :after (lsp)
     :hook
     (python-mode . lsp)
@@ -1104,7 +1100,12 @@ though.
     (python-shell-interpreter shan/python-executable)
     (python-fill-docstring-style 'pep-257)
     (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
-    (py-split-window-on-execute t))
+    (py-split-window-on-execute t)
+    :config
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
+                      :major-modes '(python-mode)
+                      :server-id 'pyls)))
 
   (use-package cython-mode)
   (use-package flycheck-cython)
@@ -1132,6 +1133,7 @@ fine.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lean-mode
+    :if (executable-find "lean")
     :mode "\\.lean\\'"
     :bind (:map lean-mode-map
                 ("S-SPC" . company-complete))
