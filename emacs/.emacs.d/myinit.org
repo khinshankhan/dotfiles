@@ -17,7 +17,10 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 
 * Table of Contents                                                     :TOC_2:
 - [[#preface][Preface]]
-- [[#personal-variables][Personal Variables]]
+- [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
+  - [[#personal-variables][Personal Variables]]
+  - [[#general-functions][General Functions]]
+  - [[#general-variables][General Variables]]
 - [[#initialization][Initialization]]
   - [[#garbage-collection][Garbage Collection]]
   - [[#package-archives][Package Archives]]
@@ -25,8 +28,6 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 - [[#start-up][Start Up]]
   - [[#encoding][Encoding]]
   - [[#backups][Backups]]
-  - [[#functions][Functions]]
-  - [[#custom-variables][Custom Variables]]
   - [[#version-specific][Version Specific]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
@@ -72,132 +73,29 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#mirrors][Mirrors]]
   - [[#wakatime][Wakatime]]
 
-* Personal Variables
+* Tricks n Gimmicks for Sweeter Configuration
+
+Mostly just useful variables and functions.
+
+** Personal Variables
 
 Me, myself, and I.
 
 #+BEGIN_SRC emacs-lisp
+  (defconst custom-file "/dev/zero")
   (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
   (defconst shan/settings-exist (file-exists-p shan/settings-path))
 
   (when shan/settings-exist
     (load-file shan/settings-path))
+
+  (defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
+
 #+END_SRC
 
-* Initialization
-
-** Garbage Collection
-
-Dangerous stuff, tangled off because it's kind of unpredictable.
-
-#+BEGIN_SRC emacs-lisp :tangle off
-  (eval-and-compile
-    (defun srs|revert-gc ()
-      (setq gc-cons-threshold 16777216
-            gc-cons-percentage 0.1
-            file-name-handler-alist last-file-name-handler-alist))
-
-    (setq gc-cons-threshold 402653184
-          gc-cons-percentage 0.6
-          file-name-handler-alist nil)
-
-    (add-hook 'emacs-startup-hook 'srs|revert-gc))
-#+END_SRC
-
-** Package Archives
-Special commands, should always be needed.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'package)
-  ;; (setq package-enable-at-startup nil)
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
-#+END_SRC
-
-Set up all the archive sources to pull from packages from.
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'package-archives
-               '("gnu" . "http://elpa.gnu.org/packages/") t)
-  (add-to-list 'package-archives
-               '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives
-               '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (add-to-list 'package-archives
-               '("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/") t)
-  (add-to-list 'package-archives
-               '("org" . "https://orgmode.org/elpa/") t)
-  (package-initialize)
-#+END_SRC
-
-These are my personal archives. Tangled off since they're not needed, but in the dire
-cases when a mirror is down, first clone [[https://github.com/kkhan01/emacs-packages-mirrors][this repository]] and run the =rsync.sh= script.
-Then, remove the =:tangle off= flag here and change the links to be relative to the cloned
-repository. And maybe comment out the repositories above this as well.
-
-#+BEGIN_SRC emacs-lisp :tangle off
-  (setq package-archives
-        `(("gnu"   . ,("~/emacs-packages-mirror/gnu/"))
-          ("melpa" . ,("~/emacs-packages-mirror/melpa/"))
-          ("org"   . ,("~/emacs-packages-mirror/org/"))))
-  (package-initialize)
-#+END_SRC
-
-** Package Installers
-
-[[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
-by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
-
-#+BEGIN_SRC emacs-lisp
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-
-  (eval-when-compile
-    (require 'use-package))
-
-  (use-package use-package
-    :config
-    (setq-default use-package-always-defer nil
-                  use-package-always-ensure t
-                  use-package-always-demand t))
-
-  (setq-default byte-compile-warnings nil)
-
-  (use-package use-package-ensure-system-package)
-
-  (use-package try)
-#+END_SRC
-
-* Start Up
-
-** Encoding
-
-Begone utf 16!
-
-#+BEGIN_SRC emacs-lisp
-  (setq-default locale-coding-system 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (prefer-coding-system 'utf-8)
-#+END_SRC
-
-** Backups
-
-I don't particularly need backup files, and =~= + =#= files are a pain to clean anyways.
-
-#+BEGIN_SRC emacs-lisp
-  (setq-default backup-inhibited t
-                auto-save-default nil
-                create-lockfiles nil
-                make-backup-files nil)
-#+END_SRC
-
-** Functions
+** General Functions
 
 Personal functions, some packages are reliant on these, so it goes on top.
-
-*** Definitions
 
 #+BEGIN_SRC emacs-lisp
   (defun shan/do-nothing ()
@@ -306,8 +204,8 @@ Personal functions, some packages are reliant on these, so it goes on top.
 
   (defun shan/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                        Arguments are optional, should the command require them. It should be noted that
-                        if the command returns a string with bad input, this function still returns t."
+                          Arguments are optional, should the command require them. It should be noted that
+                          if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -317,7 +215,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
   ;; this is going to get abused, since indices should evaluate to t
   (defun shan/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-                      it, and returns its index or nil"
+                        it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   ;; macros to potentially give use-package more control to the user
@@ -336,19 +234,129 @@ Personal functions, some packages are reliant on these, so it goes on top.
     "Copies one list of hooks to another, without the weird nonc circular list problem"
     (dolist (hook from-hook)
       (add-hook to-hook hook)))
+
+  (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
+    "Adds all elements from from-list to to-list"
+    (dolist (elem from-list)
+      (add-to-list to-list elem append compare-fn))
+    to-list)
 #+END_SRC
 
-** Custom Variables
+** General Variables
 
 Variables based on environment, some packages are reliant on these, so it goes on top.
 
 #+BEGIN_SRC emacs-lisp
-  (defconst custom-file "/dev/zero")
   (defconst shan/config-path (concat user-emacs-directory "config.org"))
-  (defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
   (defconst shan/python-executable "python3")
   (defconst shan/ipython-executable "ipython3")
   (defconst shan/cl-executable (shan/find-executables ("sbcl" "lisp" "ccl")))
+#+END_SRC
+
+* Initialization
+
+** Garbage Collection
+
+Dangerous stuff, tangled off because it's kind of unpredictable.
+
+#+BEGIN_SRC emacs-lisp :tangle off
+  (eval-and-compile
+    (defun srs|revert-gc ()
+      (setq gc-cons-threshold 16777216
+            gc-cons-percentage 0.1
+            file-name-handler-alist last-file-name-handler-alist))
+
+    (setq gc-cons-threshold 402653184
+          gc-cons-percentage 0.6
+          file-name-handler-alist nil)
+
+    (add-hook 'emacs-startup-hook 'srs|revert-gc))
+#+END_SRC
+
+** Package Archives
+
+Special commands, should always be needed.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+  ;; (setq package-enable-at-startup nil)
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+#+END_SRC
+
+Set up all the archive sources to pull from packages from.
+
+#+BEGIN_SRC emacs-lisp
+  (shan/add-list-to-list 'package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                                             ("melpa" . "http://melpa.org/packages/")
+                                             ("melpa-stable" . "http://stable.melpa.org/packages/")
+                                             ("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/")
+                                             ("org" . "https://orgmode.org/elpa/"))
+                         t)
+  (package-initialize)
+#+END_SRC
+
+These are my personal archives. Tangled off since they're not needed, but in the dire
+cases when a mirror is down, first clone [[https://github.com/kkhan01/emacs-packages-mirrors][this repository]] and run the =rsync.sh= script.
+Then, remove the =:tangle off= flag here and change the links to be relative to the cloned
+repository. And maybe comment out the repositories above this as well.
+
+#+BEGIN_SRC emacs-lisp :tangle off
+  (setq package-archives
+        `(("gnu"   . ,("~/emacs-packages-mirror/gnu/"))
+          ("melpa" . ,("~/emacs-packages-mirror/melpa/"))
+          ("org"   . ,("~/emacs-packages-mirror/org/"))))
+  (package-initialize)
+#+END_SRC
+
+** Package Installers
+
+[[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
+by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
+
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
+  (eval-when-compile
+    (require 'use-package))
+
+  (use-package use-package
+    :config
+    (setq-default use-package-always-defer nil
+                  use-package-always-ensure t
+                  use-package-always-demand t))
+
+  (setq-default byte-compile-warnings nil)
+
+  (use-package use-package-ensure-system-package)
+
+  (use-package try)
+#+END_SRC
+
+* Start Up
+
+** Encoding
+
+Begone utf 16!
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default locale-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+#+END_SRC
+
+** Backups
+
+I don't particularly need backup files, and =~= + =#= files are a pain to clean anyways.
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default backup-inhibited t
+                auto-save-default nil
+                create-lockfiles nil
+                make-backup-files nil)
 #+END_SRC
 
 ** Version Specific
@@ -896,10 +904,10 @@ though.
     (lsp-enable-snippet nil)
     (lsp-prefer-flymake nil)
     :config
-    (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
-    (add-to-list 'lsp-language-id-configuration '(caml-mode . "ocaml"))
-    (add-to-list 'lsp-language-id-configuration '(tuareg-mode . "ocaml"))
-    (add-to-list 'lsp-language-id-configuration '(reason-mode . "ocaml"))
+    (shan/add-list-to-list 'lsp-language-id-configuration '((python-mode . "python")
+                                                            (caml-mode . "ocaml")
+                                                            (tuareg-mode . "ocaml")
+                                                            (reason-mode . "ocaml")))
 
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
