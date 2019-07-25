@@ -46,6 +46,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#clojure][Clojure]]
   - [[#gnu-plot][GNU Plot]]
   - [[#haskell][Haskell]]
+  - [[#juypter][Juypter]]
   - [[#latex][LaTeX]]
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
@@ -896,11 +897,21 @@ though.
     (lsp-prefer-flymake nil)
     :config
     (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
+    (add-to-list 'lsp-language-id-configuration '(caml-mode . "ocaml"))
+    (add-to-list 'lsp-language-id-configuration '(tuareg-mode . "ocaml"))
+    (add-to-list 'lsp-language-id-configuration '(reason-mode . "ocaml"))
 
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
                       :major-modes '(python-mode)
-                      :server-id 'pyls)))
+                      :server-id 'pyls))
+
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server" "--stdio"))
+                      :major-modes '(reason-mode tuareg-mode caml-mode)
+                      :server-id 'ocamlmerlin-lsp))
+
+    (setq lsp-print-io t))
 
   (use-package lsp-ui
     :after (lsp-mode)
@@ -1003,6 +1014,17 @@ though.
     :mode "\\.hs\\'")
 #+END_SRC
 
+** Juypter
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ein
+    :mode
+    (".*\\.ipynb\\'" . ein:ipynb-mode)
+    :custom
+    (ein:completion-backend 'ein:use-company-jedi-backends)
+    (ein:use-auto-complete-superpack t))
+#+END_SRC
+
 ** LaTeX
 
 #+BEGIN_SRC emacs-lisp
@@ -1027,12 +1049,11 @@ though.
 ** OCaml
 
 #+BEGIN_SRC emacs-lisp
-  (use-package opam
-    :init
-    (opam-init))
-
   (use-package tuareg
-    :after (company)
+    :if (executable-find "ocaml")
+    :after (lsp)
+    :hook
+    (tuareg-mode . lsp)
     :mode
     (("\\.ml[ip]?\\'" . tuareg-mode)
      ("\\.mly\\'" . tuareg-menhir-mode)
@@ -1042,72 +1063,6 @@ though.
     :custom
     (tuareg-match-patterns-aligned t)
     (tuareg-indent-align-with-first-arg t))
-
-  (use-package merlin
-    :if (file-exists-p "~/.emacs.d/opam-user-setup.el")
-    :after (opam tuareg)
-    :hook
-    (tuareg-mode . merlin-mode)
-    :bind
-    (:map merlin-mode-map
-          ("M-." . merlin-locate)
-          ("M-," . merlin-pop-stack)
-          ("M-?" . merlin-occurrences)
-          ("C-c C-j" . merlin-jump)
-          ("C-c C-d" . merlin-document)
-          ("C-c <up>"   . merlin-type-enclosing-go-up)
-          ("C-c <down>" . merlin-type-enclosing-go-down)
-          ("C-c C-r" . nil))
-    :custom
-    (merlin-error-after-save nil)
-    (merlin-completion-with-doc t)
-    :config
-    ;; (setq merlin-use-auto-complete-mode t)
-    (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el"))
-
-  (use-package utop
-    :after (opam)
-    :preface
-    (defun shan/utop-eval-phrase ()
-      "Eval the surrounding Caml phrase (or block) in utop."
-      (interactive)
-      (utop-prepare-for-eval)
-      (let ((end (point)))
-        (save-excursion
-          (let ((triple (funcall utop-discover-phrase)))
-            (utop-eval (car triple) (cdr triple))))
-        (when utop-skip-after-eval-phrase
-          (goto-char end)
-          (funcall utop-next-phrase-beginning))))
-    :hook
-    (tuareg-mode . utop-minor-mode)
-    :bind
-    (:map tuareg-mode-map
-          ("C-c C-c" . shan/utop-eval-phrase)
-          ("C-c C-z" . utop))
-    (:map utop-mode-map
-          ("C-c C-g" . nil)
-          ("C-c C-k" . nil)
-          ("C-c C-s" . nil))
-    :custom
-    (utop-command "opam config exec -- utop -emacs")
-    (utop-edit-command nil))
-
-  (use-package dune)
-
-  (use-package ocp-indent
-    :after (tuareg utop)
-    :bind
-    (:map merlin-mode-map
-          ("C-c C-r r" . utop-eval-region)
-          ("C-c C-r f" . ocp-indent-buffer))
-    :hook
-    (tuareg-mode . ocp-indent-caml-mode-setup))
-
-  (use-package flycheck-ocaml
-    :after merlin
-    :config
-    (flycheck-ocaml-setup))
 #+END_SRC
 
 ** pkgbuilds
@@ -1157,17 +1112,6 @@ though.
 
   (use-package cython-mode)
   (use-package flycheck-cython)
-#+END_SRC
-
-*** Juypter
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ein
-    :mode
-    (".*\\.ipynb\\'" . ein:ipynb-mode)
-    :custom
-    (ein:completion-backend 'ein:use-company-jedi-backends)
-    (ein:use-auto-complete-superpack t))
 #+END_SRC
 
 ** R & Julia
