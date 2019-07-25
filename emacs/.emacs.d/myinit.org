@@ -1037,6 +1037,7 @@ though.
 #+BEGIN_SRC emacs-lisp
   (use-package tuareg
     :if (and (executable-find "ocaml") (executable-find "node") t)
+    :ensure-system-package (ocaml-language-server . "npm install -g ocaml-language-server")
     :after (lsp)
     :hook
     (tuareg-mode . lsp)
