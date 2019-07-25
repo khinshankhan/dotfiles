@@ -218,18 +218,6 @@ Personal functions, some packages are reliant on these, so it goes on top.
                         it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
-  ;; macros to potentially give use-package more control to the user
-  (defmacro shan/ensure-dispatch (expr)
-    (if (stringp expr)
-        `'(t . ,expr)
-      `',expr))
-
-  (defmacro shan/if (predicate then &optional else)
-    (if (eval predicate) `(shan/ensure-dispatch ,then) (or `(shan/ensure-dispatch ,else) ''ls)))
-
-  (defmacro shan/unless (predicate then &optional else)
-    (if (eval (not predicate)) `(shan/ensure-dispatch ,then) (or `(shan/ensure-dispatch ,else) ''ls)))
-
   (defun shan/copy-hooks-to (from-hook to-hook)
     "Copies one list of hooks to another, without the weird nonc circular list problem"
     (dolist (hook from-hook)
