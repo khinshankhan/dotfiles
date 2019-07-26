@@ -21,9 +21,6 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#personal-variables][Personal Variables]]
   - [[#general-functions][General Functions]]
   - [[#general-variables][General Variables]]
-  - [[#bindings][Bindings]]
-    - [[#personal-bindings][Personal Bindings]]
-    - [[#which-key][Which-key]]
 - [[#initialization][Initialization]]
   - [[#garbage-collection][Garbage Collection]]
   - [[#package-archives][Package Archives]]
@@ -32,6 +29,9 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#encoding][Encoding]]
   - [[#backups][Backups]]
   - [[#version-specific][Version Specific]]
+  - [[#bindings][Bindings]]
+    - [[#personal-bindings][Personal Bindings]]
+    - [[#which-key][Which-key]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#beacon][Beacon]]
@@ -230,8 +230,8 @@ Personal functions, some packages are reliant on these, so it goes on top.
 
   (defun shan/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                          Arguments are optional, should the command require them. It should be noted that
-                          if the command returns a string with bad input, this function still returns t."
+                            Arguments are optional, should the command require them. It should be noted that
+                            if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -241,7 +241,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
   ;; this is going to get abused, since indices should evaluate to t
   (defun shan/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-                        it, and returns its index or nil"
+                          it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   (defun shan/copy-hooks-to (from-hook to-hook)
@@ -254,6 +254,19 @@ Personal functions, some packages are reliant on these, so it goes on top.
     (dolist (elem from-list)
       (add-to-list to-list elem append compare-fn))
     to-list)
+
+  (defun shan/scratch ()
+    "Create a new scratch buffer to work in. (could be *scratch* - *scratchX*)"
+    (interactive)
+    (let ((n 0) bufname)
+      (while (progn
+               (setq bufname (concat "*scratch"
+                                     (if (= n 0) "" (int-to-string n))
+                                     "*"))
+               (setq n (1+ n))
+               (get-buffer bufname)))
+      (switch-to-buffer (get-buffer-create bufname))
+      (if (= n 1) initial-major-mode)))
 #+END_SRC
 
 ** General Variables
@@ -265,54 +278,6 @@ Variables based on environment, some packages are reliant on these, so it goes o
   (defconst shan/python-executable "python3")
   (defconst shan/ipython-executable "ipython3")
   (defconst shan/cl-executable (shan/find-executables ("sbcl" "lisp" "ccl")))
-#+END_SRC
-
-** Bindings
-
-*** Personal Bindings
-
-Personal bindings, on bottom since some are reliant on packages. I need to choose between qwerty and colemak.
-
-#+BEGIN_SRC emacs-lisp
-  ;; good for dvorak and colemak
-  ;;(keyboard-translate ?\C-t ?\C-x)
-  ;;(keyboard-translate ?\C-x ?\C-t)
-
-  (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
-  (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
-
-  (use-package bind-key)
-  (bind-key* "C-x w" 'shan/delete-window)
-  (bind-key* "C-x k" 'shan/delete-buffer)
-  (bind-key* "C-c w" 'shan/split-window-right)
-
-  (bind-key* "C-c i" 'auto-insert)
-  (bind-key* "M-/" 'hippie-expand)
-  (bind-key* "C-;" 'company-yasnippet)
-
-  ;; soft wrap lines for org mode, disabled by default for org tables
-  ;; we may need to remap this key later
-  (global-set-key "\C-z" nil)
-  (global-set-key "\C-x\C-z" nil)
-  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
-
-  ;; will set up bookmarks later.. maybe
-  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
-
-  (global-set-key (kbd "C-c m") 'recompile)
-#+END_SRC
-
-*** Which-key
-
-Display available keybindings in a popup.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package which-key
-    :config
-    (which-key-mode)
-    :bind
-    ("C-h m" . which-key-show-major-mode)
-    ("C-h b" . which-key-show-top-level))
 #+END_SRC
 
 * Initialization
@@ -426,6 +391,54 @@ I don't particularly need backup files, and =~= + =#= files are a pain to clean 
 #+BEGIN_SRC emacs-lisp
   (when (>= emacs-major-version 26)
     (setq-default confirm-kill-processes nil))
+#+END_SRC
+
+** Bindings
+
+*** Personal Bindings
+
+Personal bindings, on bottom since some are reliant on packages. I need to choose between qwerty and colemak.
+
+#+BEGIN_SRC emacs-lisp
+  ;; good for dvorak and colemak
+  ;;(keyboard-translate ?\C-t ?\C-x)
+  ;;(keyboard-translate ?\C-x ?\C-t)
+
+  (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
+  (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
+
+  (use-package bind-key)
+  (bind-key* "C-x w" 'shan/delete-window)
+  (bind-key* "C-x k" 'shan/delete-buffer)
+  (bind-key* "C-c w" 'shan/split-window-right)
+
+  (bind-key* "C-c i" 'auto-insert)
+  (bind-key* "M-/" 'hippie-expand)
+  (bind-key* "C-;" 'company-yasnippet)
+
+  ;; soft wrap lines for org mode, disabled by default for org tables
+  ;; we may need to remap this key later
+  (global-set-key "\C-z" nil)
+  (global-set-key "\C-x\C-z" nil)
+  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
+
+  ;; will set up bookmarks later.. maybe
+  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
+
+  (global-set-key (kbd "C-c m") 'recompile)
+#+END_SRC
+
+*** Which-key
+
+Display available keybindings in a popup.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode)
+    :bind
+    ("C-h m" . which-key-show-major-mode)
+    ("C-h b" . which-key-show-top-level))
 #+END_SRC
 
 ** GUI
