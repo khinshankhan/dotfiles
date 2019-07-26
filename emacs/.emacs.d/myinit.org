@@ -15,13 +15,15 @@ To manage package configurations, I use the use-package package from John Wiegle
 This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
 from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
 
-* Table of Contents                                                     :TOC_2:
+* Table of Contents :TOC_3:
 - [[#preface][Preface]]
 - [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
   - [[#personal-variables][Personal Variables]]
   - [[#general-functions][General Functions]]
   - [[#general-variables][General Variables]]
   - [[#bindings][Bindings]]
+    - [[#personal-bindings][Personal Bindings]]
+    - [[#which-key][Which-key]]
 - [[#initialization][Initialization]]
   - [[#garbage-collection][Garbage Collection]]
   - [[#package-archives][Package Archives]]
@@ -32,10 +34,25 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#version-specific][Version Specific]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
+    - [[#beacon][Beacon]]
+    - [[#cursor][Cursor]]
+    - [[#font][Font]]
+    - [[#theme][Theme]]
+    - [[#mode-line][Mode-Line]]
   - [[#interface][Interface]]
+    - [[#splash-screen][Splash Screen]]
+    - [[#scratch-buffer][Scratch buffer]]
+    - [[#lines][Lines]]
+    - [[#line-numbers][Line Numbers]]
+    - [[#scrolling][Scrolling]]
+    - [[#confirmation-messages][Confirmation messages]]
+    - [[#bells][Bells]]
   - [[#completion-frontend][Completion Frontend]]
+    - [[#all-the-icons--dired][All the Icons & Dired]]
 - [[#programming][Programming]]
   - [[#general][General]]
+    - [[#projectile][Projectile]]
+    - [[#interactive][Interactive]]
   - [[#git][Git]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
@@ -45,6 +62,8 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 - [[#languages][Languages]]
   - [[#c-c][C/ C++]]
   - [[#containers][Containers]]
+    - [[#docker][Docker]]
+    - [[#kubernetes][Kubernetes]]
   - [[#clojure][Clojure]]
   - [[#gnu-plot][GNU Plot]]
   - [[#haskell][Haskell]]
@@ -57,7 +76,13 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#python][Python]]
   - [[#r--julia][R & Julia]]
   - [[#theorem-provers][Theorem Provers]]
+    - [[#lean-prover][Lean Prover]]
   - [[#web-development][Web Development]]
+    - [[#html-css-and-friends][HTML, CSS and friends]]
+    - [[#tide][Tide]]
+    - [[#javascript][JavaScript]]
+    - [[#react][React]]
+    - [[#vuejs][VueJS]]
   - [[#yaml][YAML]]
 - [[#org][Org]]
 - [[#text-editing][Text Editing]]
@@ -65,6 +90,8 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 - [[#language-augmentation][Language Augmentation]]
   - [[#expand-region][Expand Region]]
   - [[#yasnippet][Yasnippet]]
+    - [[#basic][basic]]
+    - [[#auto-yasnippet][auto-yasnippet]]
   - [[#spell-checking][Spell Checking]]
 - [[#community][Community]]
   - [[#browser][Browser]]
@@ -1565,7 +1592,7 @@ Control how links and browser-url-generic function works (also for links).
 
 Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
 
-#+BEGIN_SRC emacs-lisp :tangle off
+#+BEGIN_SRC emacs-lisp
   (use-package elcord
     :if (executable-find "discord")
     :custom
