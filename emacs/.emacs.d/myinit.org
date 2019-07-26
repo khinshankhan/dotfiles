@@ -1549,8 +1549,9 @@ Control how links and browser-url-generic function works (also for links).
 
 #+BEGIN_SRC emacs-lisp
   (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-args '("--incognito")
-        browse-url-generic-program "chromium")
+        browse-url-generic-args '("-private")
+        browse-url-firefox-program "firefox"
+        browse-url-generic-program "firefox")
 
   (defun browse-lucky (start end)
     (interactive "r")
@@ -1561,7 +1562,7 @@ Control how links and browser-url-generic function works (also for links).
 
 ** Discord
 
-Discord rich presence based on emacs + file editing. (tangled off so I don't get distracted)
+Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
 
 #+BEGIN_SRC emacs-lisp :tangle off
   (use-package elcord
