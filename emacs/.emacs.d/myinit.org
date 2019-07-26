@@ -10,10 +10,12 @@ runs, but Windows has proven to be sightly difficult with the package manager.
 
 For more informations about myself, you can visit my website.
 
-To manage package configurations, I use the use-package package from John Wiegley, that I recommend.
+To manage package configurations, I use the use-package package from John Wiegley, which is extremely recommended.
 
 This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
 from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
+
+A special thanks to [[https://github.com/Lgneous][Lgenous]] for helping through and pulling all-nighters with me, despite being on the other end of the world.
 
 * Table of Contents :TOC_3:
 - [[#preface][Preface]]
@@ -60,6 +62,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#flycheck][Flycheck]]
   - [[#misc-helpers][Misc Helpers]]
   - [[#tramp][TRAMP]]
+  - [[#auto-ide][Auto-IDE]]
   - [[#lsp][LSP]]
 - [[#languages][Languages]]
   - [[#c-c][C/ C++]]
@@ -505,6 +508,87 @@ Display available keybindings in a popup.
     ("ao" . hydra-leader/body)
     :config
     (advice-add 'hydra-posframe-show :after #'hydra-posframe--hotfix))
+
+  (use-package pretty-hydra
+    :after hydra)
+
+  (pretty-hydra-define hydra-config (:exit t :color amaranth :quit-key "q")
+                       (" Configuration"
+                        (("e" shan/edit-config "config file")
+                         ("g" shan/refresh-buffer "refresh buffer")
+                         ("r" shan/reload "reload")
+                         ("DEL" save-buffers-kill-terminal "quit emacs"))))
+
+  (pretty-hydra-define hydra-help (:exit t :color amaranth :quit-key "q")
+                       ("Bindings"
+                        (("b" counsel-descbinds "all")
+                         ("m" which-key-show-major-mode "major mode"))
+                        "Describes"
+                        (("f" counsel-describe-function "function")
+                         ("F" counsel-describe-face "face")
+                         ("v" counsel-describe-variable "variable"))
+                        "Others"
+                        (("l" view-lossage "command history"))))
+
+  (pretty-hydra-define hydra-projectile (:exit t :color amaranth :quit-key "q")
+                       (" Projectile"
+                        (("a" projectile-find-other-file "find other file")
+                         ("b" projectile-switch-to-buffer "switch buffer")
+                         ("c" projectile-compile-project "compile")
+                         ("d" projectile-find-dir "find directory"))
+                        ""
+                        (("e" projectile-recentf "recent files")
+                         ("f" projectile-find-file "find file")
+                         ("g" projectile-grep "grep")
+                         ("k" projectile-kill-buffers "kill project buffers"))
+                        ""
+                        (("p" projectile-switch-project "switch project")
+                         ("t" projectile-toggle-between-implementation-and-test "impl ↔ test")
+                         ("v" projectile-vc "version control"))))
+
+  (pretty-hydra-define hydra-avy (:exit t :color amaranth :quit-key "q")
+                       ("Goto"
+                        (("c" avy-goto-char-timer "timed char")
+                         ("C" avy-goto-char "char")
+                         ("w" avy-goto-word-1 "word")
+                         ("W" avy-goto-word-0 "word*")
+                         ("l" avy-goto-line "bol")
+                         ("L" avy-goto-end-of-line "eol"))
+                        "Line"
+                        (("m" avy-move-line "move")
+                         ("k" avy-kill-whole-line "kill")
+                         ("y" avy-copy-line "yank"))
+                        "Region"
+                        (("M" avy-move-region "move")
+                         ("K" avy-kill-region "kill")
+                         ("Y" avy-copy-region "yank"))))
+
+  (pretty-hydra-define hydra-window (:exit nil :color amaranth :quit-key "q")
+                       (" Windows"
+                        (("2" split-window-below "below")
+                         ("3" split-window-right "right"))
+                        ""
+                        (("b" balance-windows "balance")
+                         ("k" delete-window "kill" :exit t)
+                         ("w" other-window "move"))))
+
+  (pretty-hydra-define hydra-leader (:exit t :color amaranth :quit-key "q")
+                       (" Leader"
+                        (("RET" hydra-config/body (propertize "+config" 'face 'bold))
+                         ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
+                         (";" hydra-avy/body (propertize "+jump" 'face 'bold))
+                         ("b" ivy-switch-buffer "switch buffer"))
+                        ""
+                        (("f" counsel-find-file "find file")
+                         ("g" magit-status "git")
+                         ("h" hydra-help/body (propertize "+help" 'face 'bold))
+                         ("l" recenter-top-bottom "recenter")
+                         ("p" hydra-projectile/body (propertize "+project" 'face 'bold)))
+                        ""
+                        (("s" save-buffer "save")
+                         ("t" counsel-M-x "M-x")
+                         ("u" undo "undo" :exit nil)
+                         ("w" hydra-window/body (propertize "+window" 'face 'bold)))))
 #+END_SRC
 
 ** GUI
@@ -1026,6 +1110,24 @@ Here we disable have to disable other checkers to use flycheck
                 (setq-local projectile-mode-line "Projectile"))))
 #+END_SRC
 
+** Auto-IDE
+
+Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-resolve=
+
+#+BEGIN_SRC emacs-lisp
+  (defvar shan/ide--alist '())
+
+  (defun shan/ide-add (mode hydra)
+    (push `(,mode . ,hydra) shan/ide--alist))
+
+  (defun shan/ide-resolve ()
+    (interactive)
+    (let ((hydra (alist-get major-mode shan/ide--alist)))
+      (if hydra
+          (funcall hydra)
+        (message "IDE not found for %s" major-mode))))
+#+END_SRC
+
 ** LSP
 
 lsp-mode has much potential, might use it for the hard to configure stuff, would prefer if it was slightly better
@@ -1101,7 +1203,10 @@ though.
     :if (executable-find "ccls")
     :after (lsp-mode)
     :hook
-    ((c-mode c++-mode) . lsp))
+    ((c-mode c++-mode) . lsp)
+    :config
+    (shan/ide-add 'c-mode #'hydra-lsp/body)
+    (shan/ide-add 'c++-mode #'hydra-lsp/body))
 #+END_SRC
 
 ** Containers
