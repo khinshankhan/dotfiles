@@ -32,6 +32,8 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#bindings][Bindings]]
     - [[#personal-bindings][Personal Bindings]]
     - [[#which-key][Which-key]]
+    - [[#keychords][KeyChords]]
+    - [[#hydra][Hydra]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#beacon][Beacon]]
@@ -454,6 +456,57 @@ Display available keybindings in a popup.
     ("C-h b" . which-key-show-top-level))
 #+END_SRC
 
+*** KeyChords
+
+#+BEGIN_SRC emacs-lisp
+  (use-package use-package-chords
+    :after key-chord)
+
+  (use-package key-chord
+    :custom
+    (key-chord-two-keys-delay 0.03)
+    :config
+    (key-chord-mode t))
+#+END_SRC
+
+*** Hydra
+
+#+BEGIN_SRC emacs-lisp
+  (use-package posframe
+    :preface
+    (defun posframe-poshandler-frame-bottom-center (info)
+      (cons (/ (- (plist-get info :parent-frame-width)
+                  (plist-get info :posframe-width))
+               2)
+            (- -60
+               (plist-get info :mode-line-height)
+               (plist-get info :minibuffer-height)))))
+
+  (use-package hydra
+    :after posframe
+    :preface
+    (defun hydra-posframe--hotfix (&rest _)
+      (posframe-funcall
+       " *hydra-posframe*"
+       (lambda ()
+         (fit-frame-to-buffer (selected-frame) nil
+                              (+ (count-lines (point-min) (point-max)) 1)
+                              nil nil)
+         (redirect-frame-focus (selected-frame) (frame-parent (selected-frame))))))
+    :custom
+    (hydra--work-around-dedicated nil)
+    (hydra-posframe-show-params
+     (list
+      :internal-border-width 0
+      :background-color "#1c1e24"
+      :poshandler 'posframe-poshandler-frame-bottom-center))
+    (hydra-hint-display-type 'lv)
+    :chords
+    ("ao" . hydra-leader/body)
+    :config
+    (advice-add 'hydra-posframe-show :after #'hydra-posframe--hotfix))
+#+END_SRC
+
 ** GUI
 
 You need to experience keyboard to realize keyboard master race. (fn + f10 if need be for options though)
@@ -814,6 +867,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit
+    :ensure-system-package (git)
     :bind
     ("C-c g" . magit-status))
 
@@ -1618,7 +1672,7 @@ Control how links and browser-url-generic function works (also for links).
 
 Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle off
   (use-package elcord
     :if (executable-find "discord")
     :custom
