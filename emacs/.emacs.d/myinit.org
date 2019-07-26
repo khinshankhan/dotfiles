@@ -230,8 +230,8 @@ Personal functions, some packages are reliant on these, so it goes on top.
 
   (defun shan/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                            Arguments are optional, should the command require them. It should be noted that
-                            if the command returns a string with bad input, this function still returns t."
+                              Arguments are optional, should the command require them. It should be noted that
+                              if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -241,7 +241,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
   ;; this is going to get abused, since indices should evaluate to t
   (defun shan/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-                          it, and returns its index or nil"
+                            it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   (defun shan/copy-hooks-to (from-hook to-hook)
@@ -267,6 +267,15 @@ Personal functions, some packages are reliant on these, so it goes on top.
                (get-buffer bufname)))
       (switch-to-buffer (get-buffer-create bufname))
       (if (= n 1) initial-major-mode)))
+
+  (defun shan/browser-current-file ()
+    "Open the current file as a URL using `browse-url'."
+    (interactive)
+    (let ((file-name (buffer-file-name)))
+      (if (and (fboundp 'tramp-tramp-file-p)
+               (tramp-tramp-file-p file-name))
+          (error "Cannot open tramp file")
+        (browse-url (concat "file://" file-name)))))
 #+END_SRC
 
 ** General Variables
