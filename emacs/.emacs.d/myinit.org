@@ -278,6 +278,10 @@ Variables based on environment, some packages are reliant on these, so it goes o
   (defconst shan/python-executable "python3")
   (defconst shan/ipython-executable "ipython3")
   (defconst shan/cl-executable (shan/find-executables ("sbcl" "lisp" "ccl")))
+  (setq shan/home-row
+        (if (string-equal (system-name) "faux-thunkpad")
+            '(?a ?r ?s ?t ?n ?e ?i ?o)
+          '(?a ?s ?d ?f ?j ?k ?l ?\;)))
 #+END_SRC
 
 * Initialization
@@ -1478,13 +1482,13 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :bind
     ("C-'" . avy-goto-char-2)
     :custom
-    (avy-keys '(?a ?r ?s ?t ?n ?e ?i ?o)))
+    (avy-keys shan/home-row))
 
   (use-package ace-window
     :bind
     ("C-x C-w" . ace-window)
     :custom
-    (aw-keys '(?a ?r ?s ?t ?n ?e ?i ?i)))
+    (aw-keys shan/home-row))
 #+END_SRC
 
 * Language Augmentation
