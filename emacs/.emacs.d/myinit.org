@@ -1447,8 +1447,8 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 #+BEGIN_SRC emacs-lisp
   (use-package yaml-mode
     :mode
-    (("\\.params\\'" . yaml-mode)
-     ("\\.yml\\'" . yaml-mode)))
+    (("\\.yml\\'" . yaml-mode)
+     ("\\.yaml\\'" . yaml-mode)))
 
   (use-package flycheck-yamllint
     :hook
