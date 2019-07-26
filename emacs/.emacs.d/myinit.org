@@ -21,6 +21,7 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#personal-variables][Personal Variables]]
   - [[#general-functions][General Functions]]
   - [[#general-variables][General Variables]]
+  - [[#bindings][Bindings]]
 - [[#initialization][Initialization]]
   - [[#garbage-collection][Garbage Collection]]
   - [[#package-archives][Package Archives]]
@@ -60,13 +61,11 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
   - [[#yaml][YAML]]
 - [[#org][Org]]
 - [[#text-editing][Text Editing]]
+- [[#text-navigation][Text Navigation]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#expand-region][Expand Region]]
   - [[#yasnippet][Yasnippet]]
   - [[#spell-checking][Spell Checking]]
-- [[#text-navigation][Text Navigation]]
-- [[#bindings][Bindings]]
-  - [[#which-key][Which-key]]
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
@@ -239,6 +238,54 @@ Variables based on environment, some packages are reliant on these, so it goes o
   (defconst shan/python-executable "python3")
   (defconst shan/ipython-executable "ipython3")
   (defconst shan/cl-executable (shan/find-executables ("sbcl" "lisp" "ccl")))
+#+END_SRC
+
+** Bindings
+
+*** Personal Bindings
+
+Personal bindings, on bottom since some are reliant on packages. I need to choose between qwerty and colemak.
+
+#+BEGIN_SRC emacs-lisp
+  ;; good for dvorak and colemak
+  ;;(keyboard-translate ?\C-t ?\C-x)
+  ;;(keyboard-translate ?\C-x ?\C-t)
+
+  (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
+  (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
+
+  (use-package bind-key)
+  (bind-key* "C-x w" 'shan/delete-window)
+  (bind-key* "C-x k" 'shan/delete-buffer)
+  (bind-key* "C-c w" 'shan/split-window-right)
+
+  (bind-key* "C-c i" 'auto-insert)
+  (bind-key* "M-/" 'hippie-expand)
+  (bind-key* "C-;" 'company-yasnippet)
+
+  ;; soft wrap lines for org mode, disabled by default for org tables
+  ;; we may need to remap this key later
+  (global-set-key "\C-z" nil)
+  (global-set-key "\C-x\C-z" nil)
+  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
+
+  ;; will set up bookmarks later.. maybe
+  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
+
+  (global-set-key (kbd "C-c m") 'recompile)
+#+END_SRC
+
+*** Which-key
+
+Display available keybindings in a popup.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode)
+    :bind
+    ("C-h m" . which-key-show-major-mode)
+    ("C-h b" . which-key-show-top-level))
 #+END_SRC
 
 * Initialization
@@ -1384,6 +1431,22 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
   (add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
 
+* Text Navigation
+
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :bind
+    ("C-'" . avy-goto-char-2)
+    :custom
+    (avy-keys '(?a ?r ?s ?t ?n ?e ?i ?o)))
+
+  (use-package ace-window
+    :bind
+    ("C-x C-w" . ace-window)
+    :custom
+    (aw-keys '(?a ?r ?s ?t ?n ?e ?i ?i)))
+#+END_SRC
+
 * Language Augmentation
 
 ** Expand Region
@@ -1477,68 +1540,6 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     (:map flyspell-mode-map
           ("C-," . shan/flyspell-next-word)
           ("C-M-," . shan/flyspell-prev-word)))
-#+END_SRC
-
-* Text Navigation
-
-#+BEGIN_SRC emacs-lisp
-  (use-package avy
-    :bind
-    ("C-'" . avy-goto-char-2)
-    :custom
-    (avy-keys '(?a ?r ?s ?t ?n ?e ?i ?o)))
-
-  (use-package ace-window
-    :bind
-    ("C-x C-w" . ace-window)
-    :custom
-    (aw-keys '(?a ?r ?s ?t ?n ?e ?i ?i)))
-#+END_SRC
-
-* Bindings
-
-Personal bindings, on bottom since some are reliant on packages. I need to choose between qwerty and colemak.
-
-#+BEGIN_SRC emacs-lisp
-  ;; good for dvorak and colemak
-  ;;(keyboard-translate ?\C-t ?\C-x)
-  ;;(keyboard-translate ?\C-x ?\C-t)
-
-  (define-key key-translation-map (kbd "M-t") (kbd "M-x"))
-  (define-key comint-mode-map (kbd "C-l") #'comint-clear-buffer)
-
-  (use-package bind-key)
-  (bind-key* "C-x w" 'shan/delete-window)
-  (bind-key* "C-x k" 'shan/delete-buffer)
-  (bind-key* "C-c w" 'shan/split-window-right)
-
-  (bind-key* "C-c i" 'auto-insert)
-  (bind-key* "M-/" 'hippie-expand)
-  (bind-key* "C-;" 'company-yasnippet)
-
-  ;; soft wrap lines for org mode, disabled by default for org tables
-  ;; we may need to remap this key later
-  (global-set-key "\C-z" nil)
-  (global-set-key "\C-x\C-z" nil)
-  (define-key org-mode-map "\C-z" 'toggle-truncate-lines)
-
-  ;; will set up bookmarks later.. maybe
-  (global-set-key (kbd "C-c n") (lambda() (interactive)(find-file "~/.orgfiles/notes.org")))
-
-  (global-set-key (kbd "C-c m") 'recompile)
-#+END_SRC
-
-** Which-key
-
-Display available keybindings in a popup.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package which-key
-    :config
-    (which-key-mode)
-    :bind
-    ("C-h m" . which-key-show-major-mode)
-    ("C-h b" . which-key-show-top-level))
 #+END_SRC
 
 * Community
