@@ -36,6 +36,7 @@ A special thanks to [[https://github.com/Lgneous][Lgenous]] for helping through 
     - [[#which-key][Which-key]]
     - [[#keychords][KeyChords]]
     - [[#hydra][Hydra]]
+    - [[#hydra-map][Hydra Map]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#beacon][Beacon]]
@@ -467,7 +468,7 @@ Display available keybindings in a popup.
 
   (use-package key-chord
     :custom
-    (key-chord-two-keys-delay 0.03)
+    (key-chord-two-keys-delay 0.05)
     :config
     (key-chord-mode t))
 #+END_SRC
@@ -511,13 +512,21 @@ Display available keybindings in a popup.
 
   (use-package pretty-hydra
     :after hydra)
+#+END_SRC
 
-  (pretty-hydra-define hydra-config (:exit t :color amaranth :quit-key "q")
+*** Hydra Map
+
+#+BEGIN_SRC emacs-lisp
+  (pretty-hydra-define hydra-config (:exit t :color amaranth :title " Personal" :quit-key "q")
     (" Configuration"
      (("e" shan/edit-config "config file")
-      ("g" shan/refresh-buffer "refresh buffer")
       ("r" shan/reload "reload")
-      ("DEL" save-buffers-kill-terminal "quit emacs"))))
+      ("g" shan/refresh-buffer "refresh buffer"))
+     " Elfeed"
+     ()
+     " Exit"
+     (("<deletechar>" save-buffers-kill-terminal "quit emacs")
+      ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
   (pretty-hydra-define hydra-help (:exit t :color amaranth :quit-key "q")
     ("Bindings"
@@ -525,13 +534,16 @@ Display available keybindings in a popup.
       ("m" which-key-show-major-mode "major mode"))
      "Describes"
      (("f" counsel-describe-function "function")
-      ("F" counsel-describe-face "face")
+      ("k" describe-key "key")
       ("v" counsel-describe-variable "variable"))
      "Others"
-     (("l" view-lossage "command history"))))
+     (("F" counsel-describe-face "face")
+      ("l" view-lossage "command history"))
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-  (pretty-hydra-define hydra-projectile (:exit t :color amaranth :quit-key "q")
-    (" Projectile"
+  (pretty-hydra-define hydra-projectile (:exit t :color amaranth :title " Projectile" :quit-key "q")
+    (""
      (("a" projectile-find-other-file "find other file")
       ("b" projectile-switch-to-buffer "switch buffer")
       ("c" projectile-compile-project "compile")
@@ -544,9 +556,11 @@ Display available keybindings in a popup.
      ""
      (("p" projectile-switch-project "switch project")
       ("t" projectile-toggle-between-implementation-and-test "impl ↔ test")
-      ("v" projectile-vc "version control"))))
+      ("v" projectile-vc "version control"))
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-  (pretty-hydra-define hydra-avy (:exit t :color amaranth :quit-key "q")
+  (pretty-hydra-define hydra-avy (:exit t :color amaranth :title " Avy" :quit-key "q")
     ("Goto"
      (("c" avy-goto-char-timer "timed char")
       ("C" avy-goto-char "char")
@@ -561,37 +575,49 @@ Display available keybindings in a popup.
      "Region"
      (("M" avy-move-region "move")
       ("K" avy-kill-region "kill")
-      ("Y" avy-copy-region "yank"))))
+      ("Y" avy-copy-region "yank"))
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-  (pretty-hydra-define hydra-window (:exit nil :color amaranth :quit-key "q")
-    (" Windows"
+  (pretty-hydra-define hydra-window (:exit nil :color amaranth :title " Windows" :quit-key "q")
+    ("Split"
      (("2" split-window-below "below")
       ("3" split-window-right "right"))
-     ""
+     "Movement"
      (("b" balance-windows "balance")
       ("k" delete-window "kill" :exit t)
-      ("w" other-window "move"))))
+      ("w" other-window "move"))
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-  (pretty-hydra-define hydra-leader (:exit t :color amaranth :quit-key "q")
-    (" Leader"
+  (pretty-hydra-define hydra-lsp (:exit t :color amaranth :title " LSP" :quit-key "q")
+    ("Find"
+     (("." lsp-ui-peek-find-references "find references")
+      ("d" lsp-find-definition "find definition")
+      ("t" lsp-find-type-definition "find type definition"))
+     "Refactor"
+     (("e" lsp-rename "rename symbol at point")
+      ("f" lsp-format-buffer "format buffer"))
+     "Show"
+     (("j" lsp-ui-imenu "symbol table")
+      ("l" lsp-ui-flycheck-list "error list"))
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+  (pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
+    (""
      (("RET" hydra-config/body (propertize "+config" 'face 'bold))
       ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
-      (";" hydra-avy/body (propertize "+jump" 'face 'bold))
-      ("b" ivy-switch-buffer "switch buffer"))
+      ("h" hydra-help/body (propertize "+help" 'face 'bold)))
      ""
      (("f" counsel-find-file "find file")
       ("g" magit-status "git")
-      ("h" hydra-help/body (propertize "+help" 'face 'bold))
       ("l" recenter-top-bottom "recenter")
       ("p" hydra-projectile/body (propertize "+project" 'face 'bold)))
      ""
      (("s" save-buffer "save")
       ("t" counsel-M-x "M-x")
-      ("u" undo "undo" :exit nil)
-      ("w" hydra-window/body (propertize "+window" 'face 'bold)))
-     ""
-     (("+" text-scale-increase "zoom in" :exit nil)
-      ("-" text-scale-decrease "zoom out" :exit nil))))
+      ("u" undo "undo" :exit nil))))
 #+END_SRC
 
 ** GUI
@@ -1133,16 +1159,10 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
 
 ** LSP
 
-lsp-mode has much potential, might use it for the hard to configure stuff, would prefer if it was slightly better
-though.
+[[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] has much potential, hopefully it gets even better. For now, this configuration is great.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
-    :bind
-    (:map lsp-mode-map
-          ("C-c d" . lsp-find-definition)
-          ("C-c e" . lsp-rename)
-          ("C-c f" . lsp-format-buffer))
     :custom
     (lsp-auto-guess-root t)
     (lsp-before-save-edits t)
@@ -1163,12 +1183,8 @@ though.
     (lsp-mode . lsp-ui-mode)
     :bind
     (:map lsp-mode-map
-          ("C-c C-j" . lsp-ui-imenu)
-          ("C-c l" . lsp-ui-flycheck-list)
-          ("C-c r" . lsp-ui-peek-find-references)
-          ("C-c t" . lsp-find-type-definition)
           ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-          ([remap xref-find-references] . lsp-ui-peek-find-references))
+          ([remap xref-find-references]  . lsp-ui-peek-find-references))
     :custom
     (lsp-ui-flycheck-enable t))
 
@@ -1304,11 +1320,11 @@ though.
     :hook
     (tuareg-mode . lsp)
     :mode
-    (("\\.ml[ip]?\\'" . tuareg-mode)
-     ("\\.mly\\'" . tuareg-menhir-mode)
-     ("[./]opam_?\\'" . tuareg-opam-mode)
+    (("\\.ml[ip]?\\'"                           . tuareg-mode)
+     ("\\.mly\\'"                               . tuareg-menhir-mode)
+     ("[./]opam_?\\'"                           . tuareg-opam-mode)
      ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
-     ("\\.eliomi?\\'" . tuareg-mode))
+     ("\\.eliomi?\\'"                           . tuareg-mode))
     :custom
     (tuareg-match-patterns-aligned t)
     (tuareg-indent-align-with-first-arg t)
@@ -1316,7 +1332,8 @@ though.
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server" "--stdio"))
                       :major-modes '(caml-mode tuareg-mode reason-mode)
-                      :server-id 'ocamlmerlin-lsp)))
+                      :server-id 'ocamlmerlin-lsp))
+    (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
 #+END_SRC
 
 ** pkgbuilds
@@ -1368,7 +1385,8 @@ though.
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
                       :major-modes '(python-mode)
-                      :server-id 'pyls)))
+                      :server-id 'pyls))
+    (shan/ide-add 'python-mode #'hydra-lsp/body))
 
   (use-package cython-mode)
   (use-package flycheck-cython)
@@ -1397,10 +1415,12 @@ fine.
 #+BEGIN_SRC emacs-lisp
   (use-package lean-mode
     :if (executable-find "lean")
-    :mode "\\.lean\\'"
+    :mode
+    ("\\.lean\\'" . lean-mode)
     :bind (:map lean-mode-map
                 ("S-SPC" . company-complete))
-    :init (setq lean-rootdir "/usr/local/"))
+    :init
+    (setq lean-rootdir "/usr/local/"))
 #+END_SRC
 
 ** Web Development
@@ -1421,18 +1441,18 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 
   (use-package web-mode
     :mode
-    (("\\.html?\\'" . web-mode)
-     ("\\.phtml\\'" . web-mode)
-     ("\\.tpl\\.php\\'" . web-mode)
+    (("\\.html?\\'"       . web-mode)
+     ("\\.phtml\\'"       . web-mode)
+     ("\\.tpl\\.php\\'"   . web-mode)
      ("\\.blade\\.php\\'" . web-mode)
-     ("\\.php$" . my/php-setup)
-     ("\\.[agj]sp\\'" . web-mode)
-     ("\\.as[cp]x\\'" . web-mode)
-     ("\\.erb\\'" . web-mode)
-     ("\\.mustache\\'" . web-mode)
-     ("\\.djhtml\\'" . web-mode)
-     ("\\.jsx\\'" . web-mode)
-     ("\\.tsx\\'" . web-mode))
+     ("\\.php$"           . my/php-setup)
+     ("\\.[agj]sp\\'"     . web-mode)
+     ("\\.as[cp]x\\'"     . web-mode)
+     ("\\.erb\\'"         . web-mode)
+     ("\\.mustache\\'"    . web-mode)
+     ("\\.djhtml\\'"      . web-mode)
+     ("\\.jsx\\'"         . web-mode)
+     ("\\.tsx\\'"         . web-mode))
     :config
     ;; Highlight the element under the cursor.
     (setq-default web-mode-enable-current-element-highlight t)
@@ -1449,11 +1469,11 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 
   (use-package emmet-mode
     :hook
-    ((css-mode . emmet-mode)
-     (php-mode . emmet-mode)
+    ((css-mode  . emmet-mode)
+     (php-mode  . emmet-mode)
      (sgml-mode . emmet-mode)
      (rjsx-mode . emmet-mode)
-     (web-mode . emmet-mode)))
+     (web-mode  . emmet-mode)))
 
   (use-package less-css-mode
     :mode "\\.less\\'")
@@ -1478,7 +1498,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :hook
     ((typescript-mode . tide-setup)
      (typescript-mode . tide-hl-identifier-mode)
-     (before-save . tide-format-before-save))
+     (before-save     . tide-format-before-save))
     :config
     (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
     (flycheck-add-next-checker 'tsx-tide 'javascript-eslint))
@@ -1492,7 +1512,8 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
   (use-package js2-mode
     :mode
     ("\\.js\\'" . js2-mode)
-    :interpreter ("node" . js2-mode)
+    :interpreter
+    ("node" . js2-mode)
     :hook
     (js2-mode . js2-imenu-extras-mode)
     :init
@@ -1503,8 +1524,8 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 
   (use-package rjsx-mode
     :mode
-    (("\\.js\\'" . rjsx-mode)
-     ("\\.jsx\\'" . rjsx-mode)
+    (("\\.js\\'"   . rjsx-mode)
+     ("\\.jsx\\'"  . rjsx-mode)
      ("\\.json\\'" . javascript-mode))
     :hook
     (rjsx-mode . setup-tide-mode)
@@ -1512,7 +1533,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
     :init
     (setq-default rjsx-basic-offset 2)
     (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__d\
-        irname" "console" "JSON")))
+          irname" "console" "JSON")))
 #+END_SRC
 
 *** React
@@ -1555,7 +1576,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 #+BEGIN_SRC emacs-lisp
   (use-package yaml-mode
     :mode
-    (("\\.yml\\'" . yaml-mode)
+    (("\\.yml\\'"  . yaml-mode)
      ("\\.yaml\\'" . yaml-mode)))
 
   (use-package flycheck-yamllint
@@ -1601,18 +1622,18 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
 
     (org-babel-do-load-languages
      'org-babel-load-languages
-     '((ditaa . t)
-       (dot . t)
+     '((ditaa      . t)
+       (dot        . t)
        (emacs-lisp . t)
-       (gnuplot . t)
-       (js . t)
-       (latex . t )
-       (ocaml . t)
-       (org . t)
-       (plantuml . t)
-       (python . t)
-       (shell . t)
-       (R . t)
+       (gnuplot    . t)
+       (js         . t)
+       (latex      . t )
+       (ocaml      . t)
+       (org        . t)
+       (plantuml   . t)
+       (python     . t)
+       (shell      . t)
+       (R          . t)
        ))
 
     (add-to-list 'org-src-lang-modes
@@ -1753,7 +1774,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
       (flyspell-popup-correct))
     :bind
     (:map flyspell-mode-map
-          ("C-," . shan/flyspell-next-word)
+          ("C-,"   . shan/flyspell-next-word)
           ("C-M-," . shan/flyspell-prev-word)))
 #+END_SRC
 
