@@ -236,8 +236,8 @@ Personal functions, some packages are reliant on these, so it goes on top.
 
   (defun shan/ecmd-output (cmd &optional arg)
     "Takes in an elisp command and checks if it has a valid string output when ran.
-                              Arguments are optional, should the command require them. It should be noted that
-                              if the command returns a string with bad input, this function still returns t."
+                                Arguments are optional, should the command require them. It should be noted that
+                                if the command returns a string with bad input, this function still returns t."
     (if (stringp arg)
         (not (= (length
                  (funcall cmd arg)) 0))
@@ -247,7 +247,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
   ;; this is going to get abused, since indices should evaluate to t
   (defun shan/sso(cmd arg)
     "substring-shell-output, checks if running a given command has a substring in
-                            it, and returns its index or nil"
+                              it, and returns its index or nil"
     (cl-search arg (shell-command-to-string cmd)))
 
   (defun shan/copy-hooks-to (from-hook to-hook)
@@ -282,6 +282,19 @@ Personal functions, some packages are reliant on these, so it goes on top.
                (tramp-tramp-file-p file-name))
           (error "Cannot open tramp file")
         (browse-url (concat "file://" file-name)))))
+
+  (defun shan/call-keymap (map &optional prompt)
+    "Read a key sequence and call the command it's bound to in MAP."
+    (let* ((help-form `(describe-bindings ,(vector map)))
+           (key (read-key-sequence prompt))
+           (cmd (lookup-key map key t)))
+      (if (functionp cmd) (call-interactively cmd)
+        (user-error "%s is undefined" key))))
+
+  (defun shan/exec-call-keymap (keymap prompt)
+    "Executes `shan/call-keymap'"
+    (interactive)
+    (call-keymap keymap prompt))
 #+END_SRC
 
 ** General Variables
@@ -528,7 +541,7 @@ Display available keybindings in a popup.
      (("<deletechar>" save-buffers-kill-terminal "quit emacs")
       ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-  (pretty-hydra-define hydra-help (:exit t :color amaranth :quit-key "q")
+  (pretty-hydra-define hydra-help (:exit t :color amaranth :title " Help" :quit-key "q")
     ("Bindings"
      (("b" counsel-descbinds "all")
       ("m" which-key-show-major-mode "major mode"))
@@ -617,6 +630,7 @@ Display available keybindings in a popup.
      ""
      (("s" save-buffer "save")
       ("t" counsel-M-x "M-x")
+      ("c" (lookup-key global-map (kbd "C-x")) "C-x")
       ("u" undo "undo" :exit nil))))
 #+END_SRC
 
