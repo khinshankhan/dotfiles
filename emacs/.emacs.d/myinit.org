@@ -15,7 +15,7 @@ To manage package configurations, I use the use-package package from John Wiegle
 This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
 from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
 
-A special thanks to [[https://github.com/Lgneous][Lgenous]] for helping through and pulling all-nighters with me, despite being on the other end of the world.
+A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
 
 * Table of Contents :TOC_3:
 - [[#preface][Preface]]
@@ -628,10 +628,10 @@ Display available keybindings in a popup.
       ("l" recenter-top-bottom "recenter")
       ("p" hydra-projectile/body (propertize "+project" 'face 'bold)))
      ""
-     (("s" save-buffer "save")
+     (("u" undo "undo" :exit nil)
       ("t" counsel-M-x "M-x")
       ("c" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
-      ("u" undo "undo" :exit nil))))
+      ("s" save-buffer "save"))))
 #+END_SRC
 
 ** GUI
