@@ -601,7 +601,7 @@ Display available keybindings in a popup.
       ("k" delete-window "kill" :exit t)
       ("w" other-window "move"))
      " Exit"
-     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
 
   (pretty-hydra-define hydra-lsp (:exit t :color amaranth :title " LSP" :quit-key "q")
     ("Find"
@@ -623,10 +623,10 @@ Display available keybindings in a popup.
       ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
       ("h" hydra-help/body (propertize "+help" 'face 'bold)))
      ""
-     (("f" counsel-find-file "find file")
-      ("g" magit-status "git")
-      ("l" recenter-top-bottom "recenter")
-      ("p" hydra-projectile/body (propertize "+project" 'face 'bold)))
+     (("f" counsel-find-file "management")
+      ("p" hydra-projectile/body (propertize "+project" 'face 'bold))
+      ("a" hydra-avy/body (propertize "+jump" 'face 'bold))
+      ("w" hydra-window/body (propertize "+window" 'face 'bold)))
      ""
      (("u" undo "undo" :exit nil)
       ("t" counsel-M-x "M-x")
