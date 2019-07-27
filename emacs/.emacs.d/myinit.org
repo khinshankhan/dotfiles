@@ -513,82 +513,85 @@ Display available keybindings in a popup.
     :after hydra)
 
   (pretty-hydra-define hydra-config (:exit t :color amaranth :quit-key "q")
-                       (" Configuration"
-                        (("e" shan/edit-config "config file")
-                         ("g" shan/refresh-buffer "refresh buffer")
-                         ("r" shan/reload "reload")
-                         ("DEL" save-buffers-kill-terminal "quit emacs"))))
+    (" Configuration"
+     (("e" shan/edit-config "config file")
+      ("g" shan/refresh-buffer "refresh buffer")
+      ("r" shan/reload "reload")
+      ("DEL" save-buffers-kill-terminal "quit emacs"))))
 
   (pretty-hydra-define hydra-help (:exit t :color amaranth :quit-key "q")
-                       ("Bindings"
-                        (("b" counsel-descbinds "all")
-                         ("m" which-key-show-major-mode "major mode"))
-                        "Describes"
-                        (("f" counsel-describe-function "function")
-                         ("F" counsel-describe-face "face")
-                         ("v" counsel-describe-variable "variable"))
-                        "Others"
-                        (("l" view-lossage "command history"))))
+    ("Bindings"
+     (("b" counsel-descbinds "all")
+      ("m" which-key-show-major-mode "major mode"))
+     "Describes"
+     (("f" counsel-describe-function "function")
+      ("F" counsel-describe-face "face")
+      ("v" counsel-describe-variable "variable"))
+     "Others"
+     (("l" view-lossage "command history"))))
 
   (pretty-hydra-define hydra-projectile (:exit t :color amaranth :quit-key "q")
-                       (" Projectile"
-                        (("a" projectile-find-other-file "find other file")
-                         ("b" projectile-switch-to-buffer "switch buffer")
-                         ("c" projectile-compile-project "compile")
-                         ("d" projectile-find-dir "find directory"))
-                        ""
-                        (("e" projectile-recentf "recent files")
-                         ("f" projectile-find-file "find file")
-                         ("g" projectile-grep "grep")
-                         ("k" projectile-kill-buffers "kill project buffers"))
-                        ""
-                        (("p" projectile-switch-project "switch project")
-                         ("t" projectile-toggle-between-implementation-and-test "impl ↔ test")
-                         ("v" projectile-vc "version control"))))
+    (" Projectile"
+     (("a" projectile-find-other-file "find other file")
+      ("b" projectile-switch-to-buffer "switch buffer")
+      ("c" projectile-compile-project "compile")
+      ("d" projectile-find-dir "find directory"))
+     ""
+     (("e" projectile-recentf "recent files")
+      ("f" projectile-find-file "find file")
+      ("g" projectile-grep "grep")
+      ("k" projectile-kill-buffers "kill project buffers"))
+     ""
+     (("p" projectile-switch-project "switch project")
+      ("t" projectile-toggle-between-implementation-and-test "impl ↔ test")
+      ("v" projectile-vc "version control"))))
 
   (pretty-hydra-define hydra-avy (:exit t :color amaranth :quit-key "q")
-                       ("Goto"
-                        (("c" avy-goto-char-timer "timed char")
-                         ("C" avy-goto-char "char")
-                         ("w" avy-goto-word-1 "word")
-                         ("W" avy-goto-word-0 "word*")
-                         ("l" avy-goto-line "bol")
-                         ("L" avy-goto-end-of-line "eol"))
-                        "Line"
-                        (("m" avy-move-line "move")
-                         ("k" avy-kill-whole-line "kill")
-                         ("y" avy-copy-line "yank"))
-                        "Region"
-                        (("M" avy-move-region "move")
-                         ("K" avy-kill-region "kill")
-                         ("Y" avy-copy-region "yank"))))
+    ("Goto"
+     (("c" avy-goto-char-timer "timed char")
+      ("C" avy-goto-char "char")
+      ("w" avy-goto-word-1 "word")
+      ("W" avy-goto-word-0 "word*")
+      ("l" avy-goto-line "bol")
+      ("L" avy-goto-end-of-line "eol"))
+     "Line"
+     (("m" avy-move-line "move")
+      ("k" avy-kill-whole-line "kill")
+      ("y" avy-copy-line "yank"))
+     "Region"
+     (("M" avy-move-region "move")
+      ("K" avy-kill-region "kill")
+      ("Y" avy-copy-region "yank"))))
 
   (pretty-hydra-define hydra-window (:exit nil :color amaranth :quit-key "q")
-                       (" Windows"
-                        (("2" split-window-below "below")
-                         ("3" split-window-right "right"))
-                        ""
-                        (("b" balance-windows "balance")
-                         ("k" delete-window "kill" :exit t)
-                         ("w" other-window "move"))))
+    (" Windows"
+     (("2" split-window-below "below")
+      ("3" split-window-right "right"))
+     ""
+     (("b" balance-windows "balance")
+      ("k" delete-window "kill" :exit t)
+      ("w" other-window "move"))))
 
   (pretty-hydra-define hydra-leader (:exit t :color amaranth :quit-key "q")
-                       (" Leader"
-                        (("RET" hydra-config/body (propertize "+config" 'face 'bold))
-                         ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
-                         (";" hydra-avy/body (propertize "+jump" 'face 'bold))
-                         ("b" ivy-switch-buffer "switch buffer"))
-                        ""
-                        (("f" counsel-find-file "find file")
-                         ("g" magit-status "git")
-                         ("h" hydra-help/body (propertize "+help" 'face 'bold))
-                         ("l" recenter-top-bottom "recenter")
-                         ("p" hydra-projectile/body (propertize "+project" 'face 'bold)))
-                        ""
-                        (("s" save-buffer "save")
-                         ("t" counsel-M-x "M-x")
-                         ("u" undo "undo" :exit nil)
-                         ("w" hydra-window/body (propertize "+window" 'face 'bold)))))
+    (" Leader"
+     (("RET" hydra-config/body (propertize "+config" 'face 'bold))
+      ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
+      (";" hydra-avy/body (propertize "+jump" 'face 'bold))
+      ("b" ivy-switch-buffer "switch buffer"))
+     ""
+     (("f" counsel-find-file "find file")
+      ("g" magit-status "git")
+      ("h" hydra-help/body (propertize "+help" 'face 'bold))
+      ("l" recenter-top-bottom "recenter")
+      ("p" hydra-projectile/body (propertize "+project" 'face 'bold)))
+     ""
+     (("s" save-buffer "save")
+      ("t" counsel-M-x "M-x")
+      ("u" undo "undo" :exit nil)
+      ("w" hydra-window/body (propertize "+window" 'face 'bold)))
+     ""
+     (("+" text-scale-increase "zoom in" :exit nil)
+      ("-" text-scale-decrease "zoom out" :exit nil))))
 #+END_SRC
 
 ** GUI
