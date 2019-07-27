@@ -294,7 +294,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
   (defun shan/exec-call-keymap (keymap prompt)
     "Executes `shan/call-keymap'"
     (interactive)
-    (call-keymap keymap prompt))
+    (shan/call-keymap keymap prompt))
 #+END_SRC
 
 ** General Variables
@@ -630,7 +630,7 @@ Display available keybindings in a popup.
      ""
      (("s" save-buffer "save")
       ("t" counsel-M-x "M-x")
-      ("c" (lookup-key global-map (kbd "C-x")) "C-x")
+      ("c" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
       ("u" undo "undo" :exit nil))))
 #+END_SRC
 
