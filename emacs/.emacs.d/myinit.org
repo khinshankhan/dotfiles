@@ -1855,15 +1855,22 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
     (mark-whole-buffer)
     (elfeed-search-untag-all-unread))
 
-  (defun shan/elfeed-show-bookmark-tag (bookmark-tag)
+  (defun shan/elfeed-search-filters (&optional search-filter-arg)
     (interactive)
-    (bookmark-maybe-load-default-file)
-    (bookmark-jump bookmark-tag))
-
-  (defalias 'elfeed-toggle-star
-    (elfeed-expose #'elfeed-search-toggle-all 'star))
+    (unless search-filter-arg
+      (setq search-filter-arg
+            (string-join
+             (mapcar (apply-partially (lambda (arg)
+                                        (cond ((cl-search "-months-ago" arg) (concat "@" arg))
+                                              (t (concat "+" arg)))
+                                        ))
+                     (split-string (read-string "Enter your bookmarks:") split-string-default-separators)
+                     )
+             " ")))
+    (elfeed-search-set-filter search-filter-arg))
 
   (use-package elfeed
+    :if (file-exists-p shan/elfeed-file)
     :bind
     (:map elfeed-search-mode-map
           ("q" . shan/elfeed-save-db-and-bury)
@@ -1871,13 +1878,22 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
           ("m" . elfeed-toggle-star)
           ("M" . elfeed-toggle-star))
     :custom
-    (elfeed-db-directory shan/elfeed-db))
+    (elfeed-db-directory shan/elfeed-db)
+    :config
+    (defalias 'elfeed-toggle-star
+      (elfeed-expose #'elfeed-search-toggle-all 'star)))
 
   (use-package elfeed-org
+    :after (elfeed)
     :custom
     (rmh-elfeed-org-files (list shan/elfeed-file))
     :config
     (elfeed-org))
+
+  (use-package elfeed-goodies
+    :after (elfeed elfeed-org)
+    :config
+    (elfeed-goodies/setup))
 #+END_SRC
 
 ** Mirrors
