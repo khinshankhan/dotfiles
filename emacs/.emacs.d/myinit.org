@@ -27,6 +27,8 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#garbage-collection][Garbage Collection]]
   - [[#package-archives][Package Archives]]
   - [[#package-installers][Package Installers]]
+- [[#tricks-n-gimmicks-for-sweeter-configuration-ii][Tricks n Gimmicks for Sweeter Configuration II]]
+  - [[#elfeed][Elfeed]]
 - [[#start-up][Start Up]]
   - [[#encoding][Encoding]]
   - [[#backups][Backups]]
@@ -102,7 +104,6 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
-  - [[#elfeed][Elfeed]]
   - [[#mirrors][Mirrors]]
   - [[#wakatime][Wakatime]]
 
@@ -393,6 +394,66 @@ by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets
   (use-package use-package-ensure-system-package)
 
   (use-package try)
+#+END_SRC
+
+* Tricks n Gimmicks for Sweeter Configuration II
+
+Custom stuff that required use-package
+
+** Elfeed
+
+#+BEGIN_SRC emacs-lisp
+  (defun shan/elfeed-sync-database ()
+    "Wrapper to load the elfeed db from disk and update it"
+    (interactive)
+    (elfeed-db-load)
+    (elfeed-update))
+
+  (defun shan/elfeed-load-db-and-open ()
+    "Wrapper to load the elfeed db from disk before opening"
+    (interactive)
+    (shan/elfeed-sync-database)
+    (elfeed)
+    (elfeed-search-update--force))
+
+  ;;write to disk when quiting
+  (defun bjm/elfeed-save-db-and-bury ()
+    "Wrapper to save the elfeed db to disk before burying buffer"
+    (interactive)
+    (elfeed-db-save)
+    (quit-window))
+
+  (defun elfeed-mark-all-as-read ()
+    "Wrapper to mark all elfeed entries in a buffer as read"
+    (interactive)
+    (mark-whole-buffer)
+    (elfeed-search-untag-all-unread))
+
+  (use-package elfeed
+    :if (file-exists-p shan/elfeed-file)
+    :bind
+    (:map elfeed-search-mode-map
+          ("q" . shan/elfeed-save-db-and-bury)
+          ("Q" . shan/elfeed-save-db-and-bury)
+          ("m" . elfeed-toggle-star)
+          ("M" . elfeed-toggle-star))
+    :custom
+    (elfeed-db-directory shan/elfeed-db)
+    :config
+    (defalias 'elfeed-toggle-star
+      (elfeed-expose #'elfeed-search-toggle-all 'star)))
+
+  (use-package elfeed-org
+    :after (elfeed)
+    :custom
+    (rmh-elfeed-org-files (list shan/elfeed-file))
+    :config
+    (elfeed-org))
+
+  (use-package elfeed-goodies
+    :after (elfeed elfeed-org)
+    :config
+    (elfeed-goodies/setup))
 #+END_SRC
 
 * Start Up
@@ -722,8 +783,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     :bind
     (:map dashboard-mode-map
           ("n" . widget-forward)
-          ("p" . widget-backward)
-          ("R" . shan/reload))
+          ("p" . widget-backward))
     :custom
     (dashboard-banner-logo-title
      (format ""
@@ -760,15 +820,22 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
         )))
 
     :config
+    (use-package dashboard-elfeed
+      :if (file-exists-p "~/emacs-dashboard-elfeed/dashboard-elfeed.el")
+      :load-path "~/emacs-dashboard-elfeed"
+      :config
+      (add-to-list 'dashboard-item-generators '(elfeed . dashboard-elfeed))
+      (add-to-list 'dashboard-items '(elfeed) t))
+
     (setq dashboard-items '((recents  . 5)
                             ;; (bookmarks . 5)
                             ;; (projects . 5)
                             (agenda . 5)
                             ;; (registers . 5)
+                            ;;(elfeed . 3)
                             ))
 
     (dashboard-setup-startup-hook)
-    :config
     (setq dashboard-startup-banner (if shan/settings-exist
                                        (concat user-emacs-directory shan/preferred-logo)
                                      'logo)))
@@ -1112,8 +1179,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 Here we disable have to disable other checkers to use flycheck
 
 #+BEGIN_SRC emacs-lisp
-  (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc
-                                             c/c++-clang c/c++-cppcheck
+  (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck
                                              c/c++-gcc))
 #+END_SRC
 
@@ -1818,92 +1884,13 @@ Control how links and browser-url-generic function works (also for links).
 
 Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
 
-#+BEGIN_SRC emacs-lisp :tangle off
+#+BEGIN_SRC emacs-lisp
   (use-package elcord
     :if (executable-find "discord")
     :custom
     (elcord-use-major-mode-as-main-icon t)
     :config
     (elcord-mode))
-#+END_SRC
-
-** Elfeed
-
-#+BEGIN_SRC emacs-lisp
-  (defun shan/elfeed-sync-database ()
-    "Wrapper to load the elfeed db from disk and update it"
-    (interactive)
-    (elfeed-db-load)
-    (elfeed-update))
-
-  (defun shan/elfeed-load-db-and-open ()
-    "Wrapper to load the elfeed db from disk before opening"
-    (interactive)
-    (shan/elfeed-sync-database)
-    (elfeed)
-    (elfeed-search-update--force))
-
-  ;;write to disk when quiting
-  (defun bjm/elfeed-save-db-and-bury ()
-    "Wrapper to save the elfeed db to disk before burying buffer"
-    (interactive)
-    (elfeed-db-save)
-    (quit-window))
-
-  (defun elfeed-mark-all-as-read ()
-    "Wrapper to mark all elfeed entries in a buffer as read"
-    (interactive)
-    (mark-whole-buffer)
-    (elfeed-search-untag-all-unread))
-
-  (defun shan/elfeed-search-filters (&optional search-filter-arg)
-    "Wrapper for better searching. Can be use in a hook too now."
-    (interactive)
-    (unless search-filter-arg
-      (setq timewords '("-day-ago" "-days-ago" "-month-ago" "-months-ago" "-year-ago" "-years-ago"))
-      (setq search-filter-arg
-            (string-join
-             (mapcar (apply-partially (lambda (arg)
-                                        (cond ((or (string-prefix-p "+" arg)
-                                                   (string-prefix-p "-" arg)
-                                                   (string-prefix-p "@" arg)
-                                                   (string-prefix-p "#" arg)) arg)
-                                              ((member 't
-                                                       (mapcar (apply-partially (lambda (timeword)
-                                                                                  (string-suffix-p timeword yeetus))) timewords))
-                                               (concat "@" arg))
-                                              (t (concat "+" arg)))
-                                        ))
-                     (split-string (read-string "Enter your bookmarks:") split-string-default-separators)
-                     )
-             " ")))
-    (elfeed-search-set-filter search-filter-arg))
-
-  (use-package elfeed
-    :if (file-exists-p shan/elfeed-file)
-    :bind
-    (:map elfeed-search-mode-map
-          ("q" . shan/elfeed-save-db-and-bury)
-          ("Q" . shan/elfeed-save-db-and-bury)
-          ("m" . elfeed-toggle-star)
-          ("M" . elfeed-toggle-star))
-    :custom
-    (elfeed-db-directory shan/elfeed-db)
-    :config
-    (defalias 'elfeed-toggle-star
-      (elfeed-expose #'elfeed-search-toggle-all 'star)))
-
-  (use-package elfeed-org
-    :after (elfeed)
-    :custom
-    (rmh-elfeed-org-files (list shan/elfeed-file))
-    :config
-    (elfeed-org))
-
-  (use-package elfeed-goodies
-    :after (elfeed elfeed-org)
-    :config
-    (elfeed-goodies/setup))
 #+END_SRC
 
 ** Mirrors
