@@ -102,6 +102,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
+  - [[#elfeed][Elfeed]]
   - [[#mirrors][Mirrors]]
   - [[#wakatime][Wakatime]]
 
@@ -122,7 +123,8 @@ Me, myself, and I.
     (load-file shan/settings-path))
 
   (defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
-
+  (defconst shan/elfeed-file (concat user-emacs-directory "personal/elfeed.org"))
+  (defconst shan/elfeed-db (concat user-emacs-directory "personal/elfeeddb"))
 #+END_SRC
 
 ** General Functions
@@ -186,7 +188,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
     (load-file (concat user-emacs-directory "init.el")))
 
   (defun shan/edit-config ()
-    "Reload the configuration file."
+    "Edit the configuration file."
     (interactive)
     (find-file
      (concat user-emacs-directory "myinit.org")))
@@ -1781,6 +1783,7 @@ emmet-mode cheatsheet: https://docs.emmet.io/cheatsheet-a5.pdf
       (interactive)
       (flyspell-goto-next-error)
       (flyspell-popup-correct))
+
     (defun shan/flyspell-prev-word()
       "Jump to prev miss-pelled word and pop-up correction"
       (interactive)
@@ -1822,6 +1825,59 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
     (elcord-use-major-mode-as-main-icon t)
     :config
     (elcord-mode))
+#+END_SRC
+
+** Elfeed
+
+#+BEGIN_SRC emacs-lisp
+  (defun shan/elfeed-sync-database ()
+    "Wrapper to load the elfeed db from disk and update it"
+    (interactive)
+    (elfeed-db-load)
+    (elfeed-update))
+
+  (defun shan/elfeed-load-db-and-open ()
+    "Wrapper to load the elfeed db from disk before opening"
+    (interactive)
+    (shan/elfeed-sync-database)
+    (elfeed)
+    (elfeed-search-update--force))
+
+  ;;write to disk when quiting
+  (defun bjm/elfeed-save-db-and-bury ()
+    "Wrapper to save the elfeed db to disk before burying buffer"
+    (interactive)
+    (elfeed-db-save)
+    (quit-window))
+
+  (defun elfeed-mark-all-as-read ()
+    (interactive)
+    (mark-whole-buffer)
+    (elfeed-search-untag-all-unread))
+
+  (defun shan/elfeed-show-bookmark-tag (bookmark-tag)
+    (interactive)
+    (bookmark-maybe-load-default-file)
+    (bookmark-jump bookmark-tag))
+
+  (defalias 'elfeed-toggle-star
+    (elfeed-expose #'elfeed-search-toggle-all 'star))
+
+  (use-package elfeed
+    :bind
+    (:map elfeed-search-mode-map
+          ("q" . shan/elfeed-save-db-and-bury)
+          ("Q" . shan/elfeed-save-db-and-bury)
+          ("m" . elfeed-toggle-star)
+          ("M" . elfeed-toggle-star))
+    :custom
+    (elfeed-db-directory shan/elfeed-db))
+
+  (use-package elfeed-org
+    :custom
+    (rmh-elfeed-org-files (list shan/elfeed-file))
+    :config
+    (elfeed-org))
 #+END_SRC
 
 ** Mirrors
