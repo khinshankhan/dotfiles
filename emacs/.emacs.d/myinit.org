@@ -274,7 +274,7 @@ Personal functions, some packages are reliant on these, so it goes on top.
                (setq n (1+ n))
                (get-buffer bufname)))
       (switch-to-buffer (get-buffer-create bufname))
-      (if (= n 1) initial-major-mode)))
+      (lisp-interaction-mode)))
 
   (defun shan/browser-current-file ()
     "Open the current file as a URL using `browse-url'."
@@ -1851,17 +1851,27 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
     (quit-window))
 
   (defun elfeed-mark-all-as-read ()
+    "Wrapper to mark all elfeed entries in a buffer as read"
     (interactive)
     (mark-whole-buffer)
     (elfeed-search-untag-all-unread))
 
   (defun shan/elfeed-search-filters (&optional search-filter-arg)
+    "Wrapper for better searching. Can be use in a hook too now."
     (interactive)
     (unless search-filter-arg
+      (setq timewords '("-day-ago" "-days-ago" "-month-ago" "-months-ago" "-year-ago" "-years-ago"))
       (setq search-filter-arg
             (string-join
              (mapcar (apply-partially (lambda (arg)
-                                        (cond ((cl-search "-months-ago" arg) (concat "@" arg))
+                                        (cond ((or (string-prefix-p "+" arg)
+                                                   (string-prefix-p "-" arg)
+                                                   (string-prefix-p "@" arg)
+                                                   (string-prefix-p "#" arg)) arg)
+                                              ((member 't
+                                                       (mapcar (apply-partially (lambda (timeword)
+                                                                                  (string-suffix-p timeword yeetus))) timewords))
+                                               (concat "@" arg))
                                               (t (concat "+" arg)))
                                         ))
                      (split-string (read-string "Enter your bookmarks:") split-string-default-separators)
