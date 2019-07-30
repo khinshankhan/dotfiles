@@ -429,6 +429,36 @@ Custom stuff that required use-package
     (mark-whole-buffer)
     (elfeed-search-untag-all-unread))
 
+  (defun de/elfeed-search-filters (&optional search-filter-arg)
+    "Wrapper for better searching.
+  Will prompt user for filter terms, or else use given SEARCH-FILTER-ARG.
+  Can be use in a hook too"
+    (interactive)
+    (unless search-filter-arg
+      (setq search-filter-arg
+            ;; ask for user input if need be
+            (split-string (read-string "Enter your filter terms:") split-string-default-separators)))
+    this is a slightly hacky solution to determine if time is provided
+    (setq timewords '("-day-ago" "-days-ago" "-month-ago" "-months-ago" "-year-ago" "-years-ago"))
+    (setq search-filter-arg (string-join
+                             ;; normalize the search terms for elfeed filter function
+                             (mapcar (apply-partially (lambda (arg)
+                                                        (cond ((or (string-prefix-p "+" arg)
+                                                                   (string-prefix-p "-" arg)
+                                                                   (string-prefix-p "@" arg)
+                                                                   (string-prefix-p "#" arg)) arg)
+                                                              ;; determine if term is a time term
+                                                              ((member 't
+                                                                       (mapcar (apply-partially (lambda (timeword)
+                                                                                                  (string-suffix-p timeword arg))) timewords))
+                                                               (concat "@" arg))
+                                                              ;; heuristic that everything not explicitly excluded is included
+                                                              (t (concat "+" arg)))
+                                                        ))
+                                     search-filter-arg)
+                             " "))
+    (elfeed-search-set-filter search-filter-arg))
+
   (use-package elfeed
     :if (file-exists-p shan/elfeed-file)
     :bind
@@ -823,16 +853,20 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
     (use-package dashboard-elfeed
       :if (file-exists-p "~/emacs-dashboard-elfeed/dashboard-elfeed.el")
       :load-path "~/emacs-dashboard-elfeed"
+      :custom
+      (de/key "b")
+      (de/dashboard-search-filter "+unread")
       :config
       (add-to-list 'dashboard-item-generators '(elfeed . dashboard-elfeed))
-      (add-to-list 'dashboard-items '(elfeed) t))
+      (add-to-list 'dashboard-items '(elfeed) t)
+      )
 
     (setq dashboard-items '((recents  . 5)
                             ;; (bookmarks . 5)
                             ;; (projects . 5)
                             (agenda . 5)
                             ;; (registers . 5)
-                            ;;(elfeed . 3)
+                            ;;(elfeed . 10)
                             ))
 
     (dashboard-setup-startup-hook)
