@@ -46,6 +46,7 @@ export HISTSIZE=
 export EDITOR="emacs"
 
 export PATH=$PATH:${HOME}/bin
+export PATH=$PATH:${HOME}/.local/bin
 export PATH=$PATH:${HOME}/.myscripts
 
 export NO_AT_BRIDGE=1

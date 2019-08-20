@@ -403,16 +403,28 @@ Custom stuff that required use-package
 ** Elfeed
 
 #+BEGIN_SRC emacs-lisp
+  (defun shan/elfeed-update-database ()
+    "Wrapper to update the elfeed db"
+    (interactive)
+    (save-current-buffer
+      (elfeed)
+      (elfeed-db-load)
+      (elfeed-search-set-filter " ")
+      (elfeed-db-load)
+      (shan/elfeed-sync-database)
+      (elfeed-update)
+      (elfeed-search-update--force)))
+
   (defun shan/elfeed-sync-database ()
     "Wrapper to load the elfeed db from disk and update it"
     (interactive)
     (elfeed-db-load)
     (elfeed-update))
 
-  (defun shan/elfeed-load-db-and-open ()
+  (defun bjm/elfeed-load-db-and-open ()
     "Wrapper to load the elfeed db from disk before opening"
     (interactive)
-    (shan/elfeed-sync-database)
+    (elfeed-db-load)
     (elfeed)
     (elfeed-search-update--force))
 
@@ -429,34 +441,30 @@ Custom stuff that required use-package
     (mark-whole-buffer)
     (elfeed-search-untag-all-unread))
 
-  (defun de/elfeed-search-filters (&optional search-filter-arg)
+  (defun shan/elfeed-search-filters (&optional search-filter-arg)
     "Wrapper for better searching.
-  Will prompt user for filter terms, or else use given SEARCH-FILTER-ARG.
-  Can be use in a hook too"
+    Will prompt user for filter terms, or else use given SEARCH-FILTER-ARG.
+    Can be use in a hook too"
     (interactive)
     (unless search-filter-arg
       (setq search-filter-arg
             ;; ask for user input if need be
-            (split-string (read-string "Enter your filter terms:") split-string-default-separators)))
-    this is a slightly hacky solution to determine if time is provided
+            (read-string "Enter your filter terms:")))
+    ;; this is a slightly hacky solution to determine if time is provided
     (setq timewords '("-day-ago" "-days-ago" "-month-ago" "-months-ago" "-year-ago" "-years-ago"))
-    (setq search-filter-arg (string-join
-                             ;; normalize the search terms for elfeed filter function
-                             (mapcar (apply-partially (lambda (arg)
-                                                        (cond ((or (string-prefix-p "+" arg)
-                                                                   (string-prefix-p "-" arg)
-                                                                   (string-prefix-p "@" arg)
-                                                                   (string-prefix-p "#" arg)) arg)
-                                                              ;; determine if term is a time term
-                                                              ((member 't
-                                                                       (mapcar (apply-partially (lambda (timeword)
-                                                                                                  (string-suffix-p timeword arg))) timewords))
-                                                               (concat "@" arg))
-                                                              ;; heuristic that everything not explicitly excluded is included
-                                                              (t (concat "+" arg)))
-                                                        ))
-                                     search-filter-arg)
-                             " "))
+    (setq search-filter-arg
+          (string-join
+           ;; normalize the search terms for elfeed filter function
+           (mapcar (lambda (arg)
+                     (cond ((cl-some (lambda (c) (string-prefix-p c arg)) '("-" "@" "#" "+"))
+                            arg)
+                           ;; determine if term is a time term
+                           ((cl-some (lambda (timeword) (string-suffix-p timeword arg)) timewords)
+                            (concat "@" arg))
+                           ;; heuristic that everything not explicitly excluded is included
+                           (t (concat "+" arg))))
+                   (split-string search-filter-arg split-string-default-separators))
+           " "))
     (elfeed-search-set-filter search-filter-arg))
 
   (use-package elfeed
@@ -806,73 +814,81 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 *** Splash Screen
 
 #+BEGIN_SRC emacs-lisp
-  (use-package page-break-lines)
+    (use-package page-break-lines)
 
-  (use-package dashboard
-    :after (page-break-lines)
-    :bind
-    (:map dashboard-mode-map
-          ("n" . widget-forward)
-          ("p" . widget-backward))
-    :custom
-    (dashboard-banner-logo-title
-     (format ""
-             (float-time (time-subtract after-init-time before-init-time))
-             (length package-activated-list) gcs-done))
-    (dashboard-set-heading-icons t)
-    (dashboard-set-file-icons t)
-    (dashboard-set-init-info t)
-    (dashboard-center-content t)
-    (dashboard-set-footer nil)
-
-    (dashboard-set-navigator t)
-    (dashboard-navigator-buttons
-     `((
-
-        (,(and (display-graphic-p)
-               (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
-         ""
-         "GH Repos"
-         (lambda (&rest _) (browse-url-generic "https://github.com/kkhan01?tab=repositories")))
-
-        (,(and (display-graphic-p)
-               (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
-         ""
-         "Update emacs"
-         (lambda (&rest _) (auto-package-update-now)))
-
-        (,(and (display-graphic-p)
-               (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
-         ""
-         "Restart emacs"
-         (lambda (&rest _) (shan/reload)))
-
-        )))
-
-    :config
-    (use-package dashboard-elfeed
-      :if (file-exists-p "~/emacs-dashboard-elfeed/dashboard-elfeed.el")
-      :load-path "~/emacs-dashboard-elfeed"
+    (use-package dashboard
+      :after (page-break-lines)
+      :bind
+      (:map dashboard-mode-map
+            ("n" . widget-forward)
+            ("p" . widget-backward)
+            ("f" . shan/elfeed-update-database))
       :custom
-      (de/key "b")
-      (de/dashboard-search-filter "+unread")
+      (dashboard-banner-logo-title
+       (format ""
+               (float-time (time-subtract after-init-time before-init-time))
+               (length package-activated-list) gcs-done))
+      (dashboard-set-heading-icons t)
+      (dashboard-set-file-icons t)
+      (dashboard-set-init-info t)
+      (dashboard-center-content t)
+      (dashboard-set-footer nil)
+
+      (dashboard-set-navigator t)
+      (dashboard-navigator-buttons
+       `((
+
+          (,(and (display-graphic-p)
+                 (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
+           ""
+           "GH Repos"
+           (lambda (&rest _) (browse-url-generic "https://github.com/kkhan01?tab=repositories")))
+
+          (,(and (display-graphic-p)
+                 (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
+           ""
+           "Update emacs"
+           (lambda (&rest _) (shan/elfeed-update-database)))
+
+          (,(and (display-graphic-p)
+                 (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
+           ""
+           "Restart emacs"
+           (lambda (&rest _) (shan/reload)))
+
+          )))
+
       :config
-      (add-to-list 'dashboard-item-generators '(elfeed . dashboard-elfeed))
-      (add-to-list 'dashboard-items '(elfeed) t)
-      )
+      (use-package dashboard-elfeed
+        :if (file-exists-p "~/emacs-dashboard-elfeed/dashboard-elfeed.el")
+        :load-path "~/emacs-dashboard-elfeed"
+        :custom
+        (de/key "b")
+        (de/dashboard-search-filter "+test")
+        (de/dashboard-search-filter-1 "+me")
+        :config
+        (add-to-list 'dashboard-item-generators '(elfeed . dashboard-elfeed))
+        (add-to-list 'dashboard-items '(elfeed) t)
+        (add-to-list 'dashboard-item-generators '(elfeed-1 . dashboard-elfeed-1))
+        (add-to-list 'dashboard-items '(elfeed-1) t)
+        (add-to-list 'dashboard-item-generators '(elfeed-2 . dashboard-elfeed-2))
+        (add-to-list 'dashboard-items '(elfeed-2) t)
+        )
 
-    (setq dashboard-items '((recents  . 5)
-                            ;; (bookmarks . 5)
-                            ;; (projects . 5)
-                            (agenda . 5)
-                            ;; (registers . 5)
-                            ;;(elfeed . 10)
-                            ))
+      (setq dashboard-items '((recents  . 5)
+                              ;; (bookmarks . 5)
+                              ;; (projects . 5)
+                              (agenda . 5)
+                              ;; (registers . 5)
+                              (elfeed . 3)
+                              (elfeed-1 . 3)
+                              (elfeed-2 . 2)
+                              ))
 
-    (dashboard-setup-startup-hook)
-    (setq dashboard-startup-banner (if shan/settings-exist
-                                       (concat user-emacs-directory shan/preferred-logo)
-                                     'logo)))
+      (dashboard-setup-startup-hook)
+      (setq dashboard-startup-banner (if shan/settings-exist
+                                         (concat user-emacs-directory shan/preferred-logo)
+                                       'logo)))
 #+END_SRC
 
 *** Scratch buffer
