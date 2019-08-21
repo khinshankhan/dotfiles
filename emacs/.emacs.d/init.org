@@ -276,7 +276,6 @@ by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets
 
 * Start Up
 
-
 ** Encoding
 
 Begone utf 16!
@@ -320,6 +319,21 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (menu-bar-mode 0)
   (toggle-scroll-bar 0)
   (tool-bar-mode 0))
+#+END_SRC
+
+** Appearance
+
+*** Theme
+
+#+BEGIN_SRC emacs-lisp
+(use-package doom-themes
+  :if (display-graphic-p)
+  :custom
+  (doom-vibrant-brighter-comments t)
+  (doom-vibrant-brighter-modeline t)
+  :config
+  (doom-themes-org-config)
+  (load-theme 'doom-nova t))
 #+END_SRC
 
 * Org
