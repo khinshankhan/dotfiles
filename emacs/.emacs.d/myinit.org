@@ -38,7 +38,7 @@ Shorthands
 
 #+BEGIN_SRC emacs-lisp
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
-(defconst shan/config-path (concat user-emacs-directory "config.org"))
+(defconst shan/config-path (concat user-emacs-directory "myinit.org"))
 #+END_SRC
 
 ** General Functions
@@ -334,6 +334,47 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   :config
   (doom-themes-org-config)
   (load-theme 'doom-nova t))
+#+END_SRC
+
+** Interface
+
+*** Completetion Frontend
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :bind
+  ([switch-to-buffer] . ivy-switch-buffer)
+  (:map ivy-minibuffer-map
+        ([remap xref-find-definitions] . shan/do-nothing)
+        ([remap xref-find-definitions-other-frame] . shan/do-nothing)
+        ([remap xref-find-definitions-other-window] . shan/do-nothing)
+        ([remap xref-find-references] . shan/do-nothing)
+        ([remap xref-find-apropos] . shan/do-nothing)
+        ("<return>" . ivy-alt-done))
+  :custom
+  (ivy-use-virtual-buffers t)
+  (ivy-count-format "%d/%d ")
+  (ivy-height 20)
+  (ivy-display-style 'fancy)
+  (ivy-format-function 'ivy-format-function-line)
+  (ivy-re-builders-alist
+   '((t . ivy--regex-plus)))
+  (ivy-initial-inputs-alist nil)
+  :config
+  (ivy-mode))
+
+(use-package counsel
+  :bind
+  ("M-x" . counsel-M-x)
+  ("C-x C-f" . counsel-find-file)
+  ("C-h v" . counsel-describe-variable)
+  ("C-h f" . counsel-describe-function)
+  ("C-x b" . counsel-switch-buffer))
+
+(use-package swiper
+  :bind
+  ("C-s" . swiper-isearch)
+  ("C-r" . swiper-isearch-backward))
 #+END_SRC
 
 * Org
