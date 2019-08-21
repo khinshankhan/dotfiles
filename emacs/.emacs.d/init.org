@@ -218,20 +218,10 @@ Personal functions, some packages are reliant on these, so it goes on top. Worki
   (interactive)
   (load-file shan/init-path))
 
-(defun shan/ready-reload()
-  "Re-tangle org config file for a truer reload."
-  (interactive)
-  (write-region
-   "
-(setq vc-follow-symlinks nil)
-(org-babel-load-file (concat user-emacs-directory \"init.org\"))"
-   ""
-   shan/init-path))
-
 (defun shan/edit-config ()
   "Edit the configuration file."
   (interactive)
-  (find-file shan/init-path))
+  (find-file shan/config-path))
 #+END_SRC
 
 * Initialization
