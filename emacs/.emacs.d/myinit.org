@@ -4,6 +4,18 @@
 
 * Preface
 
+
+After using emacs for a while (since my first programming class in high school), I decided to create my own
+configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
+runs, but Windows has proven to be sightly difficult with the package manager.
+
+For more informations about myself, you can visit my website.
+
+This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
+from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
+
+A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
+
 * Tricks n Gimmicks for Sweeter Configuration
 
 Mostly just useful variables and functions.
@@ -45,7 +57,8 @@ Shorthands
 
 ** General Functions
 
-Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not mentioned in preface and significant enough. Functions are split into... "sensible" groups. 
+Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not 
+mentioned in preface and significant enough. Functions are split into... "sensible" groups. 
 
 #+BEGIN_QUOTE
  [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
@@ -215,6 +228,21 @@ Personal functions, some packages are reliant on these, so it goes on top. Worki
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+(defun shan/call-keymap (map &optional prompt)
+  "Read a key sequence and call the command it's bound to in MAP."
+  (let* ((help-form `(describe-bindings ,(vector map)))
+         (key (read-key-sequence prompt))
+         (cmd (lookup-key map key t)))
+    (if (functionp cmd) (call-interactively cmd)
+      (user-error "%s is undefined" key))))
+
+(defun shan/exec-call-keymap (keymap prompt)
+  "Executes `shan/call-keymap'"
+  (interactive)
+  (shan/call-keymap keymap prompt))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 (defun shan/reload ()
   "Reload the configuration file."
   (interactive)
@@ -369,6 +397,93 @@ Weird errors of GTK without this.
 *** Hydra Map
 
 #+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra-config (:exit t :color amaranth :title " Personal" :quit-key "q")
+  (" Configuration"
+   (("e" shan/edit-config "config file")
+    ("r" shan/reload "reload")
+    ("g" shan/refresh-buffer "refresh buffer"))
+   " Elfeed"
+   ()
+   " Exit"
+   (("<deletechar>" save-buffers-kill-terminal "quit emacs")
+    ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-help (:exit t :color amaranth :title " Help" :quit-key "q")
+  ("Bindings"
+   (("b" counsel-descbinds "all")
+    ("m" which-key-show-major-mode "major mode"))
+   "Describes"
+   (("f" counsel-describe-function "function")
+    ("k" describe-key "key")
+    ("v" counsel-describe-variable "variable"))
+   "Others"
+   (("F" counsel-describe-face "face")
+    ("l" view-lossage "command history"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-projectile (:exit t :color amaranth :title " Projectile" :quit-key "q")
+  (""
+   (("a" projectile-find-other-file "find other file")
+    ("b" projectile-switch-to-buffer "switch buffer")
+    ("c" projectile-compile-project "compile")
+    ("d" projectile-find-dir "find directory"))
+   ""
+   (("e" projectile-recentf "recent files")
+    ("f" projectile-find-file "find file")
+    ("g" projectile-grep "grep")
+    ("k" projectile-kill-buffers "kill project buffers"))
+   ""
+   (("p" projectile-switch-project "switch project")
+    ("t" projectile-toggle-between-implementation-and-test "impl ↔ test")
+    ("v" projectile-vc "version control"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-avy (:exit t :color amaranth :title " Avy" :quit-key "q")
+  ("Goto"
+   (("c" avy-goto-char-timer "timed char")
+    ("C" avy-goto-char "char")
+    ("w" avy-goto-word-1 "word")
+    ("W" avy-goto-word-0 "word*")
+    ("l" avy-goto-line "bol")
+    ("L" avy-goto-end-of-line "eol"))
+   "Line"
+   (("m" avy-move-line "move")
+    ("k" avy-kill-whole-line "kill")
+    ("y" avy-copy-line "yank"))
+   "Region"
+   (("M" avy-move-region "move")
+    ("K" avy-kill-region "kill")
+    ("Y" avy-copy-region "yank"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-window (:exit nil :color amaranth :title " Windows" :quit-key "q")
+  ("Split"
+   (("2" split-window-below "below")
+    ("3" split-window-right "right"))
+   "Movement"
+   (("b" balance-windows "balance")
+    ("k" delete-window "kill" :exit t)
+    ("w" other-window "move"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
+
+(pretty-hydra-define hydra-lsp (:exit t :color amaranth :title " LSP" :quit-key "q")
+  ("Find"
+   (("." lsp-ui-peek-find-references "find references")
+    ("d" lsp-find-definition "find definition")
+    ("t" lsp-find-type-definition "find type definition"))
+   "Refactor"
+   (("e" lsp-rename "rename symbol at point")
+    ("f" lsp-format-buffer "format buffer"))
+   "Show"
+   (("j" lsp-ui-imenu "symbol table")
+    ("l" lsp-ui-flycheck-list "error list"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
 (pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
   (""
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
@@ -490,9 +605,13 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 * Programming
 
+Things that I should need in my prog modes.
+
 ** General
 
 *** Interactive
+
+These guys are always active and a series of small things that have become second nature by now.
 
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
@@ -517,6 +636,8 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 #+END_SRC
 
 * Org
+
+org-mode is so colossal, it gets its own separate first-level bullet.
 
 #+BEGIN_SRC emacs-lisp
 (use-package org
@@ -591,4 +712,65 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   :after (org))
 
 (use-package ox-pandoc)
+#+END_SRC
+
+* Community
+
+** Browser
+
+Control how links and browser-url-generic function works (also for links).
+
+#+BEGIN_SRC emacs-lisp
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-args '("-private")
+        browse-url-firefox-program "firefox"
+        browse-url-generic-program "firefox")
+
+  (defun browse-lucky (start end)
+    (interactive "r")
+    (let ((q (buffer-substring-no-properties start end)))
+      (browse-url-generic (concat "http://www.google.com/search?btnI&q="
+                                  (url-hexify-string q)))))
+#+END_SRC
+
+** Discord
+
+Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elcord
+    :if (executable-find "discord")
+    :custom
+    (elcord-use-major-mode-as-main-icon t)
+    :config
+    (elcord-mode))
+#+END_SRC
+
+** Wakatime
+
+Monitor my  coding activity.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package wakatime-mode
+    :if shan/settings-exist
+    :custom
+    (wakatime-cli-path "/usr/bin/wakatime")
+    :init
+    (global-wakatime-mode))
+#+END_SRC
+
+** Miscellaneous Helpers
+
+#+BEGIN_SRC emacs-lisp
+  (use-package speed-type)
+
+  (use-package origami)
+
+  (use-package demangle-mode)
+
+  (use-package modern-cpp-font-lock)
+
+  (use-package academic-phrases)
+
+  (use-package powerthesaurus)
 #+END_SRC
