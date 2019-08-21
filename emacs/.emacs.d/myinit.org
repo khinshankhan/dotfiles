@@ -39,6 +39,8 @@ Shorthands
 #+BEGIN_SRC emacs-lisp
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
 (defconst shan/config-path (concat user-emacs-directory "myinit.org"))
+(defconst shan/python-executable "python3")
+(defconst shan/ipython-executable "ipython3")
 #+END_SRC
 
 ** General Functions
@@ -308,6 +310,82 @@ Weird errors of GTK without this.
   (setq-default confirm-kill-processes nil))
 #+END_SRC
 
+** Bindings
+
+*** Key Chords
+
+#+BEGIN_SRC emacs-lisp
+(use-package use-package-chords
+  :after (key-chord))
+
+(use-package key-chord
+  :custom
+  (key-chord-two-keys-delay 0.05)
+  :config
+  (key-chord-mode t))
+#+END_SRC
+
+*** Hydra
+
+#+BEGIN_SRC emacs-lisp
+(use-package posframe
+  :preface
+  (defun posframe-poshandler-frame-bottom-center (info)
+    (cons (/ (- (plist-get info :parent-frame-width)
+                (plist-get info :posframe-width))
+             2)
+          (- -60
+             (plist-get info :mode-line-height)
+             (plist-get info :minibuffer-height)))))
+
+(use-package hydra
+  :after (posframe)
+  :preface
+  (defun hydra-posframe--hotfix (&rest _)
+    (posframe-funcall
+     " *hydra-posframe*"
+     (lambda ()
+       (fit-frame-to-buffer (selected-frame) nil
+                            (+ (count-lines (point-min) (point-max)) 1)
+                            nil nil)
+       (redirect-frame-focus (selected-frame) (frame-parent (selected-frame))))))
+  :custom
+  (hydra--work-around-dedicated nil)
+  (hydra-posframe-show-params
+   (list
+    :internal-border-width 0
+    :background-color "#1c1e24"
+    :poshandler 'posframe-poshandler-frame-bottom-center))
+  (hydra-hint-display-type 'lv)
+  :chords
+  ("ao" . hydra-leader/body)
+  :config
+  (advice-add 'hydra-posframe-show :after #'hydra-posframe--hotfix))
+
+(use-package pretty-hydra
+  :after (hydra))
+#+END_SRC
+
+*** Hydra Map
+
+#+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
+  (""
+   (("RET" hydra-config/body (propertize "+config" 'face 'bold))
+    ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
+    ("h" hydra-help/body (propertize "+help" 'face 'bold)))
+   ""
+   (("f" counsel-find-file "management")
+    ("p" hydra-projectile/body (propertize "+project" 'face 'bold))
+    ("a" hydra-avy/body (propertize "+jump" 'face 'bold))
+    ("w" hydra-window/body (propertize "+window" 'face 'bold)))
+   ""
+   (("u" undo "undo" :exit nil)
+    ("t" counsel-M-x "M-x")
+    ("c" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
+    ("s" save-buffer "save"))))
+#+END_SRC
+
 ** GUI
 
 You need to experience keyboard to realize keyboard master race. (fn + f10 if need be for options though)
@@ -334,6 +412,39 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   :config
   (doom-themes-org-config)
   (load-theme 'doom-nova t))
+
+(use-package solaire-mode
+  :functions persp-load-state-from-file
+  :hook
+  (prog-mode . turn-on-solaire-mode)
+  (minibuffer-setup . solaire-mode-in-minibuffer)
+  (after-load-theme . solaire-mode-swap-bg)
+  :custom
+  (solaire-mode-remap-modeline nil)
+  (solaire-mode-remap-fringe nil)
+  :config
+  (solaire-global-mode 1)
+  (solaire-mode-swap-bg)
+  (advice-add #'persp-load-state-from-file
+	      :after #'solaire-mode-restore-persp-mode-buffers))
+#+END_SRC
+
+** Mode Line
+
+#+BEGIN_SRC emacs-lisp
+(line-number-mode t)
+(column-number-mode t)
+
+(use-package doom-modeline
+  :if (display-graphic-p)
+  :custom
+  (doom-modeline-python-executable shan/python-executable)
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-version t)
+  (doom-modeline-buffer-file-name-style 'file-name)
+  :config
+  (doom-modeline-mode))
 #+END_SRC
 
 ** Interface
@@ -375,6 +486,34 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   :bind
   ("C-s" . swiper-isearch)
   ("C-r" . swiper-isearch-backward))
+#+END_SRC
+
+* Programming
+
+** General
+
+*** Interactive
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
+
+(use-package smartparens
+  :hook
+  (prog-mode . smartparens-mode)
+  :custom
+  (sp-escape-quotes-after-insert nil)
+  :config
+  (require 'smartparens-config))
+
+(use-package paren
+  :config
+  (show-paren-mode t))
+
+(use-package move-text
+  :config
+  (move-text-default-bindings))
 #+END_SRC
 
 * Org
@@ -436,7 +575,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
                '("plantuml" . fundamental)))
 
 (use-package toc-org
-  :after org
+  :after (org)
   :hook
   (org-mode . toc-org-enable))
 
