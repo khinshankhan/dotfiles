@@ -6,9 +6,74 @@
 
 * Tricks n Gimmicks for Sweeter Configuration
 
+Mostly just useful variables and functions.
+
 ** General Functions
 
-Personal functions, some packages are reliant on these, so it goes on top.
+Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not mentioned in preface and significant enough. Functions are split into... "sensible" groups. Group splits for credits may be common, should still be treated as one group.
+
+#+BEGIN_SRC emacs-lisp
+(defun shan/do-nothing ()
+  "Do nothing."
+  (interactive)
+  nil)
+
+(defun shan/before (to-call-before f)
+  "Run TO-CALL-BEFORE then run F."
+  (funcall to-call-before)
+  (funcall f))
+
+(defun shan/after (to-call-after f)
+  "Run F then run TO-CALL-AFTER."
+  (funcall f)
+  (funcall to-call-after))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun shan/split-window-right ()
+  "Create a new window split to the right and balance the windows."
+  (interactive)
+  (shan/after #'balance-windows #'split-window-right))
+
+(defun shan/split-window-below ()
+  "Create a new window split below and balance the windows."
+  (interactive)
+  (shan/after #'balance-windows #'split-window-below))
+
+(defun shan/delete-window ()
+  "Delete the current window and balance the windows."
+  (interactive)
+  (shan/after #'balance-windows #'delete-window))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun shan/delete-buffer ()
+  "Delete the current buffer and go to next most recent buffer."
+  (interactive)
+  (ido-kill-buffer))
+
+(defun shan/refresh-buffer ()
+  "Refresh the current buffer."
+  (interactive)
+  (revert-buffer :ignore-auto :noconfirm))
+#+END_SRC
+
+[[[https://emacs.stackexchange.com/a/340][Credit]]]
+
+#+BEGIN_SRC emacs-lisp
+(defun shan/scratch ()
+  "Create a new scratch buffer to work in. (could be *scratch* - *scratchX*)"
+  (interactive)
+  (let ((n 0) bufname)
+    (while (progn
+             (setq bufname (concat "*scratch"
+                                   (if (= n 0) "" (int-to-string n))
+                                   "*"))
+             (setq n (1+ n))
+             (get-buffer bufname)))
+    (switch-to-buffer (get-buffer-create bufname))
+    (lisp-interaction-mode)))
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
