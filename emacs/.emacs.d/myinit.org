@@ -12,6 +12,10 @@ Mostly just useful variables and functions.
 
 Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not mentioned in preface and significant enough. Functions are split into... "sensible" groups. Group splits for credits may be common, should still be treated as one group.
 
+#+BEGIN_QUOTE
+[[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
+#+END_QUOTE
+
 #+BEGIN_SRC emacs-lisp
 (defun shan/do-nothing ()
   "Do nothing."
@@ -56,11 +60,7 @@ Personal functions, some packages are reliant on these, so it goes on top. Worki
   "Refresh the current buffer."
   (interactive)
   (revert-buffer :ignore-auto :noconfirm))
-#+END_SRC
 
-[[[https://emacs.stackexchange.com/a/340][Credit]]]
-
-#+BEGIN_SRC emacs-lisp
 (defun shan/scratch ()
   "Create a new scratch buffer to work in. (could be *scratch* - *scratchX*)"
   (interactive)
@@ -76,11 +76,47 @@ Personal functions, some packages are reliant on these, so it goes on top. Worki
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+(defun shan/toggle-mark ()
+  "Pop a mark if one doesn't exist already, deactivate it otherwise."
+  (interactive)
+  (if (region-active-p)
+      (deactivate-mark)
+    (push-mark nil nil t)))
+
+(defun shan/toggle-mark-rectangle ()
+  "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
+  (interactive)
+  (if (region-active-p)
+      (deactivate-mark)
+    (rectangle-mark-mode)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
   "Adds all elements from from-list to to-list"
   (dolist (elem from-list)
     (add-to-list to-list elem append compare-fn))
   to-list)
+
+(defun shan/copy-hooks-to (from-hook to-hook)
+  "Copies one list of hooks to another, without the weird nonc circular list problem"
+  (dolist (hook from-hook)
+    (add-hook to-hook hook)))
+
+(defun shan/fill-or-unfill ()
+  "Fill or unfill based on the previous command."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
+(defun shan/reload ()
+  "Reload the configuration file."
+  (interactive)
+  (load-file (concat user-emacs-directory "init.el")))
 #+END_SRC
 
 * Initialization
