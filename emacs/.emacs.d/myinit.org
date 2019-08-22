@@ -532,7 +532,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   (doom-vibrant-brighter-modeline t)
   :config
   (doom-themes-org-config)
-  (load-theme 'doom-nova t))
+  (load-theme 'doom-dracula t))
 
 (use-package solaire-mode
   :functions persp-load-state-from-file
@@ -569,6 +569,67 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 #+END_SRC
 
 ** Interface
+
+*** Splash Screen
+
+#+BEGIN_SRC emacs-lisp
+(use-package page-break-lines)
+
+(use-package dashboard
+  :after (page-break-lines)
+  :bind
+  (:map dashboard-mode-map
+	("n" . widget-forward)
+	("p" . widget-backward)
+	("f" . shan/elfeed-update-database))
+  :custom
+  (dashboard-banner-logo-title
+   (format ""
+	   (float-time (time-subtract after-init-time before-init-time))
+	   (length package-activated-list) gcs-done))
+  (dashboard-set-heading-icons t)
+  (dashboard-set-file-icons t)
+  (dashboard-set-init-info t)
+  (dashboard-center-content t)
+  (dashboard-set-footer nil)
+
+  (dashboard-set-navigator t)
+  (dashboard-navigator-buttons
+   `((
+
+      (,(and (display-graphic-p)
+	     (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
+       ""
+       "GH Repos"
+       (lambda (&rest _) (browse-url-generic "https://github.com/kkhan01?tab=repositories")))
+
+      (,(and (display-graphic-p)
+	     (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
+       ""
+       "Update emacs"
+       (lambda (&rest _) (shan/elfeed-update-database)))
+
+      (,(and (display-graphic-p)
+	     (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
+       ""
+       "Restart emacs"
+       (lambda (&rest _) (shan/reload)))
+
+      )))
+
+  :config
+  (setq dashboard-items '((recents  . 5)
+			  ;; (bookmarks . 5)
+			  ;; (projects . 5)
+			  (agenda . 5)
+			  ;; (registers . 5)
+			  ))
+
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner (if shan/settings-exist
+				     (concat user-emacs-directory shan/preferred-logo)
+				   'logo)))
+#+END_SRC
 
 *** Completetion Frontend
 
