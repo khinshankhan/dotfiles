@@ -64,9 +64,13 @@ mentioned in preface and significant enough. Functions are split into... "sensib
 
 #+BEGIN_QUOTE
  [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
+
  [[[https://stackoverflow.com/questions/95631/open-a-file-with-su-sudo-inside-emacs/7043786][Credit: sudo-edit]]]
+
  [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L40-L48][Credit: delete-this-file]]]
+
  [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
+
  [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
 #+END_QUOTE
 
