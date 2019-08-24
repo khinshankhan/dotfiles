@@ -523,8 +523,7 @@ Weird errors of GTK without this.
    (("j" lsp-ui-imenu "symbol table")
     ("l" lsp-ui-flycheck-list "error list"))
    " Exit"
-   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold))
-    ("SPC" dap-hydra "dap"))))
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
 (pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
   (""
@@ -1025,7 +1024,11 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   (company-lsp-enable-recompletion t)
   :config
   (add-to-list 'company-backends #'company-lsp))
+#+END_SRC
 
+Great for debugging... once you learn how to use a debugger.
+
+#+BEGIN_SRC emacs-lisp
 (use-package dap-mode
   :after (hydra)
   :hook
@@ -1038,7 +1041,11 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
           ("C-c d" . dap-hydra))
     :config
     (defhydra+ dap-hydra (:exit nil :foreign-keys run)
-      ("d" dap-debug "Start debug session"))))
+      ("d" dap-debug "Start debug session"))
+    (pretty-hydra-define+ hydra-lsp ()
+      (;; these heads are added to the existing "Windows" column
+       " Exit"
+       (("SPC" dap-hydra "dap"))))))
 #+END_SRC
 
 * Languages
@@ -1050,7 +1057,9 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   :after (company)
   :config
   (add-to-list 'company-backends 'company-c-headers))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
 (use-package cc-mode
   :ensure nil
   :custom
@@ -1072,34 +1081,12 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   :config
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
 (use-package dap-gdb-lldb
   :ensure nil
   :after (dap-mode))
-#+END_SRC
-
-
-*** Docker
-
-#+BEGIN_SRC emacs-lisp
-(use-package dockerfile-mode
-  :mode
-  (("Dockerfile'"       . dockerfile-mode)
-   ("\\.Dockerfile\\'"  . dockerfile-mode))
-  :init
-  (progn
-    (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook)))
-
-;; Emacs interface to docker
-(use-package docker)
-#+END_SRC
-
-*** Kubernetes
-
-#+BEGIN_SRC emacs-lisp
-(use-package kubernetes
-  :commands
-  (kubernetes-overview))
 #+END_SRC
 
 ** Clojure
@@ -1193,7 +1180,73 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   (("/PKGBUILD/" . pkgbuild-mode)))
 #+END_SRC
 
-** PlantUML
+** Python
+
+A reasonable guess.
+
+#+BEGIN_SRC emacs-lisp
+(use-package pip-requirements
+  :mode
+  ("requirements\\.txt" . pip-requirements-mode)
+  :init
+  (progn
+    (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
+#+END_SRC
+
+Remember to install pyls.
+
+#+BEGIN_SRC emacs-lisp
+(use-package python
+  :ensure nil
+  :if (executable-find "pyls")
+  :after (lsp)
+  :hook
+  (python-mode . lsp)
+  :custom
+  (python-indent 4)
+  (python-shell-interpreter shan/python-executable)
+  (python-fill-docstring-style 'pep-257)
+  (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
+  (py-split-window-on-execute t)
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
+                    :major-modes '(python-mode)
+                    :server-id 'pyls))
+  (shan/ide-add 'python-mode #'hydra-lsp/body))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package dap-python
+  :ensure nil
+  :after dap-mode
+  :custom
+  (dap-python-executable shan/python-executable))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package cython-mode)
+(use-package flycheck-cython)
+#+END_SRC
+
+** R
+
+#+BEGIN_SRC emacs-lisp
+(use-package ess
+  :pin melpa-stable
+  :mode
+  ("\\.[rR]\\'" . R-mode)
+  :config
+  (require 'ess-site))
+#+END_SRC
+
+* Other Programming
+
+Not quite a programming language, but more for tools.
+
+** Abstract Planning
+
+*** PlantUML
 
 #+BEGIN_SRC emacs-lisp
 (use-package plantuml-mode
@@ -1208,27 +1261,31 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   (plantuml-options "-charset UTF-8"))
 #+END_SRC
 
-** Python
+** Containers
+
+*** Docker
 
 #+BEGIN_SRC emacs-lisp
-(use-package pip-requirements
+(use-package dockerfile-mode
   :mode
-  ("requirements\\.txt" . pip-requirements-mode)
+  (("Dockerfile'"       . dockerfile-mode)
+   ("\\.Dockerfile\\'"  . dockerfile-mode))
   :init
   (progn
-    (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
+    (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook)))
 
+;; Emacs interface to docker
+(use-package docker)
 #+END_SRC
 
-** R
+*** Kubernetes
+
+k8s stuff
 
 #+BEGIN_SRC emacs-lisp
-(use-package ess
-  :pin melpa-stable
-  :mode
-  ("\\.[rR]\\'" . R-mode)
-  :config
-  (require 'ess-site))
+(use-package kubernetes
+  :commands
+  (kubernetes-overview))
 #+END_SRC
 
 ** Theorem Provers
