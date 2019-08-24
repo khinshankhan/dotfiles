@@ -419,3 +419,8 @@ mode "$mode_gaps_outer" {
 
 #keep workspace 9 floating
 for_window [workspace="8"] floating enable
+
+# switch between layouts quickly
+#bindcode Shift+50 exec setxkbmap -layout dvorak
+bindcode Shift+50 exec setxkbmap -layout us
+bindcode Shift+62 exec setxkbmap us -variant colemak
