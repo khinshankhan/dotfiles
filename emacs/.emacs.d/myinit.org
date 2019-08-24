@@ -62,6 +62,8 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
 - [[#language-augmentation][Language Augmentation]]
   - [[#yasnippet][Yasnippet]]
 - [[#editing][Editing]]
+  - [[#expand-region][Expand Region]]
+  - [[#general-editing][General Editing]]
 - [[#navigation][Navigation]]
 - [[#community][Community]]
   - [[#browser][Browser]]
@@ -1555,7 +1557,9 @@ org-mode is so colossal, it's worth learning.
 
   (add-to-list 'org-src-lang-modes
                '("plantuml" . fundamental)))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
 (use-package toc-org
   :after (org)
   :hook
@@ -1564,7 +1568,9 @@ org-mode is so colossal, it's worth learning.
 (use-package org-bullets
   :hook
   (org-mode . org-bullets-mode))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
 (use-package px)
 
 (use-package htmlize)
@@ -1670,11 +1676,29 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
 
 * Editing
 
+** Expand Region
+
+#+BEGIN_SRC emacs-lisp
+(use-package expand-region
+  :defer t
+  :bind
+  ("C-=" . er/expand-region))
+#+END_SRC
+
+** General Editing
+
 #+BEGIN_SRC emacs-lisp
 (setq-default require-final-newline t)
 (global-subword-mode t)
 (delete-selection-mode t)
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
+
+(global-set-key [remap fill-paragraph] #'shan/fill-or-unfill)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package aggressive-indent
+  :defer t)
 #+END_SRC
 
 * Navigation
