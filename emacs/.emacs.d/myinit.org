@@ -713,6 +713,63 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   ("C-r" . swiper-isearch-backward))
 #+END_SRC
 
+*** Neotree
+
+I dont usually use gui, but this seemed fun. Used [[https://github.com/Ladicle][Ladicle]]'s config.
+
+#+BEGIN_SRC emacs-lisp
+(use-package neotree
+  :after
+  (projectile)
+  :commands
+  (neotree-show neotree-hide neotree-dir neotree-find)
+  :init
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+  :custom
+  (neo-theme 'nerd2)
+  (neo-window-position 'left)
+  :bind
+  ([f8] . neotree-current-dir-toggle)
+  ([f9] . neotree-projectile-toggle)
+  :preface
+  (defun neotree-projectile-toggle ()
+    (interactive)
+    (let ((project-dir
+           (ignore-errors
+           ;;; Pick one: projectile or find-file-in-project
+             (projectile-project-root)
+             ))
+          (file-name (buffer-file-name))
+          (neo-smart-open t))
+      (if (and (fboundp 'neo-global--window-exists-p)
+               (neo-global--window-exists-p))
+          (neotree-hide)
+        (progn
+          (neotree-show)
+          (if project-dir
+              (neotree-dir project-dir))
+          (if file-name
+              (neotree-find file-name))))))
+
+  (defun neotree-current-dir-toggle ()
+    (interactive)
+    (let ((project-dir
+           (ignore-errors
+             (ffip-project-root)
+             ))
+          (file-name (buffer-file-name))
+          (neo-smart-open t))
+      (if (and (fboundp 'neo-global--window-exists-p)
+               (neo-global--window-exists-p))
+          (neotree-hide)
+        (progn
+          (neotree-show)
+          (if project-dir
+              (neotree-dir project-dir))
+          (if file-name
+              (neotree-find file-name)))))))
+#+END_SRC
+
 * Programming
 
 Things that I should need in my prog modes.
@@ -847,6 +904,37 @@ Here we disable have to disable other checkers to use flycheck
 #+BEGIN_SRC emacs-lisp
 (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck
 						       c/c++-gcc))
+#+END_SRC
+
+*** Projectile
+
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :bind
+  (:map projectile-mode-map
+        ("C-c p" . projectile-command-map))
+  :custom
+  (projectile-project-search-path '("~/Projects/"))
+  ;; ignore set up: https://www.youtube.com/watch?v=qpv9i_I4jYU
+  (projectile-indexing-method 'hybrid)
+  (projectile-sort-order 'access-time)
+  (projectile-enable-caching t)
+  (projectile-require-project-root t)
+  (projectile-completion-system 'ivy)
+  :config
+  (projectile-mode t))
+
+(use-package counsel-projectile
+  :disabled
+  :after
+  (counsel projectile)
+  :config
+  (counsel-projectile-mode t)
+  (defalias 'projectile-switch-to-buffer 'counsel-projectile-switch-to-buffer)
+  (defalias 'projectile-find-dir 'counsel-projectile-find-dir)
+  (defalias 'projectile-find-file 'counsel-projectile-find-file)
+  (defalias 'projectile-grep 'counsel-projectile-grep)
+  (defalias 'projectile-switch-project 'counsel-projectile-switch-project))
 #+END_SRC
 
 ** TRAMP
