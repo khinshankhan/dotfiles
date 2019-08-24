@@ -4,7 +4,6 @@
 
 * Preface
 
-
 After using emacs for a while (since my first programming class in high school), I decided to create my own
 configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
 runs, but Windows has proven to be sightly difficult with the package manager.
@@ -15,6 +14,77 @@ This configuration is based on various emacs tips, users, and emacs itself (yes!
 from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
 
 A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
+
+
+* Table of Contents :TOC_3:
+- [[#preface][Preface]]
+- [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
+  - [[#personal-variables][Personal Variables]]
+  - [[#general-functions][General Functions]]
+- [[#initialization][Initialization]]
+  - [[#package-archives][Package Archives]]
+  - [[#package-installers][Package Installers]]
+- [[#start-up][Start Up]]
+  - [[#encoding][Encoding]]
+  - [[#backups][Backups]]
+  - [[#version-specific][Version Specific]]
+  - [[#bindings][Bindings]]
+    - [[#key-chords][Key Chords]]
+    - [[#hydra][Hydra]]
+    - [[#hydra-map][Hydra Map]]
+  - [[#gui][GUI]]
+  - [[#appearance][Appearance]]
+    - [[#theme][Theme]]
+  - [[#mode-line][Mode Line]]
+  - [[#interface][Interface]]
+    - [[#bells][Bells]]
+    - [[#confirmation-messages][Confirmation Messages]]
+    - [[#lines][Lines]]
+    - [[#line-numbers][Line Numbers]]
+    - [[#scratch-buffer][Scratch Buffer]]
+    - [[#scrolling][Scrolling]]
+    - [[#splash-screen][Splash Screen]]
+    - [[#completetion-frontend][Completetion Frontend]]
+    - [[#neotree][Neotree]]
+- [[#programming][Programming]]
+  - [[#general][General]]
+    - [[#interactive][Interactive]]
+  - [[#company][Company]]
+  - [[#flycheck][Flycheck]]
+    - [[#projectile][Projectile]]
+  - [[#tramp][TRAMP]]
+  - [[#auto-ide][Auto-IDE]]
+  - [[#lsp][LSP]]
+- [[#languages][Languages]]
+  - [[#c-c][C/ C++]]
+  - [[#clojure][Clojure]]
+  - [[#gnu-plot][GNU Plot]]
+  - [[#haskell][Haskell]]
+  - [[#juypter][Juypter]]
+  - [[#lua][Lua]]
+  - [[#ocaml][OCaml]]
+  - [[#pkgbuilds][pkgbuilds]]
+  - [[#python][Python]]
+  - [[#r][R]]
+  - [[#ruby][Ruby]]
+- [[#other-programming][Other Programming]]
+  - [[#abstract-planning][Abstract Planning]]
+    - [[#plantuml][PlantUML]]
+  - [[#containers][Containers]]
+    - [[#docker][Docker]]
+    - [[#kubernetes][Kubernetes]]
+  - [[#theorem-provers][Theorem Provers]]
+    - [[#lean-prover][Lean Prover]]
+- [[#writing-documents][Writing/ Documents]]
+  - [[#latex][LaTeX]]
+  - [[#org][Org]]
+  - [[#pdf][PDF]]
+- [[#community][Community]]
+  - [[#browser][Browser]]
+  - [[#discord][Discord]]
+  - [[#key-frequency][Key Frequency]]
+  - [[#wakatime][Wakatime]]
+  - [[#miscellaneous-helpers][Miscellaneous Helpers]]
 
 * Tricks n Gimmicks for Sweeter Configuration
 
@@ -537,8 +607,8 @@ Weird errors of GTK without this.
     ("w" hydra-window/body (propertize "+window" 'face 'bold)))
    ""
    (("u" undo "undo" :exit nil)
-    ("t" counsel-M-x "M-x")
-    ("c" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
+    ("t" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
+    ("n" counsel-M-x "M-x")
     ("s" save-buffer "save"))))
 #+END_SRC
 
@@ -566,7 +636,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
   :defer t)
 
 (use-package poet-theme
-  :defer)
+  :defer t)
 
 (use-package doom-themes
   :if (display-graphic-p)
@@ -1320,6 +1390,12 @@ Remember to install pyls.
   ("\\.[rR]\\'" . R-mode)
   :config
   (require 'ess-site))
+#+END_SRC
+
+** Ruby
+
+#+BEGIN_SRC emacs-lisp
+
 #+END_SRC
 
 * Other Programming
