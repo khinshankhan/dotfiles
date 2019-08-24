@@ -60,6 +60,10 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#latex][LaTeX]]
   - [[#org][Org]]
   - [[#pdf][PDF]]
+- [[#language-augmentation][Language Augmentation]]
+  - [[#yasnippet][Yasnippet]]
+- [[#editing][Editing]]
+- [[#navigation][Navigation]]
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
@@ -98,19 +102,29 @@ Personal favored variables
 (defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
 #+END_SRC
 
+Just variables for machines
+
+#+BEGIN_SRC emacs-lisp
+(defconst shan/python-executable "python3")
+(defconst shan/ipython-executable "ipython3")
+
+(setq shan/home-row
+      (if (string-equal (system-name) "faux-thunkpad")
+          '(?a ?r ?s ?t ?n ?e ?i ?o)
+        '(?a ?s ?d ?f ?j ?k ?l ?\;)))
+#+END_SRC
+
 Shorthands
 
 #+BEGIN_SRC emacs-lisp
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
 (defconst shan/config-path (concat user-emacs-directory "myinit.org"))
-(defconst shan/python-executable "python3")
-(defconst shan/ipython-executable "ipython3")
 #+END_SRC
 
 ** General Functions
 
-Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not 
-mentioned in preface and significant enough. Functions are split into... "sensible" groups. 
+Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not
+mentioned in preface and significant enough. Functions are split into... "sensible" groups.
 
 #+BEGIN_QUOTE
  [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
@@ -610,7 +624,7 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 *** Theme
 
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
 
 (use-package zerodark-theme
@@ -1537,7 +1551,7 @@ org-mode is so colossal, it's worth learning.
 
 Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
 
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package pdf-view
   :ensure pdf-tools
   :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
@@ -1609,6 +1623,46 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
       :hook (pdf-view-mode . pdf-view-restore-mode)
       :init (setq pdf-view-restore-filename
 		  (locate-user-emacs-file ".pdf-view-restore")))))
+#+END_SRC
+
+* Language Augmentation
+
+** Yasnippet
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :config
+  (use-package yasnippet-snippets)
+  (yas-global-mode 1))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle off
+(use-package auto-yasnippet)
+#+END_SRC
+
+* Editing
+
+#+BEGIN_SRC emacs-lisp
+(setq-default require-final-newline t)
+(global-subword-mode t)
+(delete-selection-mode t)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
+#+END_SRC
+
+* Navigation
+
+#+BEGIN_SRC emacs-lisp
+(use-package avy
+  :bind
+  ("C-'" . avy-goto-char-2)
+  :custom
+  (avy-keys shan/home-row))
+
+(use-package ace-window
+  :bind
+  ("C-x C-w" . ace-window)
+  :custom
+  (aw-keys shan/home-row))
 #+END_SRC
 
 * Community
