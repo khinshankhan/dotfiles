@@ -44,7 +44,6 @@ A couple of booleans so we don't have to check everytime.
 Personal favored variables
 
 #+BEGIN_SRC emacs-lisp
-(setq vc-follow-symlinks nil)
 (defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
 #+END_SRC
 
@@ -287,7 +286,7 @@ Set up all the archive sources to pull from packages from.
 ** Package Installers
 
 [[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
-by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
+by isolating packages.
 
 #+BEGIN_SRC emacs-lisp
 (unless (package-installed-p 'use-package)
@@ -306,8 +305,44 @@ by isolating packages. The [[https://github.com/larstvei/Try][try]] package lets
 (setq-default byte-compile-warnings nil)
 
 (use-package use-package-ensure-system-package)
+#+END_SRC
 
+The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
+
+#+BEGIN_SRC emacs-lisp
 (use-package try)
+#+END_SRC
+
+The following quelpa stuff is tangled off because it was easier to reference packages locally.
+
+Bootstrap quelpa
+
+#+BEGIN_SRC emacs-lisp :tangle off
+(if (require 'quelpa nil t)
+    (quelpa-self-upgrade)
+  (with-temp-buffer
+    (url-insert-file-contents
+     "https://framagit.org/steckerhalter/quelpa/raw/master/bootstrap.el")
+    (eval-buffer)))
+#+END_SRC
+
+Install quelpa-use-package, which will install use-package as well
+
+#+BEGIN_SRC emacs-lisp :tangle off
+(quelpa
+ '(quelpa-use-package
+   :fetcher git
+   :url "https://framagit.org/steckerhalter/quelpa-use-package.git"
+   :stable nil))
+(require 'quelpa-use-package)
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+Automatically debug and bisect your init (.emacs) file!
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp
+(use-package bug-hunter)
 #+END_SRC
 
 * Start Up
@@ -524,7 +559,15 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 *** Theme
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp 
+(add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
+
+(use-package zerodark-theme
+  :defer t)
+
+(use-package poet-theme
+  :defer)
+
 (use-package doom-themes
   :if (display-graphic-p)
   :custom
@@ -825,6 +868,11 @@ Here we disable have to disable other checkers to use flycheck
 	  (lambda ()
 	    (when (file-remote-p default-directory)
 	      (setq-local projectile-mode-line "Projectile"))))
+
+;; (defun uwu()
+;;   (interactive)
+;;   (find-file "Khinshan.Khan44@eniac.cs.hunter.cuny.edu|ssh:Khinshan.Khan44@cslab1")
+;;   )
 #+END_SRC
 
 ** Auto-IDE
@@ -990,7 +1038,6 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
 ** LaTeX
 
 #+BEGIN_SRC emacs-lisp
-
 #+END_SRC
 
 ** Lua
@@ -1180,7 +1227,7 @@ org-mode is so colossal, it gets its own separate first-level bullet.
 
 Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp 
 (use-package pdf-view
   :ensure pdf-tools
   :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
@@ -1213,7 +1260,8 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]
   (when shan/is-a-mac
     (setenv "PKG_CONFIG_PATH"
 	    "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
-  (pdf-tools-install t nil t t)
+  ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
+  (pdf-tools-install)
 
   (my-pdf-view-set-midnight-colors)
 
