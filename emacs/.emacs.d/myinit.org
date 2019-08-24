@@ -43,17 +43,16 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
 - [[#languages][Languages]]
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
-  - [[#gnu-plot][GNU Plot]]
   - [[#haskell][Haskell]]
   - [[#juypter][Juypter]]
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
-  - [[#pkgbuilds][pkgbuilds]]
   - [[#python][Python]]
   - [[#r][R]]
   - [[#ruby][Ruby]]
 - [[#other-programming][Other Programming]]
   - [[#abstract-planning][Abstract Planning]]
+  - [[#config][Config]]
   - [[#containers][Containers]]
   - [[#theorem-provers][Theorem Provers]]
 - [[#writing-documents][Writing/ Documents]]
@@ -1255,16 +1254,6 @@ Great for debugging... once you learn how to use a debugger.
 (use-package elein)
 #+END_SRC
 
-** GNU Plot
-
-#+BEGIN_SRC emacs-lisp
-(use-package gnuplot)
-
-(use-package gnuplot-mode
-  :mode
-  ("\\.gp\\'" "\\.gnuplot\\'"))
-#+END_SRC
-
 ** Haskell
 
 #+BEGIN_SRC emacs-lisp
@@ -1317,14 +1306,6 @@ Great for debugging... once you learn how to use a debugger.
 		    :major-modes '(caml-mode tuareg-mode reason-mode)
 		    :server-id 'ocamlmerlin-lsp))
   (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
-#+END_SRC
-
-** pkgbuilds
-
-#+BEGIN_SRC emacs-lisp
-(use-package pkgbuild-mode
-  :mode
-  (("/PKGBUILD/" . pkgbuild-mode)))
 #+END_SRC
 
 ** Python
@@ -1399,6 +1380,16 @@ Not quite a programming language, but more for tools.
 
 ** Abstract Planning
 
+*** GNU Plot
+
+#+BEGIN_SRC emacs-lisp
+(use-package gnuplot)
+
+(use-package gnuplot-mode
+  :mode
+  ("\\.gp\\'" "\\.gnuplot\\'"))
+#+END_SRC
+
 *** PlantUML
 
 #+BEGIN_SRC emacs-lisp
@@ -1412,6 +1403,43 @@ Not quite a programming language, but more for tools.
   (plantuml-java-options "")
   (plantuml-output-type "png")
   (plantuml-options "-charset UTF-8"))
+#+END_SRC
+
+** Config
+
+*** Json
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+*** Markdown
+
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode
+  :mode
+  ("\\.\\(md\\|markdown\\)\\'" . markdown-mode))
+#+END_SRC
+
+*** pkgbuilds
+
+#+BEGIN_SRC emacs-lisp
+(use-package pkgbuild-mode
+  :mode
+  (("/PKGBUILD/" . pkgbuild-mode)))
+#+END_SRC
+
+*** Yaml
+
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode
+  :mode
+  (("\\.\\(yml\\|yaml\\)\\'" . yaml-mode)
+   ("\\.raml\\'" . yaml-mode)))
+
+(use-package flycheck-yamllint
+  :hook
+  (flycheck-mode . flycheck-yamllint-setup))
 #+END_SRC
 
 ** Containers
