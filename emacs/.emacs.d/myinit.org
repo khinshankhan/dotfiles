@@ -523,7 +523,8 @@ Weird errors of GTK without this.
    (("j" lsp-ui-imenu "symbol table")
     ("l" lsp-ui-flycheck-list "error list"))
    " Exit"
-   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold))
+    ("SPC" dap-hydra "dap"))))
 
 (pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
   (""
@@ -1024,6 +1025,20 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   (company-lsp-enable-recompletion t)
   :config
   (add-to-list 'company-backends #'company-lsp))
+
+(use-package dap-mode
+  :after (hydra)
+  :hook
+  (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
+  :config
+  (use-package dap-hydra
+    :ensure nil
+    :bind
+    (:map dap-mode-map
+          ("C-c d" . dap-hydra))
+    :config
+    (defhydra+ dap-hydra (:exit nil :foreign-keys run)
+      ("d" dap-debug "Start debug session"))))
 #+END_SRC
 
 * Languages
@@ -1050,6 +1065,15 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   :config
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
+
+(use-package dap-gdb-lldb
+  :ensure nil
+  :after (dap-mode))
+
+(use-package company-c-headers
+  :after (company)
+  :config
+  (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
 
 
@@ -1313,7 +1337,7 @@ org-mode is so colossal, it gets its own separate first-level bullet.
 
 ** PDF
 
-Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]
+Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
 
 #+BEGIN_SRC emacs-lisp 
 (use-package pdf-view
@@ -1396,16 +1420,16 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]
 Control how links and browser-url-generic function works (also for links).
 
 #+BEGIN_SRC emacs-lisp
-  (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-args '("-private")
-        browse-url-firefox-program "firefox"
-        browse-url-generic-program "firefox")
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-args '("-private")
+      browse-url-firefox-program "firefox"
+      browse-url-generic-program "firefox")
 
-  (defun browse-lucky (start end)
-    (interactive "r")
-    (let ((q (buffer-substring-no-properties start end)))
-      (browse-url-generic (concat "http://www.google.com/search?btnI&q="
-                                  (url-hexify-string q)))))
+(defun browse-lucky (start end)
+  (interactive "r")
+  (let ((q (buffer-substring-no-properties start end)))
+    (browse-url-generic (concat "http://www.google.com/search?btnI&q="
+				(url-hexify-string q)))))
 #+END_SRC
 
 ** Discord
@@ -1413,12 +1437,24 @@ Control how links and browser-url-generic function works (also for links).
 Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
 
 #+BEGIN_SRC emacs-lisp
-  (use-package elcord
-    :if (executable-find "discord")
-    :custom
-    (elcord-use-major-mode-as-main-icon t)
-    :config
-    (elcord-mode))
+(use-package elcord
+  :if (executable-find "discord")
+  :custom
+  (elcord-use-major-mode-as-main-icon t)
+  :config
+  (elcord-mode))
+#+END_SRC
+
+** Key Frequency
+
+For later use, when I try to finally optimize my workflow + ergonomics.
+
+#+BEGIN_SRC emacs-lisp
+(use-package keyfreq
+  :config
+  (keyfreq-mode t)
+  ;;(keyfreq-autosave-mode 1)
+  )
 #+END_SRC
 
 ** Wakatime
@@ -1426,12 +1462,12 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
 Monitor my  coding activity.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package wakatime-mode
-    :if shan/settings-exist
-    :custom
-    (wakatime-cli-path "/usr/bin/wakatime")
-    :init
-    (global-wakatime-mode))
+(use-package wakatime-mode
+  :if shan/settings-exist
+  :custom
+  (wakatime-cli-path "/usr/bin/wakatime")
+  :init
+  (global-wakatime-mode))
 #+END_SRC
 
 ** Miscellaneous Helpers
@@ -1439,15 +1475,15 @@ Monitor my  coding activity.
 Just a salmagundi.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package speed-type)
+(use-package speed-type)
 
-  (use-package origami)
+(use-package origami)
 
-  (use-package demangle-mode)
+(use-package demangle-mode)
 
-  (use-package modern-cpp-font-lock)
+(use-package modern-cpp-font-lock)
 
-  (use-package academic-phrases)
+(use-package academic-phrases)
 
-  (use-package powerthesaurus)
+(use-package powerthesaurus)
 #+END_SRC
