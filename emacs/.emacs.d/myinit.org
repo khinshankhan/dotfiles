@@ -1046,6 +1046,11 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
 ** C/ C++
 
 #+BEGIN_SRC emacs-lisp
+(use-package company-c-headers
+  :after (company)
+  :config
+  (add-to-list 'company-backends 'company-c-headers))
+
 (use-package cc-mode
   :ensure nil
   :custom
@@ -1069,11 +1074,6 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
 (use-package dap-gdb-lldb
   :ensure nil
   :after (dap-mode))
-
-(use-package company-c-headers
-  :after (company)
-  :config
-  (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
 
 
@@ -1145,11 +1145,6 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
   :custom
   (ein:completion-backend 'ein:use-company-jedi-backends)
   (ein:use-auto-complete-superpack t))
-#+END_SRC
-
-** LaTeX
-
-#+BEGIN_SRC emacs-lisp
 #+END_SRC
 
 ** Lua
@@ -1254,9 +1249,16 @@ fine.
   (setq lean-rootdir "/usr/local/"))
 #+END_SRC
 
-* Org
+* Writing/ Documents
 
-org-mode is so colossal, it gets its own separate first-level bullet.
+** LaTeX
+
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+** Org
+
+org-mode is so colossal, it's worth learning.
 
 #+BEGIN_SRC emacs-lisp
 (use-package org
@@ -1332,8 +1334,6 @@ org-mode is so colossal, it gets its own separate first-level bullet.
 
 (use-package ox-pandoc)
 #+END_SRC
-
-* Utils
 
 ** PDF
 
@@ -1415,6 +1415,8 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
 
 * Community
 
+A lot of vanity.
+
 ** Browser
 
 Control how links and browser-url-generic function works (also for links).
@@ -1439,6 +1441,7 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
 #+BEGIN_SRC emacs-lisp
 (use-package elcord
   :if (executable-find "discord")
+  :disabled t
   :custom
   (elcord-use-major-mode-as-main-icon t)
   :config
@@ -1459,7 +1462,7 @@ For later use, when I try to finally optimize my workflow + ergonomics.
 
 ** Wakatime
 
-Monitor my  coding activity.
+Monitor my  coding activity. Remember to set =wakatime-api-key= in =settings.el=.
 
 #+BEGIN_SRC emacs-lisp
 (use-package wakatime-mode
