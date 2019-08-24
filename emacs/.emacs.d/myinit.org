@@ -1063,10 +1063,12 @@ Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-
 			  (other     . "k&r"))))
 
 (use-package ccls
-  :if (executable-find "ccls")
+  :if (file-exists-p "~/ccls/Release/ccls")
   :after (lsp-mode)
   :hook
   ((c-mode c++-mode) . lsp)
+  :custom
+  (ccls-executable "~/ccls/Release/ccls")
   :config
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
