@@ -10,6 +10,8 @@ export NVM_SOURCE="/usr/share/nvm"                     # The AUR package install
 [ -s "$NVM_SOURCE/nvm.sh" ] && . "$NVM_SOURCE/nvm.sh"  # Load NVM
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+export PATH="/home/shan/.cask/bin:$PATH"
+
 export BROWSER="/usr/bin/chromium"
 
 PATH="/home/shan/.gem/ruby/2.6.0/bin${PATH:+:${PATH}}"; export PATH;

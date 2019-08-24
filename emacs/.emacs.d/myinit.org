@@ -613,6 +613,88 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 
 ** Interface
 
+*** Bells
+
+#+BEGIN_SRC emacs-lisp
+(setq-default visible-bell nil
+              audible-bell nil
+              ring-bell-function 'ignore)
+#+END_SRC
+
+*** Confirmation Messages
+
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p (lambda (&rest _) t))
+(setq-default confirm-kill-emacs nil)
+#+END_SRC
+
+*** Lines
+
+#+BEGIN_SRC emacs-lisp
+(setq-default transient-mark-mode t
+              visual-line-mode t
+              indent-tabs-mode nil
+              tab-width 4)
+
+(when (display-graphic-p)
+  (global-hl-line-mode t))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package highlight-indent-guides
+  :hook
+  (prog-mode . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-method 'character)
+  (highlight-indent-guides-responsive 'stack)
+  (highlight-indent-guides-character ?\┊);;?\間)
+  )
+#+END_SRC
+
+*** Line Numbers
+
+#+BEGIN_SRC emacs-lisp
+(use-package linum
+  :ensure nil
+  :if (< emacs-major-version 26)
+  :hook
+  (prog-mode . linum-mode)
+  :custom
+  (linum-format " %d ")
+  :config
+  (set-face-underline 'linum nil))
+
+(use-package display-line-numbers
+  :ensure nil
+  :if (>= emacs-major-version 26)
+  :hook
+  (prog-mode . display-line-numbers-mode)
+  :custom
+  ;;(display-line-numbers-type 'relative)
+  (display-line-numbers-current-absolute t)
+  (display-line-numbers-width 2)
+  (display-line-numbers-widen t))
+#+END_SRC
+
+*** Scratch Buffer
+
+#+BEGIN_SRC emacs-lisp
+;;(setq-default initial-major-mode 'python-mode)
+(setq-default initial-major-mode 'lisp-interaction-mode)
+(setq initial-scratch-message nil)
+#+END_SRC
+
+*** Scrolling
+
+This is tangled off for now...
+
+#+BEGIN_SRC emacs-lisp
+(setq-default scroll-margin 0
+              scroll-conservatively 10000
+              scroll-preserve-screen-position t
+              mouse-wheel-progressive-speed nil)
+#+END_SRC
+
 *** Splash Screen
 
 #+BEGIN_SRC emacs-lisp
@@ -1043,7 +1125,7 @@ Great for debugging... once you learn how to use a debugger.
     (defhydra+ dap-hydra (:exit nil :foreign-keys run)
       ("d" dap-debug "Start debug session"))
     (pretty-hydra-define+ hydra-lsp ()
-      (;; these heads are added to the existing "Windows" column
+      (;; these heads are added to the existing " Exit" column
        " Exit"
        (("SPC" dap-hydra "dap"))))))
 #+END_SRC
@@ -1500,7 +1582,6 @@ Discord rich presence based on emacs + file editing. (tangle off so one doesn't 
 #+BEGIN_SRC emacs-lisp
 (use-package elcord
   :if (executable-find "discord")
-  :disabled t
   :custom
   (elcord-use-major-mode-as-main-icon t)
   :config
