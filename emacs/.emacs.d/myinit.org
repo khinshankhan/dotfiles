@@ -44,6 +44,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
   - [[#haskell][Haskell]]
+  - [[#julia][Julia]]
   - [[#juypter][Juypter]]
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
@@ -54,6 +55,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#abstract-planning][Abstract Planning]]
   - [[#config][Config]]
   - [[#containers][Containers]]
+  - [[#databases][Databases]]
   - [[#theorem-provers][Theorem Provers]]
 - [[#writing-documents][Writing/ Documents]]
   - [[#latex][LaTeX]]
@@ -1260,7 +1262,26 @@ Great for debugging... once you learn how to use a debugger.
 
 #+BEGIN_SRC emacs-lisp
 (use-package haskell-mode
-  :mode "\\.hs\\'")
+  :if (executable-find "ghc")
+  :mode "\\.hs\\'"
+  :config
+  (setq haskell-mode-hook 'haskell-mode-defaults))
+#+END_SRC
+
+** Julia
+
+Borked config
+
+#+BEGIN_SRC emacs-lisp
+(use-package julia-mode
+  :defer
+  :mode
+  ("\\.jl\\'" . julia-mode))
+
+(use-package flycheck-julia
+  :after (julia-mode)
+  :hook
+  (flycheck-mode . flycheck-julia-setup))
 #+END_SRC
 
 ** Juypter
@@ -1409,10 +1430,34 @@ Not quite a programming language, but more for tools.
 
 ** Config
 
-*** TODO Json
+*** Editor Config
 
 #+BEGIN_SRC emacs-lisp
+(use-package editorconfig
+:hook
+((prog-mode text-mode) . editorconfig-mode)
+  :config
+  (editorconfig-mode 1))
+#+END_SRC
 
+*** Groovy
+
+#+BEGIN_SRC emacs-lisp
+(use-package groovy-mode
+  :defer t
+  :mode
+  (("\\.groovy$" . groovy-mode)
+   ("\\.gradle$" . groovy-mode)))
+#+END_SRC
+
+*** Json
+
+#+BEGIN_SRC emacs-lisp
+(use-package json-mode
+  :mode
+  ("\\.json\\'" . json-mode)
+  :init
+  (setq-default js-indent-level 2))
 #+END_SRC
 
 *** Markdown
@@ -1429,6 +1474,12 @@ Not quite a programming language, but more for tools.
 (use-package pkgbuild-mode
   :mode
   (("/PKGBUILD/" . pkgbuild-mode)))
+#+END_SRC
+
+*** Toml
+
+#+BEGIN_SRC emacs-lisp
+(use-package toml-mode)
 #+END_SRC
 
 *** Yaml
@@ -1469,6 +1520,24 @@ k8s stuff
 (use-package kubernetes
   :commands
   (kubernetes-overview))
+#+END_SRC
+
+** Databases
+
+*** SQL
+
+#+BEGIN_SRC emacs-lisp
+(use-package sql
+  :mode
+  (("\\.hql$"  . sql-mode)
+   ("\\.psql$" . sql-mode)
+   ("\\.q$"    . sql-mode))
+  :hook
+  (sql-mode . (lambda () (sql-highlight-mysql-keywords))))
+
+(use-package sql-indent
+  :init
+  (setq-default sql-indent-offset tab-width))
 #+END_SRC
 
 ** Theorem Provers
