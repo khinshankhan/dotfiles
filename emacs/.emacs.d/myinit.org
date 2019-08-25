@@ -56,7 +56,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#html][HTML]]
   - [[#web-style-sheets][web style-sheets]]
   - [[#haml-slim][haml, slim]]
-  - [[#javascript][JavaScript]]
+  - [[#javascript-typescript][JavaScript/ TypeScript]]
 - [[#other-programming][Other Programming]]
   - [[#abstract-planning][Abstract Planning]]
   - [[#config][Config]]
@@ -1041,8 +1041,7 @@ These guys are always active and a series of small things that have become secon
 Here we disable have to disable other checkers to use flycheck
 
 #+BEGIN_SRC emacs-lisp
-(setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc
-                                                       javascript-jshint))
+(setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
 #+END_SRC
 
 ** Projectile
@@ -1295,7 +1294,7 @@ Borked config
 
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg
-  :if (and (executable-find "ocaml") (executable-find "node") t)
+  :if (and (executable-find "ocaml") (executable-find "npm") t)
   :ensure-system-package (ocaml-language-server . "npm install -g ocaml-language-server")
   :after (lsp)
   :hook
@@ -1477,7 +1476,7 @@ of having an lsp config for each mode within that mode.
 
 #+BEGIN_SRC emacs-lisp
 (use-package css-mode
-  :if (executable-find "node")
+  :if (executable-find "npm")
   :ensure-system-package (css-languageserver . "npm install -g vscode-css-languageserver-bin")
   :after (lsp)
   :mode
@@ -1535,9 +1534,9 @@ of having an lsp config for each mode within that mode.
   ("\\.slim\\'" . slim-mode))
 #+END_SRC
 
-** TODO JavaScript
+** TODO JavaScript/ TypeScript
 
-Javascript is probably the hardest configuration to get properly.
+These two are probably the hardest configuration to get properly solely because of "standards".
 
 This first block is tangled off for the time being (kept messing with non-owned project styles).
 
@@ -1550,7 +1549,23 @@ This first block is tangled off for the time being (kept messing with non-owned 
                       "--trailing-comma" "all")))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
 *** TODO React
+
+#+BEGIN_SRC emacs-lisp
+(use-package rjsx-mode
+  :mode
+  (("\\.js\\'"   . rjsx-mode)
+   ("\\.jsx\\'"  . rjsx-mode)
+   ("\\.json\\'" . javascript-mode))
+  :magic ("/\\*\\* @jsx React\\.DOM \\*/" "^import React")
+  :init
+  (setq-default rjsx-basic-offset 2)
+  (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON")))
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
 (use-package react-snippets
