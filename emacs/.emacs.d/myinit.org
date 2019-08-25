@@ -122,6 +122,9 @@ Shorthands
 #+BEGIN_SRC emacs-lisp
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
 (defconst shan/config-path (concat user-emacs-directory "myinit.org"))
+
+(defconst shan/ccls-path "~/ccls/Release/ccls")
+(defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
 #+END_SRC
 
 ** General Functions
@@ -379,30 +382,6 @@ The [[https://github.com/larstvei/Try][try]] package lets you try packages befor
 
 #+BEGIN_SRC emacs-lisp
 (use-package try)
-#+END_SRC
-
-The following quelpa stuff is tangled off because it was easier to reference packages locally.
-
-Bootstrap quelpa
-
-#+BEGIN_SRC emacs-lisp :tangle off
-(if (require 'quelpa nil t)
-    (quelpa-self-upgrade)
-  (with-temp-buffer
-    (url-insert-file-contents
-     "https://framagit.org/steckerhalter/quelpa/raw/master/bootstrap.el")
-    (eval-buffer)))
-#+END_SRC
-
-Install quelpa-use-package, which will install use-package as well
-
-#+BEGIN_SRC emacs-lisp :tangle off
-(quelpa
- '(quelpa-use-package
-   :fetcher git
-   :url "https://framagit.org/steckerhalter/quelpa-use-package.git"
-   :stable nil))
-(require 'quelpa-use-package)
 #+END_SRC
 
 #+BEGIN_EXAMPLE
@@ -1222,12 +1201,12 @@ Great for debugging... once you learn how to use a debugger.
 			  (other     . "k&r"))))
 
 (use-package ccls
-  :if (file-exists-p "~/ccls/Release/ccls")
+  :if (file-exists-p shan/ccls-path)
   :after (lsp-mode)
   :hook
   ((c-mode c++-mode) . lsp)
   :custom
-  (ccls-executable "~/ccls/Release/ccls")
+  (ccls-executable shan/ccls-path)
   :config
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
@@ -1417,12 +1396,12 @@ Not quite a programming language, but more for tools.
 
 #+BEGIN_SRC emacs-lisp
 (use-package plantuml-mode
-  :if (file-exists-p "/usr/share/java/plantuml/plantuml.jar")
+  :if (file-exists-p shan/plantuml-path)
   :mode
   ("\\.\\(plant\\)?uml\\'" . plantuml-mode)
   :custom
   (plantuml-default-exec-mode 'jar)
-  (plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
+  (plantuml-jar-path shan/plantuml-path)
   (plantuml-java-options "")
   (plantuml-output-type "png")
   (plantuml-options "-charset UTF-8"))
