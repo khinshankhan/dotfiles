@@ -68,6 +68,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#pdf][PDF]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#yasnippet][Yasnippet]]
+  - [[#spell-checking][Spell Checking]]
 - [[#editing][Editing]]
   - [[#expand-region][Expand Region]]
   - [[#general-editing][General Editing]]
@@ -1853,6 +1854,75 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
 
 #+BEGIN_SRC emacs-lisp :tangle off
 (use-package auto-yasnippet)
+#+END_SRC
+
+** Spell Checking
+
+#+BEGIN_SRC emacs-lisp
+(use-package flyspell
+  :hook
+  ((text-mode . flyspell-mode)
+   (prog-mode . flyspell-prog-mode)))
+
+(use-package flyspell-popup
+  :after (flyspell)
+  :preface
+  ;; move point to previous error
+  ;; based on code by hatschipuh at
+  ;; http://emacs.stackexchange.com/a/14912/2017
+  (defun flyspell-goto-previous-error (arg)
+    "Go to arg previous spelling error."
+    (interactive "p")
+    (while (not (= 0 arg))
+      (let ((pos (point))
+            (min (point-min)))
+        (if (and (eq (current-buffer) flyspell-old-buffer-error)
+                 (eq pos flyspell-old-pos-error))
+            (progn
+              (if (= flyspell-old-pos-error min)
+                  ;; goto beginning of buffer
+                  (progn
+                    (message "Restarting from end of buffer")
+                    (goto-char (point-max)))
+                (backward-word 1))
+              (setq pos (point))))
+        ;; seek the next error
+        (while (and (> pos min)
+                    (let ((ovs (overlays-at pos))
+                          (r '()))
+                      (while (and (not r) (consp ovs))
+                        (if (flyspell-overlay-p (car ovs))
+                            (setq r t)
+                          (setq ovs (cdr ovs))))
+                      (not r)))
+          (backward-word 1)
+          (setq pos (point)))
+        ;; save the current location for next invocation
+        (setq arg (1- arg))
+        (setq flyspell-old-pos-error pos)
+        (setq flyspell-old-buffer-error (current-buffer))
+        (goto-char pos)
+        (if (= pos min)
+            (progn
+              (message "No more miss-spelled word!")
+              (setq arg 0))
+          (forward-word)))))
+
+  (defun shan/flyspell-next-word()
+    "Jump to next miss-pelled word and pop-up correction"
+    (interactive)
+    (flyspell-goto-next-error)
+    (flyspell-popup-correct))
+
+  (defun shan/flyspell-prev-word()
+    "Jump to prev miss-pelled word and pop-up correction"
+    (interactive)
+    (flyspell-goto-previous-error (char-after 1))
+    (flyspell-popup-correct))
+  :bind
+  (:map flyspell-mode-map
+        ("C-,"   . shan/flyspell-next-word)
+        ("C-M-," . shan/flyspell-prev-word)))
 #+END_SRC
 
 * Editing
