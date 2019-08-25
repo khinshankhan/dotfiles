@@ -53,6 +53,8 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#ruby][Ruby]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
+  - [[#css-less-scss][css, less, scss]]
+  - [[#haml-slim][haml, slim]]
   - [[#javascript][Javascript]]
 - [[#other-programming][Other Programming]]
   - [[#abstract-planning][Abstract Planning]]
@@ -1380,7 +1382,7 @@ Remember to install pyls.
 
 Ara ara, "web development" is huge... let's make it a first level bullet.
 
-** HTML
+** TODO HTML
 
 Learn about [[http://web-mode.org/][web-mode]]
 
@@ -1432,6 +1434,43 @@ emmet-mode deserves a function to pull up cheatsheet. This is a powerful fork of
    (sgml-mode . emmet-mode)
    (rjsx-mode . emmet-mode)
    (web-mode  . emmet-mode)))
+#+END_SRC
+
+** TODO css, less, scss
+
+#+BEGIN_SRC emacs-lisp
+(use-package css-mode
+  :mode
+  ("\\.css\\'"  . css-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package less-css-mode
+  :mode "\\.less\\'")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package scss-mode
+  :mode
+  (("\\.scss\\'"  . scss-mode))
+  :init
+  (setq css-indent-offset 2))
+#+END_SRC
+
+** haml, slim
+
+#+BEGIN_SRC emacs-lisp
+(use-package haml-mode
+  :mode
+  ("\\.haml\\'"  . haml-mode)
+  :init
+  (setq haml-indent-offset 2))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package slim-mode
+  :mode
+  ("\\.slim\\'" . slim-mode))
 #+END_SRC
 
 ** TODO Javascript
