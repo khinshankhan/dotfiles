@@ -8,7 +8,7 @@ After using emacs for a while (since my first programming class in high school),
 configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
 runs, but Windows has proven to be sightly difficult with the package manager.
 
-For more informations about myself, you can visit my website.
+For more information about myself, you can visit my website.
 
 This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
 from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
@@ -51,11 +51,12 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#python][Python]]
   - [[#r][R]]
   - [[#ruby][Ruby]]
+  - [[#scala][Scala]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
   - [[#css-less-scss][css, less, scss]]
   - [[#haml-slim][haml, slim]]
-  - [[#javascript][Javascript]]
+  - [[#javascript][JavaScript]]
 - [[#other-programming][Other Programming]]
   - [[#abstract-planning][Abstract Planning]]
   - [[#config][Config]]
@@ -1382,6 +1383,34 @@ Remember to install pyls.
 
 #+END_SRC
 
+** TODO Scala
+
+Enable scala-mode and sbt-mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package scala-mode
+  :after (lsp)
+  :mode "\\.s\\(cala\\|bt\\)$"
+  :hook
+  (scala-mode . lsp)
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "metals-emacs")
+                    :major-modes '(scala-mode)
+                    :server-id 'metals))
+  (shan/ide-add 'scala-mode #'hydra-lsp/body))
+
+(use-package sbt-mode
+  :commands sbt-start sbt-command
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map))
+#+END_SRC
+
 * Web Development
 
 Ara ara, "web development" is huge... let's make it a first level bullet.
@@ -1477,7 +1506,7 @@ emmet-mode deserves a function to pull up cheatsheet. This is a powerful fork of
   ("\\.slim\\'" . slim-mode))
 #+END_SRC
 
-** TODO Javascript
+** TODO JavaScript
 
 Javascript is probably the hardest configuration to get properly.
 
@@ -1635,7 +1664,7 @@ k8s stuff
   (kubernetes-overview))
 #+END_SRC
 
-** Databases
+** TODO Databases
 
 *** SQL
 
