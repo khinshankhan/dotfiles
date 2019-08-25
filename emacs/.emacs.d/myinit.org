@@ -1922,8 +1922,11 @@ Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
 
 #+BEGIN_SRC emacs-lisp
 (use-package nov
+  :after (olivetti)
   :mode
   ("\\.epub\\'" . nov-mode)
+  :hook
+  (nov-mode . shan/my-nov-setup)
   :bind
   (:map nov-mode-map
         ("C-p" . nov-previous-document)
@@ -1931,6 +1934,10 @@ Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
         ("p"   . nov-scroll-up)
         ("n"   . nov-scroll-down))
   :config
+  (defun shan/my-nov-setup ()
+    (if (fboundp 'olivetti-mode)
+        (olivetti-mode 1)))
+
   (setq nov-variable-pitch nil)
   (setq nov-text-width 72))
 #+END_SRC
