@@ -68,6 +68,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#org][Org]]
   - [[#pdf][PDF]]
   - [[#epub][EPUB]]
+  - [[#olivetti][Olivetti]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#yasnippet][Yasnippet]]
   - [[#spell-checking][Spell Checking]]
@@ -1932,6 +1933,19 @@ Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
   :config
   (setq nov-variable-pitch nil)
   (setq nov-text-width 72))
+#+END_SRC
+
+** Olivetti
+
+I'm starting to think a hydra for things that can be toggled..
+
+#+BEGIN_SRC emacs-lisp
+(use-package olivetti
+  :diminish
+  :bind
+  ("<f7>" . olivetti-mode)
+  :init
+  (setq olivetti-body-width 0.618))
 #+END_SRC
 
 * Language Augmentation
