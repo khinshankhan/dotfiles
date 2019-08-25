@@ -67,6 +67,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#latex][LaTeX]]
   - [[#org][Org]]
   - [[#pdf][PDF]]
+  - [[#epub][EPUB]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#yasnippet][Yasnippet]]
   - [[#spell-checking][Spell Checking]]
@@ -1259,7 +1260,7 @@ Borked config
 
 #+BEGIN_SRC emacs-lisp
 (use-package julia-mode
-  :defer
+  :defer t
   :mode
   ("\\.jl\\'" . julia-mode))
 
@@ -1836,9 +1837,9 @@ org-mode is so colossal, it's worth learning.
 (use-package ox-pandoc)
 #+END_SRC
 
-** PDF
+** TODO PDF
 
-Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
+Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]. Possibly use auto ide hydra?
 
 #+BEGIN_SRC emacs-lisp
 (use-package pdf-view
@@ -1912,6 +1913,25 @@ Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]].
       :hook (pdf-view-mode . pdf-view-restore-mode)
       :init (setq pdf-view-restore-filename
 		  (locate-user-emacs-file ".pdf-view-restore")))))
+#+END_SRC
+
+** TODO EPUB
+
+Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
+
+#+BEGIN_SRC emacs-lisp
+(use-package nov
+  :mode
+  ("\\.epub\\'" . nov-mode)
+  :bind
+  (:map nov-mode-map
+        ("C-p" . nov-previous-document)
+        ("C-n" . nov-next-document)
+        ("p"   . nov-scroll-up)
+        ("n"   . nov-scroll-down))
+  :config
+  (setq nov-variable-pitch nil)
+  (setq nov-text-width 72))
 #+END_SRC
 
 * Language Augmentation
@@ -2062,9 +2082,10 @@ Control how links and browser-url-generic function works (also for links).
 				(url-hexify-string q)))))
 #+END_SRC
 
-** Discord
+** TODO Discord
 
-Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted)
+Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted).
+I want to possibly make it launch only when discord is actually open.
 
 #+BEGIN_SRC emacs-lisp
 (use-package elcord
@@ -2100,9 +2121,9 @@ Monitor my  coding activity. Remember to set =wakatime-api-key= in =settings.el=
   (global-wakatime-mode))
 #+END_SRC
 
-** Miscellaneous Helpers
+** TODO Miscellaneous Helpers
 
-Just a salmagundi.
+Just a salmagundi. Sooner or later, they'll find their places (or maybe their place here...).
 
 #+BEGIN_SRC emacs-lisp
 (use-package speed-type)
