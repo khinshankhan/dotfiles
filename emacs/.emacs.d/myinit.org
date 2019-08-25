@@ -15,7 +15,6 @@ from it. Super classy move with =C-h [key such as f or v]=, since it's self docu
 
 A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
 
-
 * Table of Contents :TOC_2:
 - [[#preface][Preface]]
 - [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
@@ -37,6 +36,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#general][General]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
+  - [[#projectile][Projectile]]
   - [[#tramp][TRAMP]]
   - [[#auto-ide][Auto-IDE]]
   - [[#lsp][LSP]]
@@ -54,7 +54,7 @@ A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[
   - [[#scala][Scala]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
-  - [[#css-less-scss][css, less, scss]]
+  - [[#web-style-sheets][web style-sheets]]
   - [[#haml-slim][haml, slim]]
   - [[#javascript][JavaScript]]
 - [[#other-programming][Other Programming]]
@@ -1041,11 +1041,11 @@ These guys are always active and a series of small things that have become secon
 Here we disable have to disable other checkers to use flycheck
 
 #+BEGIN_SRC emacs-lisp
-(setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck
-						       c/c++-gcc))
+(setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc
+                                                       javascript-jshint))
 #+END_SRC
 
-*** Projectile
+** Projectile
 
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
@@ -1385,7 +1385,7 @@ Remember to install pyls.
 
 ** TODO Scala
 
-Enable scala-mode and sbt-mode
+Enable scala-mode and sbt-mode. Used [[https://scalameta.org/metals/docs/editors/emacs.html][scala metals]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package scala-mode
@@ -1397,6 +1397,7 @@ Enable scala-mode and sbt-mode
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection "metals-emacs")
                     :major-modes '(scala-mode)
+                    :priority -1
                     :server-id 'metals))
   (shan/ide-add 'scala-mode #'hydra-lsp/body))
 
@@ -1469,25 +1470,53 @@ emmet-mode deserves a function to pull up cheatsheet. This is a powerful fork of
    (web-mode  . emmet-mode)))
 #+END_SRC
 
-** TODO css, less, scss
+** TODO web style-sheets
+
+To simplify the config a bit, I decided to create a domino effect and then start the lsp config for them, instead
+of having an lsp config for each mode within that mode.
 
 #+BEGIN_SRC emacs-lisp
 (use-package css-mode
+  :if (executable-find "node")
+  :ensure-system-package (css-languageserver . "npm install -g vscode-css-languageserver-bin")
+  :after (lsp)
   :mode
-  ("\\.css\\'"  . css-mode))
+  ("\\.css\\'"  . css-mode)
+  :config
+  (setq css-indent-offset 2))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
 (use-package less-css-mode
+  :after (lsp css-mode)
   :mode "\\.less\\'")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+(use-package sass-mode
+  :after  (lsp css-mode less-css-mode)
+  :mode
+  ("\\.sass\\'" . sass-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 (use-package scss-mode
+  :after (lsp css-mode less-css-mode sass-mode)
+  :hook
+  ((css-mode less-css-mode sass-mode scss-mode) . lsp)
   :mode
   (("\\.scss\\'"  . scss-mode))
   :init
-  (setq css-indent-offset 2))
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection '("css-languageserver" "--stdio"))
+                    :major-modes '(css-mode less-css-mode sass-mode scss-mode)
+                    :priority -1
+                    :server-id 'css-ls))
+
+  (shan/ide-add 'css-mode #'hydra-lsp/body)
+  (shan/ide-add 'less-css-mode #'hydra-lsp/body)
+  (shan/ide-add 'sass-mode #'hydra-lsp/body)
+  (shan/ide-add 'scss-mode #'hydra-lsp/body))
 #+END_SRC
 
 ** haml, slim
