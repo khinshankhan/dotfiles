@@ -678,6 +678,9 @@ You need to experience keyboard to realize keyboard master race. (fn + f10 if ne
 #+BEGIN_SRC emacs-lisp
 (defalias 'yes-or-no-p (lambda (&rest _) t))
 (setq-default confirm-kill-emacs nil)
+(setq save-abbrevs t)
+(setq-default abbrev-mode t)
+(setq save-abbrevs 'silently)
 #+END_SRC
 
 *** Lines
@@ -1491,13 +1494,19 @@ This first block is tangled off for the time being (kept messing with non-owned 
 *** TODO React
 
 #+BEGIN_SRC emacs-lisp
-
+(use-package react-snippets
+  :after yasnippet)
 #+END_SRC
 
 *** TODO Vue
 
 #+BEGIN_SRC emacs-lisp
+(use-package vue-html-mode)
 
+(use-package vue-mode
+  :defer t
+  :mode
+  (("\\.vue\\'"  . vue-mode)))
 #+END_SRC
 
 * Other Programming
