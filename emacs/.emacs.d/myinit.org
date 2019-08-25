@@ -2165,21 +2165,15 @@ Automatically debug and bisect your init (.emacs) file!
 
    Just a salmagundi. Sooner or later, they'll find their places (or maybe their place here...).
 
-   #+BEGIN_SRC emacs-lisp
+
+   Problematic packages first, tangled off and commented.
+
+   #+BEGIN_SRC emacs-lisp :tangle off
 ;; (use-package docker
 ;;   :bind (("C-c d" . docker)))
 ;; (use-package docker-compose-mode)
 ;; (use-package docker-tramp
 ;;   :config (setq docker-tramp-use-names t)) ;; name vs id
-   #+END_SRC
-
-   #+BEGIN_SRC emacs-lisp
-(use-package speed-type)
-(use-package origami)
-(use-package demangle-mode)
-(use-package modern-cpp-font-lock)
-(use-package academic-phrases)
-(use-package powerthesaurus)
 ;; (use-package undo-tree) ;; figure out toggle
 ;; (use-package gitignore-mode)
 ;; (use-package pass)
@@ -2196,6 +2190,17 @@ Automatically debug and bisect your init (.emacs) file!
 ;; (use-package my-email)
 ;; (use-package info)
 ;; (use-package recentf)
+   #+END_SRC
+
+   Now the misc packages
+
+   #+BEGIN_SRC emacs-lisp
+(use-package speed-type)
+(use-package origami)
+(use-package demangle-mode)
+(use-package modern-cpp-font-lock)
+(use-package academic-phrases)
+(use-package powerthesaurus)
 (use-package protobuf-mode)
 (use-package ssh-config-mode
   :init
