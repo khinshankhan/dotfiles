@@ -134,6 +134,7 @@
 
 (defconst shan/ccls-path "~/ccls/Release/ccls")
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
+(defconst shan/texlab-path "~/texlab/target/release/texlab")
    #+END_SRC
 
 ** General Functions
@@ -452,8 +453,9 @@ Automatically debug and bisect your init (.emacs) file!
   :config
   (which-key-mode)
   :bind
-  ("C-h m" . which-key-show-major-mode)
-  ("C-h b" . which-key-show-top-level))
+  ;; ("C-h m" . which-key-show-major-mode)
+  ;; ("C-h b" . which-key-show-top-level)
+  )
     #+END_SRC
 
 *** Key Chords
@@ -1276,11 +1278,10 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** Julia
 
-   Borked config
+   Borked config, flycheck is "interrupted".
 
    #+BEGIN_SRC emacs-lisp
 (use-package julia-mode
-  :defer t
   :mode
   ("\\.jl\\'" . julia-mode))
 
@@ -1772,6 +1773,52 @@ Automatically debug and bisect your init (.emacs) file!
 ** TODO LaTeX
 
    #+BEGIN_SRC emacs-lisp
+(use-package tex
+  :ensure auctex
+  :mode
+  ("\\.tex\\'" . LaTeX-mode)
+  :config
+  (pretty-hydra-define hydra-latex (:exit t :color amaranth :title " Latex" :quit-key "q")
+    (
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+  ;; interestingly enough, auto ide doesnt like the latex formatted latex
+  (shan/ide-add 'latex-mode #'hydra-latex/body))
+
+(use-package auctex-latexmk
+  :hook
+  (LaTeX-mode . flymake-mode)
+  :init
+  (setq TeX-show-compilation nil)
+  (setq TeX-save-query nil)
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  ;; (setq TeX-PDF-mode t)
+  (auctex-latexmk-setup)
+  :config
+  ;; use flymake as checker on latex docs
+  (defun flymake-get-tex-args (file-name)
+    (list "pdflatex"
+          (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
+
+(use-package cdlatex
+  :hook
+  (LaTeX-mode . turn-on-cdlatex))
+
+(use-package company-auctex
+  :config
+  (company-auctex-init))
+   #+END_SRC
+
+   Completion back-ends for math unicode sysmbols and latex tags
+
+   #+BEGIN_SRC emacs-lisp
+(use-package company-math
+  :defer t
+  :config
+  (add-to-list 'company-backends 'company-math-symbols-unicode))
    #+END_SRC
 
 ** Org
@@ -2207,5 +2254,6 @@ Automatically debug and bisect your init (.emacs) file!
   ;; fails the first time package is installed, should work fine after reload
   (setq ssh-config-load-file-dir (substring (find-library-name "ssh-config-mode") 0 -18)))
 (use-package crontab-mode)
+(use-package salt-mode)
 (use-package sicp)
    #+END_SRC
