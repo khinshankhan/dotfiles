@@ -1208,7 +1208,7 @@ Automatically debug and bisect your init (.emacs) file!
 
 * Languages
 
-** C/ C++
+** TODO C/ C++
 
    #+BEGIN_SRC emacs-lisp
 (use-package company-c-headers
@@ -1239,6 +1239,13 @@ Automatically debug and bisect your init (.emacs) file!
   :config
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package google-c-style
+  :hook
+  ((c-mode c++-mode) . google-set-c-style)
+  (c-mode-common . google-make-newline-indent))
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
@@ -1808,6 +1815,7 @@ Automatically debug and bisect your init (.emacs) file!
   (LaTeX-mode . turn-on-cdlatex))
 
 (use-package company-auctex
+  :after (auctex company)
   :config
   (company-auctex-init))
    #+END_SRC
@@ -1816,9 +1824,18 @@ Automatically debug and bisect your init (.emacs) file!
 
    #+BEGIN_SRC emacs-lisp
 (use-package company-math
-  :defer t
+  :after (auctex company)
   :config
   (add-to-list 'company-backends 'company-math-symbols-unicode))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package reftex
+  :after auctex
+  :custom
+  (reftex-plug-into-AUCTeX t)
+  (reftex-save-parse-info t)
+  (reftex-use-multiple-selection-buffers t))
    #+END_SRC
 
 ** Org
