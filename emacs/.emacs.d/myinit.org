@@ -1242,16 +1242,26 @@ Automatically debug and bisect your init (.emacs) file!
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
+(use-package dap-gdb-lldb
+  :ensure nil
+  :after (dap-mode))
+   #+END_SRC
+
+Provides syntax highliting support for modern C++
+
+   #+BEGIN_SRC emacs-lisp
+(use-package modern-cpp-font-lock
+  :hook
+  (c++-mode . modern-c++-font-lock-mode)
+   #+END_SRC
+
+This is kind of useless without flycheck, but I want to first try and learn the style myself.
+
+   #+BEGIN_SRC emacs-lisp
 (use-package google-c-style
   :hook
   ((c-mode c++-mode) . google-set-c-style)
   (c-mode-common . google-make-newline-indent))
-   #+END_SRC
-
-   #+BEGIN_SRC emacs-lisp
-(use-package dap-gdb-lldb
-  :ensure nil
-  :after (dap-mode))
    #+END_SRC
 
 ** Clojure
@@ -2262,7 +2272,6 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package speed-type)
 (use-package origami)
 (use-package demangle-mode)
-(use-package modern-cpp-font-lock)
 (use-package academic-phrases)
 (use-package powerthesaurus)
 (use-package protobuf-mode)
