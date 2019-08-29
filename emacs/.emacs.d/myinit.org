@@ -76,6 +76,8 @@
   - [[#expand-region][Expand Region]]
   - [[#general-editing][General Editing]]
 - [[#navigation][Navigation]]
+- [[#hobbies][Hobbies]]
+  - [[#medical][Medical]]
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
@@ -414,6 +416,10 @@ Automatically debug and bisect your init (.emacs) file!
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package unidecode)
    #+END_SRC
 
 ** Backups
@@ -1247,15 +1253,15 @@ Automatically debug and bisect your init (.emacs) file!
   :after (dap-mode))
    #+END_SRC
 
-Provides syntax highliting support for modern C++
+   Provides syntax highliting support for modern C++
 
    #+BEGIN_SRC emacs-lisp
 (use-package modern-cpp-font-lock
   :hook
-  (c++-mode . modern-c++-font-lock-mode)
+  (c++-mode . modern-c++-font-lock-mode))
    #+END_SRC
 
-This is kind of useless without flycheck, but I want to first try and learn the style myself.
+   This is kind of useless without flycheck, but I want to first try and learn the style myself.
 
    #+BEGIN_SRC emacs-lisp
 (use-package google-c-style
@@ -1673,6 +1679,14 @@ This is kind of useless without flycheck, but I want to first try and learn the 
   :mode
   (("\\.groovy$" . groovy-mode)
    ("\\.gradle$" . groovy-mode)))
+    #+END_SRC
+
+*** Info
+
+    #+BEGIN_SRC emacs-lisp
+(use-package info
+  :mode
+  ("\\.info\\" . info-mode))
     #+END_SRC
 
 *** Json
@@ -2174,6 +2188,17 @@ This is kind of useless without flycheck, but I want to first try and learn the 
   :custom
   (aw-keys shan/home-row))
   #+END_SRC
+
+* Hobbies
+
+** Medical
+
+   This requires =unidecode=. A rather edgy package, emacs hangs a lot.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package pubmed
+  :commands (pubmed-search pubmed-advanced-search))
+   #+END_SRC
 
 * Community
 
