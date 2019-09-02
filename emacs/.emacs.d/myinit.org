@@ -1686,7 +1686,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+BEGIN_SRC emacs-lisp
 (use-package info
   :mode
-  ("\\.info\\" . info-mode))
+  ("\\.info\\'" . info-mode))
     #+END_SRC
 
 *** Json
@@ -2287,7 +2287,6 @@ Automatically debug and bisect your init (.emacs) file!
 ;; (use-package google-this)
 ;; (use-package my-utils)
 ;; (use-package my-email)
-;; (use-package info)
 ;; (use-package recentf)
    #+END_SRC
 
