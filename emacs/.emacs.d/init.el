@@ -2,4 +2,4 @@
 (setq vc-follow-symlinks nil)
 
 ;; load config org file
-(org-babel-load-file (concat user-emacs-directory "myinit.org"))
+(org-babel-load-file (concat user-emacs-directory "config.org"))
