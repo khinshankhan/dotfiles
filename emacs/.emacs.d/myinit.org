@@ -15,7 +15,7 @@
 
   A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
 
-* Table of Contents :TOC_2:
+* Table of Contents :TOC_3:
 - [[#preface][Preface]]
 - [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
   - [[#personal-variables][Personal Variables]]
@@ -28,12 +28,28 @@
   - [[#backups][Backups]]
   - [[#version-specific][Version Specific]]
   - [[#bindings][Bindings]]
+    - [[#personal-bindings][Personal Bindings]]
+    - [[#which-key][Which Key]]
+    - [[#key-chords][Key Chords]]
+    - [[#hydra][Hydra]]
+    - [[#hydra-map][Hydra Map]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
+    - [[#theme][Theme]]
   - [[#mode-line][Mode Line]]
   - [[#interface][Interface]]
+    - [[#bells][Bells]]
+    - [[#confirmation-messages][Confirmation Messages]]
+    - [[#lines][Lines]]
+    - [[#line-numbers][Line Numbers]]
+    - [[#scratch-buffer][Scratch Buffer]]
+    - [[#scrolling][Scrolling]]
+    - [[#splash-screen][Splash Screen]]
+    - [[#completetion-frontend][Completetion Frontend]]
+    - [[#neotree][Neotree]]
 - [[#programming][Programming]]
   - [[#general][General]]
+    - [[#interactive][Interactive]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
   - [[#projectile][Projectile]]
@@ -57,12 +73,28 @@
   - [[#web-style-sheets][web style-sheets]]
   - [[#haml-slim][haml, slim]]
   - [[#javascript-typescript][JavaScript/ TypeScript]]
+    - [[#react][React]]
+    - [[#vue][Vue]]
 - [[#other-programming][Other Programming]]
   - [[#abstract-planning][Abstract Planning]]
+    - [[#gnu-plot][GNU Plot]]
+    - [[#plantuml][PlantUML]]
   - [[#config][Config]]
+    - [[#editor-config][Editor Config]]
+    - [[#groovy][Groovy]]
+    - [[#info][Info]]
+    - [[#json][Json]]
+    - [[#markdown][Markdown]]
+    - [[#pkgbuilds][pkgbuilds]]
+    - [[#toml][Toml]]
+    - [[#yaml][Yaml]]
   - [[#containers][Containers]]
+    - [[#docker][Docker]]
+    - [[#kubernetes][Kubernetes]]
   - [[#databases][Databases]]
+    - [[#sql][SQL]]
   - [[#theorem-provers][Theorem Provers]]
+    - [[#lean-prover][Lean Prover]]
 - [[#writing-documents][Writing/ Documents]]
   - [[#latex][LaTeX]]
   - [[#org][Org]]
@@ -508,7 +540,7 @@ Automatically debug and bisect your init (.emacs) file!
     :internal-border-width 0
     :background-color "#1c1e24"
     :poshandler 'posframe-poshandler-frame-bottom-center))
-  (hydra-hint-display-type 'lv)
+  (hydra-hint-display-type 'posframe)
   :chords
   ("ao" . hydra-leader/body)
   :config
@@ -1701,10 +1733,48 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Markdown
 
+    Slight lift off of rememberYou
+
+    Thinking about markdown hydra
+
     #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
   :mode
   ("\\.\\(md\\|markdown\\)\\'" . markdown-mode))
+
+(use-package markdown-preview-mode
+  :if (executable-find "pandoc")
+  :after (markdown-mode)
+  :custom
+  (markdown-command (executable-find "pandoc"))
+
+  (markdown-preview-javascript
+   (list (concat "https://github.com/highlightjs/highlight.js/"
+                 "9.15.6/highlight.min.js")
+         "<script>
+            $(document).on('mdContentChange', function() {
+              $('pre code').each(function(i, block)  {
+                hljs.highlightBlock(block);
+              });
+            });
+          </script>"))
+  (markdown-preview-stylesheets
+   (list (concat "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/"
+                 "3.0.1/github-markdown.min.css")
+         (concat "https://github.com/highlightjs/highlight.js/"
+                 "9.15.6/styles/github.min.css")
+
+         "<style>
+            .markdown-body {
+              box-sizing: border-box;
+              min-width: 200px;
+              max-width: 980px;
+              margin: 0 auto;
+              padding: 45px;
+            }
+
+            @media (max-width: 767px) { .markdown-body { padding: 15px; } }
+          </style>")))
     #+END_SRC
 
 *** pkgbuilds
@@ -2223,12 +2293,13 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** TODO Discord
 
-   Discord rich presence based on emacs + file editing. (tangle off so one doesn't get distracted).
+   Discord rich presence based on emacs + file editing. (disabled so one doesn't get distracted).
    I want to possibly make it launch only when discord is actually open.
 
    #+BEGIN_SRC emacs-lisp
 (use-package elcord
   :if (executable-find "discord")
+  :disabled t
   :custom
   (elcord-use-major-mode-as-main-icon t)
   :config
