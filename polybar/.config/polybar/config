@@ -32,7 +32,7 @@ font-4 = "siji:pixelsize=13;1"
 
 ;== Module Positions ========================================================
 
-modules-left = workspaces title
+modules-left = workspaces
 modules-center = weather
 modules-right = battery date
 
