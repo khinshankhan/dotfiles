@@ -33,3 +33,4 @@ alias oops='sudo !!'
 alias keyb="sudo dpkg-reconfigure keyboard-configuration"
 
 alias e="emacsclient -a '' -c"
+alias chemacs="emacs --with-profile "
