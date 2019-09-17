@@ -1,0 +1,2380 @@
+#+TITLE: An Emacs Configuration
+#+AUTHOR: Khinshan Khan
+#+STARTUP: overview
+
+* Preface
+
+  After using emacs for a while (since my first programming class in high school), I decided to create my own
+  configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
+  runs, but Windows has proven to be sightly difficult with the package manager.
+
+  For more information about myself, you can visit my website.
+
+  This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
+  from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
+
+  A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
+
+* Table of Contents :TOC_3:
+- [[#preface][Preface]]
+- [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
+  - [[#personal-variables][Personal Variables]]
+  - [[#general-functions][General Functions]]
+- [[#initialization][Initialization]]
+  - [[#package-archives][Package Archives]]
+  - [[#package-installers][Package Installers]]
+- [[#start-up][Start Up]]
+  - [[#encoding][Encoding]]
+  - [[#backups][Backups]]
+  - [[#version-specific][Version Specific]]
+  - [[#bindings][Bindings]]
+    - [[#personal-bindings][Personal Bindings]]
+    - [[#which-key][Which Key]]
+    - [[#key-chords][Key Chords]]
+    - [[#hydra][Hydra]]
+    - [[#hydra-map][Hydra Map]]
+  - [[#gui][GUI]]
+  - [[#appearance][Appearance]]
+    - [[#theme][Theme]]
+  - [[#mode-line][Mode Line]]
+  - [[#interface][Interface]]
+    - [[#bells][Bells]]
+    - [[#confirmation-messages][Confirmation Messages]]
+    - [[#lines][Lines]]
+    - [[#line-numbers][Line Numbers]]
+    - [[#scratch-buffer][Scratch Buffer]]
+    - [[#scrolling][Scrolling]]
+    - [[#splash-screen][Splash Screen]]
+    - [[#completetion-frontend][Completetion Frontend]]
+    - [[#neotree][Neotree]]
+- [[#programming][Programming]]
+  - [[#general][General]]
+    - [[#interactive][Interactive]]
+  - [[#company][Company]]
+  - [[#flycheck][Flycheck]]
+  - [[#projectile][Projectile]]
+  - [[#tramp][TRAMP]]
+  - [[#auto-ide][Auto-IDE]]
+  - [[#lsp][LSP]]
+- [[#languages][Languages]]
+  - [[#c-c][C/ C++]]
+  - [[#clojure][Clojure]]
+  - [[#haskell][Haskell]]
+  - [[#julia][Julia]]
+  - [[#juypter][Juypter]]
+  - [[#lua][Lua]]
+  - [[#ocaml][OCaml]]
+  - [[#python][Python]]
+  - [[#r][R]]
+  - [[#ruby][Ruby]]
+  - [[#scala][Scala]]
+- [[#web-development][Web Development]]
+  - [[#html][HTML]]
+  - [[#web-style-sheets][web style-sheets]]
+  - [[#haml-slim][haml, slim]]
+  - [[#javascript-typescript][JavaScript/ TypeScript]]
+    - [[#react][React]]
+    - [[#vue][Vue]]
+- [[#other-programming][Other Programming]]
+  - [[#abstract-planning][Abstract Planning]]
+    - [[#gnu-plot][GNU Plot]]
+    - [[#plantuml][PlantUML]]
+  - [[#config][Config]]
+    - [[#editor-config][Editor Config]]
+    - [[#groovy][Groovy]]
+    - [[#info][Info]]
+    - [[#json][Json]]
+    - [[#markdown][Markdown]]
+    - [[#pkgbuilds][pkgbuilds]]
+    - [[#toml][Toml]]
+    - [[#yaml][Yaml]]
+  - [[#containers][Containers]]
+    - [[#docker][Docker]]
+    - [[#kubernetes][Kubernetes]]
+  - [[#databases][Databases]]
+    - [[#sql][SQL]]
+  - [[#theorem-provers][Theorem Provers]]
+    - [[#lean-prover][Lean Prover]]
+- [[#writing-documents][Writing/ Documents]]
+  - [[#latex][LaTeX]]
+  - [[#org][Org]]
+  - [[#pdf][PDF]]
+  - [[#epub][EPUB]]
+  - [[#olivetti][Olivetti]]
+- [[#language-augmentation][Language Augmentation]]
+  - [[#yasnippet][Yasnippet]]
+  - [[#spell-checking][Spell Checking]]
+- [[#editing][Editing]]
+  - [[#expand-region][Expand Region]]
+  - [[#general-editing][General Editing]]
+- [[#navigation][Navigation]]
+- [[#hobbies][Hobbies]]
+  - [[#medical][Medical]]
+- [[#community][Community]]
+  - [[#browser][Browser]]
+  - [[#discord][Discord]]
+  - [[#key-frequency][Key Frequency]]
+  - [[#wakatime][Wakatime]]
+  - [[#miscellaneous-helpers][Miscellaneous Helpers]]
+
+* Tricks n Gimmicks for Sweeter Configuration
+
+  Mostly just useful variables and functions.
+
+** Personal Variables
+
+   Me, myself, and I.
+
+   These are personal preferences for emacs file structure.
+
+   #+BEGIN_SRC emacs-lisp
+(defconst custom-file "/dev/zero")
+(defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
+(defconst shan/settings-exist (file-exists-p shan/settings-path))
+   #+END_SRC
+
+   A couple of booleans so we don't have to check everytime.
+
+   #+BEGIN_SRC emacs-lisp
+(when shan/settings-exist
+  (load-file shan/settings-path))
+
+(defconst shan/is-a-mac (memq window-system '(mac ns)))
+   #+END_SRC
+
+   Personal favored variables
+
+   #+BEGIN_SRC emacs-lisp
+(defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
+   #+END_SRC
+
+   Just variables for machines
+
+   #+BEGIN_SRC emacs-lisp
+(defconst shan/python-executable "python3")
+(defconst shan/ipython-executable "ipython3")
+
+(setq shan/home-row
+      (if (string-equal (system-name) "faux-thunkpad")
+          '(?a ?r ?s ?t ?n ?e ?i ?o)
+        '(?a ?s ?d ?f ?j ?k ?l ?\;)))
+   #+END_SRC
+
+   Shorthands
+
+   #+BEGIN_SRC emacs-lisp
+(defconst shan/init-path (concat user-emacs-directory "init.el"))
+(defconst shan/config-path (concat user-emacs-directory "config.org"))
+
+(defconst shan/ccls-path "~/ccls/Release/ccls")
+(defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
+(defconst shan/texlab-path "~/texlab/target/release/texlab")
+   #+END_SRC
+
+** General Functions
+
+   Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not
+   mentioned in preface and significant enough. Functions are split into... "sensible" groups.
+
+   #+BEGIN_QUOTE
+   [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
+
+   [[[https://stackoverflow.com/questions/95631/open-a-file-with-su-sudo-inside-emacs/7043786][Credit: sudo-edit]]]
+
+   [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L40-L48][Credit: delete-this-file]]]
+
+   [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
+
+   [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
+   #+END_QUOTE
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/do-nothing ()
+  "Do nothing."
+  (interactive)
+  nil)
+
+(defun shan/before (to-call-before f)
+  "Run TO-CALL-BEFORE then run F."
+  (funcall to-call-before)
+  (funcall f))
+
+(defun shan/after (to-call-after f)
+  "Run F then run TO-CALL-AFTER."
+  (funcall f)
+  (funcall to-call-after))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/split-window-right ()
+  "Create a new window split to the right and balance the windows."
+  (interactive)
+  (shan/after #'balance-windows #'split-window-right))
+
+(defun shan/split-window-below ()
+  "Create a new window split below and balance the windows."
+  (interactive)
+  (shan/after #'balance-windows #'split-window-below))
+
+(defun shan/delete-window ()
+  "Delete the current window and balance the windows."
+  (interactive)
+  (shan/after #'balance-windows #'delete-window))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/delete-buffer ()
+  "Delete the current buffer and go to next most recent buffer."
+  (interactive)
+  (ido-kill-buffer))
+
+(defun shan/refresh-buffer ()
+  "Refresh the current buffer."
+  (interactive)
+  (revert-buffer :ignore-auto :noconfirm))
+
+(defun shan/scratch ()
+  "Create a new scratch buffer to work in. (could be *scratch* - *scratchX*)"
+  (interactive)
+  (let ((n 0) bufname)
+    (while (progn
+             (setq bufname (concat "*scratch"
+                                   (if (= n 0) "" (int-to-string n))
+                                   "*"))
+             (setq n (1+ n))
+             (get-buffer bufname)))
+    (switch-to-buffer (get-buffer-create bufname))
+    (lisp-interaction-mode)))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/toggle-mark ()
+  "Pop a mark if one doesn't exist already, deactivate it otherwise."
+  (interactive)
+  (if (region-active-p)
+      (deactivate-mark)
+    (push-mark nil nil t)))
+
+(defun shan/toggle-mark-rectangle ()
+  "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
+  (interactive)
+  (if (region-active-p)
+      (deactivate-mark)
+    (rectangle-mark-mode)))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+
+(defun shan/first-occurence (f list)
+  "Return the first occurence in LIST which, when applied to PREDICATE returns t."
+  (let ((head (car list))
+        (tail (cdr list)))
+    (if (or (not head) (funcall f head))
+        head
+      (shan/first-occurence f tail))))
+
+(defun shan/last-occurence (predicate list)
+  "Return the last occurence in LIST which, when applied to PREDICATE returns t."
+  (shan/first-occurence predicate (reverse list)))
+
+(defmacro shan/find-executables (list)
+  "Return the first occurence in LIST whose value corresponds to an executable."
+  (shan/first-occurence #'executable-find list))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/sudo-edit (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "FSudo Find File: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
+
+(defun shan/delete-this-file ()
+  "Delete the current file, and kill the buffer."
+  (interactive)
+  (unless (buffer-file-name)
+    (error "No file is currently being edited"))
+  (when (yes-or-no-p (format "Really delete '%s'?"
+                             (file-name-nondirectory buffer-file-name)))
+    (delete-file (buffer-file-name))
+    (kill-this-buffer)))
+
+(defun shan/rename-this-file-and-buffer (new-name)
+  "Renames both current buffer and file it's visiting to NEW-NAME."
+  (interactive "sNew name: ")
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (unless filename
+      (error "Buffer '%s' is not visiting a file!" name))
+    (progn
+      (when (file-exists-p filename)
+        (rename-file filename new-name 1))
+      (set-visited-file-name new-name)
+      (rename-buffer new-name))))
+
+(defun shan/browser-current-file ()
+  "Open the current file as a URL using `browse-url'."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (if (and (fboundp 'tramp-tramp-file-p)
+             (tramp-tramp-file-p file-name))
+        (error "Cannot open tramp file")
+      (browse-url (concat "file://" file-name)))))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/fill-or-unfill ()
+  "Fill or unfill based on the previous command."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
+  "Adds all elements from from-list to to-list"
+  (dolist (elem from-list)
+    (add-to-list to-list elem append compare-fn))
+  to-list)
+
+(defun shan/copy-hooks-to (from-hook to-hook)
+  "Copies one list of hooks to another, without the weird nonc circular list problem"
+  (dolist (hook from-hook)
+    (add-hook to-hook hook)))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/call-keymap (map &optional prompt)
+  "Read a key sequence and call the command it's bound to in MAP."
+  (let* ((help-form `(describe-bindings ,(vector map)))
+         (key (read-key-sequence prompt))
+         (cmd (lookup-key map key t)))
+    (if (functionp cmd) (call-interactively cmd)
+      (user-error "%s is undefined" key))))
+
+(defun shan/exec-call-keymap (keymap prompt)
+  "Executes `shan/call-keymap'"
+  (interactive)
+  (shan/call-keymap keymap prompt))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/reload ()
+  "Reload the configuration file."
+  (interactive)
+  (load-file shan/init-path))
+
+(defun shan/edit-config ()
+  "Edit the configuration file."
+  (interactive)
+  (find-file shan/config-path))
+   #+END_SRC
+
+* Initialization
+
+** Package Archives
+
+   Special commands, should always be needed. Note the algorithm is a hotfix to a much larger [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341][emacs issue]].
+
+   #+BEGIN_SRC emacs-lisp
+(require 'package)
+;; (setq package-enable-at-startup nil)
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+   #+END_SRC
+
+   Set up all the archive sources to pull from packages from.
+
+   #+BEGIN_SRC emacs-lisp
+(shan/add-list-to-list 'package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                                           ("melpa" . "http://melpa.org/packages/")
+                                           ("melpa-stable" . "http://stable.melpa.org/packages/")
+                                           ("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/")
+                                           ("org" . "https://orgmode.org/elpa/"))
+                       t)
+(package-initialize)
+   #+END_SRC
+
+** Package Installers
+
+   [[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
+   by isolating packages.
+
+   #+BEGIN_SRC emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
+
+(use-package use-package
+  :config
+  (setq-default use-package-always-defer nil
+                use-package-always-ensure t
+                use-package-always-demand t))
+
+(setq-default byte-compile-warnings nil)
+
+(use-package use-package-ensure-system-package)
+   #+END_SRC
+
+   The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package try)
+   #+END_SRC
+
+   #+BEGIN_EXAMPLE
+Automatically debug and bisect your init (.emacs) file!
+   #+END_EXAMPLE
+
+   #+BEGIN_SRC emacs-lisp
+(use-package bug-hunter)
+   #+END_SRC
+
+* Start Up
+
+** Encoding
+
+   Begone utf 16!
+
+   #+BEGIN_SRC emacs-lisp
+(setq-default locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package unidecode)
+   #+END_SRC
+
+** Backups
+
+   I don't particularly need backup files, and =~= + =#= files are a pain to clean anyways.
+
+   #+BEGIN_SRC emacs-lisp
+(setq-default backup-inhibited t
+              auto-save-default nil
+              create-lockfiles nil
+              make-backup-files nil)
+   #+END_SRC
+
+** Version Specific
+
+   Weird errors of GTK without this.
+
+   #+BEGIN_SRC emacs-lisp
+(when (>= emacs-major-version 26)
+  (setq-default confirm-kill-processes nil))
+   #+END_SRC
+
+** Bindings
+
+*** Personal Bindings
+
+    #+BEGIN_SRC emacs-lisp
+(bind-key* "C-;" 'company-yasnippet)
+    #+END_SRC
+
+*** Which Key
+
+    Display available keybindings in a popup.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :config
+  (which-key-mode)
+  :bind
+  ;; ("C-h m" . which-key-show-major-mode)
+  ;; ("C-h b" . which-key-show-top-level)
+  )
+    #+END_SRC
+
+*** Key Chords
+
+    #+BEGIN_SRC emacs-lisp
+(use-package use-package-chords
+  :after (key-chord))
+
+(use-package key-chord
+  :custom
+  (key-chord-two-keys-delay 0.05)
+  :config
+  (key-chord-mode t))
+    #+END_SRC
+
+*** Hydra
+
+    #+BEGIN_SRC emacs-lisp
+(use-package posframe
+  :preface
+  (defun posframe-poshandler-frame-bottom-center (info)
+    (cons (/ (- (plist-get info :parent-frame-width)
+                (plist-get info :posframe-width))
+             2)
+          (- -60
+             (plist-get info :mode-line-height)
+             (plist-get info :minibuffer-height)))))
+
+(use-package hydra
+  :after (posframe)
+  :preface
+  (defun hydra-posframe--hotfix (&rest _)
+    (posframe-funcall
+     " *hydra-posframe*"
+     (lambda ()
+       (fit-frame-to-buffer (selected-frame) nil
+                            (+ (count-lines (point-min) (point-max)) 1)
+                            nil nil)
+       (redirect-frame-focus (selected-frame) (frame-parent (selected-frame))))))
+  :custom
+  (hydra--work-around-dedicated nil)
+  (hydra-posframe-show-params
+   (list
+    :internal-border-width 0
+    :background-color "#1c1e24"
+    :poshandler 'posframe-poshandler-frame-bottom-center))
+  (hydra-hint-display-type 'posframe)
+  :chords
+  ("ao" . hydra-leader/body)
+  :config
+  (advice-add 'hydra-posframe-show :after #'hydra-posframe--hotfix))
+
+(use-package pretty-hydra
+  :after (hydra))
+    #+END_SRC
+
+*** Hydra Map
+
+    #+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra-config (:exit t :color amaranth :title " Personal" :quit-key "q")
+  (" Configuration"
+   (("e" shan/edit-config "config file")
+    ("r" shan/reload "reload")
+    ("g" shan/refresh-buffer "refresh buffer"))
+   " Elfeed"
+   ()
+   " Exit"
+   (("<deletechar>" save-buffers-kill-terminal "quit emacs")
+    ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-help (:exit t :color amaranth :title " Help" :quit-key "q")
+  ("Bindings"
+   (("b" counsel-descbinds "all")
+    ("m" which-key-show-major-mode "major mode"))
+   "Describes"
+   (("f" counsel-describe-function "function")
+    ("k" describe-key "key")
+    ("v" counsel-describe-variable "variable"))
+   "Others"
+   (("F" counsel-describe-face "face")
+    ("l" view-lossage "command history"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-projectile (:exit t :color amaranth :title " Projectile" :quit-key "q")
+  (""
+   (("a" projectile-find-other-file "find other file")
+    ("b" projectile-switch-to-buffer "switch buffer")
+    ("c" projectile-compile-project "compile")
+    ("d" projectile-find-dir "find directory"))
+   ""
+   (("e" projectile-recentf "recent files")
+    ("f" projectile-find-file "find file")
+    ("g" projectile-grep "grep")
+    ("k" projectile-kill-buffers "kill project buffers"))
+   ""
+   (("p" projectile-switch-project "switch project")
+    ("t" projectile-toggle-between-implementation-and-test "impl ↔ test")
+    ("v" projectile-vc "version control"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-avy (:exit t :color amaranth :title " Avy" :quit-key "q")
+  ("Goto"
+   (("c" avy-goto-char-timer "timed char")
+    ("C" avy-goto-char "char")
+    ("w" avy-goto-word-1 "word")
+    ("W" avy-goto-word-0 "word*")
+    ("l" avy-goto-line "bol")
+    ("L" avy-goto-end-of-line "eol"))
+   "Line"
+   (("m" avy-move-line "move")
+    ("k" avy-kill-whole-line "kill")
+    ("y" avy-copy-line "yank"))
+   "Region"
+   (("M" avy-move-region "move")
+    ("K" avy-kill-region "kill")
+    ("Y" avy-copy-region "yank"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-window (:exit nil :color amaranth :title " Windows" :quit-key "q")
+  ("Split"
+   (("2" split-window-below "below")
+    ("3" split-window-right "right"))
+   "Movement"
+   (("b" balance-windows "balance")
+    ("k" delete-window "kill" :exit t)
+    ("w" other-window "move"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
+
+(pretty-hydra-define hydra-lsp (:exit t :color amaranth :title " LSP" :quit-key "q")
+  ("Find"
+   (("." lsp-ui-peek-find-references "find references")
+    ("d" lsp-find-definition "find definition")
+    ("t" lsp-find-type-definition "find type definition"))
+   "Refactor"
+   (("e" lsp-rename "rename symbol at point")
+    ("f" lsp-format-buffer "format buffer"))
+   "Show"
+   (("j" lsp-ui-imenu "symbol table")
+    ("l" lsp-ui-flycheck-list "error list"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+
+(pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
+  (""
+   (("RET" hydra-config/body (propertize "+config" 'face 'bold))
+    ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
+    ("h" hydra-help/body (propertize "+help" 'face 'bold)))
+   ""
+   (("f" counsel-find-file "management")
+    ("p" hydra-projectile/body (propertize "+project" 'face 'bold))
+    ("a" hydra-avy/body (propertize "+jump" 'face 'bold))
+    ("w" hydra-window/body (propertize "+window" 'face 'bold)))
+   ""
+   (("u" undo "undo" :exit nil)
+    ("t" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
+    ("n" counsel-M-x "M-x")
+    ("s" save-buffer "save"))))
+    #+END_SRC
+
+** GUI
+
+   You need to experience keyboard to realize keyboard master race. (fn + f10 if need be for options though)
+
+   #+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t)
+
+(when (display-graphic-p)
+  (menu-bar-mode 0)
+  (toggle-scroll-bar 0)
+  (tool-bar-mode 0))
+   #+END_SRC
+
+** Appearance
+
+*** Theme
+
+    #+BEGIN_SRC emacs-lisp
+(add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
+
+(use-package zerodark-theme
+  :defer t)
+
+(use-package poet-theme
+  :defer t)
+
+(use-package doom-themes
+  :if (display-graphic-p)
+  :custom
+  (doom-vibrant-brighter-comments t)
+  (doom-vibrant-brighter-modeline t)
+  :config
+  (doom-themes-org-config)
+  (load-theme 'doom-dracula t))
+
+(use-package solaire-mode
+  :functions persp-load-state-from-file
+  :hook
+  (prog-mode . turn-on-solaire-mode)
+  (minibuffer-setup . solaire-mode-in-minibuffer)
+  (after-load-theme . solaire-mode-swap-bg)
+  :custom
+  (solaire-mode-remap-modeline nil)
+  (solaire-mode-remap-fringe nil)
+  :config
+  (solaire-global-mode 1)
+  (solaire-mode-swap-bg)
+  (advice-add #'persp-load-state-from-file
+              :after #'solaire-mode-restore-persp-mode-buffers))
+    #+END_SRC
+
+** Mode Line
+
+   #+BEGIN_SRC emacs-lisp
+(line-number-mode t)
+(column-number-mode t)
+
+(use-package doom-modeline
+  :if (display-graphic-p)
+  :custom
+  (doom-modeline-python-executable shan/python-executable)
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-version t)
+  (doom-modeline-buffer-file-name-style 'file-name)
+  :config
+  (doom-modeline-mode))
+   #+END_SRC
+
+** Interface
+
+*** Bells
+
+    #+BEGIN_SRC emacs-lisp
+(setq-default visible-bell nil
+              audible-bell nil
+              ring-bell-function 'ignore)
+    #+END_SRC
+
+*** Confirmation Messages
+
+    #+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p (lambda (&rest _) t))
+(setq-default confirm-kill-emacs nil)
+(setq save-abbrevs t)
+(setq-default abbrev-mode t)
+(setq save-abbrevs 'silently)
+    #+END_SRC
+
+*** Lines
+
+    #+BEGIN_SRC emacs-lisp
+(setq-default transient-mark-mode t
+              visual-line-mode t
+              indent-tabs-mode nil
+              tab-width 4)
+
+(when (display-graphic-p)
+  (global-hl-line-mode t))
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+(use-package highlight-indent-guides
+  :hook
+  (prog-mode . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-method 'character)
+  (highlight-indent-guides-responsive 'stack)
+  (highlight-indent-guides-character ?\┊);;?\間)
+  )
+    #+END_SRC
+
+*** Line Numbers
+
+    #+BEGIN_SRC emacs-lisp
+(use-package linum
+  :ensure nil
+  :if (< emacs-major-version 26)
+  :hook
+  (prog-mode . linum-mode)
+  :custom
+  (linum-format " %d ")
+  :config
+  (set-face-underline 'linum nil))
+
+(use-package display-line-numbers
+  :ensure nil
+  :if (>= emacs-major-version 26)
+  :hook
+  (prog-mode . display-line-numbers-mode)
+  :custom
+  ;;(display-line-numbers-type 'relative)
+  (display-line-numbers-current-absolute t)
+  (display-line-numbers-width 2)
+  (display-line-numbers-widen t))
+    #+END_SRC
+
+*** Scratch Buffer
+
+    #+BEGIN_SRC emacs-lisp
+;;(setq-default initial-major-mode 'python-mode)
+(setq-default initial-major-mode 'lisp-interaction-mode)
+(setq initial-scratch-message nil)
+    #+END_SRC
+
+*** Scrolling
+
+    This is tangled off for now...
+
+    #+BEGIN_SRC emacs-lisp
+(setq-default scroll-margin 0
+              scroll-conservatively 10000
+              scroll-preserve-screen-position t
+              mouse-wheel-progressive-speed nil)
+    #+END_SRC
+
+*** Splash Screen
+
+    #+BEGIN_SRC emacs-lisp
+(use-package page-break-lines)
+
+(use-package dashboard
+  :after (page-break-lines)
+  :bind
+  (:map dashboard-mode-map
+        ("n" . widget-forward)
+        ("p" . widget-backward)
+        ("f" . shan/elfeed-update-database))
+  :custom
+  (dashboard-banner-logo-title
+   (format ""
+           (float-time (time-subtract after-init-time before-init-time))
+           (length package-activated-list) gcs-done))
+  (dashboard-set-heading-icons t)
+  (dashboard-set-file-icons t)
+  (dashboard-set-init-info t)
+  (dashboard-center-content t)
+  (dashboard-set-footer nil)
+
+  (dashboard-set-navigator t)
+  (dashboard-navigator-buttons
+   `((
+
+      (,(and (display-graphic-p)
+             (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
+       ""
+       "GH Repos"
+       (lambda (&rest _) (browse-url-generic "https://github.com/kkhan01?tab=repositories")))
+
+      (,(and (display-graphic-p)
+             (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
+       ""
+       "Update emacs"
+       (lambda (&rest _) (shan/elfeed-update-database)))
+
+      (,(and (display-graphic-p)
+             (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
+       ""
+       "Restart emacs"
+       (lambda (&rest _) (shan/reload)))
+
+      )))
+
+  :config
+  (setq dashboard-items '((recents  . 5)
+                          ;; (bookmarks . 5)
+                          ;; (projects . 5)
+                          (agenda . 5)
+                          ;; (registers . 5)
+                          ))
+
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner (if shan/settings-exist
+                                     (concat user-emacs-directory shan/preferred-logo)
+                                   'logo)))
+    #+END_SRC
+
+*** Completetion Frontend
+
+    #+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :bind
+  ([switch-to-buffer] . ivy-switch-buffer)
+  (:map ivy-minibuffer-map
+        ([remap xref-find-definitions] . shan/do-nothing)
+        ([remap xref-find-definitions-other-frame] . shan/do-nothing)
+        ([remap xref-find-definitions-other-window] . shan/do-nothing)
+        ([remap xref-find-references] . shan/do-nothing)
+        ([remap xref-find-apropos] . shan/do-nothing)
+        ("<return>" . ivy-alt-done))
+  :custom
+  (ivy-use-virtual-buffers t)
+  (ivy-count-format "%d/%d ")
+  (ivy-height 20)
+  (ivy-display-style 'fancy)
+  (ivy-format-function 'ivy-format-function-line)
+  (ivy-re-builders-alist
+   '((t . ivy--regex-plus)))
+  (ivy-initial-inputs-alist nil)
+  :config
+  (ivy-mode))
+
+(use-package counsel
+  :bind
+  ("M-x" . counsel-M-x)
+  ("C-x C-f" . counsel-find-file)
+  ("C-h v" . counsel-describe-variable)
+  ("C-h f" . counsel-describe-function)
+  ("C-x b" . counsel-switch-buffer))
+
+(use-package swiper
+  :bind
+  ("C-s" . swiper-isearch)
+  ("C-r" . swiper-isearch-backward))
+    #+END_SRC
+
+*** Neotree
+
+    I dont usually use gui, but this seemed fun. Used [[https://github.com/Ladicle][Ladicle]]'s config.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package neotree
+  :after
+  (projectile)
+  :commands
+  (neotree-show neotree-hide neotree-dir neotree-find)
+  :init
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+  :custom
+  (neo-theme 'nerd2)
+  (neo-window-position 'left)
+  :bind
+  ([f8] . neotree-current-dir-toggle)
+  ([f9] . neotree-projectile-toggle)
+  :preface
+  (defun neotree-projectile-toggle ()
+    (interactive)
+    (let ((project-dir
+           (ignore-errors
+           ;;; Pick one: projectile or find-file-in-project
+             (projectile-project-root)
+             ))
+          (file-name (buffer-file-name))
+          (neo-smart-open t))
+      (if (and (fboundp 'neo-global--window-exists-p)
+               (neo-global--window-exists-p))
+          (neotree-hide)
+        (progn
+          (neotree-show)
+          (if project-dir
+              (neotree-dir project-dir))
+          (if file-name
+              (neotree-find file-name))))))
+
+  (defun neotree-current-dir-toggle ()
+    (interactive)
+    (let ((project-dir
+           (ignore-errors
+             (ffip-project-root)
+             ))
+          (file-name (buffer-file-name))
+          (neo-smart-open t))
+      (if (and (fboundp 'neo-global--window-exists-p)
+               (neo-global--window-exists-p))
+          (neotree-hide)
+        (progn
+          (neotree-show)
+          (if project-dir
+              (neotree-dir project-dir))
+          (if file-name
+              (neotree-find file-name)))))))
+    #+END_SRC
+
+* Programming
+
+  Things that I should need in my prog modes.
+
+** General
+
+*** Interactive
+
+    These guys are always active and a series of small things that have become second nature by now.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
+
+(use-package smartparens
+  :hook
+  (prog-mode . smartparens-mode)
+  :custom
+  (sp-escape-quotes-after-insert nil)
+  :config
+  (require 'smartparens-config))
+
+(use-package paren
+  :config
+  (show-paren-mode t))
+
+(use-package move-text
+  :config
+  (move-text-default-bindings))
+    #+END_SRC
+
+** Company
+
+   #+BEGIN_SRC emacs-lisp
+(use-package company
+  :bind
+  ("C-/" . company-complete)
+  (:map company-active-map
+        ("M-/" . company-other-backend)
+        ("M-n" . nil)
+        ("M-p" . nil)
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous))
+  :custom-face
+  (company-tooltip ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-tooltip-annotation ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-tooltip-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
+  (company-tooltip-mouse ((t (:background "#30343c"))))
+  (company-tooltip-common ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-tooltip-common-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
+  (company-preview ((t (:background "#30343c"))))
+  (company-preview-common ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-scrollbar-fg ((t (:background "#30343c"))))
+  (company-scrollbar-bg ((t (:background "#30343c"))))
+  (company-template-field ((t (:foreground "#282c34" :background "#c678dd"))))
+  :custom
+  (company-require-match 'never)
+  (company-dabbrev-downcase nil)
+  (company-tooltip-align-annotations t)
+  (company-idle-delay 3) ;; 128)
+  (company-minimum-prefix-length 3) ;; 128)
+  :config
+  (global-company-mode t))
+
+(use-package company-quickhelp
+  :after (company)
+  :config
+  (company-quickhelp-mode))
+
+(use-package company-box
+  :after (company)
+  :hook
+  (company-mode . company-box-mode))
+   #+END_SRC
+
+** Flycheck
+
+   #+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :custom-face
+  (flycheck-info ((t (:underline (:style line :color "#80FF80")))))
+  (flycheck-warning ((t (:underline (:style line :color "#FF9933")))))
+  (flycheck-error ((t (:underline (:style line :color "#FF5C33")))))
+  :custom
+  (flycheck-check-syntax-automatically '(mode-enabled save))
+  :config
+  (define-fringe-bitmap 'flycheck-fringe-bitmap-ball
+    (vector #b00000000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00111000
+            #b01111100
+            #b11111110
+            #b11111110
+            #b11111110
+            #b01111100
+            #b00111000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00000000))
+  (flycheck-define-error-level 'info
+    :severity 100
+    :compilation-level 2
+    :overlay-category 'flycheck-info-overlay
+    :fringe-bitmap 'flycheck-fringe-bitmap-ball
+    :fringe-face 'flycheck-fringe-info
+    :info-list-face 'flycheck-error-list-info)
+  (flycheck-define-error-level 'warning
+    :severity 100
+    :compilation-level 2
+    :overlay-category 'flycheck-warning-overlay
+    :fringe-bitmap 'flycheck-fringe-bitmap-ball
+    :fringe-face 'flycheck-fringe-warning
+    :warning-list-face 'flycheck-error-list-warning)
+  (flycheck-define-error-level 'error
+    :severity 100
+    :compilation-level 2
+    :overlay-category 'flycheck-error-overlay
+    :fringe-bitmap 'flycheck-fringe-bitmap-ball
+    :fringe-face 'flycheck-fringe-error
+    :error-list-face 'flycheck-error-list-error)
+  (global-flycheck-mode t))
+   #+END_SRC
+
+   Here we disable have to disable other checkers to use flycheck
+
+   #+BEGIN_SRC emacs-lisp
+(setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+   #+END_SRC
+
+** Projectile
+
+   #+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :bind
+  (:map projectile-mode-map
+        ("C-c p" . projectile-command-map))
+  :custom
+  (projectile-project-search-path '("~/Projects/"))
+  ;; ignore set up: https://www.youtube.com/watch?v=qpv9i_I4jYU
+  (projectile-indexing-method 'hybrid)
+  (projectile-sort-order 'access-time)
+  (projectile-enable-caching t)
+  (projectile-require-project-root t)
+  (projectile-completion-system 'ivy)
+  :config
+  (projectile-mode t))
+
+(use-package counsel-projectile
+  :disabled
+  :after
+  (counsel projectile)
+  :config
+  (counsel-projectile-mode t)
+  (defalias 'projectile-switch-to-buffer 'counsel-projectile-switch-to-buffer)
+  (defalias 'projectile-find-dir 'counsel-projectile-find-dir)
+  (defalias 'projectile-find-file 'counsel-projectile-find-file)
+  (defalias 'projectile-grep 'counsel-projectile-grep)
+  (defalias 'projectile-switch-project 'counsel-projectile-switch-project))
+   #+END_SRC
+
+** TRAMP
+
+   #+BEGIN_SRC emacs-lisp
+(use-package tramp
+  :ensure nil
+  :config
+  ;; faster than scp
+  (setq tramp-default-method "ssh")
+  (add-to-list 'tramp-default-user-alist
+               '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
+               '(nil nil "shan")) ;; fallback login
+
+  (setq password-cache-expiry nil))
+
+;; this hook makes remote projectile a little lighter
+(add-hook 'find-file-hook
+          (lambda ()
+            (when (file-remote-p default-directory)
+              (setq-local projectile-mode-line "Projectile"))))
+
+;; (defun uwu()
+;;   (interactive)
+;;   (find-file "Khinshan.Khan44@eniac.cs.hunter.cuny.edu|ssh:Khinshan.Khan44@cslab1")
+;;   )
+   #+END_SRC
+
+** Auto-IDE
+
+   Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-resolve=
+
+   #+BEGIN_SRC emacs-lisp
+(defvar shan/ide--alist '())
+
+(defun shan/ide-add (mode hydra)
+  (push `(,mode . ,hydra) shan/ide--alist))
+
+(defun shan/ide-resolve ()
+  (interactive)
+  (let ((hydra (alist-get major-mode shan/ide--alist)))
+    (if hydra
+        (funcall hydra)
+      (message "IDE not found for %s" major-mode))))
+   #+END_SRC
+
+** LSP
+
+   [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] has much potential, hopefully it gets even better. For now, this configuration is great.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+  :custom
+  (lsp-auto-guess-root t)
+  (lsp-before-save-edits t)
+  (lsp-enable-indentation t)
+  (lsp-auto-configure nil)
+  (lsp-enable-snippet nil)
+  (lsp-prefer-flymake nil)
+  :config
+  (shan/add-list-to-list 'lsp-language-id-configuration '((python-mode . "python")
+                                                          (caml-mode   . "ocaml")
+                                                          (tuareg-mode . "ocaml")
+                                                          (reason-mode . "ocaml")))
+  (setq lsp-print-io t))
+
+(use-package lsp-ui
+  :after (lsp-mode)
+  :hook
+  (lsp-mode . lsp-ui-mode)
+  :bind
+  (:map lsp-mode-map
+        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+        ([remap xref-find-references]  . lsp-ui-peek-find-references))
+  :custom
+  (lsp-ui-flycheck-enable t))
+
+(use-package company-lsp
+  :after (company lsp-mode)
+  :bind
+  (:map lsp-mode-map
+        ("C-/" . company-lsp))
+  :custom
+  (company-lsp-async t)
+  (company-lsp-cache-candidates t)
+  (company-lsp-enable-snippets nil)
+  (company-lsp-enable-recompletion t)
+  :config
+  (add-to-list 'company-backends #'company-lsp))
+   #+END_SRC
+
+   Great for debugging... once you learn how to use a debugger. Don't worry about eager expansion errors.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package dap-mode
+  :after (hydra)
+  :hook
+  (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
+  :config
+  (use-package dap-hydra
+    :ensure nil
+    :config
+    (defhydra+ dap-hydra (:exit nil :foreign-keys run)
+      ("d" dap-debug "Start debug session"))
+    (pretty-hydra-define+ hydra-lsp ()
+      (;; these heads are added to the existing " Exit" column
+       " Exit"
+       (("SPC" dap-hydra "dap"))))))
+   #+END_SRC
+
+* Languages
+
+** TODO C/ C++
+
+   #+BEGIN_SRC emacs-lisp
+(use-package company-c-headers
+  :after (company)
+  :config
+  (add-to-list 'company-backends 'company-c-headers))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package cc-mode
+  :ensure nil
+  :custom
+  (ccls-sem-highlight-method 'font-lock)
+  (c-basic-offset 4)
+  :config
+  (setq c-default-style '((c++-mode  . "stroustrup")
+                          (awk-mode  . "awk")
+                          (java-mode . "java")
+                          (other     . "k&r"))))
+
+(use-package ccls
+  :if (file-exists-p shan/ccls-path)
+  :after (lsp-mode)
+  :hook
+  ((c-mode c++-mode) . lsp)
+  :custom
+  (ccls-executable shan/ccls-path)
+  :config
+  (shan/ide-add 'c-mode #'hydra-lsp/body)
+  (shan/ide-add 'c++-mode #'hydra-lsp/body))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package dap-gdb-lldb
+  :ensure nil
+  :after (dap-mode))
+   #+END_SRC
+
+   Provides syntax highliting support for modern C++
+
+   #+BEGIN_SRC emacs-lisp
+(use-package modern-cpp-font-lock
+  :hook
+  (c++-mode . modern-c++-font-lock-mode))
+   #+END_SRC
+
+   This is kind of useless without flycheck, but I want to first try and learn the style myself.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package google-c-style
+  :hook
+  ((c-mode c++-mode) . google-set-c-style)
+  (c-mode-common . google-make-newline-indent))
+   #+END_SRC
+
+** Clojure
+
+   #+BEGIN_SRC emacs-lisp
+(use-package clojure-mode)
+
+(use-package cider
+  :bind
+  (:map cider-repl-mode-map
+        ("C-l" . cider-repl-clear-buffer))
+  :custom
+  (cider-print-fn 'fipp)
+  (cider-repl-display-help-banner nil)
+  (cider-repl-pop-to-buffer-on-connect nil)
+  (cider-repl-display-in-current-window nil)
+  (cider-font-lock-dynamically t))
+
+(use-package elein)
+   #+END_SRC
+
+** Haskell
+
+   #+BEGIN_SRC emacs-lisp
+(use-package haskell-mode
+  :if (executable-find "ghc")
+  :mode "\\.hs\\'"
+  :config
+  (setq haskell-mode-hook 'haskell-mode-defaults))
+   #+END_SRC
+
+** Julia
+
+   Borked config, flycheck is "interrupted".
+
+   #+BEGIN_SRC emacs-lisp
+(use-package julia-mode
+  :mode
+  ("\\.jl\\'" . julia-mode))
+
+(use-package flycheck-julia
+  :after (julia-mode)
+  :hook
+  (flycheck-mode . flycheck-julia-setup))
+   #+END_SRC
+
+** Juypter
+
+   #+BEGIN_SRC emacs-lisp
+(use-package ein
+  :mode
+  (".*\\.ipynb\\'" . ein:ipynb-mode)
+  :custom
+  (ein:completion-backend 'ein:use-company-jedi-backends)
+  (ein:use-auto-complete-superpack t))
+   #+END_SRC
+
+** Lua
+   #+BEGIN_SRC emacs-lisp
+(use-package lua-mode
+  :after (company)
+  :mode
+  (("\\.lua\\'" . lua-mode))
+  :hook
+  (lua-mode . company-mode))
+   #+END_SRC
+
+** OCaml
+
+   #+BEGIN_SRC emacs-lisp
+(use-package tuareg
+  :if (and (executable-find "ocaml") (executable-find "npm") t)
+  :ensure-system-package (ocaml-language-server . "npm install -g ocaml-language-server")
+  :after (lsp)
+  :hook
+  (tuareg-mode . lsp)
+  :mode
+  (("\\.ml[ip]?\\'"                           . tuareg-mode)
+   ("\\.mly\\'"                               . tuareg-menhir-mode)
+   ("[./]opam_?\\'"                           . tuareg-opam-mode)
+   ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
+   ("\\.eliomi?\\'"                           . tuareg-mode))
+  :custom
+  (tuareg-match-patterns-aligned t)
+  (tuareg-indent-align-with-first-arg t)
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server" "--stdio"))
+                    :major-modes '(caml-mode tuareg-mode reason-mode)
+                    :server-id 'ocamlmerlin-lsp))
+  (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
+   #+END_SRC
+
+** Python
+
+   A reasonable guess.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package pip-requirements
+  :mode
+  ("requirements\\.txt" . pip-requirements-mode)
+  :init
+  (progn
+    (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
+   #+END_SRC
+
+   Remember to install pyls.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package python
+  :ensure nil
+  :if (executable-find "pyls")
+  :after (lsp)
+  :hook
+  (python-mode . lsp)
+  :custom
+  (python-indent 4)
+  (python-shell-interpreter shan/python-executable)
+  (python-fill-docstring-style 'pep-257)
+  (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
+  (py-split-window-on-execute t)
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
+                    :major-modes '(python-mode)
+                    :server-id 'pyls))
+  (shan/ide-add 'python-mode #'hydra-lsp/body))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package dap-python
+  :ensure nil
+  :after dap-mode
+  :custom
+  (dap-python-executable shan/python-executable))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package cython-mode)
+(use-package flycheck-cython)
+   #+END_SRC
+
+** R
+
+   #+BEGIN_SRC emacs-lisp
+(use-package ess
+  :pin melpa-stable
+  :mode
+  ("\\.[rR]\\'" . R-mode)
+  :config
+  (require 'ess-site))
+   #+END_SRC
+
+** TODO Ruby
+
+   #+BEGIN_SRC emacs-lisp
+
+   #+END_SRC
+
+** TODO Scala
+
+   Enable scala-mode and sbt-mode. Used [[https://scalameta.org/metals/docs/editors/emacs.html][scala metals]].
+
+   #+BEGIN_SRC emacs-lisp
+(use-package scala-mode
+  :after (lsp)
+  :mode "\\.s\\(cala\\|bt\\)$"
+  :hook
+  (scala-mode . lsp)
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "metals-emacs")
+                    :major-modes '(scala-mode)
+                    :priority -1
+                    :server-id 'metals))
+  (shan/ide-add 'scala-mode #'hydra-lsp/body))
+
+(use-package sbt-mode
+  :commands sbt-start sbt-command
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map))
+   #+END_SRC
+
+* Web Development
+
+  Ara ara, "web development" is huge... let's make it a first level bullet.
+
+** TODO HTML
+
+   Learn about [[http://web-mode.org/][web-mode]]
+
+   #+BEGIN_SRC emacs-lisp
+(use-package web-mode
+  :mode
+  (("\\.html?\\'"       . web-mode)
+   ("\\.phtml\\'"       . web-mode)
+   ("\\.tpl\\.php\\'"   . web-mode)
+   ("\\.blade\\.php\\'" . web-mode)
+   ("\\.php$"           . my/php-setup)
+   ("\\.[agj]sp\\'"     . web-mode)
+   ("\\.as[cp]x\\'"     . web-mode)
+   ("\\.erb\\'"         . web-mode)
+   ("\\.mustache\\'"    . web-mode)
+   ("\\.djhtml\\'"      . web-mode)
+   ("\\.jsx\\'"         . web-mode)
+   ("\\.tsx\\'"         . web-mode))
+  :config
+  ;; Highlight the element under the cursor.
+  (setq-default web-mode-enable-current-element-highlight t)
+  ;; built in color for most themes dont work well with my eyes
+  (eval-after-load "web-mode"
+    '(set-face-background 'web-mode-current-element-highlight-face "LightCoral"))
+  :custom
+  (web-mode-attr-indent-offset 2)
+  (web-mode-block-padding 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  (web-mode-comment-style 2)
+  (web-mode-enable-current-element-highlight t)
+  (web-mode-markup-indent-offset 2))
+   #+END_SRC
+
+   emmet-mode deserves a function to pull up cheatsheet. This is a powerful fork of "zencoding".
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/emmet-mode-cheatsheet ()
+  "Open emmet mode cheatsheet"
+  (interactive)
+  (browse-url-generic "https://docs.emmet.io/cheatsheet-a5.pdf"))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package emmet-mode
+  :hook
+  ((css-mode  . emmet-mode)
+   (php-mode  . emmet-mode)
+   (sgml-mode . emmet-mode)
+   (rjsx-mode . emmet-mode)
+   (web-mode  . emmet-mode)))
+   #+END_SRC
+
+** TODO web style-sheets
+
+   To simplify the config a bit, I decided to create a domino effect and then start the lsp config for them, instead
+   of having an lsp config for each mode within that mode.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package css-mode
+  :if (executable-find "npm")
+  :ensure-system-package (css-languageserver . "npm install -g vscode-css-languageserver-bin")
+  :after (lsp)
+  :mode
+  ("\\.css\\'"  . css-mode)
+  :config
+  (setq css-indent-offset 2))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package less-css-mode
+  :after (lsp css-mode)
+  :mode "\\.less\\'")
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package sass-mode
+  :after  (lsp css-mode less-css-mode)
+  :mode
+  ("\\.sass\\'" . sass-mode))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package scss-mode
+  :after (lsp css-mode less-css-mode sass-mode)
+  :hook
+  ((css-mode less-css-mode sass-mode scss-mode) . lsp)
+  :mode
+  (("\\.scss\\'"  . scss-mode))
+  :init
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection '("css-languageserver" "--stdio"))
+                    :major-modes '(css-mode less-css-mode sass-mode scss-mode)
+                    :priority -1
+                    :server-id 'css-ls))
+
+  (shan/ide-add 'css-mode #'hydra-lsp/body)
+  (shan/ide-add 'less-css-mode #'hydra-lsp/body)
+  (shan/ide-add 'sass-mode #'hydra-lsp/body)
+  (shan/ide-add 'scss-mode #'hydra-lsp/body))
+   #+END_SRC
+
+** haml, slim
+
+   #+BEGIN_SRC emacs-lisp
+(use-package haml-mode
+  :mode
+  ("\\.haml\\'"  . haml-mode)
+  :init
+  (setq haml-indent-offset 2))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package slim-mode
+  :mode
+  ("\\.slim\\'" . slim-mode))
+   #+END_SRC
+
+** TODO JavaScript/ TypeScript
+
+   These two are probably the hardest configuration to get properly solely because of "standards".
+
+   This first block is tangled off for the time being (kept messing with non-owned project styles).
+
+   #+BEGIN_SRC emacs-lisp :tangle off
+(use-package prettier-js
+  :hook
+  (js-mode . prettier-js-mode)
+  :custom
+  (prettier-js-args '("--print-width" "100"
+                      "--trailing-comma" "all")))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+
+   #+END_SRC
+
+*** TODO React
+
+    #+BEGIN_SRC emacs-lisp
+(use-package rjsx-mode
+  :mode
+  (("\\.js\\'"   . rjsx-mode)
+   ("\\.jsx\\'"  . rjsx-mode)
+   ("\\.json\\'" . javascript-mode))
+  :magic ("/\\*\\* @jsx React\\.DOM \\*/" "^import React")
+  :init
+  (setq-default rjsx-basic-offset 2)
+  (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON")))
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+(use-package react-snippets
+  :after yasnippet)
+    #+END_SRC
+
+*** TODO Vue
+
+    #+BEGIN_SRC emacs-lisp
+(use-package vue-html-mode)
+
+(use-package vue-mode
+  :defer t
+  :mode
+  (("\\.vue\\'"  . vue-mode)))
+    #+END_SRC
+
+* Other Programming
+
+  Not quite a programming language, but more for tools.
+
+** Abstract Planning
+
+*** GNU Plot
+
+    #+BEGIN_SRC emacs-lisp
+(use-package gnuplot)
+
+(use-package gnuplot-mode
+  :mode
+  ("\\.gp\\'" "\\.gnuplot\\'"))
+    #+END_SRC
+
+*** PlantUML
+
+    #+BEGIN_SRC emacs-lisp
+(use-package plantuml-mode
+  :if (file-exists-p shan/plantuml-path)
+  :mode
+  ("\\.\\(plant\\)?uml\\'" . plantuml-mode)
+  :custom
+  (plantuml-default-exec-mode 'jar)
+  (plantuml-jar-path shan/plantuml-path)
+  (plantuml-java-options "")
+  (plantuml-output-type "png")
+  (plantuml-options "-charset UTF-8"))
+    #+END_SRC
+
+** Config
+
+*** Editor Config
+
+    #+BEGIN_SRC emacs-lisp
+(use-package editorconfig
+  :hook
+  ((prog-mode text-mode) . editorconfig-mode)
+  :config
+  (editorconfig-mode 1))
+    #+END_SRC
+
+*** Groovy
+
+    #+BEGIN_SRC emacs-lisp
+(use-package groovy-mode
+  :defer t
+  :mode
+  (("\\.groovy$" . groovy-mode)
+   ("\\.gradle$" . groovy-mode)))
+    #+END_SRC
+
+*** Info
+
+    #+BEGIN_SRC emacs-lisp
+(use-package info
+  :mode
+  ("\\.info\\'" . info-mode))
+    #+END_SRC
+
+*** Json
+
+    #+BEGIN_SRC emacs-lisp
+(use-package json-mode
+  :mode
+  ("\\.json\\'" . json-mode)
+  :init
+  (setq-default js-indent-level 2))
+    #+END_SRC
+
+*** Markdown
+
+    Slight lift off of rememberYou
+
+    Thinking about markdown hydra
+
+    #+BEGIN_SRC emacs-lisp
+(use-package markdown-mode
+  :mode
+  ("\\.\\(md\\|markdown\\)\\'" . markdown-mode))
+
+(use-package markdown-preview-mode
+  :if (executable-find "pandoc")
+  :after (markdown-mode)
+  :custom
+  (markdown-command (executable-find "pandoc"))
+
+  (markdown-preview-javascript
+   (list (concat "https://github.com/highlightjs/highlight.js/"
+                 "9.15.6/highlight.min.js")
+         "<script>
+            $(document).on('mdContentChange', function() {
+              $('pre code').each(function(i, block)  {
+                hljs.highlightBlock(block);
+              });
+            });
+          </script>"))
+  (markdown-preview-stylesheets
+   (list (concat "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/"
+                 "3.0.1/github-markdown.min.css")
+         (concat "https://github.com/highlightjs/highlight.js/"
+                 "9.15.6/styles/github.min.css")
+
+         "<style>
+            .markdown-body {
+              box-sizing: border-box;
+              min-width: 200px;
+              max-width: 980px;
+              margin: 0 auto;
+              padding: 45px;
+            }
+
+            @media (max-width: 767px) { .markdown-body { padding: 15px; } }
+          </style>")))
+    #+END_SRC
+
+*** pkgbuilds
+
+    #+BEGIN_SRC emacs-lisp
+(use-package pkgbuild-mode
+  :mode
+  (("/PKGBUILD/" . pkgbuild-mode)))
+    #+END_SRC
+
+*** Toml
+
+    #+BEGIN_SRC emacs-lisp
+(use-package toml-mode)
+    #+END_SRC
+
+*** Yaml
+
+    #+BEGIN_SRC emacs-lisp
+(use-package yaml-mode
+  :mode
+  (("\\.\\(yml\\|yaml\\)\\'" . yaml-mode)
+   ("\\.raml\\'" . yaml-mode)))
+
+(use-package flycheck-yamllint
+  :hook
+  (flycheck-mode . flycheck-yamllint-setup))
+    #+END_SRC
+
+** Containers
+
+*** Docker
+
+    #+BEGIN_SRC emacs-lisp
+(use-package dockerfile-mode
+  :mode
+  (("Dockerfile'"       . dockerfile-mode)
+   ("\\.Dockerfile\\'"  . dockerfile-mode))
+  :init
+  (progn
+    (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook)))
+
+;; Emacs interface to docker
+(use-package docker)
+    #+END_SRC
+
+*** Kubernetes
+
+    k8s stuff
+
+    #+BEGIN_SRC emacs-lisp
+(use-package kubernetes
+  :commands
+  (kubernetes-overview))
+    #+END_SRC
+
+** TODO Databases
+
+*** SQL
+
+    #+BEGIN_SRC emacs-lisp
+(use-package sql
+  :mode
+  (("\\.hql$"  . sql-mode)
+   ("\\.psql$" . sql-mode)
+   ("\\.q$"    . sql-mode))
+  :hook
+  (sql-mode . (lambda () (sql-highlight-mysql-keywords))))
+
+(use-package sql-indent
+  :init
+  (setq-default sql-indent-offset tab-width))
+    #+END_SRC
+
+** Theorem Provers
+
+*** Lean Prover
+
+    Install lean using [[https://github.com/leanprover/lean/blob/master/doc/make/index.md][generic build instructions]] (don't worry about warnings or anything).
+    Next copy the binaries (eg =lean= in =lean/bin=) to =/usr/local/bin= and copy the entire lean
+    folder (repo?) to =/usr/local/lib=. Restart (terminal/ emacs)and everything should work
+    fine.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package lean-mode
+  :if (executable-find "lean")
+  :mode
+  ("\\.lean\\'" . lean-mode)
+  :bind (:map lean-mode-map
+              ("S-SPC" . company-complete))
+  :init
+  (setq lean-rootdir "/usr/local/"))
+    #+END_SRC
+
+* Writing/ Documents
+
+** TODO LaTeX
+
+   #+BEGIN_SRC emacs-lisp
+(use-package tex
+  :ensure auctex
+  :mode
+  ("\\.tex\\'" . LaTeX-mode)
+  :config
+  (pretty-hydra-define hydra-latex (:exit t :color amaranth :title " Latex" :quit-key "q")
+    (
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+  ;; interestingly enough, auto ide doesnt like the latex formatted latex
+  (shan/ide-add 'latex-mode #'hydra-latex/body))
+
+(use-package auctex-latexmk
+  :hook
+  (LaTeX-mode . flymake-mode)
+  :init
+  (setq TeX-show-compilation nil)
+  (setq TeX-save-query nil)
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  ;; (setq TeX-PDF-mode t)
+  (auctex-latexmk-setup)
+  :config
+  ;; use flymake as checker on latex docs
+  (defun flymake-get-tex-args (file-name)
+    (list "pdflatex"
+          (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
+
+(use-package cdlatex
+  :hook
+  (LaTeX-mode . turn-on-cdlatex))
+
+(use-package company-auctex
+  :after (auctex company)
+  :config
+  (company-auctex-init))
+   #+END_SRC
+
+   Completion back-ends for math unicode sysmbols and latex tags
+
+   #+BEGIN_SRC emacs-lisp
+(use-package company-math
+  :after (auctex company)
+  :config
+  (add-to-list 'company-backends 'company-math-symbols-unicode))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package reftex
+  :after auctex
+  :custom
+  (reftex-plug-into-AUCTeX t)
+  (reftex-save-parse-info t)
+  (reftex-use-multiple-selection-buffers t))
+   #+END_SRC
+
+** Org
+
+   org-mode is so colossal, it's worth learning.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package org
+  :mode
+  ("\\.\\(org\\|ORG\\)\\'" . org-mode)
+  :ensure nil
+  :hook
+  (org-babel-after-execute . org-redisplay-inline-images)
+  :custom
+  (org-file-apps
+   '((auto-mode . emacs)
+     ("\\.x?html?\\'" . "/usr/bin/firefox -private-window %s")
+     ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
+
+  (org-directory "~/.orgfiles")
+  (org-default-notes-file (concat org-directory "/notes.org"))
+  (org-export-html-postamble nil)
+
+  (org-image-actual-width 480)
+  (org-src-fontify-natively t)
+  (org-src-window-setup 'current-window)
+  (org-src-strip-leading-and-trailing-blank-lines t)
+  (org-src-preserve-indentation t)
+  (org-src-tab-acts-natively t)
+  (org-pretty-entities t)
+  (org-hide-emphasis-markers t)
+  (org-startup-with-inline-images t)
+  (org-babel-python-command "ipython3 -i --simple-prompt")
+  (org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+
+  (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
+  (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
+  :config
+  (add-to-list 'org-structure-template-alist
+               '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
+
+  (use-package ob-ipython)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((ditaa      . t)
+     (dot        . t)
+     (emacs-lisp . t)
+     (gnuplot    . t)
+     (js         . t)
+     (latex      . t)
+     (ocaml      . t)
+     (org        . t)
+     (plantuml   . t)
+     (python     . t)
+     (shell      . t)
+     (R          . t)
+     ))
+
+  (add-to-list 'org-src-lang-modes
+               '("plantuml" . fundamental)))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package toc-org
+  :after (org)
+  :hook
+  (org-mode . toc-org-enable))
+
+(use-package org-bullets
+  :hook
+  (org-mode . org-bullets-mode))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package px)
+
+(use-package htmlize)
+
+(use-package ox-gfm
+  :after (org))
+
+(use-package ox-pandoc)
+   #+END_SRC
+
+** TODO PDF
+
+   Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]. Possibly use auto ide hydra?
+
+   #+BEGIN_SRC emacs-lisp
+(use-package pdf-view
+  :ensure pdf-tools
+  :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
+  :defines pdf-annot-activate-created-annotations
+  :functions my-pdf-view-set-midnight-colors
+  :commands pdf-view-midnight-minor-mode
+  :mode ("\\.[pP][dD][fF]\\'" . pdf-view-mode)
+  :magic ("%PDF" . pdf-view-mode)
+  :hook (after-load-theme . my-pdf-view-set-dark-theme)
+  :bind (:map pdf-view-mode-map
+              ("C-s" . isearch-forward))
+  :init
+  (setq pdf-annot-activate-created-annotations t)
+
+  (defun my-pdf-view-set-midnight-colors ()
+    "Set pdf-view midnight colors."
+    (setq pdf-view-midnight-colors
+          `(,(face-foreground 'default) . ,(face-background 'default))))
+
+  (defun my-pdf-view-set-dark-theme ()
+    "Set pdf-view midnight theme as color theme."
+    (my-pdf-view-set-midnight-colors)
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (eq major-mode 'pdf-view-mode)
+          (pdf-view-midnight-minor-mode (if pdf-view-midnight-minor-mode 1 -1))))))
+  :config
+  ;; WORKAROUND: Fix compilation errors on macOS.
+  ;; @see https://github.com/politza/pdf-tools/issues/480
+  (when shan/is-a-mac
+    (setenv "PKG_CONFIG_PATH"
+            "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
+  ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
+  (pdf-tools-install)
+
+  (my-pdf-view-set-midnight-colors)
+
+  ;; FIXME: Support retina
+  ;; @see https://emacs-china.org/t/pdf-tools-mac-retina-display/10243/
+  ;; and https://github.com/politza/pdf-tools/pull/501/
+  (setq pdf-view-use-scaling t
+        pdf-view-use-imagemagick nil)
+  (with-no-warnings
+    (defun pdf-view-use-scaling-p ()
+      "Return t if scaling should be used."
+      (and (or (and (eq system-type 'darwin) (string-equal emacs-version "27.0.50"))
+               (memq (pdf-view-image-type)
+                     '(imagemagick image-io)))
+           pdf-view-use-scaling))
+    (defun pdf-view-create-page (page &optional window)
+      "Create an image of PAGE for display on WINDOW."
+      (let* ((size (pdf-view-desired-image-size page window))
+             (width (if (not (pdf-view-use-scaling-p))
+                        (car size)
+                      (* 2 (car size))))
+             (data (pdf-cache-renderpage
+                    page width width))
+             (hotspots (pdf-view-apply-hotspot-functions
+                        window page size)))
+        (pdf-view-create-image data
+          :width width
+          :scale (if (pdf-view-use-scaling-p) 0.5 1)
+          :map hotspots
+          :pointer 'arrow))))
+
+  ;; Recover last viewed position
+  (when (>= emacs-major-version 26)
+    (use-package pdf-view-restore
+      :hook (pdf-view-mode . pdf-view-restore-mode)
+      :init (setq pdf-view-restore-filename
+                  (locate-user-emacs-file ".pdf-view-restore")))))
+   #+END_SRC
+
+** TODO EPUB
+
+   Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
+
+   #+BEGIN_SRC emacs-lisp
+(use-package nov
+  :after (olivetti)
+  :mode
+  ("\\.epub\\'" . nov-mode)
+  :hook
+  (nov-mode . shan/my-nov-setup)
+  :bind
+  (:map nov-mode-map
+        ("C-p" . nov-previous-document)
+        ("C-n" . nov-next-document)
+        ("p"   . nov-scroll-up)
+        ("n"   . nov-scroll-down))
+  :config
+  (defun shan/my-nov-setup ()
+    (if (fboundp 'olivetti-mode)
+        (olivetti-mode 1)))
+
+  (setq nov-variable-pitch nil)
+  (setq nov-text-width 72))
+   #+END_SRC
+
+** Olivetti
+
+   I'm starting to think a hydra for things that can be toggled..
+
+   #+BEGIN_SRC emacs-lisp
+(use-package olivetti
+  :diminish
+  :bind
+  ("<f7>" . olivetti-mode)
+  :init
+  (setq olivetti-body-width 0.618))
+   #+END_SRC
+
+* Language Augmentation
+
+** Yasnippet
+
+   #+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :config
+  (use-package yasnippet-snippets)
+  (yas-global-mode 1))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp :tangle off
+(use-package auto-yasnippet)
+   #+END_SRC
+
+** Spell Checking
+
+   #+BEGIN_SRC emacs-lisp
+(use-package flyspell
+  :hook
+  ((text-mode . flyspell-mode)
+   (prog-mode . flyspell-prog-mode)))
+
+(use-package flyspell-popup
+  :after (flyspell)
+  :preface
+  ;; move point to previous error
+  ;; based on code by hatschipuh at
+  ;; http://emacs.stackexchange.com/a/14912/2017
+  (defun flyspell-goto-previous-error (arg)
+    "Go to arg previous spelling error."
+    (interactive "p")
+    (while (not (= 0 arg))
+      (let ((pos (point))
+            (min (point-min)))
+        (if (and (eq (current-buffer) flyspell-old-buffer-error)
+                 (eq pos flyspell-old-pos-error))
+            (progn
+              (if (= flyspell-old-pos-error min)
+                  ;; goto beginning of buffer
+                  (progn
+                    (message "Restarting from end of buffer")
+                    (goto-char (point-max)))
+                (backward-word 1))
+              (setq pos (point))))
+        ;; seek the next error
+        (while (and (> pos min)
+                    (let ((ovs (overlays-at pos))
+                          (r '()))
+                      (while (and (not r) (consp ovs))
+                        (if (flyspell-overlay-p (car ovs))
+                            (setq r t)
+                          (setq ovs (cdr ovs))))
+                      (not r)))
+          (backward-word 1)
+          (setq pos (point)))
+        ;; save the current location for next invocation
+        (setq arg (1- arg))
+        (setq flyspell-old-pos-error pos)
+        (setq flyspell-old-buffer-error (current-buffer))
+        (goto-char pos)
+        (if (= pos min)
+            (progn
+              (message "No more miss-spelled word!")
+              (setq arg 0))
+          (forward-word)))))
+
+  (defun shan/flyspell-next-word()
+    "Jump to next miss-pelled word and pop-up correction"
+    (interactive)
+    (flyspell-goto-next-error)
+    (flyspell-popup-correct))
+
+  (defun shan/flyspell-prev-word()
+    "Jump to prev miss-pelled word and pop-up correction"
+    (interactive)
+    (flyspell-goto-previous-error (char-after 1))
+    (flyspell-popup-correct))
+  :bind
+  (:map flyspell-mode-map
+        ("C-,"   . shan/flyspell-next-word)
+        ("C-M-," . shan/flyspell-prev-word)))
+   #+END_SRC
+
+* Editing
+
+** Expand Region
+
+   #+BEGIN_SRC emacs-lisp
+(use-package expand-region
+  :defer t
+  :bind
+  ("C-=" . er/expand-region))
+   #+END_SRC
+
+** General Editing
+
+   #+BEGIN_SRC emacs-lisp
+(setq-default require-final-newline t)
+(global-subword-mode t)
+(delete-selection-mode t)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
+
+(global-set-key [remap fill-paragraph] #'shan/fill-or-unfill)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package aggressive-indent
+  :defer t)
+   #+END_SRC
+
+* Navigation
+
+  #+BEGIN_SRC emacs-lisp
+(use-package avy
+  :bind
+  ("C-'" . avy-goto-char-2)
+  :custom
+  (avy-keys shan/home-row))
+
+(use-package ace-window
+  :bind
+  ("C-x C-w" . ace-window)
+  :custom
+  (aw-keys shan/home-row))
+  #+END_SRC
+
+* Hobbies
+
+** Medical
+
+   This requires =unidecode=. A rather edgy package, emacs hangs a lot.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package pubmed
+  :commands (pubmed-search pubmed-advanced-search))
+   #+END_SRC
+
+* Community
+
+  A lot of vanity.
+
+** Browser
+
+   Control how links and browser-url-generic function works (also for links).
+
+   #+BEGIN_SRC emacs-lisp
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-args '("-private")
+      browse-url-firefox-program "firefox"
+      browse-url-generic-program "firefox")
+
+(defun browse-lucky (start end)
+  (interactive "r")
+  (let ((q (buffer-substring-no-properties start end)))
+    (browse-url-generic (concat "http://www.google.com/search?btnI&q="
+                                (url-hexify-string q)))))
+   #+END_SRC
+
+** TODO Discord
+
+   Discord rich presence based on emacs + file editing. (disabled so one doesn't get distracted).
+   I want to possibly make it launch only when discord is actually open.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package elcord
+  :if (executable-find "discord")
+  :disabled t
+  :custom
+  (elcord-use-major-mode-as-main-icon t)
+  :config
+  (elcord-mode))
+   #+END_SRC
+
+** Key Frequency
+
+   For later use, when I try to finally optimize my workflow + ergonomics.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package keyfreq
+  :config
+  (keyfreq-mode t)
+  ;;(keyfreq-autosave-mode 1)
+  )
+   #+END_SRC
+
+** Wakatime
+
+   Monitor my  coding activity. Remember to set =wakatime-api-key= in =settings.el=.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package wakatime-mode
+  :if shan/settings-exist
+  :custom
+  (wakatime-cli-path "/usr/bin/wakatime")
+  :init
+  (global-wakatime-mode))
+   #+END_SRC
+
+** TODO Miscellaneous Helpers
+
+   Just a salmagundi. Sooner or later, they'll find their places (or maybe their place here...).
+
+
+   Problematic packages first, tangled off and commented.
+
+   #+BEGIN_SRC emacs-lisp :tangle off
+;; (use-package docker
+;;   :bind (("C-c d" . docker)))
+;; (use-package docker-compose-mode)
+;; (use-package docker-tramp
+;;   :config (setq docker-tramp-use-names t)) ;; name vs id
+;; (use-package undo-tree) ;; figure out toggle
+;; (use-package gitignore-mode)
+;; (use-package pass)
+;; (use-package pinentry)
+;; (use-package edit-indirect)
+;; (use-package tablist)
+;; (use-package helpful)
+;; (use-package direnv)
+;; (use-package pyvenv)
+;; (use-package writeroom-mode)
+;; (use-package whitespace-cleanup-mode)
+;; (use-package google-this)
+;; (use-package my-utils)
+;; (use-package my-email)
+;; (use-package recentf)
+   #+END_SRC
+
+   Now the misc packages
+
+   #+BEGIN_SRC emacs-lisp
+(use-package speed-type)
+(use-package origami)
+(use-package demangle-mode)
+(use-package academic-phrases)
+(use-package powerthesaurus)
+(use-package protobuf-mode)
+(use-package ssh-config-mode
+  :init
+  ;; fails the first time package is installed, should work fine after reload
+  (setq ssh-config-load-file-dir (substring (find-library-name "ssh-config-mode") 0 -18)))
+(use-package crontab-mode)
+(use-package salt-mode)
+(use-package sicp)
+   #+END_SRC
