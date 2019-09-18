@@ -78,6 +78,7 @@
 - [[#other-programming][Other Programming]]
   - [[#abstract-planning][Abstract Planning]]
     - [[#gnu-plot][GNU Plot]]
+    - [[#mermaid][Mermaid]]
     - [[#plantuml][PlantUML]]
   - [[#config][Config]]
     - [[#editor-config][Editor Config]]
@@ -1674,6 +1675,18 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package gnuplot-mode
   :mode
   ("\\.gp\\'" "\\.gnuplot\\'"))
+    #+END_SRC
+
+*** Mermaid
+
+    #+BEGIN_SRC emacs-lisp
+(use-package mermaid-mode
+  :if (executable-find "mmdc")
+  :mode
+  (("\\.mmd\\'" . mermaid-mode)
+   ("\\.mermaid\\'" . mermaid-mode))
+  :init
+  (setq mermaid-mmdc-location (executable-find "mmdc")))
     #+END_SRC
 
 *** PlantUML
