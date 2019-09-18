@@ -1,4 +1,4 @@
-
-# ignore init.el in custom emacs
+# emacs
 emacs/.emacs.d/init.el
 emacs/.emacs.d/off
+elpa
