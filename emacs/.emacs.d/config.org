@@ -225,11 +225,6 @@
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
-(defun shan/delete-buffer ()
-  "Delete the current buffer and go to next most recent buffer."
-  (interactive)
-  (ido-kill-buffer))
-
 (defun shan/refresh-buffer ()
   "Refresh the current buffer."
   (interactive)
@@ -565,7 +560,9 @@ Automatically debug and bisect your init (.emacs) file!
    " Exit"
    (("<deletechar>" save-buffers-kill-terminal "quit emacs")
     ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+    #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-help (:exit t :color amaranth :title " Help" :quit-key "q")
   ("Bindings"
    (("b" counsel-descbinds "all")
@@ -579,7 +576,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("l" view-lossage "command history"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+    #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-projectile (:exit t :color amaranth :title " Projectile" :quit-key "q")
   (""
    (("a" projectile-find-other-file "find other file")
@@ -597,7 +596,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("v" projectile-vc "version control"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+    #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-avy (:exit t :color amaranth :title " Avy" :quit-key "q")
   ("Goto"
    (("c" avy-goto-char-timer "timed char")
@@ -616,18 +617,25 @@ Automatically debug and bisect your init (.emacs) file!
     ("Y" avy-copy-region "yank"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+    #+END_SRC
 
-(pretty-hydra-define hydra-window (:exit nil :color amaranth :title " Windows" :quit-key "q")
-  ("Split"
+    #+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra-window (:exit nil :color amaranth :title " Screen" :quit-key "q")
+  ("Window Split"
    (("2" split-window-below "below")
     ("3" split-window-right "right"))
-   "Movement"
-   (("b" balance-windows "balance")
+   "Window Movement"
+   (("c" ace-window "choose")
+    ("b" balance-windows "balance")
     ("k" delete-window "kill" :exit t)
     ("w" other-window "move"))
+   "Buffer Movement"
+   (("l" kill-buffer-and-windows "kill" :exit t))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
+    #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-lsp (:exit t :color amaranth :title " LSP" :quit-key "q")
   ("Find"
    (("." lsp-ui-peek-find-references "find references")
@@ -641,7 +649,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("l" lsp-ui-flycheck-list "error list"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+    #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
   (""
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
@@ -651,7 +661,7 @@ Automatically debug and bisect your init (.emacs) file!
    (("f" counsel-find-file "management")
     ("p" hydra-projectile/body (propertize "+project" 'face 'bold))
     ("a" hydra-avy/body (propertize "+jump" 'face 'bold))
-    ("w" hydra-window/body (propertize "+window" 'face 'bold)))
+    ("w" hydra-window/body (propertize "+screen" 'face 'bold)))
    ""
    (("u" undo "undo" :exit nil)
     ("t" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
@@ -1673,7 +1683,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+BEGIN_SRC emacs-lisp
 (use-package artist
   :config
-  (pretty-hydra-define hydra-artist (:exit t :color amaranth :title " LSP" :quit-key "q")
+  (pretty-hydra-define hydra-artist (:exit t :color amaranth :title "Artist" :quit-key "q")
     ("Find"
      (("a" artist-mouse-choose-operation "operations"))
      " Exit"
