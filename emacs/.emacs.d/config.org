@@ -62,6 +62,8 @@
   - [[#haskell][Haskell]]
   - [[#julia][Julia]]
   - [[#juypter][Juypter]]
+  - [[#lisp][Lisp]]
+    - [[#elisp][ELisp]]
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
   - [[#python][Python]]
@@ -722,7 +724,7 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Mode Line
 
-   #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
 
@@ -736,13 +738,13 @@ Automatically debug and bisect your init (.emacs) file!
   (doom-modeline-buffer-file-name-style 'file-name)
   :config
   (doom-modeline-mode))
-   #+END_SRC
+    #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp
 (use-package hide-mode-line
   :hook
   ((neotree-mode imenu-list-minor-mode minimap-mode ibuffer-mode help-mode deft-text-mode) . hide-mode-line-mode))
-   #+END_SRC
+    #+END_SRC
 
 ** Interface
 
@@ -1375,6 +1377,14 @@ Automatically debug and bisect your init (.emacs) file!
   (ein:use-auto-complete-superpack t))
    #+END_SRC
 
+** Lisp
+
+*** ELisp
+
+    #+BEGIN_SRC emacs-lisp
+(use-package elisp-format)
+    #+END_SRC
+
 ** Lua
    #+BEGIN_SRC emacs-lisp
 (use-package lua-mode
@@ -1388,26 +1398,25 @@ Automatically debug and bisect your init (.emacs) file!
 ** OCaml
 
    #+BEGIN_SRC emacs-lisp
-(use-package tuareg
-  :if (and (executable-find "ocaml") (executable-find "npm") t)
+(use-package
+  tuareg
+  :if (and (executable-find "ocaml")
+           (executable-find "npm")
+           t)
   :ensure-system-package (ocaml-language-server . "npm install -g ocaml-language-server")
   :after (lsp)
-  :hook
-  (tuareg-mode . lsp)
-  :mode
-  (("\\.ml[ip]?\\'"                           . tuareg-mode)
-   ("\\.mly\\'"                               . tuareg-menhir-mode)
-   ("[./]opam_?\\'"                           . tuareg-opam-mode)
-   ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
-   ("\\.eliomi?\\'"                           . tuareg-mode))
-  :custom
-  (tuareg-match-patterns-aligned t)
+  :hook (tuareg-mode . lsp)
+  :mode (("\\.ml[ip]?\\'"                           . tuareg-mode)
+         ("\\.mly\\'"                               . tuareg-menhir-mode)
+         ("[./]opam_?\\'"                           . tuareg-opam-mode)
+         ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
+         ("\\.eliomi?\\'"                           . tuareg-mode))
+  :custom (tuareg-match-patterns-aligned t)
   (tuareg-indent-align-with-first-arg t)
-  :config
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server" "--stdio"))
-                    :major-modes '(caml-mode tuareg-mode reason-mode)
-                    :server-id 'ocamlmerlin-lsp))
+  :config (lsp-register-client (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server"
+                                                                                        "--stdio"))
+                                                :major-modes '(caml-mode tuareg-mode reason-mode)
+                                                :server-id 'ocamlmerlin-lsp))
   (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
    #+END_SRC
 
@@ -2194,12 +2203,13 @@ Automatically debug and bisect your init (.emacs) file!
 ** Spell Checking
 
    #+BEGIN_SRC emacs-lisp
-(use-package flyspell
-  :hook
-  ((text-mode . flyspell-mode)
-   (prog-mode . flyspell-prog-mode)))
+(use-package
+  flyspell
+  :hook ((text-mode . flyspell-mode)
+         (prog-mode . flyspell-prog-mode)))
 
-(use-package flyspell-popup
+(use-package
+  flyspell-popup
   :after (flyspell)
   :preface
   ;; move point to previous error
@@ -2213,19 +2223,18 @@ Automatically debug and bisect your init (.emacs) file!
             (min (point-min)))
         (if (and (eq (current-buffer) flyspell-old-buffer-error)
                  (eq pos flyspell-old-pos-error))
-            (progn
-              (if (= flyspell-old-pos-error min)
-                  ;; goto beginning of buffer
-                  (progn
-                    (message "Restarting from end of buffer")
-                    (goto-char (point-max)))
-                (backward-word 1))
-              (setq pos (point))))
+            (progn (if (= flyspell-old-pos-error min)
+                       ;; goto beginning of buffer
+                       (progn (message "Restarting from end of buffer")
+                              (goto-char (point-max)))
+                     (backward-word 1))
+                   (setq pos (point))))
         ;; seek the next error
         (while (and (> pos min)
                     (let ((ovs (overlays-at pos))
                           (r '()))
-                      (while (and (not r) (consp ovs))
+                      (while (and (not r)
+                                  (consp ovs))
                         (if (flyspell-overlay-p (car ovs))
                             (setq r t)
                           (setq ovs (cdr ovs))))
@@ -2238,26 +2247,22 @@ Automatically debug and bisect your init (.emacs) file!
         (setq flyspell-old-buffer-error (current-buffer))
         (goto-char pos)
         (if (= pos min)
-            (progn
-              (message "No more miss-spelled word!")
-              (setq arg 0))
+            (progn (message "No more miss-spelled word!")
+                   (setq arg 0))
           (forward-word)))))
-
   (defun shan/flyspell-next-word()
     "Jump to next miss-pelled word and pop-up correction"
     (interactive)
     (flyspell-goto-next-error)
     (flyspell-popup-correct))
-
   (defun shan/flyspell-prev-word()
     "Jump to prev miss-pelled word and pop-up correction"
     (interactive)
     (flyspell-goto-previous-error (char-after 1))
     (flyspell-popup-correct))
-  :bind
-  (:map flyspell-mode-map
-        ("C-,"   . shan/flyspell-next-word)
-        ("C-M-," . shan/flyspell-prev-word)))
+  :bind (:map flyspell-mode-map
+              ("C-,"   . shan/flyspell-next-word)
+              ("C-M-," . shan/flyspell-prev-word)))
    #+END_SRC
 
 * Editing
@@ -2323,16 +2328,16 @@ Automatically debug and bisect your init (.emacs) file!
    Control how links and browser-url-generic function works (also for links).
 
    #+BEGIN_SRC emacs-lisp
-(setq browse-url-browser-function 'browse-url-generic
-      browse-url-generic-args '("-private")
-      browse-url-firefox-program "firefox"
-      browse-url-generic-program "firefox")
+(setq browse-url-browser-function 'browse-url-generic browse-url-generic-args '("-private")
+      browse-url-firefox-program "firefox" browse-url-generic-program "firefox")
 
 (defun browse-lucky (start end)
   (interactive "r")
-  (let ((q (buffer-substring-no-properties start end)))
-    (browse-url-generic (concat "http://www.google.com/search?btnI&q="
-                                (url-hexify-string q)))))
+  (let ((q
+         (buffer-substring-no-properties
+          start
+          end)))
+    (browse-url-generic (concat "http://www.google.com/search?btnI&q=" (url-hexify-string q)))))
    #+END_SRC
 
 ** TODO Discord
