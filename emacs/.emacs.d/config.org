@@ -96,6 +96,7 @@
     - [[#docker][Docker]]
     - [[#kubernetes][Kubernetes]]
   - [[#databases][Databases]]
+    - [[#graphql][GraphQL]]
     - [[#sql][SQL]]
   - [[#theorem-provers][Theorem Provers]]
     - [[#lean-prover][Lean Prover]]
@@ -1885,6 +1886,26 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
 ** TODO Databases
+
+*** GraphQL
+
+    #+BEGIN_SRC emacs-lisp
+(use-package
+  graphql)
+
+(use-package
+  graphql-mode
+  :mode (("\\.\\(gql\\|graphql\\)\\'" . graphql-mode))
+  :config (defun shan/set-graphql-url()
+            (interactive)
+            (let ((shan/user-input '("http://localhost:8000/api/graphql/query"
+                                     "http://localhost:3000" "Manual")))
+              (ivy-read "Set graphql url: " shan/user-input
+                        :action #'(lambda(arg)
+                                    (setq graphql-url (if (string= arg "Manual")
+                                                          (read-string "Enter graphql url:") arg)))
+                        :caller 'shan/set-graphql-url))))
+    #+END_SRC
 
 *** SQL
 
