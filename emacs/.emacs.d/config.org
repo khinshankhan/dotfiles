@@ -35,6 +35,7 @@
     - [[#hydra-map][Hydra Map]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
+    - [[#ligatures][Ligatures]]
     - [[#theme][Theme]]
     - [[#mode-line][Mode Line]]
   - [[#interface][Interface]]
@@ -689,6 +690,36 @@ Automatically debug and bisect your init (.emacs) file!
    #+END_SRC
 
 ** Appearance
+
+*** Ligatures
+
+    #+BEGIN_SRC emacs-lisp
+(use-package prog-mode
+  :ensure nil
+  :hook
+  (prog-mode . prettify-symbols-mode)
+  :init
+  (setq-default prettify-symbols-alist
+                '(("lambda" . ?λ)
+                  ("<-" . ?←)
+                  ("->" . ?→)
+                  ("->>" . ?↠)
+                  ("=>" . ?⇒)
+                  ("map" . ?↦)
+                  ("/=" . ?≠)
+                  ("!=" . ?≠)
+                  ("==" . ?≡)
+                  ("<=" . ?≤)
+                  (">=" . ?≥)
+                  ("=<<" . (?= (Br . Bl) ?≪))
+                  (">>=" . (?≫ (Br . Bl) ?=))
+                  ("<=<" . ?↢)
+                  (">=>" . ?↣)
+                  ("&&" . ?∧)
+                  ("||" . ?∨)
+                  ("not" . ?¬)))
+  (setq prettify-symbols-unprettify-at-point 'right-edge))
+    #+END_SRC
 
 *** Theme
 
