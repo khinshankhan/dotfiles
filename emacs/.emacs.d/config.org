@@ -1399,25 +1399,28 @@ Automatically debug and bisect your init (.emacs) file!
 ** OCaml
 
    #+BEGIN_SRC emacs-lisp
-(use-package
-  tuareg
+(use-package tuareg
   :if (and (executable-find "ocaml")
            (executable-find "npm")
            t)
   :ensure-system-package (ocaml-language-server . "npm install -g ocaml-language-server")
   :after (lsp)
-  :hook (tuareg-mode . lsp)
-  :mode (("\\.ml[ip]?\\'"                           . tuareg-mode)
-         ("\\.mly\\'"                               . tuareg-menhir-mode)
-         ("[./]opam_?\\'"                           . tuareg-opam-mode)
-         ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
-         ("\\.eliomi?\\'"                           . tuareg-mode))
-  :custom (tuareg-match-patterns-aligned t)
+  :hook
+  (tuareg-mode . lsp)
+  :mode
+  (("\\.ml[ip]?\\'"                           . tuareg-mode)
+   ("\\.mly\\'"                               . tuareg-menhir-mode)
+   ("[./]opam_?\\'"                           . tuareg-opam-mode)
+   ("\\(?:\\`\\|/\\)jbuild\\(?:\\.inc\\)?\\'" . tuareg-jbuild-mode)
+   ("\\.eliomi?\\'"                           . tuareg-mode))
+  :custom
+  (tuareg-match-patterns-aligned t)
   (tuareg-indent-align-with-first-arg t)
-  :config (lsp-register-client (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server"
-                                                                                        "--stdio"))
-                                                :major-modes '(caml-mode tuareg-mode reason-mode)
-                                                :server-id 'ocamlmerlin-lsp))
+  :config
+  (lsp-register-client (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server"
+                                                                                "--stdio"))
+                                        :major-modes '(caml-mode tuareg-mode reason-mode)
+                                        :server-id 'ocamlmerlin-lsp))
   (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
    #+END_SRC
 
@@ -1720,9 +1723,12 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Mermaid
 
+Uses my version of mermaid-mode, since original doesn't use generic browser.
+
     #+BEGIN_SRC emacs-lisp
 (use-package mermaid-mode
   :if (executable-find "mmdc")
+  :load-path "site-lisp/mermaid"
   :mode
   (("\\.mmd\\'" . mermaid-mode)
    ("\\.mermaid\\'" . mermaid-mode))
@@ -1890,21 +1896,21 @@ Automatically debug and bisect your init (.emacs) file!
 *** GraphQL
 
     #+BEGIN_SRC emacs-lisp
-(use-package
-  graphql)
+(use-package graphql)
 
-(use-package
-  graphql-mode
-  :mode (("\\.\\(gql\\|graphql\\)\\'" . graphql-mode))
-  :config (defun shan/set-graphql-url()
-            (interactive)
-            (let ((shan/user-input '("http://localhost:8000/api/graphql/query"
-                                     "http://localhost:3000" "Manual")))
-              (ivy-read "Set graphql url: " shan/user-input
-                        :action #'(lambda(arg)
-                                    (setq graphql-url (if (string= arg "Manual")
-                                                          (read-string "Enter graphql url:") arg)))
-                        :caller 'shan/set-graphql-url))))
+(use-package graphql-mode
+  :mode
+  (("\\.\\(gql\\|graphql\\)\\'" . graphql-mode))
+  :config
+  (defun shan/set-graphql-url()
+    (interactive)
+    (let ((shan/user-input '("http://localhost:8000/api/graphql/query"
+                             "http://localhost:3000" "Manual")))
+      (ivy-read "Set graphql url: " shan/user-input
+                :action #'(lambda(arg)
+                            (setq graphql-url (if (string= arg "Manual")
+                                                  (read-string "Enter graphql url:") arg)))
+                :caller 'shan/set-graphql-url))))
     #+END_SRC
 
 *** SQL
@@ -1912,11 +1918,10 @@ Automatically debug and bisect your init (.emacs) file!
     #+BEGIN_SRC emacs-lisp
 (use-package sql
   :mode
-  (("\\.hql$"  . sql-mode)
-   ("\\.psql$" . sql-mode)
-   ("\\.q$"    . sql-mode))
+  (("\\.\\(sql\\|psql\\|hql\\|mysql\\|q\\)\\'" . sql-mode))
   :hook
-  (sql-mode . (lambda () (sql-highlight-mysql-keywords))))
+  (sql-mode . (lambda ()
+                (sql-highlight-mysql-keywords))))
 
 (use-package sql-indent
   :init
@@ -2224,13 +2229,12 @@ Automatically debug and bisect your init (.emacs) file!
 ** Spell Checking
 
    #+BEGIN_SRC emacs-lisp
-(use-package
-  flyspell
-  :hook ((text-mode . flyspell-mode)
-         (prog-mode . flyspell-prog-mode)))
+(use-package flyspell
+  :hook
+  ((text-mode . flyspell-mode)
+   (prog-mode . flyspell-prog-mode)))
 
-(use-package
-  flyspell-popup
+(use-package flyspell-popup
   :after (flyspell)
   :preface
   ;; move point to previous error
@@ -2281,9 +2285,10 @@ Automatically debug and bisect your init (.emacs) file!
     (interactive)
     (flyspell-goto-previous-error (char-after 1))
     (flyspell-popup-correct))
-  :bind (:map flyspell-mode-map
-              ("C-,"   . shan/flyspell-next-word)
-              ("C-M-," . shan/flyspell-prev-word)))
+  :bind
+  (:map flyspell-mode-map
+        ("C-,"   . shan/flyspell-next-word)
+        ("C-M-," . shan/flyspell-prev-word)))
    #+END_SRC
 
 * Editing
@@ -2349,8 +2354,10 @@ Automatically debug and bisect your init (.emacs) file!
    Control how links and browser-url-generic function works (also for links).
 
    #+BEGIN_SRC emacs-lisp
-(setq browse-url-browser-function 'browse-url-generic browse-url-generic-args '("-private")
-      browse-url-firefox-program "firefox" browse-url-generic-program "firefox")
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-args '("-private")
+      browse-url-firefox-program "firefox"
+      browse-url-generic-program "firefox")
 
 (defun browse-lucky (start end)
   (interactive "r")
