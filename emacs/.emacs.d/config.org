@@ -36,7 +36,7 @@
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#theme][Theme]]
-  - [[#mode-line][Mode Line]]
+    - [[#mode-line][Mode Line]]
   - [[#interface][Interface]]
     - [[#bells][Bells]]
     - [[#confirmation-messages][Confirmation Messages]]
@@ -625,7 +625,7 @@ Automatically debug and bisect your init (.emacs) file!
    (("2" split-window-below "below")
     ("3" split-window-right "right"))
    "Window Movement"
-   (("c" ace-window "choose")
+   (("c" ace-window "choose" :exit t)
     ("b" balance-windows "balance")
     ("k" delete-window "kill" :exit t)
     ("w" other-window "move"))
@@ -720,7 +720,7 @@ Automatically debug and bisect your init (.emacs) file!
               :after #'solaire-mode-restore-persp-mode-buffers))
     #+END_SRC
 
-** Mode Line
+*** Mode Line
 
    #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
@@ -736,6 +736,12 @@ Automatically debug and bisect your init (.emacs) file!
   (doom-modeline-buffer-file-name-style 'file-name)
   :config
   (doom-modeline-mode))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package hide-mode-line
+  :hook
+  ((neotree-mode imenu-list-minor-mode minimap-mode ibuffer-mode help-mode deft-text-mode) . hide-mode-line-mode))
    #+END_SRC
 
 ** Interface
