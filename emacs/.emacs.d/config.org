@@ -107,6 +107,7 @@
 - [[#writing-documents][Writing/ Documents]]
   - [[#latex][LaTeX]]
   - [[#org][Org]]
+    - [[#revealjs][Reveal.js]]
   - [[#pdf][PDF]]
   - [[#epub][EPUB]]
   - [[#olivetti][Olivetti]]
@@ -691,13 +692,15 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** Appearance
 
-*** Ligatures
+*** TODO Ligatures
+
+    Allows for uniform ligatures, regardless of font. Seems to fail sometimes... will figure it out later.
 
     #+BEGIN_SRC emacs-lisp
 (use-package prog-mode
   :ensure nil
   :hook
-  (prog-mode . prettify-symbols-mode)
+  ((prog-mode text-mode) . prettify-symbols-mode)
   :init
   (setq-default prettify-symbols-alist
                 '(("lambda" . ?λ)
@@ -2140,13 +2143,22 @@ Automatically debug and bisect your init (.emacs) file!
    #+BEGIN_SRC emacs-lisp
 (use-package px)
 
-(use-package htmlize)
-
 (use-package ox-gfm
   :after (org))
 
 (use-package ox-pandoc)
    #+END_SRC
+
+*** Reveal.js
+
+    #+BEGIN_SRC emacs-lisp
+(use-package ox-reveal
+  :custom
+  (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
+  (org-reveal-mathjax t))
+
+(use-package htmlize)
+    #+END_SRC
 
 ** TODO PDF
 
@@ -2507,4 +2519,5 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package crontab-mode)
 (use-package salt-mode)
 (use-package sicp)
+(use-package rmsbolt)                   ; A compiler output viewer
    #+END_SRC
