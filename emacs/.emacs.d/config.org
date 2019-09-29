@@ -123,6 +123,7 @@
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#discord][Discord]]
+  - [[#elfeed][Elfeed]]
   - [[#key-frequency][Key Frequency]]
   - [[#wakatime][Wakatime]]
   - [[#miscellaneous-helpers][Miscellaneous Helpers]]
@@ -155,7 +156,9 @@
    Personal favored variables
 
    #+BEGIN_SRC emacs-lisp
-(defconst shan/preferred-logo "personal/hifumi-sweater-emacs.png")
+(defconst shan/preferred-logo "personal/nezuko-emacs.png")
+(defconst shan/elfeed-file (concat user-emacs-directory "personal/elfeed.org"))
+(defconst shan/elfeed-db (concat user-emacs-directory "personal/elfeeddb"))
    #+END_SRC
 
    Just variables for machines
@@ -2442,11 +2445,66 @@ Automatically debug and bisect your init (.emacs) file!
    #+BEGIN_SRC emacs-lisp
 (use-package elcord
   :if (executable-find "discord")
-  :disabled t
   :custom
   (elcord-use-major-mode-as-main-icon t)
   :config
   (elcord-mode))
+   #+END_SRC
+
+** Elfeed
+
+   #+BEGIN_SRC emacs-lisp
+(defun shan/elfeed-sync-database ()
+  "Wrapper to load the elfeed db from disk and update it"
+  (interactive)
+  (elfeed-db-load)
+  (elfeed-update))
+
+(defun shan/elfeed-load-db-and-open ()
+  "Wrapper to load the elfeed db from disk before opening"
+  (interactive)
+  (shan/elfeed-sync-database)
+  (elfeed)
+  (elfeed-search-update--force))
+
+;;write to disk when quiting
+(defun bjm/elfeed-save-db-and-bury ()
+  "Wrapper to save the elfeed db to disk before burying buffer"
+  (interactive)
+  (elfeed-db-save)
+  (quit-window))
+
+(defun elfeed-mark-all-as-read ()
+  "Wrapper to mark all elfeed entries in a buffer as read"
+  (interactive)
+  (mark-whole-buffer)
+  (elfeed-search-untag-all-unread))
+
+(use-package elfeed
+  :if (file-exists-p shan/elfeed-file)
+  :bind
+  (:map elfeed-search-mode-map
+        ("q" . shan/elfeed-save-db-and-bury)
+        ("Q" . shan/elfeed-save-db-and-bury)
+        ("m" . elfeed-toggle-star)
+        ("M" . elfeed-toggle-star))
+  :custom
+  (elfeed-db-directory shan/elfeed-db)
+  :config
+  (defalias 'elfeed-toggle-star
+    (elfeed-expose #'elfeed-search-toggle-all 'star)))
+
+(use-package elfeed-org
+  :after (elfeed)
+  :custom
+  (rmh-elfeed-org-files (list shan/elfeed-file))
+  :config
+  (elfeed-org))
+
+(use-package elfeed-goodies
+  :after (elfeed elfeed-org)
+  :config
+  (elfeed-goodies/setup))
    #+END_SRC
 
 ** Key Frequency
