@@ -687,9 +687,25 @@ Automatically debug and bisect your init (.emacs) file!
    #+BEGIN_SRC emacs-lisp
 (setq inhibit-startup-message t)
 
-(when (display-graphic-p)
-  (menu-bar-mode 0)
-  (toggle-scroll-bar 0)
+(use-package menu-bar
+  :if (display-graphic-p)
+  :demand t
+  :ensure nil
+  :config
+  (menu-bar-mode 0))
+
+(use-package scroll-bar
+  :if (display-graphic-p)
+  :demand t
+  :ensure nil
+  :config
+  (toggle-scroll-bar 0))
+
+(use-package tool-bar
+  :if (display-graphic-p)
+  :demand t
+  :ensure nil
+  :config
   (tool-bar-mode 0))
    #+END_SRC
 
