@@ -34,3 +34,5 @@ alias keyb="sudo dpkg-reconfigure keyboard-configuration"
 
 alias e="emacsclient -a '' -c"
 alias chemacs="emacs --with-profile "
+
+alias yeet='mkdir -p "$HOME/.trash" && mv -b -t "$HOME/.trash"'
