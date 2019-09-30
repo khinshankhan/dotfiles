@@ -57,7 +57,8 @@ XTerm*selectToClipboard: true
 Xcursor.theme: xcursor-breeze
 Xcursor.size:                     0
 
-URxvt.font:                       9x15,xft:TerminessTTFNerdFontMono
+URxvt.font:                       9x15,xft:TerminessTTFNerdFontMono, \
+                                  xft:PowerlineSymbols:pixelsize=14:antialias=true:hinting=slight
 
 ! alternative font settings with 'terminus':
 ! URxvt.font:      -xos4-terminus-medium-r-normal--16-160-72-72-c-80-iso10646-1
