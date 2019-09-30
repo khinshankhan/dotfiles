@@ -1,5 +1,5 @@
 # get default git prompt script
-for file in {"/usr/lib/git-core/git-sh-prompt","/usr/share/git/git-prompt.sh"}; do
+for file in {"/usr/lib/git-core/git-sh-prompt","/usr/share/git/git-prompt.sh","${HOME}/git-sh-prompt.sh"}; do
 #for file in {"~/git_prompt"}; do
     if [ -e "$file" ]; then
         source "$file"
@@ -23,7 +23,7 @@ _prompt() {
     local BLUE="\[$(tput setaf 4)\]"
     local MAGENTA="\[$(tput setaf 5)\]"
     local CYAN="\[$(tput setaf 6)\]"
-    VIOLET="\[$(tput setaf 61)\]"
+    local VIOLET="\[$(tput setaf 61)\]"
     local WHITE="\[$(tput setaf 7)\]"
     local RESET="\[$(tput sgr0)\]"
     local BOLD="\[$(tput bold)\]"
@@ -38,19 +38,19 @@ _prompt() {
     # Show virtualenv info if we are in one
     if [[ -n "$VIRTUAL_ENV" ]]; then
         local virt=$(basename "$VIRTUAL_ENV")
-        PS1+=" ${YELLOW}($virt)${RESET}"
+        PS1+=" ${BOLD}${YELLOW}($virt)${RESET}"
     fi
 
     # show git branch and statuses if any
-    PS1+=" ${VIOLET}$(__git_ps1 '(%s) ')"
+    PS1+=" ${BOLD}${VIOLET}$(__git_ps1 '(%s) ')"
 
     # new line now
     PS1+="${RESET}\n"
     # Exit status and prompt
     if [[ $EXIT != 0 ]]; then
-        PS1+="[${RED}:(${RESET}]"
+        PS1+="${RED}"
     else
-        PS1+="[${WHITE}:)${RESET}]"
+        PS1+=""
     fi
-    PS1+="$ "
+    PS1+="${BOLD}λ${RESET} "
 }
