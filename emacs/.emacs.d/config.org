@@ -36,7 +36,6 @@
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#font][Font]]
-    - [[#emojify][Emojify]]
     - [[#ligatures][Ligatures]]
     - [[#theme][Theme]]
     - [[#mode-line][Mode Line]]
@@ -126,6 +125,7 @@
   - [[#browser][Browser]]
   - [[#discord][Discord]]
   - [[#elfeed][Elfeed]]
+  - [[#emojify][Emojify]]
   - [[#key-frequency][Key Frequency]]
   - [[#wakatime][Wakatime]]
   - [[#miscellaneous-helpers][Miscellaneous Helpers]]
@@ -731,21 +731,6 @@ Automatically debug and bisect your init (.emacs) file!
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-    #+END_SRC
-
-*** Emojify
-
-    Utilizing [[https://github.com/iqbalansari/emacs-emojify][this package]], we finally have colorful emoji. The unicode emoji are
-    still very meh. Will probably make my own images and source them. May end up
-    moving this into a different file them.
-
-    #+BEGIN_SRC emacs-lisp
-(use-package emojify
-  :init
-  (global-emojify-mode)
-  (setq emojify-point-entered-behaviour 'uncover)
-  (setq emojify-show-help nil)
-  )
     #+END_SRC
 
 *** TODO Ligatures
@@ -2558,6 +2543,24 @@ Automatically debug and bisect your init (.emacs) file!
   :after (elfeed elfeed-org)
   :config
   (elfeed-goodies/setup))
+   #+END_SRC
+
+** Emojify
+
+   Utilizing [[https://github.com/iqbalansari/emacs-emojify][this package]], we finally have colorful emoji. The unicode emoji are
+   still very meh. Will probably make my own images and source them. May end up
+   moving this into a different file them.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package emojify
+  :init
+  (setq emojify-user-emojis '(("🧚" . (("name" . "Fairy")
+                                       ("image" . "~/.emacs.d/emoji/fairy.png")
+                                       ("style" . "unicode")))))
+  (setq emojify-point-entered-behaviour 'uncover)
+  (setq emojify-show-help nil)
+  (global-emojify-mode)
+  (emojify-set-emoji-data))
    #+END_SRC
 
 ** Key Frequency
