@@ -36,6 +36,7 @@
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#font][Font]]
+    - [[#emojify][Emojify]]
     - [[#ligatures][Ligatures]]
     - [[#theme][Theme]]
     - [[#mode-line][Mode Line]]
@@ -725,6 +726,26 @@ Automatically debug and bisect your init (.emacs) file!
                            :family "Iosevka"
                            :weight 'normal
                            :width 'normal)))
+
+(add-to-list 'face-ignored-fonts "Noto Color Emoji")
+
+(when (member "Symbola" (font-family-list))
+  (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+    #+END_SRC
+
+*** Emojify
+
+    Utilizing [[https://github.com/iqbalansari/emacs-emojify][this package]], we finally have colorful emoji. The unicode emoji are
+    still very meh. Will probably make my own images and source them. May end up
+    moving this into a different file them.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package emojify
+  :init
+  (global-emojify-mode)
+  (setq emojify-point-entered-behaviour 'uncover)
+  (setq emojify-show-help nil)
+  )
     #+END_SRC
 
 *** TODO Ligatures
