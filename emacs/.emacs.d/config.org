@@ -35,6 +35,7 @@
     - [[#hydra-map][Hydra Map]]
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
+    - [[#font][Font]]
     - [[#ligatures][Ligatures]]
     - [[#theme][Theme]]
     - [[#mode-line][Mode Line]]
@@ -710,6 +711,21 @@ Automatically debug and bisect your init (.emacs) file!
    #+END_SRC
 
 ** Appearance
+
+*** Font
+
+    #+BEGIN_SRC emacs-lisp
+(cond ((member "Source Code Pro" (font-family-list))
+       (set-face-attribute 'default nil
+                           :family "Source Code Pro"
+                           :weight 'normal
+                           :width 'normal))
+      ((member "Iosevka" (font-family-list))
+       (set-face-attribute 'default nil
+                           :family "Iosevka"
+                           :weight 'normal
+                           :width 'normal)))
+    #+END_SRC
 
 *** TODO Ligatures
 
