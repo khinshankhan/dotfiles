@@ -4,14 +4,32 @@ PERL_LOCAL_LIB_ROOT="/home/shan/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_RO
 PERL_MB_OPT="--install_base \"/home/shan/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/home/shan/perl5"; export PERL_MM_OPT;
 
+# general env
+export BROWSER="/usr/bin/firefox"
+export EDITOR="emacs"
+
 # Set up Node Version Manager
 export NVM_DIR="$HOME/.nvm"                            # You can change this if you want.
 export NVM_SOURCE="/usr/share/nvm"                     # The AUR package installs it to here.
 [ -s "$NVM_SOURCE/nvm.sh" ] && . "$NVM_SOURCE/nvm.sh"  # Load NVM
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+# ruby
+PATH="/home/shan/.gem/ruby/2.6.0/bin${PATH:+:${PATH}}"; export PATH;
+
+# cask
 export PATH="/home/shan/.cask/bin:$PATH"
 
-export BROWSER="/usr/bin/chromium"
+# opam configuration
+test -r /home/shan/.opam/opam-init/init.sh && . /home/shan/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
 
-PATH="/home/shan/.gem/ruby/2.6.0/bin${PATH:+:${PATH}}"; export PATH;
+# cargo
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# some folders than should contain executable files
+export PATH=$PATH:${HOME}/bin
+export PATH=$PATH:${HOME}/.local/bin
+export PATH=$PATH:${HOME}/.myscripts
+
+# weird gtk issue
+export NO_AT_BRIDGE=1

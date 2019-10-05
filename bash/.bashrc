@@ -42,13 +42,4 @@ export HISTFILESIZE=
 export HISTIGNORE="?:??:ls:[bf]g:exit:pwd:clear:mount:umount:history"
 export HISTSIZE=
 
-
-export EDITOR="emacs"
-
-export PATH=$PATH:${HOME}/bin
-export PATH=$PATH:${HOME}/.local/bin
-export PATH=$PATH:${HOME}/.myscripts
-
-export NO_AT_BRIDGE=1
-
 eval "$(hub alias -s)"
