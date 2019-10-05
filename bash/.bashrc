@@ -50,3 +50,5 @@ export PATH=$PATH:${HOME}/.local/bin
 export PATH=$PATH:${HOME}/.myscripts
 
 export NO_AT_BRIDGE=1
+
+eval "$(hub alias -s)"
