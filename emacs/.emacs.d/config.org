@@ -806,7 +806,9 @@ Automatically debug and bisect your init (.emacs) file!
     #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
+    #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
   :if (display-graphic-p)
   :custom
@@ -870,7 +872,9 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Line Numbers
 
-    #+BEGIN_SRC emacs-lisp
+    Tangled off because I've heard of performance issues. We'll see in a week.
+
+    #+BEGIN_SRC emacs-lisp :tangle off
 (use-package linum
   :ensure nil
   :if (< emacs-major-version 26)
