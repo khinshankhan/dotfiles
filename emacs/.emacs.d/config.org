@@ -181,7 +181,6 @@
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
 (defconst shan/config-path (concat user-emacs-directory "config.org"))
 
-(defconst shan/ccls-path "~/ccls/Release/ccls")
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
 (defconst shan/texlab-path "~/texlab/target/release/texlab")
    #+END_SRC
@@ -191,19 +190,13 @@
    Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not
    mentioned in preface and significant enough. Functions are split into... "sensible" groups.
 
-   #+BEGIN_QUOTE
-   [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
+   - [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
+   - [[[https://stackoverflow.com/questions/95631/open-a-file-with-su-sudo-inside-emacs/7043786][Credit: sudo-edit]]]
+   - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L40-L48][Credit: delete-this-file]]]
+   - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
+   - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
 
-   [[[https://stackoverflow.com/questions/95631/open-a-file-with-su-sudo-inside-emacs/7043786][Credit: sudo-edit]]]
-
-   [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L40-L48][Credit: delete-this-file]]]
-
-   [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
-
-   [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
-   #+END_QUOTE
-
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/do-nothing ()
   "Do nothing."
   (interactive)
@@ -218,9 +211,9 @@
   "Run F then run TO-CALL-AFTER."
   (funcall f)
   (funcall to-call-after))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/split-window-right ()
   "Create a new window split to the right and balance the windows."
   (interactive)
@@ -235,9 +228,9 @@
   "Delete the current window and balance the windows."
   (interactive)
   (shan/after #'balance-windows #'delete-window))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/refresh-buffer ()
   "Refresh the current buffer."
   (interactive)
@@ -255,9 +248,9 @@
              (get-buffer bufname)))
     (switch-to-buffer (get-buffer-create bufname))
     (lisp-interaction-mode)))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/toggle-mark ()
   "Pop a mark if one doesn't exist already, deactivate it otherwise."
   (interactive)
@@ -271,9 +264,9 @@
   (if (region-active-p)
       (deactivate-mark)
     (rectangle-mark-mode)))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 
 (defun shan/first-occurence (f list)
   "Return the first occurence in LIST which, when applied to PREDICATE returns t."
@@ -290,9 +283,9 @@
 (defmacro shan/find-executables (list)
   "Return the first occurence in LIST whose value corresponds to an executable."
   (shan/first-occurence #'executable-find list))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/sudo-edit (file-name)
   "Like find file, but opens the file as root."
   (interactive "FSudo Find File: ")
@@ -330,9 +323,9 @@
              (tramp-tramp-file-p file-name))
         (error "Cannot open tramp file")
       (browse-url (concat "file://" file-name)))))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/fill-or-unfill ()
   "Fill or unfill based on the previous command."
   (interactive)
@@ -342,9 +335,9 @@
                     (point-max))
            fill-column)))
     (call-interactively #'fill-paragraph)))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
   "Adds all elements from from-list to to-list"
   (dolist (elem from-list)
@@ -355,9 +348,9 @@
   "Copies one list of hooks to another, without the weird nonc circular list problem"
   (dolist (hook from-hook)
     (add-hook to-hook hook)))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/call-keymap (map &optional prompt)
   "Read a key sequence and call the command it's bound to in MAP."
   (let* ((help-form `(describe-bindings ,(vector map)))
@@ -370,9 +363,9 @@
   "Executes `shan/call-keymap'"
   (interactive)
   (shan/call-keymap keymap prompt))
-   #+END_SRC
+     #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+     #+BEGIN_SRC emacs-lisp
 (defun shan/reload ()
   "Reload the configuration file."
   (interactive)
@@ -382,7 +375,7 @@
   "Edit the configuration file."
   (interactive)
   (find-file shan/config-path))
-   #+END_SRC
+     #+END_SRC
 
 * Initialization
 
@@ -1297,10 +1290,7 @@ Automatically debug and bisect your init (.emacs) file!
   (lsp-enable-snippet nil)
   (lsp-prefer-flymake nil)
   :config
-  (shan/add-list-to-list 'lsp-language-id-configuration '((python-mode . "python")
-                                                          (caml-mode   . "ocaml")
-                                                          (tuareg-mode . "ocaml")
-                                                          (reason-mode . "ocaml")))
+  (require 'lsp-clients) ;; due to lsp-auto-configure being nil
   (setq lsp-print-io t))
 
 (use-package lsp-ui
@@ -1361,23 +1351,15 @@ Automatically debug and bisect your init (.emacs) file!
    #+BEGIN_SRC emacs-lisp
 (use-package cc-mode
   :ensure nil
+  :hook
+  ((c-mode c++-mode) . lsp)
   :custom
-  (ccls-sem-highlight-method 'font-lock)
   (c-basic-offset 4)
   :config
   (setq c-default-style '((c++-mode  . "stroustrup")
                           (awk-mode  . "awk")
                           (java-mode . "java")
-                          (other     . "k&r"))))
-
-(use-package ccls
-  :if (file-exists-p shan/ccls-path)
-  :after (lsp-mode)
-  :hook
-  ((c-mode c++-mode) . lsp)
-  :custom
-  (ccls-executable shan/ccls-path)
-  :config
+                          (other     . "k&r")))
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
    #+END_SRC
@@ -1499,10 +1481,6 @@ Automatically debug and bisect your init (.emacs) file!
   (tuareg-match-patterns-aligned t)
   (tuareg-indent-align-with-first-arg t)
   :config
-  (lsp-register-client (make-lsp-client :new-connection (lsp-stdio-connection '("ocaml-language-server"
-                                                                                "--stdio"))
-                                        :major-modes '(caml-mode tuareg-mode reason-mode)
-                                        :server-id 'ocamlmerlin-lsp))
   (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
    #+END_SRC
 
@@ -1535,10 +1513,6 @@ Automatically debug and bisect your init (.emacs) file!
   (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
   (py-split-window-on-execute t)
   :config
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "pyls")
-                    :major-modes '(python-mode)
-                    :server-id 'pyls))
   (shan/ide-add 'python-mode #'hydra-lsp/body))
    #+END_SRC
 
@@ -1583,11 +1557,6 @@ Automatically debug and bisect your init (.emacs) file!
   :hook
   (scala-mode . lsp)
   :config
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "metals-emacs")
-                    :major-modes '(scala-mode)
-                    :priority -1
-                    :server-id 'metals))
   (shan/ide-add 'scala-mode #'hydra-lsp/body))
 
 (use-package sbt-mode
@@ -1696,12 +1665,6 @@ Automatically debug and bisect your init (.emacs) file!
   :mode
   (("\\.scss\\'"  . scss-mode))
   :init
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection '("css-languageserver" "--stdio"))
-                    :major-modes '(css-mode less-css-mode sass-mode scss-mode)
-                    :priority -1
-                    :server-id 'css-ls))
-
   (shan/ide-add 'css-mode #'hydra-lsp/body)
   (shan/ide-add 'less-css-mode #'hydra-lsp/body)
   (shan/ide-add 'sass-mode #'hydra-lsp/body)
