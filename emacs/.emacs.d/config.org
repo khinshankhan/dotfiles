@@ -13,7 +13,7 @@
   This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
   from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
 
-  A special thanks to my emacs crew: [[https://github.com/Lgneous]["Igneous"]], [[https://github.com/Dreameh]["Dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
+  A special thanks to my emacs crew: [[https://github.com/Lgneous]["lgneous"]], [[https://github.com/Dreameh]["dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
 
 * Table of Contents :TOC_3:
 - [[#preface][Preface]]
@@ -182,7 +182,6 @@
 (defconst shan/config-path (concat user-emacs-directory "config.org"))
 
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
-(defconst shan/texlab-path "~/texlab/target/release/texlab")
    #+END_SRC
 
 ** General Functions
@@ -760,6 +759,8 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Theme
 
+    A bunch of themes in case I get bored. Really just prefer the doom ones most of the time.
+
     #+BEGIN_SRC emacs-lisp
 (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
 
@@ -777,7 +778,11 @@ Automatically debug and bisect your init (.emacs) file!
   :config
   (doom-themes-org-config)
   (load-theme 'doom-dracula t))
+    #+END_SRC
 
+    The dark nights sometimes need a little sun. The slight brightness is nice for the eyes.
+
+    #+BEGIN_SRC emacs-lisp
 (use-package solaire-mode
   :functions persp-load-state-from-file
   :hook
@@ -796,10 +801,14 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Mode Line
 
+    Definitely needed, or else you'd never know where you are.
+
     #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
     #+END_SRC
+
+    The cleanest modeline I've ever used.
 
     #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
@@ -814,6 +823,8 @@ Automatically debug and bisect your init (.emacs) file!
   (doom-modeline-mode))
     #+END_SRC
 
+    These modes don't need a modeline. I'd prefer to get it out of a debugging buffers too though.
+
     #+BEGIN_SRC emacs-lisp
 (use-package hide-mode-line
   :hook
@@ -824,6 +835,8 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Bells
 
+    Okay, these bells are annoying, but emacspeak has me doubting my initial impressions.
+
     #+BEGIN_SRC emacs-lisp
 (setq-default visible-bell nil
               audible-bell nil
@@ -831,6 +844,8 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
 *** Confirmation Messages
+
+    Who types a whole yes intead of y nowadays..?
 
     #+BEGIN_SRC emacs-lisp
 (defalias 'yes-or-no-p (lambda (&rest _) t))
@@ -851,6 +866,8 @@ Automatically debug and bisect your init (.emacs) file!
 (when (display-graphic-p)
   (global-hl-line-mode t))
     #+END_SRC
+
+    This isn't the best character for indents, but I can't find a good one, so it'll do for now.
 
     #+BEGIN_SRC emacs-lisp
 (use-package highlight-indent-guides
