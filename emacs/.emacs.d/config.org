@@ -54,6 +54,7 @@
     - [[#interactive][Interactive]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
+  - [[#git][Git]]
   - [[#projectile][Projectile]]
   - [[#tramp][TRAMP]]
   - [[#auto-ide][Auto-IDE]]
@@ -561,8 +562,6 @@ Automatically debug and bisect your init (.emacs) file!
    (("e" shan/edit-config "config file")
     ("r" shan/reload "reload")
     ("g" shan/refresh-buffer "refresh buffer"))
-   " Elfeed"
-   ()
    " Exit"
    (("<deletechar>" save-buffers-kill-terminal "quit emacs")
     ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
@@ -659,16 +658,19 @@ Automatically debug and bisect your init (.emacs) file!
 
     #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
-  (""
+  ("General"
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
     ("h" hydra-help/body (propertize "+help" 'face 'bold)))
-   ""
+   "Short Hands"
    (("f" counsel-find-file "management")
-    ("p" hydra-projectile/body (propertize "+project" 'face 'bold))
+    ("g" magit "magit")
+    ("r" shan/toggle-mark-rectangle "rectangle"))
+   "Shortcuts"
+   (("p" hydra-projectile/body (propertize "+project" 'face 'bold))
     ("a" hydra-avy/body (propertize "+jump" 'face 'bold))
     ("w" hydra-window/body (propertize "+screen" 'face 'bold)))
-   ""
+   "RSI Binds"
    (("u" undo "undo" :exit nil)
     ("t" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
     ("n" counsel-M-x "M-x")
@@ -1208,6 +1210,21 @@ Automatically debug and bisect your init (.emacs) file!
 
    #+BEGIN_SRC emacs-lisp
 (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+   #+END_SRC
+
+** Git
+
+   #+BEGIN_SRC emacs-lisp
+(use-package magit
+  :defer t
+  :bind
+  ("C-c g" . magit))
+
+(use-package gitignore-mode
+  :mode "\\.gitignore\\'")
+
+(use-package gitconfig-mode
+  :mode "\\.gitconfig\\'")
    #+END_SRC
 
 ** Projectile
