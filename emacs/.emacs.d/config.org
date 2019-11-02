@@ -544,7 +544,7 @@ Automatically debug and bisect your init (.emacs) file!
     :internal-border-width 0
     :background-color "#1c1e24"
     :poshandler 'posframe-poshandler-frame-bottom-center))
-  (hydra-hint-display-type 'posframe)
+  (hydra-hint-display-type 'lv)
   :chords
   ("ao" . hydra-leader/body)
   :config
@@ -664,7 +664,7 @@ Automatically debug and bisect your init (.emacs) file!
     ("h" hydra-help/body (propertize "+help" 'face 'bold)))
    "Short Hands"
    (("f" counsel-find-file "management")
-    ("g" magit "magit")
+    ("g" magit (propertize "magit" 'face 'bold))
     ("r" shan/toggle-mark-rectangle "rectangle"))
    "Shortcuts"
    (("p" hydra-projectile/body (propertize "+project" 'face 'bold))
