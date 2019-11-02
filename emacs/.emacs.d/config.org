@@ -482,6 +482,7 @@ Automatically debug and bisect your init (.emacs) file!
 
     #+BEGIN_SRC emacs-lisp
 (bind-key* "C-;" 'company-yasnippet)
+(windmove-default-keybindings 'meta)
     #+END_SRC
 
 *** Which Key
@@ -682,21 +683,18 @@ Automatically debug and bisect your init (.emacs) file!
 (setq inhibit-startup-message t)
 
 (use-package menu-bar
-  :if (display-graphic-p)
   :demand t
   :ensure nil
   :config
   (menu-bar-mode 0))
 
 (use-package scroll-bar
-  :if (display-graphic-p)
   :demand t
   :ensure nil
   :config
   (toggle-scroll-bar 0))
 
 (use-package tool-bar
-  :if (display-graphic-p)
   :demand t
   :ensure nil
   :config
@@ -771,7 +769,6 @@ Automatically debug and bisect your init (.emacs) file!
   :defer t)
 
 (use-package doom-themes
-  :if (display-graphic-p)
   :custom
   (doom-vibrant-brighter-comments t)
   (doom-vibrant-brighter-modeline t)
@@ -812,7 +809,6 @@ Automatically debug and bisect your init (.emacs) file!
 
     #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
-  :if (display-graphic-p)
   :custom
   (doom-modeline-python-executable shan/python-executable)
   (doom-modeline-icon t)
@@ -863,8 +859,7 @@ Automatically debug and bisect your init (.emacs) file!
               indent-tabs-mode nil
               tab-width 4)
 
-(when (display-graphic-p)
-  (global-hl-line-mode t))
+(global-hl-line-mode t)
     #+END_SRC
 
     This isn't the best character for indents, but I can't find a good one, so it'll do for now.
@@ -953,20 +948,17 @@ Automatically debug and bisect your init (.emacs) file!
   (dashboard-navigator-buttons
    `((
 
-      (,(and (display-graphic-p)
-             (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
+      (,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
        ""
        "GH Repos"
        (lambda (&rest _) (browse-url-generic "https://github.com/kkhan01?tab=repositories")))
 
-      (,(and (display-graphic-p)
-             (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
+      (,(all-the-icons-material "update" :height 1.2 :v-adjust -0.24)
        ""
        "Update emacs"
        (lambda (&rest _) (shan/elfeed-update-database)))
 
-      (,(and (display-graphic-p)
-             (all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15))
+      (,(all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15)
        ""
        "Restart emacs"
        (lambda (&rest _) (shan/reload)))
@@ -1268,11 +1260,6 @@ Automatically debug and bisect your init (.emacs) file!
           (lambda ()
             (when (file-remote-p default-directory)
               (setq-local projectile-mode-line "Projectile"))))
-
-;; (defun uwu()
-;;   (interactive)
-;;   (find-file "Khinshan.Khan44@eniac.cs.hunter.cuny.edu|ssh:Khinshan.Khan44@cslab1")
-;;   )
    #+END_SRC
 
 ** Auto-IDE
