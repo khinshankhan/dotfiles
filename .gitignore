@@ -1,4 +1,8 @@
-# emacs
+# main emacs
 emacs/.emacs.d/init.el
 emacs/.emacs.d/off
+emacs/.emacs.d/site-lisp/
+emacs/.emacs
+
+# general emacs
 elpa
