@@ -17,10 +17,13 @@
 
 * Table of Contents :TOC_3:
 - [[#preface][Preface]]
+- [[#pre-configuration][Pre-Configuration]]
+  - [[#initialization][Initialization]]
+  - [[#garbage-collection][Garbage Collection]]
 - [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
   - [[#personal-variables][Personal Variables]]
   - [[#general-functions][General Functions]]
-- [[#initialization][Initialization]]
+- [[#initialization-1][Initialization]]
   - [[#package-archives][Package Archives]]
   - [[#package-installers][Package Installers]]
 - [[#start-up][Start Up]]
@@ -130,6 +133,36 @@
   - [[#key-frequency][Key Frequency]]
   - [[#wakatime][Wakatime]]
   - [[#miscellaneous-helpers][Miscellaneous Helpers]]
+
+* Pre-Configuration
+
+  This code should be executed first. It's general, but will make the rest of the configuration nicer since it's somewhat 'meta'.
+
+** Initialization
+
+   Add lexical binding support
+
+   #+BEGIN_SRC emacs-lisp
+;; -*- lexical-binding: t -*-
+   #+END_SRC
+
+** Garbage Collection
+
+   We don't need garbage collection during start up.
+
+   #+BEGIN_SRC emacs-lisp
+(eval-and-compile
+  (defun srs|revert-gc ()
+    (setq gc-cons-threshold 16777216
+          gc-cons-percentage 0.1
+          file-name-handler-alist last-file-name-handler-alist))
+
+  (setq gc-cons-threshold 402653184
+        gc-cons-percentage 0.6
+        file-name-handler-alist nil)
+
+  (add-hook 'emacs-startup-hook 'srs|revert-gc))
+   #+END_SRC
 
 * Tricks n Gimmicks for Sweeter Configuration
 
@@ -556,8 +589,24 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Hydra Map
 
+Important to take note of the following chart when making hydras:
+
+|----------+-----------+-----------------------+-----------------|
+| Body     | Head      | Executing NON-HEADS   | Executing HEADS |
+| Color    | Inherited |                       |                 |
+|          | Color     |                       |                 |
+|----------+-----------+-----------------------+-----------------|
+| amaranth | red       | Disallow and Continue | Continue        |
+| teal     | blue      | Disallow and Continue | Quit            |
+| pink     | red       | Allow and Continue    | Continue        |
+| red      | red       | Allow and Quit        | Continue        |
+| blue     | blue      | Allow and Quit        | Quit            |
+|----------+-----------+-----------------------+-----------------|
+
+I feel like pink hydras are the way to go, since I enjoy being about to use continuous undo or highlighting for a region based hydra command. But, feel free to change as you see fit.
+
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-config (:exit t :color amaranth :title " Personal" :quit-key "q")
+(pretty-hydra-define hydra-config (:exit t :color pink :title " Personal" :quit-key "q")
   (" Configuration"
    (("e" shan/edit-config "config file")
     ("r" shan/reload "reload")
@@ -568,7 +617,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-help (:exit t :color amaranth :title " Help" :quit-key "q")
+(pretty-hydra-define hydra-help (:exit t :color pink :title " Help" :quit-key "q")
   ("Bindings"
    (("b" counsel-descbinds "all")
     ("m" which-key-show-major-mode "major mode"))
@@ -584,7 +633,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-projectile (:exit t :color amaranth :title " Projectile" :quit-key "q")
+(pretty-hydra-define hydra-projectile (:exit t :color pink :title " Projectile" :quit-key "q")
   (""
    (("a" projectile-find-other-file "find other file")
     ("b" projectile-switch-to-buffer "switch buffer")
@@ -604,7 +653,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-avy (:exit t :color amaranth :title " Avy" :quit-key "q")
+(pretty-hydra-define hydra-avy (:exit t :color pink :title " Avy" :quit-key "q")
   ("Goto"
    (("c" avy-goto-char-timer "timed char")
     ("C" avy-goto-char "char")
@@ -625,7 +674,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-window (:exit nil :color amaranth :title " Screen" :quit-key "q")
+(pretty-hydra-define hydra-window (:exit nil :color pink :title " Screen" :quit-key "q")
   ("Window Split"
    (("2" split-window-below "below")
     ("3" split-window-right "right"))
@@ -641,7 +690,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-lsp (:exit t :color amaranth :title " LSP" :quit-key "q")
+(pretty-hydra-define hydra-lsp (:exit t :color pink :title " LSP" :quit-key "q")
   ("Find"
    (("." lsp-ui-peek-find-references "find references")
     ("d" lsp-find-definition "find definition")
@@ -657,7 +706,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-(pretty-hydra-define hydra-leader (:exit t :color amaranth :title " Leader" :quit-key "q")
+(pretty-hydra-define hydra-leader (:exit t :color pink :title " Leader" :quit-key "q")
   ("General"
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
@@ -978,7 +1027,9 @@ Automatically debug and bisect your init (.emacs) file!
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner (if shan/settings-exist
                                      (concat user-emacs-directory shan/preferred-logo)
-                                   'logo)))
+                                   'logo))
+
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
     #+END_SRC
 
 *** Completetion Frontend
@@ -1768,7 +1819,7 @@ Automatically debug and bisect your init (.emacs) file!
     #+BEGIN_SRC emacs-lisp
 (use-package artist
   :config
-  (pretty-hydra-define hydra-artist (:exit t :color amaranth :title "Artist" :quit-key "q")
+  (pretty-hydra-define hydra-artist (:exit t :color pink :title "Artist" :quit-key "q")
     ("Find"
      (("a" artist-mouse-choose-operation "operations"))
      " Exit"
@@ -2044,7 +2095,7 @@ Automatically debug and bisect your init (.emacs) file!
   :mode
   ("\\.tex\\'" . LaTeX-mode)
   :config
-  (pretty-hydra-define hydra-latex (:exit t :color amaranth :title " Latex" :quit-key "q")
+  (pretty-hydra-define hydra-latex (:exit t :color pink :title " Latex" :quit-key "q")
     (
      " Exit"
      (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
