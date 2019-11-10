@@ -368,6 +368,12 @@
                     (point-max))
            fill-column)))
     (call-interactively #'fill-paragraph)))
+
+(defun shan/save-proper ()
+  (interactive)
+  (remove-hook 'before-save-hook #'delete-trailing-whitespace)
+  (save-buffer)
+  (add-hook 'before-save-hook #'delete-trailing-whitespace))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
@@ -577,7 +583,9 @@ Automatically debug and bisect your init (.emacs) file!
     :internal-border-width 0
     :background-color "#1c1e24"
     :poshandler 'posframe-poshandler-frame-bottom-center))
+  (hydra-is-helpful t)
   (hydra-hint-display-type 'lv)
+  (lv-use-separator nil)
   :chords
   ("ao" . hydra-leader/body)
   :config
@@ -589,21 +597,21 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Hydra Map
 
-Important to take note of the following chart when making hydras:
+    Important to take note of the following chart when making hydras:
 
-|----------+-----------+-----------------------+-----------------|
-| Body     | Head      | Executing NON-HEADS   | Executing HEADS |
-| Color    | Inherited |                       |                 |
-|          | Color     |                       |                 |
-|----------+-----------+-----------------------+-----------------|
-| amaranth | red       | Disallow and Continue | Continue        |
-| teal     | blue      | Disallow and Continue | Quit            |
-| pink     | red       | Allow and Continue    | Continue        |
-| red      | red       | Allow and Quit        | Continue        |
-| blue     | blue      | Allow and Quit        | Quit            |
-|----------+-----------+-----------------------+-----------------|
+    |----------+-----------+-----------------------+-----------------|
+    | Body     | Head      | Executing NON-HEADS   | Executing HEADS |
+    | Color    | Inherited |                       |                 |
+    |          | Color     |                       |                 |
+    |----------+-----------+-----------------------+-----------------|
+    | amaranth | red       | Disallow and Continue | Continue        |
+    | teal     | blue      | Disallow and Continue | Quit            |
+    | pink     | red       | Allow and Continue    | Continue        |
+    | red      | red       | Allow and Quit        | Continue        |
+    | blue     | blue      | Allow and Quit        | Quit            |
+    |----------+-----------+-----------------------+-----------------|
 
-I feel like pink hydras are the way to go, since I enjoy being about to use continuous undo or highlighting for a region based hydra command. But, feel free to change as you see fit.
+    I feel like pink hydras are the way to go, since I enjoy being about to use continuous undo or highlighting for a region based hydra command. But, feel free to change as you see fit.
 
     #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra-config (:exit t :color pink :title " Personal" :quit-key "q")
@@ -714,6 +722,7 @@ I feel like pink hydras are the way to go, since I enjoy being about to use cont
    "Short Hands"
    (("f" counsel-find-file "management")
     ("g" magit (propertize "magit" 'face 'bold))
+    ("i" ibuffer "ibuffer")
     ("r" shan/toggle-mark-rectangle "rectangle"))
    "Shortcuts"
    (("p" hydra-projectile/body (propertize "+project" 'face 'bold))
@@ -1063,7 +1072,10 @@ I feel like pink hydras are the way to go, since I enjoy being about to use cont
   ("C-x C-f" . counsel-find-file)
   ("C-h v" . counsel-describe-variable)
   ("C-h f" . counsel-describe-function)
-  ("C-x b" . counsel-switch-buffer))
+  ("C-x b" . counsel-switch-buffer)
+  :config
+  ;; weird because of a top-level push in source cod
+  (setq-default ivy-initial-inputs-alist nil))
 
 (use-package swiper
   :bind
