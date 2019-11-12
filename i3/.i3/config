@@ -423,6 +423,9 @@ mode "$mode_gaps_outer" {
 #keep workspace 9 floating
 for_window [workspace="8"] floating enable
 
+# make caps lock control
+setxkbmap -option ctrl:nocaps
+
 # switch between layouts quickly
 #bindcode Shift+50 exec setxkbmap -layout dvorak
 bindcode Shift+50 exec setxkbmap -layout us
