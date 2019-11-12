@@ -118,7 +118,7 @@
   - [[#olivetti][Olivetti]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#yasnippet][Yasnippet]]
-  - [[#spell-checking][Spell Checking]]
+  - [[#orthography][Orthography]]
 - [[#editing][Editing]]
   - [[#expand-region][Expand Region]]
   - [[#general-editing][General Editing]]
@@ -2384,7 +2384,15 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package auto-yasnippet)
    #+END_SRC
 
-** Spell Checking
+** Orthography
+
+   #+BEGIN_SRC emacs-lisp :tangle off
+(use-package langtool
+  :init
+  (setq langtool-default-language "en-US")
+  (setq langtool-mother-tongue "en")
+  (setq langtool-bin (executable-find "languagetool")))
+   #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
 (use-package flyspell
