@@ -6,7 +6,7 @@ PERL_MM_OPT="INSTALL_BASE=/home/shan/perl5"; export PERL_MM_OPT;
 
 # general env
 export BROWSER="/usr/bin/firefox"
-export EDITOR="emacs"
+export EDITOR="emacsclient -a '' -c"
 
 # Set up Node Version Manager
 export NVM_DIR="$HOME/.nvm"                            # You can change this if you want.
@@ -22,6 +22,9 @@ export PATH="/home/shan/.cask/bin:$PATH"
 
 # opam configuration
 test -r /home/shan/.opam/opam-init/init.sh && . /home/shan/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+
+# java
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk/jre
 
 # cargo
 export PATH="$HOME/.cargo/bin:$PATH"
