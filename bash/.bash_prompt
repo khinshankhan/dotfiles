@@ -25,6 +25,7 @@ _prompt() {
     local CYAN="\[$(tput setaf 6)\]"
     local VIOLET="\[$(tput setaf 61)\]"
     local WHITE="\[$(tput setaf 7)\]"
+    local GRAY="\[$(tput setaf 8)\]"
     local RESET="\[$(tput sgr0)\]"
     local BOLD="\[$(tput bold)\]"
     PS1=""
@@ -33,7 +34,7 @@ _prompt() {
     #PS1+="[${CYAN}\u@\h${RESET}] "
 
     # Current working directory
-    PS1+="${GREEN}\w${RESET}"
+    PS1+="${MAGENTA}\w${RESET}"
 
     # Show virtualenv info if we are in one
     if [[ -n "$VIRTUAL_ENV" ]]; then
