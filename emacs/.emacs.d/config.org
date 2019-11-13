@@ -76,6 +76,7 @@
   - [[#r][R]]
   - [[#ruby][Ruby]]
   - [[#scala][Scala]]
+  - [[#shell][Shell]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
   - [[#web-style-sheets][web style-sheets]]
@@ -1652,6 +1653,20 @@ Automatically debug and bisect your init (.emacs) file!
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
+   #+END_SRC
+
+** Shell
+   Default auto-mode-alist is great, but I sometimes get annoyed when configing. Seems detection for files is fairly good, so no need for a =sh-set-shell=.
+   #+BEGIN_SRC emacs-lisp
+(use-package sh-script
+  :config
+  (shan/add-list-to-list 'auto-mode-alist '(("bash$" . sh-mode)
+                                            ("bash_aliases$" . sh-mode)
+                                            ("bash_exports$" . sh-mode)
+                                            ("bash_functions$" . sh-mode)
+                                            ("bash_logout$" . sh-mode)
+                                            ("bash_prompt$" . sh-mode)
+                                            ("zshrc$" . sh-mode))))
    #+END_SRC
 
 * Web Development
