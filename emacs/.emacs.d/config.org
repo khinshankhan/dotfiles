@@ -131,6 +131,8 @@
   - [[#discord][Discord]]
   - [[#elfeed][Elfeed]]
   - [[#emojify][Emojify]]
+  - [[#imgur][Imgur]]
+  - [[#memes][Memes]]
   - [[#key-frequency][Key Frequency]]
   - [[#wakatime][Wakatime]]
   - [[#miscellaneous-helpers][Miscellaneous Helpers]]
@@ -1343,6 +1345,10 @@ Automatically debug and bisect your init (.emacs) file!
               (setq-local projectile-mode-line "Projectile"))))
    #+END_SRC
 
+   #+BEGIN_SRC emacs-lisp
+(use-package tramp-term)
+   #+END_SRC
+
 ** Auto-IDE
 
    Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-resolve=
@@ -1846,9 +1852,50 @@ Automatically debug and bisect your init (.emacs) file!
     #+BEGIN_SRC emacs-lisp
 (use-package artist
   :config
-  (pretty-hydra-define hydra-artist (:exit t :color pink :title "Artist" :quit-key "q")
+  ;; this is from emacswiki
+  (defun shan/artist-ido-select-operation (type)
+    "Use ido to select a drawing operation in artist-mode"
+    (interactive (list (ido-completing-read "Drawing operation: "
+                                            (list "Pen" "Pen Line" "line" "straight line" "rectangle"
+                                                  "square" "poly-line" "straight poly-line" "ellipse"
+                                                  "circle" "text see-thru" "text-overwrite" "spray-can"
+                                                  "erase char" "erase rectangle" "vaporize line" "vaporize lines"
+                                                  "cut rectangle" "cut square" "copy rectangle" "copy square"
+                                                  "paste" "flood-fill"))))
+    (artist-select-operation type))
+
+  ;; also from emacswiki
+  (defun shan/artist-ido-select-settings (type)
+    "Use ido to select a setting to change in artist-mode"
+    (interactive (list (ido-completing-read "Setting: "
+                                            (list "Set Fill" "Set Line" "Set Erase" "Spray-size" "Spray-chars"
+                                                  "Rubber-banding" "Trimming" "Borders"))))
+    (if (equal type "Spray-size")
+        (artist-select-operation "spray set size")
+      (call-interactively (artist-fc-get-fn-from-symbol
+                           (cdr (assoc type '(("Set Fill" . set-fill)
+                                              ("Set Line" . set-line)
+                                              ("Set Erase" . set-erase)
+                                              ("Rubber-banding" . rubber-band)
+                                              ("Trimming" . trimming)
+                                              ("Borders" . borders)
+                                              ("Spray-chars" . spray-chars))))))))
+
+  (pretty-hydra-define hydra-artist (:exit t :color pink :title " Artist" :quit-key "q")
     ("Find"
-     (("a" artist-mouse-choose-operation "operations"))
+     (("a" artist-mouse-choose-operation "touch all ops")
+      ("o" shan/artist-ido-select-operation "ido ops")
+      ("s" shan/artist-ido-select-settings "ido settings"))
+     "Drawing"
+     (("l" artist-select-op-line "line")
+      ("r" artist-select-op-rectangle "rectangle")
+      ("p" artist-select-op-poly-line "polyline")
+      ("e" artist-select-op-ellipse "ellipse"))
+     "Edit"
+     (("w" artist-select-op-copy-rectangle "copy")
+      ("y" artist-select-op-paste "paste")
+      ("c" artist-select-op-cut-rectangle "cut")
+      ("f" artist-select-op-flood-fill "flood fill"))
      " Exit"
      (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
@@ -2554,7 +2601,7 @@ Automatically debug and bisect your init (.emacs) file!
    Discord rich presence based on emacs + file editing. (disabled so one doesn't get distracted).
    I want to possibly make it launch only when discord is actually open.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle off
 (use-package elcord
   :if (executable-find "discord")
   :custom
@@ -2637,6 +2684,27 @@ Automatically debug and bisect your init (.emacs) file!
   (emojify-set-emoji-data))
    #+END_SRC
 
+** Imgur
+
+   #+BEGIN_SRC emacs-lisp
+(use-package imgur
+  :load-path "site-lisp/imgur.el")
+   #+END_SRC
+
+** Memes
+
+   #+BEGIN_SRC emacs-lisp
+(use-package meme
+  :load-path "site-lisp/meme"
+  :commands (meme meme-file)
+  :init
+  (setq meme-char-font "Source Code Pro")
+  (setq meme-font "Iosevka")
+  :config
+  (autoload 'meme "meme.el" "Create a meme from a collection" t)
+  (autoload 'meme-file "meme.el" "Create a meme from a file" t))
+   #+END_SRC
+
 ** Key Frequency
 
    For later use, when I try to finally optimize my workflow + ergonomics.
@@ -2676,7 +2744,6 @@ Automatically debug and bisect your init (.emacs) file!
 ;; (use-package docker-tramp
 ;;   :config (setq docker-tramp-use-names t)) ;; name vs id
 ;; (use-package undo-tree) ;; figure out toggle
-;; (use-package gitignore-mode)
 ;; (use-package pass)
 ;; (use-package pinentry)
 ;; (use-package edit-indirect)
