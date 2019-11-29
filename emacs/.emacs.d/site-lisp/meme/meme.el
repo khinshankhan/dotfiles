@@ -43,6 +43,7 @@
 (defvar meme-animation)
 (defvar meme-column)
 (defvar meme-font "impact")
+(defvar meme-char-font "impact")
 (defvar meme--timer nil)
 
 (defun meme ()
@@ -81,7 +82,7 @@
     (insert "GIF    ")
     (let ((elem (list :start (meme--text-input "start" 4 "0"))))
       (plist-put elem :files (mapcar (lambda (f)
-				       (svg--image-data 
+				       (svg--image-data
 					(expand-file-name f directory)
 					"image/jpeg"
 					nil))
@@ -197,7 +198,7 @@
     (plist-put elem :align (meme--text-input
 			    (format "%s-align" name) 8 "middle"))
     (plist-put elem :family (meme--text-input
-			     (format "%s-family" name) 10 "impact"))
+			     (format "%s-family" name) 10 meme-char-font))
     (insert "\n")
     elem))
 
