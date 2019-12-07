@@ -2230,7 +2230,7 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package org
   :mode
   ("\\.\\(org\\|ORG\\)\\'" . org-mode)
-  :ensure nil
+  :ensure org-plus-contrib
   :hook
   (org-babel-after-execute . org-redisplay-inline-images)
   :custom
