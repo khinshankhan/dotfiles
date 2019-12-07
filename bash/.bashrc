@@ -43,3 +43,5 @@ export HISTIGNORE="?:??:ls:[bf]g:exit:pwd:clear:mount:umount:history"
 export HISTSIZE=
 
 eval "$(hub alias -s)"
+
+# eval "$(starship init bash)"
