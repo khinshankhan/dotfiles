@@ -359,6 +359,11 @@
              (tramp-tramp-file-p file-name))
         (error "Cannot open tramp file")
       (browse-url (concat "file://" file-name)))))
+
+(defun shan/path-copy ()
+  "Copy the current file path to kill ring."
+  (interactive)
+  (kill-new buffer-file-name))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
