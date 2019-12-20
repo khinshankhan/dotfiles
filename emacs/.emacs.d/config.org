@@ -795,7 +795,7 @@ Automatically debug and bisect your init (.emacs) file!
 
     Allows for uniform ligatures, regardless of font. Seems to fail sometimes... will figure it out later.
 
-    #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp :tangle off
 (use-package prog-mode
   :ensure nil
   :hook
@@ -1800,6 +1800,13 @@ Automatically debug and bisect your init (.emacs) file!
 ** TODO JavaScript/ TypeScript
 
    These two are probably the hardest configuration to get properly solely because of "standards".
+
+   #+BEGIN_SRC emacs-lisp
+(use-package add-node-modules-path
+  :hook
+  ((web-mode . add-node-modules-path)
+   (rjsx-mode . add-node-modules-path)))
+   #+END_SRC
 
    This first block is tangled off for the time being (kept messing with non-owned project styles).
 
