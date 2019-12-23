@@ -1813,10 +1813,8 @@ Automatically debug and bisect your init (.emacs) file!
    #+BEGIN_SRC emacs-lisp :tangle off
 (use-package prettier-js
   :hook
-  (js-mode . prettier-js-mode)
-  :custom
-  (prettier-js-args '("--print-width" "100"
-                      "--trailing-comma" "all")))
+  ((js-mode . prettier-js-mode)
+   (rjsx-mode . prettier-js-mode)))
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
