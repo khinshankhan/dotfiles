@@ -71,6 +71,7 @@
   - [[#java][Java]]
   - [[#julia][Julia]]
   - [[#juypter][Juypter]]
+  - [[#kotlin][Kotlin]]
   - [[#lisp][Lisp]]
     - [[#elisp][ELisp]]
   - [[#lua][Lua]]
@@ -224,6 +225,7 @@
 (defconst shan/config-path (concat user-emacs-directory "config.org"))
 
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
+(defconst shan/kotlin-path "/home/shan/kotlin-language-server/server/build/install/server/bin/kotlin-language-server")
    #+END_SRC
 
 ** General Functions
@@ -1607,6 +1609,22 @@ Automatically debug and bisect your init (.emacs) file!
   :custom
   (ein:completion-backend 'ein:use-company-jedi-backends)
   (ein:use-auto-complete-superpack t))
+   #+END_SRC
+
+** Kotlin
+
+   #+BEGIN_SRC emacs-lisp
+(use-package kotlin-mode
+  :mode ("\\.kt\\'" . kotlin-mode)
+  :hook (kotlin-mode . lsp)
+  :config
+  (setq lsp-kotlin-language-server-path shan/kotlin-path))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package flycheck-kotlin
+  :config
+  (flycheck-kotlin-setup))
    #+END_SRC
 
 ** Lisp
