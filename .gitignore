@@ -6,3 +6,4 @@ emacs/.emacs
 
 # general emacs
 elpa
+*.elc

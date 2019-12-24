@@ -160,17 +160,9 @@
    We don't need garbage collection during start up.
 
    #+BEGIN_SRC emacs-lisp
-(eval-and-compile
-  (defun srs|revert-gc ()
-    (setq gc-cons-threshold 16777216
-          gc-cons-percentage 0.1
-          file-name-handler-alist last-file-name-handler-alist))
-
-  (setq gc-cons-threshold 402653184
-        gc-cons-percentage 0.6
-        file-name-handler-alist nil)
-
-  (add-hook 'emacs-startup-hook 'srs|revert-gc))
+(eval-when-compile
+  (setq-local gc-cons-threshold most-positive-fixnum)
+  (setq-local gc-cons-percentage 0.6))
    #+END_SRC
 
 * Tricks n Gimmicks for Sweeter Configuration
