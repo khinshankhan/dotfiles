@@ -1592,10 +1592,10 @@ Automatically debug and bisect your init (.emacs) file!
   :mode
   ("\\.jl\\'" . julia-mode))
 
-(use-package flycheck-julia
-  :after (julia-mode)
-  :hook
-  (flycheck-mode . flycheck-julia-setup))
+;; (use-package flycheck-julia
+;;   :after (julia-mode)
+;;   :hook
+;;   (flycheck-mode . flycheck-julia-setup))
    #+END_SRC
 
 ** Juypter
