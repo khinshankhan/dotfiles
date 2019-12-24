@@ -1300,11 +1300,15 @@ Automatically debug and bisect your init (.emacs) file!
   :bind
   ("C-c g" . magit))
 
+;; (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+
 (use-package gitignore-mode
   :mode "\\.gitignore\\'")
 
 (use-package gitconfig-mode
   :mode "\\.gitconfig\\'")
+
+(use-package git-timemachine)
    #+END_SRC
 
 ** Projectile
@@ -1870,7 +1874,9 @@ Automatically debug and bisect your init (.emacs) file!
    #+BEGIN_SRC emacs-lisp
 (use-package typescript-mode
   :hook
-  (typescript-mode . lsp))
+  (typescript-mode . lsp)
+  :mode (("\\.ts\\'" . typescript-mode)
+         ("\\.tsx\\'" . typescript-mode)))
    #+END_SRC
 
 *** General JS/TS Projects
@@ -1888,11 +1894,13 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package prettier-js
   :hook
   ((js-mode . prettier-js-mode)
+   (typescript-mode . prettier-js-mode)
    (rjsx-mode . prettier-js-mode)))
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
 (defun setup-tide-mode ()
+  "Setup tide for javascript."
   (interactive)
   (tide-setup)
   (flycheck-mode +1)
@@ -1902,10 +1910,15 @@ Automatically debug and bisect your init (.emacs) file!
   (company-mode +1))
 
 (use-package tide
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)))
+  :after
+  (typescript-mode company flycheck)
+  :hook
+  ((typescript-mode . tide-setup)
+   (typescript-mode . tide-hl-identifier-mode)
+   (before-save . tide-format-before-save))
+  :config
+  (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
+  (flycheck-add-next-checker 'tsx-tide 'javascript-eslint))
     #+END_SRC
 
 *** TODO React
