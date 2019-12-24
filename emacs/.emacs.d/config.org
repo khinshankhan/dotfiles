@@ -80,6 +80,7 @@
   - [[#ruby][Ruby]]
   - [[#scala][Scala]]
   - [[#shell][Shell]]
+  - [[#swift][Swift]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
   - [[#web-style-sheets][web style-sheets]]
@@ -1748,6 +1749,29 @@ Automatically debug and bisect your init (.emacs) file!
                                             ("bash_logout$" . sh-mode)
                                             ("bash_prompt$" . sh-mode)
                                             ("zshrc$" . sh-mode))))
+   #+END_SRC
+
+** TODO Swift
+
+   #+BEGIN_SRC emacs-lisp
+(use-package swift-mode
+  :mode
+  ("\\.swift\\'" . swift-mode))
+   #+END_SRC
+
+   Seems swift needs special flycheck support. Need to set executable path later.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package flycheck-swift
+  :after flycheck
+  :config
+  (flycheck-swift-setup))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package company-sourcekit
+  :config
+  (add-to-list 'company-backends 'company-sourcekit))
    #+END_SRC
 
 * Web Development
