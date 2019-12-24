@@ -57,6 +57,7 @@
     - [[#interactive][Interactive]]
   - [[#company][Company]]
   - [[#flycheck][Flycheck]]
+    - [[#disabled-flycheck][Disabled Flycheck]]
   - [[#git][Git]]
   - [[#projectile][Projectile]]
   - [[#tramp][TRAMP]]
@@ -1280,11 +1281,16 @@ Automatically debug and bisect your init (.emacs) file!
   (global-flycheck-mode t))
    #+END_SRC
 
-   Here we disable have to disable other checkers to use flycheck
+*** Disabled Flycheck
 
-   #+BEGIN_SRC emacs-lisp
+    Here we disable have to disable other checkers to use flycheck
+
+    #+BEGIN_SRC emacs-lisp
 (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
-   #+END_SRC
+
+(setq js2-missing-semi-one-line-override t)
+(setq js2-strict-missing-semi-warning nil)
+    #+END_SRC
 
 ** Git
 
@@ -1869,23 +1875,23 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** General JS/TS Projects
 
-   Makes emacs use the node modules. Especially helpful for versions of tools and for stuff like prettier.
+    Makes emacs use the node modules. Especially helpful for versions of tools and for stuff like prettier.
 
-   #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp
 (use-package add-node-modules-path
   :hook
   ((web-mode . add-node-modules-path)
    (rjsx-mode . add-node-modules-path)))
-   #+END_SRC
+    #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp
 (use-package prettier-js
   :hook
   ((js-mode . prettier-js-mode)
    (rjsx-mode . prettier-js-mode)))
-   #+END_SRC
+    #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp
 (defun setup-tide-mode ()
   (interactive)
   (tide-setup)
@@ -1900,7 +1906,7 @@ Automatically debug and bisect your init (.emacs) file!
   :hook ((typescript-mode . tide-setup)
          (typescript-mode . tide-hl-identifier-mode)
          (before-save . tide-format-before-save)))
-   #+END_SRC
+    #+END_SRC
 
 *** TODO React
 
