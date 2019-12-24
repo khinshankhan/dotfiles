@@ -84,6 +84,7 @@
   - [[#web-style-sheets][web style-sheets]]
   - [[#haml-slim][haml, slim]]
   - [[#javascript-typescript][JavaScript/ TypeScript]]
+    - [[#general-jsts-projects][General JS/TS Projects]]
     - [[#react][React]]
     - [[#vue][Vue]]
 - [[#other-programming][Other Programming]]
@@ -1443,7 +1444,7 @@ Automatically debug and bisect your init (.emacs) file!
               ("C-x t t" . treemacs)
               ("C-x t 1" . treemacs-select-window))
   :config
-  (setq treemacs-resize-icons 7))
+  (setq treemacs-resize-icons 4))
 
 (use-package lsp-treemacs
   :init (lsp-treemacs-sync-mode 1)
@@ -1861,15 +1862,23 @@ Automatically debug and bisect your init (.emacs) file!
    These two are probably the hardest configuration to get properly solely because of "standards".
 
    #+BEGIN_SRC emacs-lisp
+(use-package typescript-mode
+  :hook
+  (typescript-mode . lsp))
+   #+END_SRC
+
+*** General JS/TS Projects
+
+   Makes emacs use the node modules. Especially helpful for versions of tools and for stuff like prettier.
+
+   #+BEGIN_SRC emacs-lisp
 (use-package add-node-modules-path
   :hook
   ((web-mode . add-node-modules-path)
    (rjsx-mode . add-node-modules-path)))
    #+END_SRC
 
-   This first block is tangled off for the time being (kept messing with non-owned project styles).
-
-   #+BEGIN_SRC emacs-lisp :tangle off
+   #+BEGIN_SRC emacs-lisp
 (use-package prettier-js
   :hook
   ((js-mode . prettier-js-mode)
@@ -1877,7 +1886,20 @@ Automatically debug and bisect your init (.emacs) file!
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
+(defun setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  (company-mode +1))
 
+(use-package tide
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
    #+END_SRC
 
 *** TODO React
