@@ -1,0 +1,10 @@
+cookiecutter
+networkx
+numpy
+pandas
+poetry
+requests
+sortedcollections
+sphinx
+sphinx_rtd_theme
+wakatime
