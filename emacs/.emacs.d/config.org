@@ -562,41 +562,14 @@ Automatically debug and bisect your init (.emacs) file!
 *** Hydra
 
     #+begin_src emacs-lisp
-(use-package posframe
-  :preface
-  (defun posframe-poshandler-frame-bottom-center (info)
-    (cons (/ (- (plist-get info :parent-frame-width)
-                (plist-get info :posframe-width))
-             2)
-          (- -60
-             (plist-get info :mode-line-height)
-             (plist-get info :minibuffer-height)))))
-
 (use-package hydra
-  :after (posframe)
-  :preface
-  (defun hydra-posframe--hotfix (&rest _)
-    (posframe-funcall
-     " *hydra-posframe*"
-     (lambda ()
-       (fit-frame-to-buffer (selected-frame) nil
-                            (+ (count-lines (point-min) (point-max)) 1)
-                            nil nil)
-       (redirect-frame-focus (selected-frame) (frame-parent (selected-frame))))))
   :custom
   (hydra--work-around-dedicated nil)
-  (hydra-posframe-show-params
-   (list
-    :internal-border-width 0
-    :background-color "#1c1e24"
-    :poshandler 'posframe-poshandler-frame-bottom-center))
   (hydra-is-helpful t)
   (hydra-hint-display-type 'lv)
   (lv-use-separator nil)
   :chords
-  ("ao" . hydra-leader/body)
-  :config
-  (advice-add 'hydra-posframe-show :after #'hydra-posframe--hotfix))
+  ("ao" . hydra-leader/body))
 
 (use-package pretty-hydra
   :after (hydra))
