@@ -606,17 +606,15 @@ Automatically debug and bisect your init (.emacs) file!
 
     Important to take note of the following chart when making hydras:
 
-    |----------+-----------+-----------------------+-----------------|
-    | Body     | Head      | Executing NON-HEADS   | Executing HEADS |
-    | Color    | Inherited |                       |                 |
-    |          | Color     |                       |                 |
-    |----------+-----------+-----------------------+-----------------|
-    | amaranth | red       | Disallow and Continue | Continue        |
-    | teal     | blue      | Disallow and Continue | Quit            |
-    | pink     | red       | Allow and Continue    | Continue        |
-    | red      | red       | Allow and Quit        | Continue        |
-    | blue     | blue      | Allow and Quit        | Quit            |
-    |----------+-----------+-----------------------+-----------------|
+    |------------+-----------------------+-----------------------+-----------------|
+    | Body Color | Head  Inherited Color | Executing NON-HEADS   | Executing HEADS |
+    |------------+-----------------------+-----------------------+-----------------|
+    | amaranth   | red                   | Disallow and Continue | Continue        |
+    | teal       | blue                  | Disallow and Continue | Quit            |
+    | pink       | red                   | Allow and Continue    | Continue        |
+    | red        | red                   | Allow and Quit        | Continue        |
+    | blue       | blue                  | Allow and Quit        | Quit            |
+    |------------+-----------------------+-----------------------+-----------------|
 
     I feel like pink hydras are the way to go, since I enjoy being about to use continuous undo or highlighting for a region based hydra command. But, feel free to change as you see fit.
 
@@ -2402,9 +2400,6 @@ Automatically debug and bisect your init (.emacs) file!
   (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
   (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
   :config
-  (add-to-list 'org-structure-template-alist
-               '("el" . "src emacs-lisp"))
-
   (use-package ob-ipython)
 
   (org-babel-do-load-languages
@@ -2425,6 +2420,15 @@ Automatically debug and bisect your init (.emacs) file!
 
   (add-to-list 'org-src-lang-modes
                '("plantuml" . fundamental)))
+   #+end_src
+
+   Seems org now uses =C-c C-,= to choose templates and does its own analysis to decide output.
+
+   #+begin_src emacs-lisp
+(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp")
+                                                       ("py" . "src python")
+                                                       ("r" . "src R")
+                                                       ("sh" . "src shell")))
    #+end_src
 
    #+begin_src emacs-lisp
