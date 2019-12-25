@@ -151,19 +151,19 @@
 
    Add lexical binding support
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
-   #+END_SRC
+   #+end_src
 
 ** Garbage Collection
 
    We don't need garbage collection during start up.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (eval-when-compile
   (setq-local gc-cons-threshold most-positive-fixnum)
   (setq-local gc-cons-percentage 0.6))
-   #+END_SRC
+   #+end_src
 
 * Tricks n Gimmicks for Sweeter Configuration
 
@@ -175,32 +175,32 @@
 
    These are personal preferences for emacs file structure.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defconst custom-file "/dev/zero")
 (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
 (defconst shan/settings-exist (file-exists-p shan/settings-path))
-   #+END_SRC
+   #+end_src
 
    A couple of booleans so we don't have to check everytime.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (when shan/settings-exist
   (load-file shan/settings-path))
 
 (defconst shan/is-a-mac (memq window-system '(mac ns)))
-   #+END_SRC
+   #+end_src
 
    Personal favored variables
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defconst shan/preferred-logo "personal/nezuko-emacs.png")
 (defconst shan/elfeed-file (concat user-emacs-directory "personal/elfeed.org"))
 (defconst shan/elfeed-db (concat user-emacs-directory "personal/elfeeddb"))
-   #+END_SRC
+   #+end_src
 
    Just variables for machines
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defconst shan/python-executable "python3")
 (defconst shan/ipython-executable "ipython3")
 
@@ -208,17 +208,17 @@
       (if (string-equal (system-name) "faux-thunkpad")
           '(?a ?r ?s ?t ?n ?e ?i ?o)
         '(?a ?s ?d ?f ?j ?k ?l ?\;)))
-   #+END_SRC
+   #+end_src
 
    Shorthands
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
 (defconst shan/config-path (concat user-emacs-directory "config.org"))
 
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
 (defconst shan/kotlin-path "/home/shan/kotlin-language-server/server/build/install/server/bin/kotlin-language-server")
-   #+END_SRC
+   #+end_src
 
 ** General Functions
 
@@ -231,7 +231,7 @@
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/do-nothing ()
   "Do nothing."
   (interactive)
@@ -246,9 +246,9 @@
   "Run F then run TO-CALL-AFTER."
   (funcall f)
   (funcall to-call-after))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/split-window-right ()
   "Create a new window split to the right and balance the windows."
   (interactive)
@@ -263,9 +263,9 @@
   "Delete the current window and balance the windows."
   (interactive)
   (shan/after #'balance-windows #'delete-window))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/refresh-buffer ()
   "Refresh the current buffer."
   (interactive)
@@ -283,9 +283,9 @@
              (get-buffer bufname)))
     (switch-to-buffer (get-buffer-create bufname))
     (lisp-interaction-mode)))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/toggle-mark ()
   "Pop a mark if one doesn't exist already, deactivate it otherwise."
   (interactive)
@@ -299,9 +299,9 @@
   (if (region-active-p)
       (deactivate-mark)
     (rectangle-mark-mode)))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 
 (defun shan/first-occurence (f list)
   "Return the first occurence in LIST which, when applied to PREDICATE returns t."
@@ -318,9 +318,9 @@
 (defmacro shan/find-executables (list)
   "Return the first occurence in LIST whose value corresponds to an executable."
   (shan/first-occurence #'executable-find list))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/sudo-edit (file-name)
   "Like find file, but opens the file as root."
   (interactive "FSudo Find File: ")
@@ -363,9 +363,9 @@
   "Copy the current file path to kill ring."
   (interactive)
   (kill-new buffer-file-name))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/fill-or-unfill ()
   "Fill or unfill based on the previous command."
   (interactive)
@@ -381,9 +381,9 @@
   (remove-hook 'before-save-hook #'delete-trailing-whitespace)
   (save-buffer)
   (add-hook 'before-save-hook #'delete-trailing-whitespace))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
   "Adds all elements from from-list to to-list"
   (dolist (elem from-list)
@@ -394,9 +394,9 @@
   "Copies one list of hooks to another, without the weird nonc circular list problem"
   (dolist (hook from-hook)
     (add-hook to-hook hook)))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/call-keymap (map &optional prompt)
   "Read a key sequence and call the command it's bound to in MAP."
   (let* ((help-form `(describe-bindings ,(vector map)))
@@ -409,9 +409,9 @@
   "Executes `shan/call-keymap'"
   (interactive)
   (shan/call-keymap keymap prompt))
-     #+END_SRC
+     #+end_src
 
-     #+BEGIN_SRC emacs-lisp
+     #+begin_src emacs-lisp
 (defun shan/reload ()
   "Reload the configuration file."
   (interactive)
@@ -421,7 +421,7 @@
   "Edit the configuration file."
   (interactive)
   (find-file shan/config-path))
-     #+END_SRC
+     #+end_src
 
 * Initialization
 
@@ -429,15 +429,15 @@
 
    Special commands, should always be needed. Note the algorithm is a hotfix to a much larger [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341][emacs issue]].
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (require 'package)
 ;; (setq package-enable-at-startup nil)
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
-   #+END_SRC
+   #+end_src
 
    Set up all the archive sources to pull from packages from.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (shan/add-list-to-list 'package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                                            ("melpa" . "http://melpa.org/packages/")
                                            ("melpa-stable" . "http://stable.melpa.org/packages/")
@@ -445,14 +445,14 @@
                                            ("org" . "https://orgmode.org/elpa/"))
                        t)
 (package-initialize)
-   #+END_SRC
+   #+end_src
 
 ** Package Installers
 
    [[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
    by isolating packages.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -469,21 +469,21 @@
 (setq-default byte-compile-warnings nil)
 
 (use-package use-package-ensure-system-package)
-   #+END_SRC
+   #+end_src
 
    The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package try)
-   #+END_SRC
+   #+end_src
 
    #+BEGIN_EXAMPLE
 Automatically debug and bisect your init (.emacs) file!
    #+END_EXAMPLE
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package bug-hunter)
-   #+END_SRC
+   #+end_src
 
 * Start Up
 
@@ -491,52 +491,52 @@ Automatically debug and bisect your init (.emacs) file!
 
    Begone utf 16!
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (setq-default locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package unidecode)
-   #+END_SRC
+   #+end_src
 
 ** Backups
 
    I don't particularly need backup files, and =~= + =#= files are a pain to clean anyways.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (setq-default backup-inhibited t
               auto-save-default nil
               create-lockfiles nil
               make-backup-files nil)
-   #+END_SRC
+   #+end_src
 
 ** Version Specific
 
    Weird errors of GTK without this.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
-   #+END_SRC
+   #+end_src
 
 ** Bindings
 
 *** Personal Bindings
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (bind-key* "C-;" 'company-yasnippet)
 (windmove-default-keybindings 'meta)
-    #+END_SRC
+    #+end_src
 
 *** Which Key
 
     Display available keybindings in a popup.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package which-key
   :config
   (which-key-mode)
@@ -544,11 +544,11 @@ Automatically debug and bisect your init (.emacs) file!
   ;; ("C-h m" . which-key-show-major-mode)
   ;; ("C-h b" . which-key-show-top-level)
   )
-    #+END_SRC
+    #+end_src
 
 *** Key Chords
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package use-package-chords
   :after (key-chord))
 
@@ -557,11 +557,11 @@ Automatically debug and bisect your init (.emacs) file!
   (key-chord-two-keys-delay 0.05)
   :config
   (key-chord-mode t))
-    #+END_SRC
+    #+end_src
 
 *** Hydra
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package posframe
   :preface
   (defun posframe-poshandler-frame-bottom-center (info)
@@ -600,7 +600,7 @@ Automatically debug and bisect your init (.emacs) file!
 
 (use-package pretty-hydra
   :after (hydra))
-    #+END_SRC
+    #+end_src
 
 *** Hydra Map
 
@@ -620,7 +620,7 @@ Automatically debug and bisect your init (.emacs) file!
 
     I feel like pink hydras are the way to go, since I enjoy being about to use continuous undo or highlighting for a region based hydra command. But, feel free to change as you see fit.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-config (:exit t :color pink :title " Personal" :quit-key "q")
   (" Configuration"
    (("e" shan/edit-config "config file")
@@ -629,9 +629,9 @@ Automatically debug and bisect your init (.emacs) file!
    " Exit"
    (("<deletechar>" save-buffers-kill-terminal "quit emacs")
     ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-help (:exit t :color pink :title " Help" :quit-key "q")
   ("Bindings"
    (("b" counsel-descbinds "all")
@@ -645,9 +645,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("l" view-lossage "command history"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-projectile (:exit t :color pink :title " Projectile" :quit-key "q")
   (""
    (("a" projectile-find-other-file "find other file")
@@ -665,9 +665,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("v" projectile-vc "version control"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-avy (:exit t :color pink :title " Avy" :quit-key "q")
   ("Goto"
    (("c" avy-goto-char-timer "timed char")
@@ -686,9 +686,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("Y" avy-copy-region "yank"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-window (:exit nil :color pink :title " Screen" :quit-key "q")
   ("Window Split"
    (("2" split-window-below "below")
@@ -702,9 +702,9 @@ Automatically debug and bisect your init (.emacs) file!
    (("l" kill-buffer-and-windows "kill" :exit t))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-lsp (:exit t :color pink :title " LSP" :quit-key "q")
   ("Find"
    (("." lsp-ui-peek-find-references "find references")
@@ -718,9 +718,9 @@ Automatically debug and bisect your init (.emacs) file!
     ("l" lsp-ui-flycheck-list "error list"))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-leader (:exit t :color pink :title " Leader" :quit-key "q")
   ("General"
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
@@ -740,13 +740,13 @@ Automatically debug and bisect your init (.emacs) file!
     ("t" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
     ("n" counsel-M-x "M-x")
     ("s" save-buffer "save"))))
-    #+END_SRC
+    #+end_src
 
 ** GUI
 
    You need to experience keyboard to realize keyboard master race. (fn + f10 if need be for options though)
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (setq inhibit-startup-message t)
 
 (use-package menu-bar
@@ -766,13 +766,13 @@ Automatically debug and bisect your init (.emacs) file!
   :ensure nil
   :config
   (tool-bar-mode 0))
-   #+END_SRC
+   #+end_src
 
 ** Appearance
 
 *** Font
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (cond ((member "Source Code Pro" (font-family-list))
        (set-face-attribute 'default nil
                            :family "Source Code Pro"
@@ -788,13 +788,13 @@ Automatically debug and bisect your init (.emacs) file!
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-    #+END_SRC
+    #+end_src
 
 *** TODO Ligatures
 
     Allows for uniform ligatures, regardless of font. Seems to fail sometimes... will figure it out later.
 
-    #+BEGIN_SRC emacs-lisp :tangle off
+    #+begin_src emacs-lisp :tangle off
 (use-package prog-mode
   :ensure nil
   :hook
@@ -820,13 +820,13 @@ Automatically debug and bisect your init (.emacs) file!
                   ("||" . ?∨)
                   ("not" . ?¬)))
   (setq prettify-symbols-unprettify-at-point 'right-edge))
-    #+END_SRC
+    #+end_src
 
 *** Theme
 
     A bunch of themes in case I get bored. Really just prefer the doom ones most of the time.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
 
 (use-package zerodark-theme
@@ -842,11 +842,11 @@ Automatically debug and bisect your init (.emacs) file!
   :config
   (doom-themes-org-config)
   (load-theme 'doom-dracula t))
-    #+END_SRC
+    #+end_src
 
     The dark nights sometimes need a little sun. The slight brightness is nice for the eyes.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package solaire-mode
   :functions persp-load-state-from-file
   :hook
@@ -861,20 +861,20 @@ Automatically debug and bisect your init (.emacs) file!
   (solaire-mode-swap-bg)
   (advice-add #'persp-load-state-from-file
               :after #'solaire-mode-restore-persp-mode-buffers))
-    #+END_SRC
+    #+end_src
 
 *** Mode Line
 
     Definitely needed, or else you'd never know where you are.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
-    #+END_SRC
+    #+end_src
 
     The cleanest modeline I've ever used.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package doom-modeline
   :custom
   (doom-modeline-python-executable shan/python-executable)
@@ -884,15 +884,15 @@ Automatically debug and bisect your init (.emacs) file!
   (doom-modeline-buffer-file-name-style 'file-name)
   :config
   (doom-modeline-mode))
-    #+END_SRC
+    #+end_src
 
     These modes don't need a modeline. I'd prefer to get it out of a debugging buffers too though.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package hide-mode-line
   :hook
   ((neotree-mode imenu-list-minor-mode minimap-mode ibuffer-mode help-mode deft-text-mode) . hide-mode-line-mode))
-    #+END_SRC
+    #+end_src
 
 ** Interface
 
@@ -900,38 +900,38 @@ Automatically debug and bisect your init (.emacs) file!
 
     Okay, these bells are annoying, but emacspeak has me doubting my initial impressions.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (setq-default visible-bell nil
               audible-bell nil
               ring-bell-function 'ignore)
-    #+END_SRC
+    #+end_src
 
 *** Confirmation Messages
 
     Who types a whole yes intead of y nowadays..?
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (defalias 'yes-or-no-p (lambda (&rest _) t))
 (setq-default confirm-kill-emacs nil)
 (setq save-abbrevs t)
 (setq-default abbrev-mode t)
 (setq save-abbrevs 'silently)
-    #+END_SRC
+    #+end_src
 
 *** Lines
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (setq-default transient-mark-mode t
               visual-line-mode t
               indent-tabs-mode nil
               tab-width 4)
 
 (global-hl-line-mode t)
-    #+END_SRC
+    #+end_src
 
     This isn't the best character for indents, but I can't find a good one, so it'll do for now.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package highlight-indent-guides
   :hook
   (prog-mode . highlight-indent-guides-mode)
@@ -940,13 +940,13 @@ Automatically debug and bisect your init (.emacs) file!
   (highlight-indent-guides-responsive 'stack)
   (highlight-indent-guides-character ?\┊);;?\間)
   )
-    #+END_SRC
+    #+end_src
 
 *** Line Numbers
 
     Tangled off because I've heard of performance issues. We'll see in a week.
 
-    #+BEGIN_SRC emacs-lisp :tangle off
+    #+begin_src emacs-lisp :tangle off
 (use-package linum
   :ensure nil
   :if (< emacs-major-version 26)
@@ -967,30 +967,30 @@ Automatically debug and bisect your init (.emacs) file!
   (display-line-numbers-current-absolute t)
   (display-line-numbers-width 2)
   (display-line-numbers-widen t))
-    #+END_SRC
+    #+end_src
 
 *** Scratch Buffer
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 ;;(setq-default initial-major-mode 'python-mode)
 (setq-default initial-major-mode 'lisp-interaction-mode)
 (setq initial-scratch-message nil)
-    #+END_SRC
+    #+end_src
 
 *** Scrolling
 
     This is tangled off for now...
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (setq-default scroll-margin 0
               scroll-conservatively 10000
               scroll-preserve-screen-position t
               mouse-wheel-progressive-speed nil)
-    #+END_SRC
+    #+end_src
 
 *** Splash Screen
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package page-break-lines)
 
 (use-package dashboard
@@ -1046,11 +1046,11 @@ Automatically debug and bisect your init (.emacs) file!
                                    'logo))
 
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
-    #+END_SRC
+    #+end_src
 
 *** Completetion Frontend
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package ivy
   :bind
   ([switch-to-buffer] . ivy-switch-buffer)
@@ -1088,13 +1088,13 @@ Automatically debug and bisect your init (.emacs) file!
   :bind
   ("C-s" . swiper-isearch)
   ("C-r" . swiper-isearch-backward))
-    #+END_SRC
+    #+end_src
 
 *** Neotree
 
     I dont usually use gui, but this seemed fun. Used [[https://github.com/Ladicle][Ladicle]]'s config.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package neotree
   :after
   (projectile)
@@ -1145,7 +1145,7 @@ Automatically debug and bisect your init (.emacs) file!
               (neotree-dir project-dir))
           (if file-name
               (neotree-find file-name)))))))
-    #+END_SRC
+    #+end_src
 
 * Programming
 
@@ -1157,7 +1157,7 @@ Automatically debug and bisect your init (.emacs) file!
 
     These guys are always active and a series of small things that have become second nature by now.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package rainbow-delimiters
   :hook
   (prog-mode . rainbow-delimiters-mode))
@@ -1177,11 +1177,11 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package move-text
   :config
   (move-text-default-bindings))
-    #+END_SRC
+    #+end_src
 
 ** Company
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package company
   :bind
   ("C-/" . company-complete)
@@ -1221,11 +1221,11 @@ Automatically debug and bisect your init (.emacs) file!
   :after (company)
   :hook
   (company-mode . company-box-mode))
-   #+END_SRC
+   #+end_src
 
 ** Flycheck
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package flycheck
   :custom-face
   (flycheck-info ((t (:underline (:style line :color "#80FF80")))))
@@ -1274,22 +1274,22 @@ Automatically debug and bisect your init (.emacs) file!
     :fringe-face 'flycheck-fringe-error
     :error-list-face 'flycheck-error-list-error)
   (global-flycheck-mode t))
-   #+END_SRC
+   #+end_src
 
 *** Disabled Flycheck
 
     Here we disable have to disable other checkers to use flycheck
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
 
 (setq js2-missing-semi-one-line-override t)
 (setq js2-strict-missing-semi-warning nil)
-    #+END_SRC
+    #+end_src
 
 ** Git
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package magit
   :defer t
   :bind
@@ -1304,11 +1304,11 @@ Automatically debug and bisect your init (.emacs) file!
   :mode "\\.gitconfig\\'")
 
 (use-package git-timemachine)
-   #+END_SRC
+   #+end_src
 
 ** Projectile
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package projectile
   :bind
   (:map projectile-mode-map
@@ -1335,11 +1335,11 @@ Automatically debug and bisect your init (.emacs) file!
   (defalias 'projectile-find-file 'counsel-projectile-find-file)
   (defalias 'projectile-grep 'counsel-projectile-grep)
   (defalias 'projectile-switch-project 'counsel-projectile-switch-project))
-   #+END_SRC
+   #+end_src
 
 ** TRAMP
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package tramp
   :ensure nil
   :config
@@ -1356,17 +1356,17 @@ Automatically debug and bisect your init (.emacs) file!
           (lambda ()
             (when (file-remote-p default-directory)
               (setq-local projectile-mode-line "Projectile"))))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package tramp-term)
-   #+END_SRC
+   #+end_src
 
 ** Auto-IDE
 
    Add an hydra to a list, based on a mode, which then gets resolved by  =shan/ide-resolve=
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defvar shan/ide--alist '())
 
 (defun shan/ide-add (mode hydra)
@@ -1378,13 +1378,13 @@ Automatically debug and bisect your init (.emacs) file!
     (if hydra
         (funcall hydra)
       (message "IDE not found for %s" major-mode))))
-   #+END_SRC
+   #+end_src
 
 ** LSP
 
    [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] has much potential, hopefully it gets even better. For now, this configuration is great.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package lsp-mode
   :custom
   (lsp-auto-guess-root t)
@@ -1420,11 +1420,11 @@ Automatically debug and bisect your init (.emacs) file!
   (company-lsp-enable-recompletion t)
   :config
   (add-to-list 'company-backends #'company-lsp))
-   #+END_SRC
+   #+end_src
 
    Great for debugging... once you learn how to use a debugger. Don't worry about eager expansion errors.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package dap-mode
   :after (hydra)
   :hook
@@ -1439,11 +1439,11 @@ Automatically debug and bisect your init (.emacs) file!
       (;; these heads are added to the existing " Exit" column
        " Exit"
        (("SPC" dap-hydra "dap"))))))
-   #+END_SRC
+   #+end_src
 
 ** Treemacs
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package treemacs
   :bind (:map global-map
               ("C-x t t" . treemacs)
@@ -1466,20 +1466,20 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package treemacs-icons-dired
   :after treemacs dired
   :config (treemacs-icons-dired-mode))
-   #+END_SRC
+   #+end_src
 
 * Languages
 
 ** TODO C/ C++
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package company-c-headers
   :after (company)
   :config
   (add-to-list 'company-backends 'company-c-headers))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package cc-mode
   :ensure nil
   :hook
@@ -1493,34 +1493,34 @@ Automatically debug and bisect your init (.emacs) file!
                           (other     . "k&r")))
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package dap-gdb-lldb
   :ensure nil
   :after (dap-mode))
-   #+END_SRC
+   #+end_src
 
    Provides syntax highliting support for modern C++
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package modern-cpp-font-lock
   :hook
   (c++-mode . modern-c++-font-lock-mode))
-   #+END_SRC
+   #+end_src
 
    This is kind of useless without flycheck, but I want to first try and learn the style myself.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package google-c-style
   :hook
   ((c-mode c++-mode) . google-set-c-style)
   (c-mode-common . google-make-newline-indent))
-   #+END_SRC
+   #+end_src
 
 ** Clojure
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package clojure-mode)
 
 (use-package cider
@@ -1535,20 +1535,20 @@ Automatically debug and bisect your init (.emacs) file!
   (cider-font-lock-dynamically t))
 
 (use-package elein)
-   #+END_SRC
+   #+end_src
 
 ** Haskell
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package haskell-mode
   :if (executable-find "ghc")
   :mode "\\.hs\\'"
   :config
   (setq haskell-mode-hook 'haskell-mode-defaults))
-   #+END_SRC
+   #+end_src
 
 ** Java
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package lsp-java
   :after (lsp)
   :hook (java-mode . lsp)
@@ -1575,13 +1575,13 @@ Automatically debug and bisect your init (.emacs) file!
           (if (boundp 'compilation-filter-start)
               (ansi-color-apply-on-region compilation-filter-start (point))))))
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
-   #+END_SRC
+   #+end_src
 
 ** Julia
 
    Borked config, flycheck is "interrupted".
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package julia-mode
   :mode
   ("\\.jl\\'" . julia-mode))
@@ -1590,56 +1590,56 @@ Automatically debug and bisect your init (.emacs) file!
 ;;   :after (julia-mode)
 ;;   :hook
 ;;   (flycheck-mode . flycheck-julia-setup))
-   #+END_SRC
+   #+end_src
 
 ** Juypter
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package ein
   :mode
   (".*\\.ipynb\\'" . ein:ipynb-mode)
   :custom
   (ein:completion-backend 'ein:use-company-jedi-backends)
   (ein:use-auto-complete-superpack t))
-   #+END_SRC
+   #+end_src
 
 ** Kotlin
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package kotlin-mode
   :mode ("\\.kt\\'" . kotlin-mode)
   :hook (kotlin-mode . lsp)
   :config
   (setq lsp-kotlin-language-server-path shan/kotlin-path))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package flycheck-kotlin
   :config
   (flycheck-kotlin-setup))
-   #+END_SRC
+   #+end_src
 
 ** Lisp
 
 *** ELisp
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package elisp-format)
-    #+END_SRC
+    #+end_src
 
 ** Lua
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package lua-mode
   :after (company)
   :mode
   (("\\.lua\\'" . lua-mode))
   :hook
   (lua-mode . company-mode))
-   #+END_SRC
+   #+end_src
 
 ** OCaml
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package tuareg
   :if (and (executable-find "ocaml")
            (executable-find "npm")
@@ -1659,24 +1659,24 @@ Automatically debug and bisect your init (.emacs) file!
   (tuareg-indent-align-with-first-arg t)
   :config
   (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
-   #+END_SRC
+   #+end_src
 
 ** Python
 
    A reasonable guess.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package pip-requirements
   :mode
   ("requirements\\.txt" . pip-requirements-mode)
   :init
   (progn
     (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
-   #+END_SRC
+   #+end_src
 
    Remember to install pyls.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package python
   :ensure nil
   :if (executable-find "pyls")
@@ -1691,43 +1691,43 @@ Automatically debug and bisect your init (.emacs) file!
   (py-split-window-on-execute t)
   :config
   (shan/ide-add 'python-mode #'hydra-lsp/body))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package dap-python
   :ensure nil
   :after dap-mode
   :custom
   (dap-python-executable shan/python-executable))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package cython-mode)
 (use-package flycheck-cython)
-   #+END_SRC
+   #+end_src
 
 ** R
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package ess
   :pin melpa-stable
   :mode
   ("\\.[rR]\\'" . R-mode)
   :config
   (require 'ess-site))
-   #+END_SRC
+   #+end_src
 
 ** TODO Ruby
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 
-   #+END_SRC
+   #+end_src
 
 ** TODO Scala
 
    Enable scala-mode and sbt-mode. Used [[https://scalameta.org/metals/docs/editors/emacs.html][scala metals]].
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package scala-mode
   :after (lsp)
   :mode "\\.s\\(cala\\|bt\\)$"
@@ -1745,11 +1745,11 @@ Automatically debug and bisect your init (.emacs) file!
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
-   #+END_SRC
+   #+end_src
 
 ** Shell
    Default auto-mode-alist is great, but I sometimes get annoyed when configing. Seems detection for files is fairly good, so no need for a =sh-set-shell=.
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package sh-script
   :config
   (shan/add-list-to-list 'auto-mode-alist '(("bash$" . sh-mode)
@@ -1759,30 +1759,30 @@ Automatically debug and bisect your init (.emacs) file!
                                             ("bash_logout$" . sh-mode)
                                             ("bash_prompt$" . sh-mode)
                                             ("zshrc$" . sh-mode))))
-   #+END_SRC
+   #+end_src
 
 ** TODO Swift
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package swift-mode
   :mode
   ("\\.swift\\'" . swift-mode))
-   #+END_SRC
+   #+end_src
 
    Seems swift needs special flycheck support. Need to set executable path later.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package flycheck-swift
   :after flycheck
   :config
   (flycheck-swift-setup))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package company-sourcekit
   :config
   (add-to-list 'company-backends 'company-sourcekit))
-   #+END_SRC
+   #+end_src
 
 * Web Development
 
@@ -1792,7 +1792,7 @@ Automatically debug and bisect your init (.emacs) file!
 
    Learn about [[http://web-mode.org/][web-mode]]
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package web-mode
   :mode
   (("\\.html?\\'"       . web-mode)
@@ -1821,18 +1821,18 @@ Automatically debug and bisect your init (.emacs) file!
   (web-mode-comment-style 2)
   (web-mode-enable-current-element-highlight t)
   (web-mode-markup-indent-offset 2))
-   #+END_SRC
+   #+end_src
 
    emmet-mode deserves a function to pull up cheatsheet. This is a powerful fork of "zencoding".
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defun shan/emmet-mode-cheatsheet ()
   "Open emmet mode cheatsheet"
   (interactive)
   (browse-url-generic "https://docs.emmet.io/cheatsheet-a5.pdf"))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package emmet-mode
   :hook
   ((css-mode  . emmet-mode)
@@ -1840,14 +1840,14 @@ Automatically debug and bisect your init (.emacs) file!
    (sgml-mode . emmet-mode)
    (rjsx-mode . emmet-mode)
    (web-mode  . emmet-mode)))
-   #+END_SRC
+   #+end_src
 
 ** TODO web style-sheets
 
    To simplify the config a bit, I decided to create a domino effect and then start the lsp config for them, instead
    of having an lsp config for each mode within that mode.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package css-mode
   :if (executable-find "npm")
   :ensure-system-package (css-languageserver . "npm install -g vscode-css-languageserver-bin")
@@ -1856,22 +1856,22 @@ Automatically debug and bisect your init (.emacs) file!
   ("\\.css\\'"  . css-mode)
   :config
   (setq css-indent-offset 2))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package less-css-mode
   :after (lsp css-mode)
   :mode "\\.less\\'")
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package sass-mode
   :after  (lsp css-mode less-css-mode)
   :mode
   ("\\.sass\\'" . sass-mode))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package scss-mode
   :after (lsp css-mode less-css-mode sass-mode)
   :hook
@@ -1883,56 +1883,56 @@ Automatically debug and bisect your init (.emacs) file!
   (shan/ide-add 'less-css-mode #'hydra-lsp/body)
   (shan/ide-add 'sass-mode #'hydra-lsp/body)
   (shan/ide-add 'scss-mode #'hydra-lsp/body))
-   #+END_SRC
+   #+end_src
 
 ** haml, slim
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package haml-mode
   :mode
   ("\\.haml\\'"  . haml-mode)
   :init
   (setq haml-indent-offset 2))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package slim-mode
   :mode
   ("\\.slim\\'" . slim-mode))
-   #+END_SRC
+   #+end_src
 
 ** TODO JavaScript/ TypeScript
 
    These two are probably the hardest configuration to get properly solely because of "standards".
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package typescript-mode
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
          ("\\.tsx\\'" . typescript-mode)))
-   #+END_SRC
+   #+end_src
 
 *** General JS/TS Projects
 
     Makes emacs use the node modules. Especially helpful for versions of tools and for stuff like prettier.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package add-node-modules-path
   :hook
   ((web-mode . add-node-modules-path)
    (rjsx-mode . add-node-modules-path)))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package prettier-js
   :hook
   ((js-mode . prettier-js-mode)
    (typescript-mode . prettier-js-mode)
    (rjsx-mode . prettier-js-mode)))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (defun setup-tide-mode ()
   "Setup tide for javascript."
   (interactive)
@@ -1953,11 +1953,11 @@ Automatically debug and bisect your init (.emacs) file!
   :config
   (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
   (flycheck-add-next-checker 'tsx-tide 'javascript-eslint))
-    #+END_SRC
+    #+end_src
 
 *** TODO React
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package rjsx-mode
   :mode
   (("\\.js\\'"   . rjsx-mode)
@@ -1967,23 +1967,23 @@ Automatically debug and bisect your init (.emacs) file!
   :init
   (setq-default rjsx-basic-offset 2)
   (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON")))
-    #+END_SRC
+    #+end_src
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package react-snippets
   :after yasnippet)
-    #+END_SRC
+    #+end_src
 
 *** TODO Vue
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package vue-html-mode)
 
 (use-package vue-mode
   :defer t
   :mode
   (("\\.vue\\'"  . vue-mode)))
-    #+END_SRC
+    #+end_src
 
 * Other Programming
 
@@ -1993,7 +1993,7 @@ Automatically debug and bisect your init (.emacs) file!
 
 *** Artist
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package artist
   :config
   ;; this is from emacswiki
@@ -2044,23 +2044,23 @@ Automatically debug and bisect your init (.emacs) file!
      (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
   (shan/ide-add 'picture-mode #'hydra-artist/body))
-    #+END_SRC
+    #+end_src
 
 *** GNU Plot
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package gnuplot)
 
 (use-package gnuplot-mode
   :mode
   ("\\.gp\\'" "\\.gnuplot\\'"))
-    #+END_SRC
+    #+end_src
 
 *** Mermaid
 
     Uses my version of mermaid-mode, since original doesn't use generic browser.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package mermaid-mode
   :if (executable-find "mmdc")
   :load-path "site-lisp/mermaid"
@@ -2069,11 +2069,11 @@ Automatically debug and bisect your init (.emacs) file!
    ("\\.mermaid\\'" . mermaid-mode))
   :init
   (setq mermaid-mmdc-location (executable-find "mmdc")))
-    #+END_SRC
+    #+end_src
 
 *** PlantUML
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package plantuml-mode
   :if (file-exists-p shan/plantuml-path)
   :mode
@@ -2084,61 +2084,61 @@ Automatically debug and bisect your init (.emacs) file!
   (plantuml-java-options "")
   (plantuml-output-type "png")
   (plantuml-options "-charset UTF-8"))
-    #+END_SRC
+    #+end_src
 
 ** Config/ Data
 
 *** CSV
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package csv-mode)
-    #+END_SRC
+    #+end_src
 
 *** dhall
 
     Weird, says not found on melpa, but it exists...
 
-    #+BEGIN_SRC emacs-lisp :tangle off
+    #+begin_src emacs-lisp :tangle off
 (use-package dhall-mode)
-    #+END_SRC
+    #+end_src
 
 *** Editor Config
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package editorconfig
   :hook
   ((prog-mode text-mode) . editorconfig-mode)
   :config
   (editorconfig-mode 1))
-    #+END_SRC
+    #+end_src
 
 *** Groovy
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package groovy-mode
   :defer t
   :mode
   (("\\.groovy$" . groovy-mode)
    ("\\.gradle$" . groovy-mode)))
-    #+END_SRC
+    #+end_src
 
 *** Info
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package info
   :mode
   ("\\.info\\'" . info-mode))
-    #+END_SRC
+    #+end_src
 
 *** Json
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package json-mode
   :mode
   ("\\.json\\'" . json-mode)
   :init
   (setq-default js-indent-level 2))
-    #+END_SRC
+    #+end_src
 
 *** Markdown
 
@@ -2146,7 +2146,7 @@ Automatically debug and bisect your init (.emacs) file!
 
     Thinking about markdown hydra
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package markdown-mode
   :mode
   ("\\.\\(md\\|markdown\\)\\'" . markdown-mode))
@@ -2184,31 +2184,31 @@ Automatically debug and bisect your init (.emacs) file!
 
             @media (max-width: 767px) { .markdown-body { padding: 15px; } }
           </style>")))
-    #+END_SRC
+    #+end_src
 
 *** pkgbuilds
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package pkgbuild-mode
   :mode
   (("/PKGBUILD/" . pkgbuild-mode)))
-    #+END_SRC
+    #+end_src
 
 *** Protocol Buffer
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package protobuf-mode)
-    #+END_SRC
+    #+end_src
 
 *** Toml
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package toml-mode)
-    #+END_SRC
+    #+end_src
 
 *** Yaml
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package yaml-mode
   :mode
   (("\\.\\(yml\\|yaml\\)\\'" . yaml-mode)
@@ -2217,13 +2217,13 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package flycheck-yamllint
   :hook
   (flycheck-mode . flycheck-yamllint-setup))
-    #+END_SRC
+    #+end_src
 
 ** Containers
 
 *** Docker
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package dockerfile-mode
   :mode
   (("Dockerfile'"       . dockerfile-mode)
@@ -2234,23 +2234,23 @@ Automatically debug and bisect your init (.emacs) file!
 
 ;; Emacs interface to docker
 (use-package docker)
-    #+END_SRC
+    #+end_src
 
 *** Kubernetes
 
     k8s stuff
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package kubernetes
   :commands
   (kubernetes-overview))
-    #+END_SRC
+    #+end_src
 
 ** TODO Databases
 
 *** GraphQL
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package graphql)
 
 (use-package graphql-mode
@@ -2266,11 +2266,11 @@ Automatically debug and bisect your init (.emacs) file!
                             (setq graphql-url (if (string= arg "Manual")
                                                   (read-string "Enter graphql url:") arg)))
                 :caller 'shan/set-graphql-url))))
-    #+END_SRC
+    #+end_src
 
 *** SQL
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package sql
   :mode
   (("\\.\\(sql\\|psql\\|hql\\|mysql\\|q\\)\\'" . sql-mode))
@@ -2281,7 +2281,7 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package sql-indent
   :init
   (setq-default sql-indent-offset tab-width))
-    #+END_SRC
+    #+end_src
 
 ** Theorem Provers
 
@@ -2292,7 +2292,7 @@ Automatically debug and bisect your init (.emacs) file!
     folder (repo?) to =/usr/local/lib=. Restart (terminal/ emacs)and everything should work
     fine.
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package lean-mode
   :if (executable-find "lean")
   :mode
@@ -2301,13 +2301,13 @@ Automatically debug and bisect your init (.emacs) file!
               ("S-SPC" . company-complete))
   :init
   (setq lean-rootdir "/usr/local/"))
-    #+END_SRC
+    #+end_src
 
 * Writing/ Documents
 
 ** TODO LaTeX
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package tex
   :ensure auctex
   :mode
@@ -2346,31 +2346,31 @@ Automatically debug and bisect your init (.emacs) file!
   :after (auctex company)
   :config
   (company-auctex-init))
-   #+END_SRC
+   #+end_src
 
    Completion back-ends for math unicode sysmbols and latex tags
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package company-math
   :after (auctex company)
   :config
   (add-to-list 'company-backends 'company-math-symbols-unicode))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package reftex
   :after auctex
   :custom
   (reftex-plug-into-AUCTeX t)
   (reftex-save-parse-info t)
   (reftex-use-multiple-selection-buffers t))
-   #+END_SRC
+   #+end_src
 
 ** Org
 
    org-mode is so colossal, it's worth learning.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package org
   :mode
   ("\\.\\(org\\|ORG\\)\\'" . org-mode)
@@ -2403,7 +2403,7 @@ Automatically debug and bisect your init (.emacs) file!
   (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
   :config
   (add-to-list 'org-structure-template-alist
-               '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
+               '("el" . "src emacs-lisp"))
 
   (use-package ob-ipython)
 
@@ -2425,9 +2425,9 @@ Automatically debug and bisect your init (.emacs) file!
 
   (add-to-list 'org-src-lang-modes
                '("plantuml" . fundamental)))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package toc-org
   :after (org)
   :hook
@@ -2436,33 +2436,33 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package org-bullets
   :hook
   (org-mode . org-bullets-mode))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package px)
 
 (use-package ox-gfm
   :after (org))
 
 (use-package ox-pandoc)
-   #+END_SRC
+   #+end_src
 
 *** Reveal.js
 
-    #+BEGIN_SRC emacs-lisp
+    #+begin_src emacs-lisp
 (use-package ox-reveal
   :custom
   (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
   (org-reveal-mathjax t))
 
 (use-package htmlize)
-    #+END_SRC
+    #+end_src
 
 ** TODO PDF
 
    Lifted off of gh user: [[https://github.com/seagle0128][seagle0128]]. Possibly use auto ide hydra?
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package pdf-view
   :ensure pdf-tools
   :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
@@ -2534,13 +2534,13 @@ Automatically debug and bisect your init (.emacs) file!
       :hook (pdf-view-mode . pdf-view-restore-mode)
       :init (setq pdf-view-restore-filename
                   (locate-user-emacs-file ".pdf-view-restore")))))
-   #+END_SRC
+   #+end_src
 
 ** TODO EPUB
 
    Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package nov
   :after (olivetti)
   :mode
@@ -2560,47 +2560,47 @@ Automatically debug and bisect your init (.emacs) file!
 
   (setq nov-variable-pitch nil)
   (setq nov-text-width 72))
-   #+END_SRC
+   #+end_src
 
 ** Olivetti
 
    I'm starting to think a hydra for things that can be toggled..
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package olivetti
   :diminish
   :bind
   ("<f7>" . olivetti-mode)
   :init
   (setq olivetti-body-width 0.618))
-   #+END_SRC
+   #+end_src
 
 * Language Augmentation
 
 ** Yasnippet
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package yasnippet
   :config
   (use-package yasnippet-snippets)
   (yas-global-mode 1))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp :tangle off
+   #+begin_src emacs-lisp :tangle off
 (use-package auto-yasnippet)
-   #+END_SRC
+   #+end_src
 
 ** Orthography
 
-   #+BEGIN_SRC emacs-lisp :tangle off
+   #+begin_src emacs-lisp :tangle off
 (use-package langtool
   :init
   (setq langtool-default-language "en-US")
   (setq langtool-mother-tongue "en")
   (setq langtool-bin (executable-find "languagetool")))
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package flyspell
   :hook
   ((text-mode . flyspell-mode)
@@ -2661,38 +2661,38 @@ Automatically debug and bisect your init (.emacs) file!
   (:map flyspell-mode-map
         ("C-,"   . shan/flyspell-next-word)
         ("C-M-," . shan/flyspell-prev-word)))
-   #+END_SRC
+   #+end_src
 
 * Editing
 
 ** Expand Region
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package expand-region
   :defer t
   :bind
   ("C-=" . er/expand-region))
-   #+END_SRC
+   #+end_src
 
 ** General Editing
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (setq-default require-final-newline t)
 (global-subword-mode t)
 (delete-selection-mode t)
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 (global-set-key [remap fill-paragraph] #'shan/fill-or-unfill)
-   #+END_SRC
+   #+end_src
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package aggressive-indent
   :defer t)
-   #+END_SRC
+   #+end_src
 
 * Navigation
 
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
 (use-package avy
   :bind
   ("C-'" . avy-goto-char-2)
@@ -2704,7 +2704,7 @@ Automatically debug and bisect your init (.emacs) file!
   ("C-x C-w" . ace-window)
   :custom
   (aw-keys shan/home-row))
-  #+END_SRC
+  #+end_src
 
 * Hobbies
 
@@ -2712,10 +2712,10 @@ Automatically debug and bisect your init (.emacs) file!
 
    This requires =unidecode=. A rather edgy package, emacs hangs a lot.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package pubmed
   :commands (pubmed-search pubmed-advanced-search))
-   #+END_SRC
+   #+end_src
 
 * Community
 
@@ -2725,7 +2725,7 @@ Automatically debug and bisect your init (.emacs) file!
 
    Control how links and browser-url-generic function works (also for links).
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (setq browse-url-browser-function 'browse-url-generic
       browse-url-generic-args '("-private")
       browse-url-firefox-program "firefox"
@@ -2738,25 +2738,25 @@ Automatically debug and bisect your init (.emacs) file!
           start
           end)))
     (browse-url-generic (concat "http://www.google.com/search?btnI&q=" (url-hexify-string q)))))
-   #+END_SRC
+   #+end_src
 
 ** TODO Discord
 
    Discord rich presence based on emacs + file editing. (disabled so one doesn't get distracted).
    I want to possibly make it launch only when discord is actually open.
 
-   #+BEGIN_SRC emacs-lisp :tangle off
+   #+begin_src emacs-lisp :tangle off
 (use-package elcord
   :if (executable-find "discord")
   :custom
   (elcord-use-major-mode-as-main-icon t)
   :config
   (elcord-mode))
-   #+END_SRC
+   #+end_src
 
 ** Elfeed
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (defun shan/elfeed-sync-database ()
   "Wrapper to load the elfeed db from disk and update it"
   (interactive)
@@ -2808,7 +2808,7 @@ Automatically debug and bisect your init (.emacs) file!
   :after (elfeed elfeed-org)
   :config
   (elfeed-goodies/setup))
-   #+END_SRC
+   #+end_src
 
 ** Emojify
 
@@ -2816,7 +2816,7 @@ Automatically debug and bisect your init (.emacs) file!
    still very meh. Will probably make my own images and source them. May end up
    moving this into a different file them.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package emojify
   :init
   (setq emojify-user-emojis '(("🧚" . (("name" . "Fairy")
@@ -2826,18 +2826,18 @@ Automatically debug and bisect your init (.emacs) file!
   (setq emojify-show-help nil)
   (global-emojify-mode)
   (emojify-set-emoji-data))
-   #+END_SRC
+   #+end_src
 
 ** Imgur
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package imgur
   :load-path "site-lisp/imgur.el")
-   #+END_SRC
+   #+end_src
 
 ** Memes
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package meme
   :load-path "site-lisp/meme"
   :commands (meme meme-file)
@@ -2847,32 +2847,32 @@ Automatically debug and bisect your init (.emacs) file!
   :config
   (autoload 'meme "meme.el" "Create a meme from a collection" t)
   (autoload 'meme-file "meme.el" "Create a meme from a file" t))
-   #+END_SRC
+   #+end_src
 
 ** Key Frequency
 
    For later use, when I try to finally optimize my workflow + ergonomics.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package keyfreq
   :config
   (keyfreq-mode t)
   ;;(keyfreq-autosave-mode 1)
   )
-   #+END_SRC
+   #+end_src
 
 ** Wakatime
 
    Monitor my  coding activity. Remember to set =wakatime-api-key= in =settings.el=.
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package wakatime-mode
   :if shan/settings-exist
   :custom
-  (wakatime-cli-path "/usr/bin/wakatime")
+  (wakatime-cli-path (executable-find "wakatime"))
   :init
   (global-wakatime-mode))
-   #+END_SRC
+   #+end_src
 
 ** TODO Miscellaneous Helpers
 
@@ -2881,7 +2881,7 @@ Automatically debug and bisect your init (.emacs) file!
 
    Problematic packages first, tangled off and commented.
 
-   #+BEGIN_SRC emacs-lisp :tangle off
+   #+begin_src emacs-lisp :tangle off
 ;; (use-package docker
 ;;   :bind (("C-c d" . docker)))
 ;; (use-package docker-compose-mode)
@@ -2901,11 +2901,11 @@ Automatically debug and bisect your init (.emacs) file!
 ;; (use-package my-utils)
 ;; (use-package my-email)
 ;; (use-package recentf)
-   #+END_SRC
+   #+end_src
 
    Now the misc packages
 
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
 (use-package speed-type)
 (use-package origami)
 (use-package demangle-mode)
@@ -2919,4 +2919,4 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package salt-mode)
 (use-package sicp)
 (use-package rmsbolt)                   ; A compiler output viewer
-   #+END_SRC
+   #+end_src
