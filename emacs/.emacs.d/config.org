@@ -1273,9 +1273,9 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package magit
   :defer t
   :bind
-  ("C-c g" . magit))
-
-;; (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+  ("C-c g" . magit)
+  :config
+  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
 
 (use-package gitignore-mode
   :mode "\\.gitignore\\'")
