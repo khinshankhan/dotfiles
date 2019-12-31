@@ -676,6 +676,15 @@ Automatically debug and bisect your init (.emacs) file!
     #+end_src
 
     #+begin_src emacs-lisp
+(pretty-hydra-define hydra-git (:exit nil :color pink :title " Screen" :quit-key "q")
+  ("Commands"
+   (("g" magit "magit" :exit t)
+    ("t" git-timemachine "timemachine" :exit t))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
+    #+end_src
+
+    #+begin_src emacs-lisp
 (pretty-hydra-define hydra-lsp (:exit t :color pink :title " LSP" :quit-key "q")
   ("Find"
    (("." lsp-ui-peek-find-references "find references")
@@ -699,7 +708,7 @@ Automatically debug and bisect your init (.emacs) file!
     ("h" hydra-help/body (propertize "+help" 'face 'bold)))
    "Short Hands"
    (("f" counsel-find-file "management")
-    ("g" magit (propertize "magit" 'face 'bold))
+    ("g" hydra-git/body (propertize "+git" 'face 'bold))
     ("i" ibuffer "ibuffer")
     ("r" shan/toggle-mark-rectangle "rectangle"))
    "Shortcuts"
