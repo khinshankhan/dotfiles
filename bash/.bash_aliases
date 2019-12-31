@@ -32,6 +32,9 @@ alias oops='sudo !!'
 
 alias keyb="sudo dpkg-reconfigure keyboard-configuration"
 
+# sudo chown -cR $USER:$(id -gn $USER) /path/to/folder
+alias chown_me="sudo chown -cR $USER:$(id -gn $USER)"
+
 alias chemacs="emacs --with-profile "
 
 alias yeet='mkdir -p "$HOME/.trash" && mv -b -t "$HOME/.trash"'
