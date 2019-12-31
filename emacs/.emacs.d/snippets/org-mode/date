@@ -1,0 +1,6 @@
+# -*- coding: utf-8 -*-
+# name: date
+# key: date
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# --
+`(format-time-string "%Y-%m-%d")`
