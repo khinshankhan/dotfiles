@@ -1824,47 +1824,6 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** TODO web style-sheets
 
-   To simplify the config a bit, I decided to create a domino effect and then start the lsp config for them, instead
-   of having an lsp config for each mode within that mode.
-
-   #+begin_src emacs-lisp
-(use-package css-mode
-  :if (executable-find "npm")
-  :ensure-system-package (css-languageserver . "npm install -g vscode-css-languageserver-bin")
-  :after (lsp)
-  :mode
-  ("\\.css\\'"  . css-mode)
-  :config
-  (setq css-indent-offset 2))
-   #+end_src
-
-   #+begin_src emacs-lisp
-(use-package less-css-mode
-  :after (lsp css-mode)
-  :mode "\\.less\\'")
-   #+end_src
-
-   #+begin_src emacs-lisp
-(use-package sass-mode
-  :after  (lsp css-mode less-css-mode)
-  :mode
-  ("\\.sass\\'" . sass-mode))
-   #+end_src
-
-   #+begin_src emacs-lisp
-(use-package scss-mode
-  :after (lsp css-mode less-css-mode sass-mode)
-  :hook
-  ((css-mode less-css-mode sass-mode scss-mode) . lsp)
-  :mode
-  (("\\.scss\\'"  . scss-mode))
-  :init
-  (shan/ide-add 'css-mode #'hydra-lsp/body)
-  (shan/ide-add 'less-css-mode #'hydra-lsp/body)
-  (shan/ide-add 'sass-mode #'hydra-lsp/body)
-  (shan/ide-add 'scss-mode #'hydra-lsp/body))
-   #+end_src
-
 ** haml, slim
 
    #+begin_src emacs-lisp
