@@ -177,7 +177,7 @@
    These are personal preferences for emacs file structure.
 
    #+begin_src emacs-lisp
-(defconst custom-file "/dev/zero")
+(defconst custom-file (concat user-emacs-directory "custom.el"))
 (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
 (defconst shan/settings-exist (file-exists-p shan/settings-path))
    #+end_src
