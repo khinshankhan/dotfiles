@@ -59,6 +59,10 @@
   - [[#flycheck][Flycheck]]
     - [[#disabled-flycheck][Disabled Flycheck]]
   - [[#git][Git]]
+    - [[#general-git][General Git]]
+    - [[#magit][Magit]]
+    - [[#forge][Forge]]
+    - [[#git-timemachine][Git Timemachine]]
   - [[#projectile][Projectile]]
   - [[#tramp][TRAMP]]
   - [[#auto-ide][Auto-IDE]]
@@ -1271,7 +1275,19 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** Git
 
-   #+begin_src emacs-lisp
+*** General Git
+    #+begin_src emacs-lisp
+(use-package gitignore-mode
+  :mode "\\.gitignore\\'")
+
+(use-package gitconfig-mode
+  :mode "\\.gitconfig\\'")
+
+(use-package git-timemachine)
+    #+end_src
+
+*** Magit
+    #+begin_src emacs-lisp
 (use-package magit
   :defer t
   :bind
@@ -1287,15 +1303,17 @@ Automatically debug and bisect your init (.emacs) file!
   ;;   (kbd "q")
   ;;   (lambda() (interactive) (magit-mode-bury-buffer t)))
   )
+    #+end_src
 
-(use-package gitignore-mode
-  :mode "\\.gitignore\\'")
+*** Forge
+    #+begin_src emacs-lisp
+(use-package forge)
+    #+end_src
 
-(use-package gitconfig-mode
-  :mode "\\.gitconfig\\'")
-
+*** Git Timemachine
+    #+begin_src emacs-lisp
 (use-package git-timemachine)
-   #+end_src
+    #+end_src
 
 ** Projectile
 
@@ -1794,7 +1812,9 @@ Automatically debug and bisect your init (.emacs) file!
   (flycheck-swift-setup))
    #+end_src
 
-   #+begin_src emacs-lisp
+   Figuring this out
+
+   #+begin_src emacs-lisp :tangle off
 (use-package company-sourcekit
   :config
   (add-to-list 'company-backends 'company-sourcekit))
@@ -2419,7 +2439,7 @@ Automatically debug and bisect your init (.emacs) file!
   (org-mode . org-bullets-mode))
    #+end_src
 
-   Nicer priorities
+   Nicer priorities, don't see myself using more than 4.
 
    - Red: HIGH
    - Yellow: MID
@@ -2432,11 +2452,14 @@ Automatically debug and bisect your init (.emacs) file!
   :defines org-fancy-priority-list
   :hook (org-mode . org-fancy-priorities-mode)
   :config
+  ;; colors of priorities
   (setq org-priority-faces
         '((?A . error)
           (?B . warning)
           (?C . success)
           (?D . (:foreground "#87ceeb"))))
+
+  ;; symbol for priorities
   (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
    #+end_src
 
