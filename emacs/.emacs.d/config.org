@@ -681,7 +681,24 @@ Automatically debug and bisect your init (.emacs) file!
     #+end_src
 
     #+begin_src emacs-lisp
-(pretty-hydra-define hydra-git (:exit nil :color pink :title " Screen" :quit-key "q")
+(pretty-hydra-define hydra-file (:exit t :color pink :title " Files" :quit-key "q")
+  ("Private"
+   ()
+   "Find"
+   (("f" counsel-find-file "find")
+    ("s" shan/sudo-edit "sudo")
+    ("d" dired "dired"))
+   "Operations"
+   (("r" shan/rename-this-file-and-buffer "rename")
+    ("y" shan/path-copy "yank path")
+    ("k" shan/delete-this-file "delete file")
+    ("b" shan/browser-current-file "browser"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
+    #+end_src
+
+    #+begin_src emacs-lisp
+(pretty-hydra-define hydra-git (:exit nil :color pink :title " Git" :quit-key "q")
   ("Commands"
    (("g" magit "magit" :exit t)
     ("t" git-timemachine "timemachine" :exit t))
@@ -712,7 +729,7 @@ Automatically debug and bisect your init (.emacs) file!
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
     ("h" hydra-help/body (propertize "+help" 'face 'bold)))
    "Short Hands"
-   (("f" counsel-find-file "management")
+   (("f" hydra-file/body (propertize "+file" 'face 'bold))
     ("g" hydra-git/body (propertize "+git" 'face 'bold))
     ("i" ibuffer "ibuffer")
     ("r" shan/toggle-mark-rectangle "rectangle"))
