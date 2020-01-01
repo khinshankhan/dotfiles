@@ -67,6 +67,7 @@
 - [[#languages][Languages]]
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
+  - [[#dart-flutter][Dart/ Flutter]]
   - [[#haskell][Haskell]]
   - [[#java][Java]]
   - [[#julia][Julia]]
@@ -1515,6 +1516,31 @@ Automatically debug and bisect your init (.emacs) file!
   (cider-font-lock-dynamically t))
 
 (use-package elein)
+   #+end_src
+
+** Dart/ Flutter
+
+   #+begin_src emacs-lisp
+(use-package dart-mode
+  :custom
+  (dart-format-on-save t)
+  (dart-sdk-path "/opt/flutter/bin/cache/dart-sdk/"))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package flutter
+  :after dart-mode
+  :bind (:map dart-mode-map
+              ("C-M-x" . #'flutter-run-or-hot-reload))
+  :custom
+  (flutter-sdk-path "/opt/flutter/"))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package flutter-l10n-flycheck
+  :after flutter
+  :config
+  (flutter-l10n-flycheck-setup))
    #+end_src
 
 ** Haskell
