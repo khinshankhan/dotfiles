@@ -2409,6 +2409,27 @@ Automatically debug and bisect your init (.emacs) file!
   (org-mode . org-bullets-mode))
    #+end_src
 
+   Nicer priorities
+
+   - Red: HIGH
+   - Yellow: MID
+   - Green: LOW
+   - Sky blue: OPTIONAL
+
+   #+begin_src emacs-lisp
+(use-package org-fancy-priorities
+  :diminish
+  :defines org-fancy-priority-list
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-priority-faces
+        '((?A . error)
+          (?B . warning)
+          (?C . success)
+          (?D . (:foreground "#87ceeb"))))
+  (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
+   #+end_src
+
    #+begin_src emacs-lisp
 (use-package px)
 
