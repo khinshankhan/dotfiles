@@ -3,6 +3,7 @@ networkx
 numpy
 pandas
 poetry
+python-language-server[all]
 requests
 sortedcollections
 sphinx
