@@ -1276,7 +1276,16 @@ Automatically debug and bisect your init (.emacs) file!
   :bind
   ("C-c g" . magit)
   :config
-  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
+  ;; full window magit
+  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+
+  ;; kills buffer as well
+  ;; need to work out a way to kill window to not reload status multiple times
+
+  ;; (define-key magit-mode-map
+  ;;   (kbd "q")
+  ;;   (lambda() (interactive) (magit-mode-bury-buffer t)))
+  )
 
 (use-package gitignore-mode
   :mode "\\.gitignore\\'")
