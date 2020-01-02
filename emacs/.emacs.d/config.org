@@ -1,19 +1,7 @@
 #+TITLE: An Emacs Configuration
 #+AUTHOR: Khinshan Khan
 #+STARTUP: overview
-
-* Preface
-
-  After using emacs for a while (since my first programming class in high school), I decided to create my own
-  configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
-  runs, but Windows has proven to be sightly difficult with the package manager.
-
-  For more information about myself, you can visit my website.
-
-  This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
-  from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
-
-  A special thanks to my emacs crew: [[https://github.com/Lgneous]["lgneous"]], [[https://github.com/Dreameh]["dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
+#+PRIORITIES: A D B
 
 * Table of Contents :TOC_3:
 - [[#preface][Preface]]
@@ -148,6 +136,19 @@
   - [[#wakatime][Wakatime]]
   - [[#miscellaneous-helpers][Miscellaneous Helpers]]
 
+* Preface
+
+  After using emacs for a while (since my first programming class in high school), I decided to create my own
+  configuration which I can use on most (if not any) machine. I'm still working on creating checks to ensure smooth
+  runs, but Windows has proven to be sightly difficult with the package manager.
+
+  For more information about myself, you can visit my website.
+
+  This configuration is based on various emacs tips, users, and emacs itself (yes! You can talk to emacs to learn
+  from it. Super classy move with =C-h [key such as f or v]=, since it's self documenting).
+
+  A special thanks to my emacs crew: [[https://github.com/Lgneous]["lgneous"]], [[https://github.com/Dreameh]["dreameh"]], and [[https://github.com/berquist]["speckledlemon"]].
+
 * Pre-Configuration
 
   This code should be executed first. It's general, but will make the rest of the configuration nicer since it's somewhat 'meta'.
@@ -227,14 +228,17 @@
 
 ** General Functions
 
-   Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not
-   mentioned in preface and significant enough. Functions are split into... "sensible" groups.
+   Personal functions, some packages are reliant on these, so it goes on top. Working
+   on credit for people not mentioned in preface and significant enough. People
+   should be cited even if the function was modified. Functions are split into...
+   "sensible" groups.
 
    - [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
    - [[[https://stackoverflow.com/questions/95631/open-a-file-with-su-sudo-inside-emacs/7043786][Credit: sudo-edit]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L40-L48][Credit: delete-this-file]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
+   - [[[https://emacs.stackexchange.com/a/29421][Credit: org-toc]]]
 
      #+begin_src emacs-lisp
 (defun shan/do-nothing ()
@@ -368,6 +372,31 @@
   "Copy the current file path to kill ring."
   (interactive)
   (kill-new buffer-file-name))
+
+(defun shan/org-toc (&optional shan/file-name)
+  "A nice search utility for org headers in a direcory."
+  (interactive)
+  (unless shan/file-name
+    (setq shan/file-name (read-directory-name "Directory name: ")))
+  (let ((files (f-entries shan/file-name (lambda (f) (f-ext? f "org")) t))
+    (headlines '())
+    choice)
+    (loop for file in files do
+      (with-temp-buffer
+        (insert-file-contents file)
+        (goto-char (point-min))
+        (while (re-search-forward org-heading-regexp nil t)
+          (cl-pushnew (list
+               (format "%-80s (%s)"
+                   (match-string 0)
+                   (file-name-nondirectory file))
+               :file file
+               :position (match-beginning 0))
+              headlines))))
+    (setq choice
+      (completing-read "Headline: " (reverse headlines)))
+    (find-file (plist-get (cdr (assoc choice headlines)) :file))
+    (goto-char (plist-get (cdr (assoc choice headlines)) :position))))
      #+end_src
 
      #+begin_src emacs-lisp
@@ -601,7 +630,9 @@ Automatically debug and bisect your init (.emacs) file!
   (" Configuration"
    (("e" shan/edit-config "config file")
     ("r" shan/reload "reload")
-    ("g" shan/refresh-buffer "refresh buffer"))
+    ("s" (shan/org-toc (concat user-emacs-directory "config/.")) "search config"))
+   "Utility"
+    (("g" shan/refresh-buffer "refresh buffer"))
    " Exit"
    (("<deletechar>" save-buffers-kill-terminal "quit emacs")
     ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
@@ -1307,8 +1338,6 @@ Automatically debug and bisect your init (.emacs) file!
     #+begin_src emacs-lisp
 (use-package magit
   :defer t
-  :bind
-  ("C-c g" . magit)
   :config
   ;; full window magit
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
@@ -2961,4 +2990,5 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package salt-mode)
 (use-package sicp)
 (use-package rmsbolt)                   ; A compiler output viewer
+(use-package f)                         ; used for file stuff like with shan/org-toc
    #+end_src
