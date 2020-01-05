@@ -1,5 +1,6 @@
 #+TITLE: An Emacs Configuration
 #+AUTHOR: Khinshan Khan
+#+property: header-args :tangle init.el
 #+STARTUP: overview
 #+PRIORITIES: A D B
 
@@ -113,6 +114,7 @@
   - [[#latex][LaTeX]]
   - [[#org][Org]]
     - [[#revealjs][Reveal.js]]
+    - [[#new-org-hot-fixes][New Org Hot Fixes]]
   - [[#pdf][PDF]]
   - [[#epub][EPUB]]
   - [[#olivetti][Olivetti]]
@@ -157,7 +159,7 @@
 
    Add lexical binding support
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 ;; -*- lexical-binding: t -*-
    #+end_src
 
@@ -168,7 +170,8 @@
    #+begin_src emacs-lisp
 (eval-when-compile
   (setq-local gc-cons-threshold most-positive-fixnum)
-  (setq-local gc-cons-percentage 0.6))
+  (setq-local gc-cons-percentage 0.6)
+  (setq-local file-name-handler-alist nil))
    #+end_src
 
 * Tricks n Gimmicks for Sweeter Configuration
@@ -182,7 +185,7 @@
    These are personal preferences for emacs file structure.
 
    #+begin_src emacs-lisp
-(defconst custom-file (concat user-emacs-directory "custom.el"))
+(defconst custom-file (concat user-emacs-directory "/dev/zero"))
 (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
 (defconst shan/settings-exist (file-exists-p shan/settings-path))
    #+end_src
@@ -379,22 +382,22 @@
   (unless shan/file-name
     (setq shan/file-name (read-directory-name "Directory name: ")))
   (let ((files (f-entries shan/file-name (lambda (f) (f-ext? f "org")) t))
-    (headlines '())
-    choice)
+        (headlines '())
+        choice)
     (loop for file in files do
-      (with-temp-buffer
-        (insert-file-contents file)
-        (goto-char (point-min))
-        (while (re-search-forward org-heading-regexp nil t)
-          (cl-pushnew (list
-               (format "%-80s (%s)"
-                   (match-string 0)
-                   (file-name-nondirectory file))
-               :file file
-               :position (match-beginning 0))
-              headlines))))
+          (with-temp-buffer
+            (insert-file-contents file)
+            (goto-char (point-min))
+            (while (re-search-forward org-heading-regexp nil t)
+              (cl-pushnew (list
+                           (format "%-80s (%s)"
+                                   (match-string 0)
+                                   (file-name-nondirectory file))
+                           :file file
+                           :position (match-beginning 0))
+                          headlines))))
     (setq choice
-      (completing-read "Headline: " (reverse headlines)))
+          (completing-read "Headline: " (reverse headlines)))
     (find-file (plist-get (cdr (assoc choice headlines)) :file))
     (goto-char (plist-get (cdr (assoc choice headlines)) :position))))
      #+end_src
@@ -632,7 +635,7 @@ Automatically debug and bisect your init (.emacs) file!
     ("r" shan/reload "reload")
     ("s" (shan/org-toc (concat user-emacs-directory "config/.")) "search config"))
    "Utility"
-    (("g" shan/refresh-buffer "refresh buffer"))
+   (("g" shan/refresh-buffer "refresh buffer"))
    " Exit"
    (("<deletechar>" save-buffers-kill-terminal "quit emacs")
     ("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
@@ -2438,7 +2441,6 @@ Automatically debug and bisect your init (.emacs) file!
   (org-hide-emphasis-markers t)
   (org-startup-with-inline-images t)
   (org-babel-python-command "ipython3 -i --simple-prompt")
-  (org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
   (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
   (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
@@ -2463,15 +2465,6 @@ Automatically debug and bisect your init (.emacs) file!
 
   (add-to-list 'org-src-lang-modes
                '("plantuml" . fundamental)))
-   #+end_src
-
-   Seems org now uses =C-c C-,= to choose templates and does its own analysis to decide output.
-
-   #+begin_src emacs-lisp
-(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp")
-                                                       ("py" . "src python")
-                                                       ("r" . "src R")
-                                                       ("sh" . "src shell")))
    #+end_src
 
    #+begin_src emacs-lisp
@@ -2527,6 +2520,20 @@ Automatically debug and bisect your init (.emacs) file!
   (org-reveal-mathjax t))
 
 (use-package htmlize)
+    #+end_src
+
+*** New Org Hot Fixes
+    This is separated and moved down since org 9.2 seems to get conflicts due to org reveal it seems.
+
+    Seems org now uses =C-c C-,= to choose templates and does its own analysis to decide output.
+
+    #+begin_src emacs-lisp
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+
+(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp")
+                                                       ("py" . "src python")
+                                                       ("r" . "src R")
+                                                       ("sh" . "src shell")))
     #+end_src
 
 ** TODO PDF
