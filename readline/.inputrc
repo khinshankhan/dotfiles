@@ -1,0 +1,40 @@
+# Show only commands beginning with current input
+"\e[B": history-search-forward
+"\e[A": history-search-backward
+
+set show-all-if-ambiguous on
+set menu-complete-display-prefix on
+set completion-ignore-case on
+set completion-map-case on
+set match-hidden-files on
+
+set visible-stats on
+set colored-completion-prefix on
+set mark-symlinked-directories on
+
+# do not bell on tab-completion
+set bell-style none
+
+# Completed names which are symbolic links to directories have a slash appended.
+set mark-symlinked-directories on
+
+Tab: menu-complete
+
+set blink-matching-paren on
+
+# xterm: allow the use of the Home/End keys
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\eOH": beginning-of-line
+"\eOF": end-of-line
+
+
+# allow the use of the Delete/Insert keys
+"\e[3~": delete-char
+"\e[2~": quoted-insert
+
+# control/alt + arrow key
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+"\e[1;3C": forward-word
+"\e[1;3D": backward-word

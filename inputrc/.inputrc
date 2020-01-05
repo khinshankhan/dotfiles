@@ -1,3 +1,0 @@
-# Show only commands beginning with current input
-"\e[B": history-search-forward
-"\e[A": history-search-backward
