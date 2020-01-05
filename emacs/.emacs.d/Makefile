@@ -13,7 +13,7 @@ NEVER = Makefile config.org personal
 
 .PHONY: default clean cleanall fresh
 
-default:
+default: clean
 	ntangle config.org
 
 clean:

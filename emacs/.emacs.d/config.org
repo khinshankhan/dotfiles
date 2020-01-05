@@ -112,7 +112,7 @@
     - [[#lean-prover][Lean Prover]]
 - [[#writing-documents][Writing/ Documents]]
   - [[#latex][LaTeX]]
-  - [[#org][Org]]
+- [[#org][Org]]
     - [[#revealjs][Reveal.js]]
     - [[#new-org-hot-fixes][New Org Hot Fixes]]
   - [[#pdf][PDF]]
@@ -159,7 +159,7 @@
 
    Add lexical binding support
 
-   #+begin_src emacs-lisp :tangle off
+   #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
    #+end_src
 
@@ -185,7 +185,7 @@
    These are personal preferences for emacs file structure.
 
    #+begin_src emacs-lisp
-(defconst custom-file (concat user-emacs-directory "/dev/zero"))
+(defconst custom-file (concat user-emacs-directory "custom.el"))
 (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
 (defconst shan/settings-exist (file-exists-p shan/settings-path))
    #+end_src
@@ -2410,7 +2410,7 @@ Automatically debug and bisect your init (.emacs) file!
   (reftex-use-multiple-selection-buffers t))
    #+end_src
 
-** Org
+* Org
 
    org-mode is so colossal, it's worth learning.
 
@@ -2477,7 +2477,22 @@ Automatically debug and bisect your init (.emacs) file!
 
 (use-package org-bullets
   :hook
-  (org-mode . org-bullets-mode))
+  (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("⁖"))
+  :config
+  (set-face-attribute 'org-level-1 nil
+				      :height 1.25
+				      :weight 'bold)
+  (set-face-attribute 'org-level-2 nil
+				      :height 1.1
+                      :weight 'bold)
+  (set-face-attribute 'org-level-3 nil
+				      :height 1.0
+                      :weight 'bold)
+  (set-face-attribute 'org-level-4 nil
+				      :height 1.0
+                      :weight 'bold))
    #+end_src
 
    Nicer priorities, don't see myself using more than 4.
