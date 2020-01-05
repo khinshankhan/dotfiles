@@ -2440,6 +2440,8 @@ Automatically debug and bisect your init (.emacs) file!
   (org-pretty-entities t)
   (org-hide-emphasis-markers t)
   (org-startup-with-inline-images t)
+  (org-support-shift-select t)
+
   (org-babel-python-command "ipython3 -i --simple-prompt")
 
   (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
