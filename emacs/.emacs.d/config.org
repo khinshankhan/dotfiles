@@ -110,14 +110,17 @@
     - [[#sql][SQL]]
   - [[#theorem-provers][Theorem Provers]]
     - [[#lean-prover][Lean Prover]]
-- [[#writing-documents][Writing/ Documents]]
-  - [[#latex][LaTeX]]
 - [[#org][Org]]
-    - [[#revealjs][Reveal.js]]
-    - [[#new-org-hot-fixes][New Org Hot Fixes]]
+  - [[#bullets][Bullets]]
+  - [[#priorities][Priorities]]
+  - [[#exports][Exports]]
+  - [[#revealjs][Reveal.js]]
+  - [[#new-org-hot-fixes][New Org Hot Fixes]]
+- [[#writing-documents][Writing/ Documents]]
+  - [[#olivetti][Olivetti]]
+  - [[#latex][LaTeX]]
   - [[#pdf][PDF]]
   - [[#epub][EPUB]]
-  - [[#olivetti][Olivetti]]
 - [[#language-augmentation][Language Augmentation]]
   - [[#yasnippet][Yasnippet]]
   - [[#orthography][Orthography]]
@@ -1830,7 +1833,7 @@ Automatically debug and bisect your init (.emacs) file!
    minibuffer-local-completion-map))
    #+end_src
 
-** Shell
+** TODO Shell
    Default auto-mode-alist is great, but I sometimes get annoyed when configing. Seems detection for files is fairly good, so no need for a =sh-set-shell=.
    #+begin_src emacs-lisp
 (use-package sh-script
@@ -2347,8 +2350,190 @@ Automatically debug and bisect your init (.emacs) file!
   (setq lean-rootdir "/usr/local/"))
     #+end_src
 
+* Org
+
+  Org is so colossal, it's worth learning. Gets its own category, and one day I'll get around to making this literate and clean.
+
+  #+begin_src emacs-lisp
+(use-package org
+  :mode
+  ("\\.\\(org\\|ORG\\)\\'" . org-mode)
+  :ensure org-plus-contrib
+  :hook
+  (org-babel-after-execute . org-redisplay-inline-images)
+  :custom
+  (org-file-apps
+   '((auto-mode . emacs)
+     ("\\.x?html?\\'" . "/usr/bin/firefox -private-window %s")
+     ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
+
+  (org-directory "~/.orgfiles")
+  (org-default-notes-file (concat org-directory "/notes.org"))
+  (org-export-html-postamble nil)
+
+  (org-image-actual-width 480)
+  (org-src-fontify-natively t)
+  (org-src-window-setup 'current-window)
+  (org-src-strip-leading-and-trailing-blank-lines t)
+  (org-src-preserve-indentation t)
+  (org-src-tab-acts-natively t)
+  (org-pretty-entities t)
+  (org-hide-emphasis-markers t)
+  (org-startup-with-inline-images t)
+  (org-support-shift-select t)
+
+  ;; TODO: choose better colors
+  ;; (org-todo-keyword-faces
+  ;;  '(("TODO" :foreground "#7c7c75" :weight normal :underline t)
+  ;;    ("WAITING" :foreground "#9f7efe" :weight normal :underline t)
+  ;;    ("INPROGRESS" :foreground "#0098dd" :weight normal :underline t)
+  ;;    ("DONE" :foreground "#50a14f" :weight normal :underline t)
+  ;;    ("CANCELLED" :foreground "#ff6480" :weight normal :underline t)))
+
+  (org-babel-python-command "ipython3 -i --simple-prompt")
+
+  (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
+  (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
+  :config
+  (use-package ob-ipython)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((ditaa      . t)
+     (dot        . t)
+     (emacs-lisp . t)
+     (gnuplot    . t)
+     (js         . t)
+     (latex      . t)
+     (ocaml      . t)
+     (org        . t)
+     (plantuml   . t)
+     (python     . t)
+     (shell      . t)
+     (R          . t)
+     ))
+
+  (add-to-list 'org-src-lang-modes
+               '("plantuml" . fundamental)))
+  #+end_src
+
+** Bullets
+
+  #+begin_src emacs-lisp
+(use-package toc-org
+  :after (org)
+  :hook
+  (org-mode . toc-org-enable))
+
+(use-package org-bullets
+  :after (org)
+  :hook
+  (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("⁖"))
+  :config
+  ;; trying to figure out how to change the size without affecting anything else
+  ;; (setq org-bullets-face-name 'org-bullet-face)
+  ;; (set-face-attribute 'org-bullet-face nil
+  ;;                     :height 1.50
+  ;;                     :weight 'bold)
+
+  (set-face-attribute 'org-level-1 nil
+				      :height 1.25
+				      :weight 'bold)
+  (set-face-attribute 'org-level-2 nil
+				      :height 1.1
+                      :weight 'bold)
+  (set-face-attribute 'org-level-3 nil
+				      :height 1.0
+                      :weight 'bold)
+  (set-face-attribute 'org-level-4 nil
+				      :height 1.0
+                      :weight 'bold)
+
+  (set-face-attribute 'org-ellipsis nil
+                      :underline nil
+                      :background "#fafafa"
+                      :foreground "#a0a1a7"))
+  #+end_src
+
+** Priorities
+
+  Nicer priorities, don't see myself using more than 4.
+
+  - Red: HIGH
+  - Yellow: MID
+  - Green: LOW
+  - Sky blue: OPTIONAL
+
+    #+begin_src emacs-lisp
+(use-package org-fancy-priorities
+  :after (org)
+  :diminish
+  :defines org-fancy-priority-list
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config
+  ;; colors of priorities
+  (setq org-priority-faces
+        '((?A . error)
+          (?B . warning)
+          (?C . success)
+          (?D . (:foreground "#87ceeb"))))
+
+  ;; symbol for priorities
+  (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
+    #+end_src
+
+** Exports
+
+    #+begin_src emacs-lisp
+(use-package px)
+
+(use-package ox-gfm
+  :after (org))
+
+(use-package ox-pandoc)
+    #+end_src
+
+** Reveal.js
+
+   #+begin_src emacs-lisp
+(use-package ox-reveal
+  :custom
+  (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
+  (org-reveal-mathjax t))
+
+(use-package htmlize)
+   #+end_src
+
+** New Org Hot Fixes
+   This is separated and moved down since org 9.2 seems to get conflicts due to org reveal it seems.
+
+   Seems org now uses =C-c C-,= to choose templates and does its own analysis to decide output.
+
+   #+begin_src emacs-lisp
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+
+(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
+                                                       ("py" . "src python\n")
+                                                       ("r" . "src R\n")
+                                                       ("sh" . "src shell\n")))
+   #+end_src
+
 * Writing/ Documents
 
+** Olivetti
+
+   I'm starting to think a hydra for things that can be toggled..
+
+   #+begin_src emacs-lisp
+(use-package olivetti
+  :diminish
+  :bind
+  ("<f7>" . olivetti-mode)
+  :init
+  (setq olivetti-body-width 0.618))
+   #+end_src
 ** TODO LaTeX
 
    #+begin_src emacs-lisp
@@ -2409,149 +2594,6 @@ Automatically debug and bisect your init (.emacs) file!
   (reftex-save-parse-info t)
   (reftex-use-multiple-selection-buffers t))
    #+end_src
-
-* Org
-
-   org-mode is so colossal, it's worth learning.
-
-   #+begin_src emacs-lisp
-(use-package org
-  :mode
-  ("\\.\\(org\\|ORG\\)\\'" . org-mode)
-  :ensure org-plus-contrib
-  :hook
-  (org-babel-after-execute . org-redisplay-inline-images)
-  :custom
-  (org-file-apps
-   '((auto-mode . emacs)
-     ("\\.x?html?\\'" . "/usr/bin/firefox -private-window %s")
-     ("\\.pdf\\(::[0-9]+\\)?\\'" . "epdfview %s")))
-
-  (org-directory "~/.orgfiles")
-  (org-default-notes-file (concat org-directory "/notes.org"))
-  (org-export-html-postamble nil)
-
-  (org-image-actual-width 480)
-  (org-src-fontify-natively t)
-  (org-src-window-setup 'current-window)
-  (org-src-strip-leading-and-trailing-blank-lines t)
-  (org-src-preserve-indentation t)
-  (org-src-tab-acts-natively t)
-  (org-pretty-entities t)
-  (org-hide-emphasis-markers t)
-  (org-startup-with-inline-images t)
-  (org-support-shift-select t)
-
-  (org-babel-python-command "ipython3 -i --simple-prompt")
-
-  (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
-  (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
-  :config
-  (use-package ob-ipython)
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((ditaa      . t)
-     (dot        . t)
-     (emacs-lisp . t)
-     (gnuplot    . t)
-     (js         . t)
-     (latex      . t)
-     (ocaml      . t)
-     (org        . t)
-     (plantuml   . t)
-     (python     . t)
-     (shell      . t)
-     (R          . t)
-     ))
-
-  (add-to-list 'org-src-lang-modes
-               '("plantuml" . fundamental)))
-   #+end_src
-
-   #+begin_src emacs-lisp
-(use-package toc-org
-  :after (org)
-  :hook
-  (org-mode . toc-org-enable))
-
-(use-package org-bullets
-  :hook
-  (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list '("⁖"))
-  :config
-  (set-face-attribute 'org-level-1 nil
-				      :height 1.25
-				      :weight 'bold)
-  (set-face-attribute 'org-level-2 nil
-				      :height 1.1
-                      :weight 'bold)
-  (set-face-attribute 'org-level-3 nil
-				      :height 1.0
-                      :weight 'bold)
-  (set-face-attribute 'org-level-4 nil
-				      :height 1.0
-                      :weight 'bold))
-   #+end_src
-
-   Nicer priorities, don't see myself using more than 4.
-
-   - Red: HIGH
-   - Yellow: MID
-   - Green: LOW
-   - Sky blue: OPTIONAL
-
-   #+begin_src emacs-lisp
-(use-package org-fancy-priorities
-  :diminish
-  :defines org-fancy-priority-list
-  :hook (org-mode . org-fancy-priorities-mode)
-  :config
-  ;; colors of priorities
-  (setq org-priority-faces
-        '((?A . error)
-          (?B . warning)
-          (?C . success)
-          (?D . (:foreground "#87ceeb"))))
-
-  ;; symbol for priorities
-  (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
-   #+end_src
-
-   #+begin_src emacs-lisp
-(use-package px)
-
-(use-package ox-gfm
-  :after (org))
-
-(use-package ox-pandoc)
-   #+end_src
-
-*** Reveal.js
-
-    #+begin_src emacs-lisp
-(use-package ox-reveal
-  :custom
-  (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
-  (org-reveal-mathjax t))
-
-(use-package htmlize)
-    #+end_src
-
-*** New Org Hot Fixes
-    This is separated and moved down since org 9.2 seems to get conflicts due to org reveal it seems.
-
-    Seems org now uses =C-c C-,= to choose templates and does its own analysis to decide output.
-
-    #+begin_src emacs-lisp
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
-
-(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp")
-                                                       ("py" . "src python")
-                                                       ("r" . "src R")
-                                                       ("sh" . "src shell")))
-    #+end_src
 
 ** TODO PDF
 
@@ -2655,19 +2697,6 @@ Automatically debug and bisect your init (.emacs) file!
 
   (setq nov-variable-pitch nil)
   (setq nov-text-width 72))
-   #+end_src
-
-** Olivetti
-
-   I'm starting to think a hydra for things that can be toggled..
-
-   #+begin_src emacs-lisp
-(use-package olivetti
-  :diminish
-  :bind
-  ("<f7>" . olivetti-mode)
-  :init
-  (setq olivetti-body-width 0.618))
    #+end_src
 
 * Language Augmentation
