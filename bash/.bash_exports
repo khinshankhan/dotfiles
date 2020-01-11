@@ -5,8 +5,12 @@ PERL_MB_OPT="--install_base \"/home/shan/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/home/shan/perl5"; export PERL_MM_OPT;
 
 # general env
-export BROWSER="/usr/bin/firefox"
+export QT_QPA_PLATFORMTHEME="qt5ct"
+export GTK2_RC_FILES="$HOME/.gtkrc-2.0"
 export EDITOR="emacsclient -a '' -c"
+
+# fix "xdg-open fork-bomb"
+export BROWSER="/usr/bin/firefox"
 
 # Set up Node Version Manager
 export NVM_DIR="$HOME/.nvm"                            # You can change this if you want.
@@ -50,3 +54,4 @@ export PATH=$PATH:${HOME}/kotlin-language-server/server/build/install/server/bin
 
 # weird gtk issue
 export NO_AT_BRIDGE=1
+
