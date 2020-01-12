@@ -228,6 +228,8 @@
 (defconst shan/init-path (concat user-emacs-directory "init.el"))
 (defconst shan/config-path (concat user-emacs-directory "config.org"))
 
+(defconst shan/dart-path "/opt/flutter/bin/cache/dart-sdk/")
+(defconst shan/flutter-path "/opt/flutter/")
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
 (defconst shan/kotlin-path "/home/shan/kotlin-language-server/server/build/install/server/bin/kotlin-language-server")
    #+end_src
@@ -1604,7 +1606,7 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package dart-mode
   :custom
   (dart-format-on-save t)
-  (dart-sdk-path "/opt/flutter/bin/cache/dart-sdk/"))
+  (dart-sdk-path shan/dart-path))
    #+end_src
 
    #+begin_src emacs-lisp
@@ -1613,7 +1615,7 @@ Automatically debug and bisect your init (.emacs) file!
   :bind (:map dart-mode-map
               ("C-M-x" . #'flutter-run-or-hot-reload))
   :custom
-  (flutter-sdk-path "/opt/flutter/"))
+  (flutter-sdk-path shan/flutter-path))
    #+end_src
 
    #+begin_src emacs-lisp
