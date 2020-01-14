@@ -61,6 +61,7 @@
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
   - [[#dart-flutter][Dart/ Flutter]]
+  - [[#golang][Golang]]
   - [[#haskell][Haskell]]
   - [[#java][Java]]
   - [[#julia][Julia]]
@@ -1623,6 +1624,32 @@ Automatically debug and bisect your init (.emacs) file!
   :after flutter
   :config
   (flutter-l10n-flycheck-setup))
+   #+end_src
+
+** Golang
+
+   #+begin_src emacs-lisp
+(use-package go-mode
+  :if (and (executable-find "go") (executable-find "bingo"))
+  :hook
+  (go-mode . lsp)
+  :mode "\\.go\\'"
+  :custom (gofmt-command "goimports")
+  :bind (:map go-mode-map
+              ("C-c C-n" . go-run)
+              ("C-c ."   . go-test-current-test)
+              ("C-c f"   . go-test-current-file)
+              ("C-c a"   . go-test-current-project))
+  :config
+  (add-hook 'before-save-hook #'gofmt-before-save)
+
+  (use-package gotest
+    :after go)
+
+  (use-package go-tag
+    :after go
+    :config
+    (setq go-tag-args (list "-transform" "camelcase"))))
    #+end_src
 
 ** Haskell
