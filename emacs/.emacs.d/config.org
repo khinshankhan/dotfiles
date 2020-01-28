@@ -215,7 +215,7 @@
 
    #+begin_src emacs-lisp
 (defconst shan/python-executable "python3")
-(defconst shan/ipython-executable "ipython3")
+;; (defconst shan/ipython-executable "ipython3")
 
 (setq shan/home-row
       (if (string-equal (system-name) "faux-thunkpad")
@@ -2419,12 +2419,12 @@ Automatically debug and bisect your init (.emacs) file!
   ;;    ("DONE" :foreground "#50a14f" :weight normal :underline t)
   ;;    ("CANCELLED" :foreground "#ff6480" :weight normal :underline t)))
 
-  (org-babel-python-command "ipython3 -i --simple-prompt")
+  ;; (org-babel-python-command "ipython3 -i --simple-prompt")
 
   (org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
   (org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
   :config
-  (use-package ob-ipython)
+  ;; (use-package ob-ipython)
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -2437,7 +2437,7 @@ Automatically debug and bisect your init (.emacs) file!
      (ocaml      . t)
      (org        . t)
      (plantuml   . t)
-     (python     . t)
+     ;; (python     . t)
      (shell      . t)
      (R          . t)
      ))
