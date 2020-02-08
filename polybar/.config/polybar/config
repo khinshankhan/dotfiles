@@ -115,7 +115,7 @@ date = " %Y-%m-%d |"
 date-alt =
 
 time = %H:%M:%S
-time-alt = %H:%M
+time-alt = %I:%M
 
 format-background =
 format-underline = #0a6cf5
