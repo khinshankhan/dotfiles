@@ -45,15 +45,21 @@ export PATH=$PATH:${HOME}/.pub-cache/bin
 # nimble
 export PATH=/home/shan/.nimble/bin:$PATH
 
+# TODO
+# kotlin ls
+export PATH=$PATH:${HOME}/kotlin-language-server/server/build/install/server/bin/
+
 # executables via go
 export PATH=/home/shan/go/bin:$PATH
+
+# activate pyenv
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 
 # some folders than should contain executable files
 export PATH=$PATH:${HOME}/bin
 export PATH=$PATH:${HOME}/.local/bin
 export PATH=$PATH:${HOME}/.myscripts
-
-export PATH=$PATH:${HOME}/kotlin-language-server/server/build/install/server/bin/
 
 # weird gtk issue
 export NO_AT_BRIDGE=1
