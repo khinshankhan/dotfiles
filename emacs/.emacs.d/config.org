@@ -947,6 +947,14 @@ Automatically debug and bisect your init (.emacs) file!
   (default-text-scale-mode))
      #+end_src
 
+**** Single Window Focus Zooming
+
+     #+begin_src emacs-lisp
+(use-package zoom-window
+  :config
+  (global-set-key (kbd "C-z") 'zoom-window-zoom))
+     #+end_src
+
 ** Interface
 
 *** Bells
