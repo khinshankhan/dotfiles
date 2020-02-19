@@ -31,6 +31,7 @@
     - [[#ligatures][Ligatures]]
     - [[#theme][Theme]]
     - [[#mode-line][Mode Line]]
+    - [[#zoom][Zoom]]
   - [[#interface][Interface]]
     - [[#bells][Bells]]
     - [[#confirmation-messages][Confirmation Messages]]
@@ -819,7 +820,7 @@ Automatically debug and bisect your init (.emacs) file!
        (set-face-attribute 'default nil
                            :family "Source Code Pro"
                            :weight 'normal
-                           :width 'normal))
+                           Q                  :width 'normal))
       ((member "Iosevka" (font-family-list))
        (set-face-attribute 'default nil
                            :family "Iosevka"
@@ -935,6 +936,16 @@ Automatically debug and bisect your init (.emacs) file!
   :hook
   ((neotree-mode imenu-list-minor-mode minimap-mode ibuffer-mode help-mode deft-text-mode) . hide-mode-line-mode))
     #+end_src
+
+*** Zoom
+
+**** Font Size Zooming
+
+     #+begin_src emacs-lisp
+(use-package default-text-scale
+  :init
+  (default-text-scale-mode))
+     #+end_src
 
 ** Interface
 
@@ -2448,7 +2459,7 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** Bullets
 
-  #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 (use-package toc-org
   :after (org)
   :hook
@@ -2484,18 +2495,18 @@ Automatically debug and bisect your init (.emacs) file!
                       :underline nil
                       :background "#fafafa"
                       :foreground "#a0a1a7"))
-  #+end_src
+   #+end_src
 
 ** Priorities
 
-  Nicer priorities, don't see myself using more than 4.
+   Nicer priorities, don't see myself using more than 4.
 
-  - Red: HIGH
-  - Yellow: MID
-  - Green: LOW
-  - Sky blue: OPTIONAL
+   - Red: HIGH
+   - Yellow: MID
+   - Green: LOW
+   - Sky blue: OPTIONAL
 
-    #+begin_src emacs-lisp
+     #+begin_src emacs-lisp
 (use-package org-fancy-priorities
   :after (org)
   :diminish
@@ -2511,18 +2522,18 @@ Automatically debug and bisect your init (.emacs) file!
 
   ;; symbol for priorities
   (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
-    #+end_src
+     #+end_src
 
 ** Exports
 
-    #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 (use-package px)
 
 (use-package ox-gfm
   :after (org))
 
 (use-package ox-pandoc)
-    #+end_src
+   #+end_src
 
 ** Reveal.js
 
