@@ -1367,6 +1367,9 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package magit
   :defer t
   :config
+  ;; allow window to be split vertically rather than horizontally
+  (setq split-width-threshold 0)
+  (setq split-height-threshold nil)
   ;; full window magit
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
 
