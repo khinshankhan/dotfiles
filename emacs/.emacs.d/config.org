@@ -776,12 +776,12 @@ Automatically debug and bisect your init (.emacs) file!
     ("r" shan/toggle-mark-rectangle "rectangle"))
    "Shortcuts"
    (("p" hydra-projectile/body (propertize "+project" 'face 'bold))
-    ("a" hydra-avy/body (propertize "+jump" 'face 'bold))
+    ("j" hydra-avy/body (propertize "+jump" 'face 'bold))
     ("w" hydra-window/body (propertize "+screen" 'face 'bold)))
    "RSI Binds"
    (("u" undo "undo" :exit nil)
-    ("t" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
-    ("n" counsel-M-x "M-x")
+    ("a" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
+    (";" counsel-M-x "M-x")
     ("s" save-buffer "save"))))
     #+end_src
 
