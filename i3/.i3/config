@@ -32,7 +32,7 @@ bindsym $mod+Return exec tilix
 bindsym $mod+Shift+q kill
 
 # start program launcher
-bindsym $mod+d exec --no-startup-id rofi -show run #dmenu_recency
+bindsym $mod+space exec --no-startup-id rofi -show run #dmenu_recency
 bindsym $mod+Tab exec --no-startup-id "rofi -show-icons -modi windowcd,window,drun -show window"
 
 # launch categorized menu
@@ -118,7 +118,8 @@ bindsym $mod+e layout toggle split
 bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+# doesnt work??
+# bindsym $mod+space focus mode_toggle
 
 # toggle sticky
 bindsym $mod+Shift+s sticky toggle
