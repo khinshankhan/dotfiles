@@ -19,7 +19,7 @@ export NVM_SOURCE="/usr/share/nvm"                     # The AUR package install
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # ruby
-PATH="/home/shan/.gem/ruby/2.6.0/bin${PATH:+:${PATH}}"; export PATH;
+PATH="/home/shan/.gem/ruby/2.7.0/bin${PATH:+:${PATH}}"; export PATH;
 
 # cask
 export PATH="/home/shan/.cask/bin:$PATH"
