@@ -468,7 +468,7 @@
        (set-face-attribute 'default nil
                            :family "Source Code Pro"
                            :weight 'normal
-                           Q                  :width 'normal))
+                           :width 'normal))
       ((member "Iosevka" (font-family-list))
        (set-face-attribute 'default nil
                            :family "Iosevka"
@@ -831,30 +831,32 @@
 (setq js2-missing-semi-one-line-override t)
 (setq js2-strict-missing-semi-warning nil)
 
+(use-package gitattributes-mode
+  :defer t)
 (use-package gitignore-mode
-  :mode "\\.gitignore\\'")
-
+  :defer t)
 (use-package gitconfig-mode
-  :mode "\\.gitconfig\\'")
+  :defer t)
 
 (use-package git-timemachine)
 
 (use-package magit
   :defer t
+  :bind
+  (:map magit-status-mode-map
+        ("q" . (lambda () (interactive) (magit-mode-bury-buffer t))))
   :config
   ;; allow window to be split vertically rather than horizontally
   (setq split-width-threshold 0)
   (setq split-height-threshold nil)
   ;; full window magit
-  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
 
-  ;; kills buffer as well
-  ;; need to work out a way to kill window to not reload status multiple times
-
-  ;; (define-key magit-mode-map
-  ;;   (kbd "q")
-  ;;   (lambda() (interactive) (magit-mode-bury-buffer t)))
-  )
+(use-package transient
+  :defer t
+  :after magit
+  :config
+  (transient-bind-q-to-quit))
 
 (use-package forge)
 
