@@ -844,7 +844,7 @@
   :defer t
   :bind
   (:map magit-status-mode-map
-        ("q" . (lambda () (interactive) (magit-mode-bury-buffer t))))
+        ("q" . (lambda () (interactive) (magit-mode-bury-buffer 16))))
   :config
   ;; allow window to be split vertically rather than horizontally
   (setq split-width-threshold 0)
