@@ -1324,8 +1324,8 @@
   :after
   (typescript-mode company flycheck)
   :hook
-  ((typescript-mode . tide-setup)
-   (typescript-mode . tide-hl-identifier-mode)
+  (((js2-mode . typescript-mode) . tide-setup)
+   ((js2-mode . typescript-mode) . tide-hl-identifier-mode)
    (before-save . tide-format-before-save))
   :config
   (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
