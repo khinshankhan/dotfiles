@@ -36,6 +36,9 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # adb not on path for some reason, from android sdk
 export PATH=$PATH:${HOME}/Android/Sdk/platform-tools/
 
+# android studio emulator
+export PATH=$PATH:${HOME}/Android/Sdk/emulator/
+
 # dart via flutter
 export PATH=$PATH:/opt/flutter/bin/cache/dart-sdk/bin/
 
