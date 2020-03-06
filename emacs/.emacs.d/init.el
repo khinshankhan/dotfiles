@@ -925,7 +925,7 @@
   (lsp-auto-guess-root t)
   (lsp-before-save-edits t)
   (lsp-enable-indentation t)
-  (lsp-auto-configure nil)
+  (lsp-auto-configure t)
   (lsp-enable-snippet nil)
   (lsp-prefer-flymake nil)
   :config
@@ -1176,28 +1176,22 @@
     (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
 
 (use-package python
-  :ensure nil
   :if (executable-find "pyls")
   :after (lsp)
+  :ensure nil
+  :defer t
   :hook
   (python-mode . lsp)
   :custom
   (python-indent 4)
   (python-shell-interpreter shan/python-executable)
+  ;; Required for MacOS, prevents newlines from being displayed as ^G
+  (python-shell-interpreter-args (if (eq system-type 'darwin) "-c exec('__import__(\\'readline\\')') -i" "-i"))
+  ;; (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
   (python-fill-docstring-style 'pep-257)
-  (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
   (py-split-window-on-execute t)
   :config
   (shan/ide-add 'python-mode #'hydra-lsp/body))
-
-(use-package dap-python
-  :ensure nil
-  :after dap-mode
-  :custom
-  (dap-python-executable shan/python-executable))
-
-(use-package cython-mode)
-(use-package flycheck-cython)
 
 (use-package ess
   :pin melpa-stable
