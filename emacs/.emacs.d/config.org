@@ -2010,7 +2010,9 @@ Automatically debug and bisect your init (.emacs) file!
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
-         ("\\.tsx\\'" . typescript-mode)))
+         ("\\.tsx\\'" . typescript-mode))
+  :config
+  (shan/ide-add 'typescript-mode #'hydra-lsp/body))
    #+end_src
 
 *** General JS/TS Projects
