@@ -381,10 +381,10 @@
    "Window Movement"
    (("c" ace-window "choose" :exit t)
     ("b" balance-windows "balance")
-    ("k" delete-window "kill" :exit t)
+    ("l" delete-window "kill" :exit t)
     ("w" other-window "move"))
    "Buffer Movement"
-   (("l" kill-buffer-and-windows "kill" :exit t))
+   (("k" kill-buffer "kill" :exit t))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
 
