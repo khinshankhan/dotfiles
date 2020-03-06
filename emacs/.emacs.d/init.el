@@ -1301,7 +1301,9 @@
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
-         ("\\.tsx\\'" . typescript-mode)))
+         ("\\.tsx\\'" . typescript-mode))
+  :config
+  (shan/ide-add 'typescript-mode #'hydra-lsp/body))
 
 (use-package add-node-modules-path
   :hook
