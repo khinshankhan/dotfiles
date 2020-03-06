@@ -1310,19 +1310,9 @@
    (typescript-mode . prettier-js-mode)
    (rjsx-mode . prettier-js-mode)))
 
-(defun setup-tide-mode ()
-  "Setup tide for javascript."
-  (interactive)
-  (tide-setup)
-  (flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (eldoc-mode +1)
-  (tide-hl-identifier-mode +1)
-  (company-mode +1))
-
 (use-package tide
   :after
-  (typescript-mode company flycheck)
+  (typescript-mode js2-mode company flycheck)
   :hook
   (((js2-mode . typescript-mode) . tide-setup)
    ((js2-mode . typescript-mode) . tide-hl-identifier-mode)
