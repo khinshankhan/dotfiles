@@ -106,8 +106,6 @@
   - [[#databases][Databases]]
     - [[#graphql][GraphQL]]
     - [[#sql][SQL]]
-  - [[#theorem-provers][Theorem Provers]]
-    - [[#lean-prover][Lean Prover]]
 - [[#org][Org]]
   - [[#bullets][Bullets]]
   - [[#priorities][Priorities]]
@@ -2176,26 +2174,6 @@
 (use-package sql-indent
   :init
   (setq-default sql-indent-offset tab-width))
-    #+end_src
-
-** Theorem Provers
-
-*** Lean Prover
-
-    Install lean using [[https://github.com/leanprover/lean/blob/master/doc/make/index.md][generic build instructions]] (don't worry about warnings or anything).
-    Next copy the binaries (eg =lean= in =lean/bin=) to =/usr/local/bin= and copy the entire lean
-    folder (repo?) to =/usr/local/lib=. Restart (terminal/ emacs)and everything should work
-    fine.
-
-    #+begin_src emacs-lisp
-(use-package lean-mode
-  :if (executable-find "lean")
-  :mode
-  ("\\.lean\\'" . lean-mode)
-  :bind (:map lean-mode-map
-              ("S-SPC" . company-complete))
-  :init
-  (setq lean-rootdir "/usr/local/"))
     #+end_src
 
 * Org
