@@ -1,6 +1,6 @@
 #+TITLE: An Emacs Configuration
 #+AUTHOR: Khinshan Khan
-#+property: header-args :tangle init.el
+#+PROPERTY: header-args :tangle init.el
 #+STARTUP: overview
 #+PRIORITIES: A D B
 
