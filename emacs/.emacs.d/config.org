@@ -78,8 +78,6 @@
   - [[#swift][Swift]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
-  - [[#web-style-sheets][web style-sheets]]
-  - [[#haml-slim][haml, slim]]
   - [[#javascript-typescript][JavaScript/ TypeScript]]
     - [[#general-jsts-projects][General JS/TS Projects]]
     - [[#react][React]]
@@ -1801,23 +1799,6 @@
    (web-mode  . emmet-mode)))
    #+end_src
 
-** TODO web style-sheets
-
-** haml, slim
-
-   #+begin_src emacs-lisp
-(use-package haml-mode
-  :mode
-  ("\\.haml\\'"  . haml-mode)
-  :init
-  (setq haml-indent-offset 2))
-   #+end_src
-
-   #+begin_src emacs-lisp
-(use-package slim-mode
-  :mode
-  ("\\.slim\\'" . slim-mode))
-   #+end_src
 
 ** TODO JavaScript/ TypeScript
 
@@ -2006,13 +1987,13 @@
 
 *** dhall
 
-    Weird, says not found on melpa, but it exists...
-
-    #+begin_src emacs-lisp :tangle off
+    #+begin_src emacs-lisp
 (use-package dhall-mode)
     #+end_src
 
-*** Editor Config
+*** TODO [#A] Editor Config
+
+    Make this work
 
     #+begin_src emacs-lisp
 (use-package editorconfig
@@ -2050,7 +2031,9 @@
   (setq-default js-indent-level 2))
     #+end_src
 
-*** Markdown
+*** TODO Markdown
+
+    Clean up preview and stuff.
 
     Slight lift off of rememberYou
 
@@ -2131,7 +2114,9 @@
 
 ** Containers
 
-*** Docker
+*** TODO [#B] Docker
+
+    Figure this out
 
     #+begin_src emacs-lisp
 (use-package dockerfile-mode
@@ -2146,7 +2131,7 @@
 (use-package docker)
     #+end_src
 
-*** Kubernetes
+*** TODO [#D] Kubernetes
 
     k8s stuff
 
