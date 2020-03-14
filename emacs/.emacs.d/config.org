@@ -9,12 +9,16 @@
 - [[#pre-configuration][Pre-Configuration]]
   - [[#initialization][Initialization]]
   - [[#garbage-collection][Garbage Collection]]
-- [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
-  - [[#personal-variables][Personal Variables]]
-  - [[#general-functions][General Functions]]
-- [[#initialization-1][Initialization]]
+- [[#package-setup][Package Setup]]
   - [[#package-archives][Package Archives]]
   - [[#package-installers][Package Installers]]
+  - [[#package-ensure][Package Ensure]]
+  - [[#debug][Debug]]
+- [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
+  - [[#helpful-libraries][Helpful Libraries]]
+  - [[#personal-variables][Personal Variables]]
+  - [[#general-functions][General Functions]]
+- [[#terminal][Terminal]]
 - [[#start-up][Start Up]]
   - [[#encoding][Encoding]]
   - [[#backups][Backups]]
@@ -28,7 +32,6 @@
   - [[#gui][GUI]]
   - [[#appearance][Appearance]]
     - [[#font][Font]]
-    - [[#ligatures][Ligatures]]
     - [[#theme][Theme]]
     - [[#mode-line][Mode Line]]
     - [[#zoom][Zoom]]
@@ -40,7 +43,7 @@
     - [[#scratch-buffer][Scratch Buffer]]
     - [[#scrolling][Scrolling]]
     - [[#splash-screen][Splash Screen]]
-    - [[#completetion-frontend][Completetion Frontend]]
+    - [[#completion-frontend][Completion Frontend]]
     - [[#neotree][Neotree]]
 - [[#programming][Programming]]
   - [[#general][General]]
@@ -65,18 +68,13 @@
   - [[#golang][Golang]]
   - [[#haskell][Haskell]]
   - [[#java][Java]]
-  - [[#julia][Julia]]
   - [[#juypter][Juypter]]
   - [[#kotlin][Kotlin]]
-  - [[#lisp][Lisp]]
-    - [[#elisp][ELisp]]
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
   - [[#python][Python]]
   - [[#r][R]]
-  - [[#ruby][Ruby]]
   - [[#scala][Scala]]
-  - [[#shell][Shell]]
   - [[#swift][Swift]]
 - [[#web-development][Web Development]]
   - [[#html][HTML]]
@@ -158,11 +156,12 @@
 
 * Pre-Configuration
 
-  This code should be executed first. It's general, but will make the rest of the configuration nicer since it's somewhat 'meta'.
+  This code should be executed first. It's general, but will make the rest of the configuration nicer since it's
+  somewhat 'meta'.
 
 ** Initialization
 
-   Add lexical binding support
+   Add [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html][lexical binding]] support globally.
 
    #+begin_src emacs-lisp
 ;; -*- lexical-binding: t -*-
@@ -170,38 +169,115 @@
 
 ** Garbage Collection
 
-   We don't need garbage collection during start up.
+   We don't need [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] so low (maybe on a machine from a couple decade ago...) nor does =load-file= need
+   the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Magic-File-Names.html][file name handler]] during start up.
 
    #+begin_src emacs-lisp
+(eval-and-compile
+  (defun srs|revert-gc ()
+    (setq gc-cons-threshold 16777216
+          gc-cons-percentage 0.1
+          file-name-handler-alist last-file-name-handler-alist))
+
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6
+        file-name-handler-alist nil)
+
+  (add-hook 'after-init-hook 'srs|revert-gc))
+   #+end_src
+
+* Package Setup
+
+** Package Archives
+
+   Set up all the archive sources to pull from packages from.
+
+   #+begin_src emacs-lisp
+(require 'package)
+
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+
+(package-initialize)
+   #+end_src
+
+** Package Installers
+
+   [[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup by isolating packages.
+
+   #+begin_src emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 (eval-when-compile
-  (setq-local gc-cons-threshold most-positive-fixnum)
-  (setq-local gc-cons-percentage 0.6)
-  (setq-local file-name-handler-alist nil))
+  (require 'use-package))
+
+(use-package use-package
+  :config
+  (setq-default use-package-always-defer nil
+                use-package-always-ensure t
+                use-package-always-demand t
+                byte-compile-warnings nil))
+   #+end_src
+
+** Package Ensure
+
+   This can help with ensuring dependency programs are installed before installing a package.
+
+   #+begin_src emacs-lisp
+(use-package use-package-ensure-system-package)
+   #+end_src
+
+** Debug
+
+   The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
+
+   #+begin_src emacs-lisp
+(use-package try)
+   #+end_src
+
+   Extremely helpful for figuring out what went wrong with configuration file.
+
+   #+begin_quote
+   Automatically debug and bisect your init (.emacs) file!
+   #+end_quote
+
+   #+begin_src emacs-lisp
+(use-package bug-hunter)
    #+end_src
 
 * Tricks n Gimmicks for Sweeter Configuration
 
-  Mostly just useful variables and functions.
+  General nice configuration to have.
+
+** Helpful Libraries
+
+   These are just cool libraries I'd like to use during my configuration, or many of the packages use them.
+
+   #+begin_src emacs-lisp
+(use-package dash)
+(use-package dash-functional)
+   #+end_src
 
 ** Personal Variables
 
-   Me, myself, and I.
-
-   These are personal preferences for emacs file structure.
+   Me, myself, and I. These are personal preferences for emacs file structure.
 
    #+begin_src emacs-lisp
 (defconst custom-file (concat user-emacs-directory "custom.el"))
 (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
-(defconst shan/settings-exist (file-exists-p shan/settings-path))
+(defconst shan/settings-exist? (file-exists-p shan/settings-path))
+(when shan/settings-exist?
+  (load-file shan/settings-path))
    #+end_src
 
    A couple of booleans so we don't have to check everytime.
 
    #+begin_src emacs-lisp
-(when shan/settings-exist
-  (load-file shan/settings-path))
-
-(defconst shan/is-a-mac (memq window-system '(mac ns)))
+(defconst shan/personal? (-contains? '("shan" "faux-thunkpad") (system-name)))
+(defconst shan/is-mac? (memq window-system '(mac ns)))
    #+end_src
 
    Personal favored variables
@@ -216,10 +292,10 @@
 
    #+begin_src emacs-lisp
 (defconst shan/python-executable "python3")
-;; (defconst shan/ipython-executable "ipython3")
+(defconst shan/ipython-executable "ipython3")
 
 (setq shan/home-row
-      (if (string-equal (system-name) "faux-thunkpad")
+      (if shan/personal?
           '(?a ?r ?s ?t ?n ?e ?i ?o)
         '(?a ?s ?d ?f ?j ?k ?l ?\;)))
    #+end_src
@@ -227,9 +303,6 @@
    Shorthands
 
    #+begin_src emacs-lisp
-(defconst shan/init-path (concat user-emacs-directory "init.el"))
-(defconst shan/config-path (concat user-emacs-directory "config.org"))
-
 (defconst shan/dart-path "/opt/flutter/bin/cache/dart-sdk/")
 (defconst shan/flutter-path "/opt/flutter/")
 (defconst shan/plantuml-path "/usr/share/java/plantuml/plantuml.jar")
@@ -238,19 +311,18 @@
 
 ** General Functions
 
-   Personal functions, some packages are reliant on these, so it goes on top. Working
-   on credit for people not mentioned in preface and significant enough. People
-   should be cited even if the function was modified. Functions are split into...
-   "sensible" groups.
+   Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not
+   mentioned in preface and significant enough. People should be cited even if the function was modified. Functions
+   are split into... "sensible" groups. Note, they're prefixed with =shan/= over other prefixes because I needed
+   'namespaces' and I like auto completing any 'custom' function off of this one prefix instead of remembering more.
 
    - [[[https://emacs.stackexchange.com/a/340][Credit: scratch]]]
    - [[[https://stackoverflow.com/questions/95631/open-a-file-with-su-sudo-inside-emacs/7043786][Credit: sudo-edit]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L40-L48][Credit: delete-this-file]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L51-L65][Credit: rename-this-file-and-buffer]]]
    - [[[https://github.com/purcell/emacs.d/blob/master/lisp/init-utils.el#L67-L77][Credit: browse-current-file]]]
-   - [[[https://emacs.stackexchange.com/a/29421][Credit: org-toc]]]
 
-     #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 (defun shan/do-nothing ()
   "Do nothing."
   (interactive)
@@ -265,33 +337,16 @@
   "Run F then run TO-CALL-AFTER."
   (funcall f)
   (funcall to-call-after))
-     #+end_src
+   #+end_src
 
-     #+begin_src emacs-lisp
-(defun shan/split-window-right ()
-  "Create a new window split to the right and balance the windows."
-  (interactive)
-  (shan/after #'balance-windows #'split-window-right))
-
-(defun shan/split-window-below ()
-  "Create a new window split below and balance the windows."
-  (interactive)
-  (shan/after #'balance-windows #'split-window-below))
-
-(defun shan/delete-window ()
-  "Delete the current window and balance the windows."
-  (interactive)
-  (shan/after #'balance-windows #'delete-window))
-     #+end_src
-
-     #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 (defun shan/refresh-buffer ()
   "Refresh the current buffer."
   (interactive)
   (revert-buffer :ignore-auto :noconfirm))
 
 (defun shan/scratch ()
-  "Create a new scratch buffer to work in. (could be *scratch* - *scratchX*)"
+  "Create a new scratch buffer to work in.  (could be *scratch* - *scratchX*)."
   (interactive)
   (let ((n 0) bufname)
     (while (progn
@@ -302,46 +357,11 @@
              (get-buffer bufname)))
     (switch-to-buffer (get-buffer-create bufname))
     (lisp-interaction-mode)))
-     #+end_src
+   #+end_src
 
-     #+begin_src emacs-lisp
-(defun shan/toggle-mark ()
-  "Pop a mark if one doesn't exist already, deactivate it otherwise."
-  (interactive)
-  (if (region-active-p)
-      (deactivate-mark)
-    (push-mark nil nil t)))
-
-(defun shan/toggle-mark-rectangle ()
-  "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
-  (interactive)
-  (if (region-active-p)
-      (deactivate-mark)
-    (rectangle-mark-mode)))
-     #+end_src
-
-     #+begin_src emacs-lisp
-
-(defun shan/first-occurence (f list)
-  "Return the first occurence in LIST which, when applied to PREDICATE returns t."
-  (let ((head (car list))
-        (tail (cdr list)))
-    (if (or (not head) (funcall f head))
-        head
-      (shan/first-occurence f tail))))
-
-(defun shan/last-occurence (predicate list)
-  "Return the last occurence in LIST which, when applied to PREDICATE returns t."
-  (shan/first-occurence predicate (reverse list)))
-
-(defmacro shan/find-executables (list)
-  "Return the first occurence in LIST whose value corresponds to an executable."
-  (shan/first-occurence #'executable-find list))
-     #+end_src
-
-     #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 (defun shan/sudo-edit (file-name)
-  "Like find file, but opens the file as root."
+  "Like find file, but opens FILE-NAME as root."
   (interactive "FSudo Find File: ")
   (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
     (find-file tramp-file-name)))
@@ -382,34 +402,9 @@
   "Copy the current file path to kill ring."
   (interactive)
   (kill-new buffer-file-name))
+   #+end_src
 
-(defun shan/org-toc (&optional shan/file-name)
-  "A nice search utility for org headers in a direcory."
-  (interactive)
-  (unless shan/file-name
-    (setq shan/file-name (read-directory-name "Directory name: ")))
-  (let ((files (f-entries shan/file-name (lambda (f) (f-ext? f "org")) t))
-        (headlines '())
-        choice)
-    (loop for file in files do
-          (with-temp-buffer
-            (insert-file-contents file)
-            (goto-char (point-min))
-            (while (re-search-forward org-heading-regexp nil t)
-              (cl-pushnew (list
-                           (format "%-80s (%s)"
-                                   (match-string 0)
-                                   (file-name-nondirectory file))
-                           :file file
-                           :position (match-beginning 0))
-                          headlines))))
-    (setq choice
-          (completing-read "Headline: " (reverse headlines)))
-    (find-file (plist-get (cdr (assoc choice headlines)) :file))
-    (goto-char (plist-get (cdr (assoc choice headlines)) :position))))
-     #+end_src
-
-     #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 (defun shan/fill-or-unfill ()
   "Fill or unfill based on the previous command."
   (interactive)
@@ -419,115 +414,27 @@
                     (point-max))
            fill-column)))
     (call-interactively #'fill-paragraph)))
-
-(defun shan/save-proper ()
-  (interactive)
-  (remove-hook 'before-save-hook #'delete-trailing-whitespace)
-  (save-buffer)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace))
-     #+end_src
-
-     #+begin_src emacs-lisp
-(defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
-  "Adds all elements from from-list to to-list"
-  (dolist (elem from-list)
-    (add-to-list to-list elem append compare-fn))
-  to-list)
-
-(defun shan/copy-hooks-to (from-hook to-hook)
-  "Copies one list of hooks to another, without the weird nonc circular list problem"
-  (dolist (hook from-hook)
-    (add-hook to-hook hook)))
-     #+end_src
-
-     #+begin_src emacs-lisp
-(defun shan/call-keymap (map &optional prompt)
-  "Read a key sequence and call the command it's bound to in MAP."
-  (let* ((help-form `(describe-bindings ,(vector map)))
-         (key (read-key-sequence prompt))
-         (cmd (lookup-key map key t)))
-    (if (functionp cmd) (call-interactively cmd)
-      (user-error "%s is undefined" key))))
-
-(defun shan/exec-call-keymap (keymap prompt)
-  "Executes `shan/call-keymap'"
-  (interactive)
-  (shan/call-keymap keymap prompt))
-     #+end_src
-
-     #+begin_src emacs-lisp
-(defun shan/reload ()
-  "Reload the configuration file."
-  (interactive)
-  (load-file shan/init-path))
-
-(defun shan/edit-config ()
-  "Edit the configuration file."
-  (interactive)
-  (find-file shan/config-path))
-     #+end_src
-
-* Initialization
-
-** Package Archives
-
-   Special commands, should always be needed. Note the algorithm is a hotfix to a much larger [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341][emacs issue]].
-
-   #+begin_src emacs-lisp
-(require 'package)
-;; (setq package-enable-at-startup nil)
-(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
    #+end_src
 
-   Set up all the archive sources to pull from packages from.
+* Terminal
 
-   #+begin_src emacs-lisp
-(shan/add-list-to-list 'package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                                           ("melpa" . "http://melpa.org/packages/")
-                                           ("melpa-stable" . "http://stable.melpa.org/packages/")
-                                           ("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/")
-                                           ("org" . "https://orgmode.org/elpa/"))
-                       t)
-(package-initialize)
-   #+end_src
-
-** Package Installers
-
-   [[https://github.com/jwiegley/use-package][use-package]] configuration. Helps clean up rest of the configuration and speeds up startup
-   by isolating packages.
-
-   #+begin_src emacs-lisp
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(eval-when-compile
-  (require 'use-package))
-
-(use-package use-package
+  #+begin_src emacs-lisp
+(use-package vterm)
+(use-package vterm-toggle
   :config
-  (setq-default use-package-always-defer nil
-                use-package-always-ensure t
-                use-package-always-demand t))
-
-(setq-default byte-compile-warnings nil)
-
-(use-package use-package-ensure-system-package)
-   #+end_src
-
-   The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
-
-   #+begin_src emacs-lisp
-(use-package try)
-   #+end_src
-
-   #+BEGIN_EXAMPLE
-Automatically debug and bisect your init (.emacs) file!
-   #+END_EXAMPLE
-
-   #+begin_src emacs-lisp
-(use-package bug-hunter)
-   #+end_src
+  ;; I like vterm to 'pop up' on the bottom
+  ;; if anything, I can use zoom-window-zoom to focus
+  (setq vterm-toggle-fullscreen-p nil)
+  (add-to-list 'display-buffer-alist
+               '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
+                 (display-buffer-reuse-window display-buffer-at-bottom)
+                 ;;(display-buffer-reuse-window display-buffer-in-direction)
+                 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                 ;;(direction . bottom)
+                 ;;(dedicated . t) ;dedicated is supported in emacs27
+                 (reusable-frames . visible)
+                 (window-height . 0.3))))
+  #+end_src
 
 * Start Up
 
@@ -791,24 +698,9 @@ Automatically debug and bisect your init (.emacs) file!
 
    #+begin_src emacs-lisp
 (setq inhibit-startup-message t)
-
-(use-package menu-bar
-  :demand t
-  :ensure nil
-  :config
-  (menu-bar-mode 0))
-
-(use-package scroll-bar
-  :demand t
-  :ensure nil
-  :config
-  (toggle-scroll-bar 0))
-
-(use-package tool-bar
-  :demand t
-  :ensure nil
-  :config
-  (tool-bar-mode 0))
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
    #+end_src
 
 ** Appearance
@@ -820,11 +712,6 @@ Automatically debug and bisect your init (.emacs) file!
        (set-face-attribute 'default nil
                            :family "Source Code Pro"
                            :weight 'normal
-                           :width 'normal))
-      ((member "Iosevka" (font-family-list))
-       (set-face-attribute 'default nil
-                           :family "Iosevka"
-                           :weight 'normal
                            :width 'normal)))
 
 (add-to-list 'face-ignored-fonts "Noto Color Emoji")
@@ -833,37 +720,6 @@ Automatically debug and bisect your init (.emacs) file!
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
     #+end_src
 
-*** TODO Ligatures
-
-    Allows for uniform ligatures, regardless of font. Seems to fail sometimes... will figure it out later.
-
-    #+begin_src emacs-lisp :tangle off
-(use-package prog-mode
-  :ensure nil
-  :hook
-  ((prog-mode text-mode) . prettify-symbols-mode)
-  :init
-  (setq-default prettify-symbols-alist
-                '(("lambda" . ?λ)
-                  ("<-" . ?←)
-                  ("->" . ?→)
-                  ("->>" . ?↠)
-                  ("=>" . ?⇒)
-                  ("map" . ?↦)
-                  ("/=" . ?≠)
-                  ("!=" . ?≠)
-                  ("==" . ?≡)
-                  ("<=" . ?≤)
-                  (">=" . ?≥)
-                  ("=<<" . (?= (Br . Bl) ?≪))
-                  (">>=" . (?≫ (Br . Bl) ?=))
-                  ("<=<" . ?↢)
-                  (">=>" . ?↣)
-                  ("&&" . ?∧)
-                  ("||" . ?∨)
-                  ("not" . ?¬)))
-  (setq prettify-symbols-unprettify-at-point 'right-edge))
-    #+end_src
 
 *** Theme
 
@@ -1008,16 +864,6 @@ Automatically debug and bisect your init (.emacs) file!
     Tangled off because I've heard of performance issues. We'll see in a week.
 
     #+begin_src emacs-lisp :tangle off
-(use-package linum
-  :ensure nil
-  :if (< emacs-major-version 26)
-  :hook
-  (prog-mode . linum-mode)
-  :custom
-  (linum-format " %d ")
-  :config
-  (set-face-underline 'linum nil))
-
 (use-package display-line-numbers
   :ensure nil
   :if (>= emacs-major-version 26)
@@ -1055,7 +901,6 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package page-break-lines)
 
 (use-package dashboard
-  :after (page-break-lines)
   :bind
   (:map dashboard-mode-map
         ("n" . widget-forward)
@@ -1109,7 +954,7 @@ Automatically debug and bisect your init (.emacs) file!
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
     #+end_src
 
-*** Completetion Frontend
+*** Completion Frontend
 
     #+begin_src emacs-lisp
 (use-package ivy
@@ -1152,9 +997,11 @@ Automatically debug and bisect your init (.emacs) file!
   ("C-r" . swiper-isearch-backward))
     #+end_src
 
-*** Neotree
+*** TODO [#B] Neotree
 
     I dont usually use gui, but this seemed fun. Used [[https://github.com/Ladicle][Ladicle]]'s config.
+
+    [ ] Until we figure out treemacs.
 
     #+begin_src emacs-lisp
 (use-package neotree
@@ -1241,7 +1088,9 @@ Automatically debug and bisect your init (.emacs) file!
   (move-text-default-bindings))
     #+end_src
 
-** Company
+** TODO [#D] Company
+
+   Clean this up.
 
    #+begin_src emacs-lisp
 (use-package company
@@ -1285,7 +1134,9 @@ Automatically debug and bisect your init (.emacs) file!
   (company-mode . company-box-mode))
    #+end_src
 
-** Flycheck
+** TODO [#D] Flycheck
+
+   Clean this up.
 
    #+begin_src emacs-lisp
 (use-package flycheck
@@ -1352,6 +1203,7 @@ Automatically debug and bisect your init (.emacs) file!
 ** Git
 
 *** General Git
+
     #+begin_src emacs-lisp
 (use-package gitattributes-mode
   :defer t)
@@ -1359,11 +1211,10 @@ Automatically debug and bisect your init (.emacs) file!
   :defer t)
 (use-package gitconfig-mode
   :defer t)
-
-(use-package git-timemachine)
     #+end_src
 
 *** Magit
+
     #+begin_src emacs-lisp
 (use-package magit
   :defer t
@@ -1387,11 +1238,13 @@ Automatically debug and bisect your init (.emacs) file!
     #+end_src
 
 *** Forge
+
     #+begin_src emacs-lisp
 (use-package forge)
     #+end_src
 
 *** Git Timemachine
+
     #+begin_src emacs-lisp
 (use-package git-timemachine)
     #+end_src
@@ -1533,6 +1386,8 @@ Automatically debug and bisect your init (.emacs) file!
 
 ** Treemacs
 
+   Sneaky on Dreameh.
+
    #+begin_src emacs-lisp
 (use-package treemacs
   :bind (:map global-map
@@ -1627,7 +1482,9 @@ Automatically debug and bisect your init (.emacs) file!
 (use-package elein)
    #+end_src
 
-** Dart/ Flutter
+** TODO Dart/ Flutter
+
+   Add lsp integration.
 
    #+begin_src emacs-lisp
 (use-package dart-mode
@@ -1678,7 +1535,9 @@ Automatically debug and bisect your init (.emacs) file!
     (setq go-tag-args (list "-transform" "camelcase"))))
    #+end_src
 
-** Haskell
+** TODO [#C] Haskell
+
+   Play with this.
 
    #+begin_src emacs-lisp
 (use-package haskell-mode
@@ -1689,6 +1548,7 @@ Automatically debug and bisect your init (.emacs) file!
    #+end_src
 
 ** Java
+
    #+begin_src emacs-lisp
 (use-package lsp-java
   :after (lsp)
@@ -1718,20 +1578,6 @@ Automatically debug and bisect your init (.emacs) file!
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
    #+end_src
 
-** Julia
-
-   Borked config, flycheck is "interrupted".
-
-   #+begin_src emacs-lisp
-(use-package julia-mode
-  :mode
-  ("\\.jl\\'" . julia-mode))
-
-;; (use-package flycheck-julia
-;;   :after (julia-mode)
-;;   :hook
-;;   (flycheck-mode . flycheck-julia-setup))
-   #+end_src
 
 ** Juypter
 
@@ -1744,29 +1590,19 @@ Automatically debug and bisect your init (.emacs) file!
   (ein:use-auto-complete-superpack t))
    #+end_src
 
-** Kotlin
+** TODO [#B] Kotlin
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 (use-package kotlin-mode
   :mode ("\\.kt\\'" . kotlin-mode)
   :hook (kotlin-mode . lsp)
   :config
   (setq lsp-kotlin-language-server-path shan/kotlin-path))
-   #+end_src
 
-   #+begin_src emacs-lisp
 (use-package flycheck-kotlin
   :config
   (flycheck-kotlin-setup))
    #+end_src
-
-** Lisp
-
-*** ELisp
-
-    #+begin_src emacs-lisp
-(use-package elisp-format)
-    #+end_src
 
 ** Lua
    #+begin_src emacs-lisp
@@ -1802,7 +1638,7 @@ Automatically debug and bisect your init (.emacs) file!
   (shan/ide-add 'tuareg-mode #'hydra-lsp/body))
    #+end_src
 
-** Python
+** TODO [#C] Python
 
    A reasonable guess.
 
@@ -1845,7 +1681,9 @@ Automatically debug and bisect your init (.emacs) file!
   (dap-python-executable shan/python-executable))
    #+end_src
 
-** R
+** TODO R
+
+   Refine this. Perhaps use jupyter stuff.
 
    #+begin_src emacs-lisp
 (use-package ess
@@ -1856,17 +1694,11 @@ Automatically debug and bisect your init (.emacs) file!
   (require 'ess-site))
    #+end_src
 
-** TODO Ruby
-
-   #+begin_src emacs-lisp
-
-   #+end_src
-
-** TODO Scala
+** TODO [#D] Scala
 
    Enable scala-mode and sbt-mode. Used [[https://scalameta.org/metals/docs/editors/emacs.html][scala metals]].
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 (use-package scala-mode
   :after (lsp)
   :mode "\\.s\\(cala\\|bt\\)$"
@@ -1886,23 +1718,9 @@ Automatically debug and bisect your init (.emacs) file!
    minibuffer-local-completion-map))
    #+end_src
 
-** TODO Shell
-   Default auto-mode-alist is great, but I sometimes get annoyed when configing. Seems detection for files is fairly good, so no need for a =sh-set-shell=.
-   #+begin_src emacs-lisp
-(use-package sh-script
-  :config
-  (shan/add-list-to-list 'auto-mode-alist '(("bash$" . sh-mode)
-                                            ("bash_aliases$" . sh-mode)
-                                            ("bash_exports$" . sh-mode)
-                                            ("bash_functions$" . sh-mode)
-                                            ("bash_logout$" . sh-mode)
-                                            ("bash_prompt$" . sh-mode)
-                                            ("zshrc$" . sh-mode))))
-   #+end_src
+** TODO [#D] Swift
 
-** TODO Swift
-
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 (use-package swift-mode
   :mode
   ("\\.swift\\'" . swift-mode))
@@ -1910,7 +1728,7 @@ Automatically debug and bisect your init (.emacs) file!
 
    Seems swift needs special flycheck support. Need to set executable path later.
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 (use-package flycheck-swift
   :after flycheck
   :config
