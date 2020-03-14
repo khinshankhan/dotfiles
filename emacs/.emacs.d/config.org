@@ -128,11 +128,8 @@
   - [[#medical][Medical]]
 - [[#community][Community]]
   - [[#browser][Browser]]
-  - [[#discord][Discord]]
   - [[#elfeed][Elfeed]]
   - [[#emojify][Emojify]]
-  - [[#imgur][Imgur]]
-  - [[#memes][Memes]]
   - [[#key-frequency][Key Frequency]]
   - [[#wakatime][Wakatime]]
   - [[#miscellaneous-helpers][Miscellaneous Helpers]]
@@ -2176,7 +2173,7 @@
   (setq-default sql-indent-offset tab-width))
     #+end_src
 
-* Org
+* TODO Org
 
   Org is so colossal, it's worth learning. Gets its own category, and one day I'll get around to making this literate and clean.
 
@@ -2243,7 +2240,7 @@
                '("plantuml" . fundamental)))
   #+end_src
 
-** Bullets
+** TODO Bullets
 
    #+begin_src emacs-lisp
 (use-package toc-org
@@ -2341,6 +2338,8 @@
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
 (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
+                                                       ("ts" . "src ts\n")
+                                                       ("js" . "src js\n")
                                                        ("py" . "src python\n")
                                                        ("r" . "src R\n")
                                                        ("sh" . "src shell\n")))
@@ -2540,7 +2539,7 @@
 (use-package auto-yasnippet)
    #+end_src
 
-** Orthography
+** TODO Orthography
 
    #+begin_src emacs-lisp :tangle off
 (use-package langtool
@@ -2671,7 +2670,9 @@
 
   A lot of vanity.
 
-** Browser
+** TODO Browser
+
+   Make smarter with if statements.
 
    Control how links and browser-url-generic function works (also for links).
 
@@ -2680,29 +2681,8 @@
       browse-url-generic-args '("-private")
       browse-url-firefox-program "firefox"
       browse-url-generic-program "firefox")
-
-(defun browse-lucky (start end)
-  (interactive "r")
-  (let ((q
-         (buffer-substring-no-properties
-          start
-          end)))
-    (browse-url-generic (concat "http://www.google.com/search?btnI&q=" (url-hexify-string q)))))
    #+end_src
 
-** TODO Discord
-
-   Discord rich presence based on emacs + file editing. (disabled so one doesn't get distracted).
-   I want to possibly make it launch only when discord is actually open.
-
-   #+begin_src emacs-lisp :tangle off
-(use-package elcord
-  :if (executable-find "discord")
-  :custom
-  (elcord-use-major-mode-as-main-icon t)
-  :config
-  (elcord-mode))
-   #+end_src
 
 ** Elfeed
 
@@ -2778,28 +2758,7 @@
   (emojify-set-emoji-data))
    #+end_src
 
-** Imgur
-
-   #+begin_src emacs-lisp
-(use-package imgur
-  :load-path "site-lisp/imgur.el")
-   #+end_src
-
-** Memes
-
-   #+begin_src emacs-lisp
-(use-package meme
-  :load-path "site-lisp/meme"
-  :commands (meme meme-file)
-  :init
-  (setq meme-char-font "Source Code Pro")
-  (setq meme-font "Iosevka")
-  :config
-  (autoload 'meme "meme.el" "Create a meme from a collection" t)
-  (autoload 'meme-file "meme.el" "Create a meme from a file" t))
-   #+end_src
-
-** Key Frequency
+** TODO Key Frequency
 
    For later use, when I try to finally optimize my workflow + ergonomics.
 
@@ -2849,7 +2808,6 @@
 ;; (use-package whitespace-cleanup-mode)
 ;; (use-package google-this)
 ;; (use-package my-utils)
-;; (use-package my-email)
 ;; (use-package recentf)
    #+end_src
 
@@ -2861,10 +2819,6 @@
 (use-package demangle-mode)
 (use-package academic-phrases)
 (use-package powerthesaurus)
-(use-package ssh-config-mode
-  :init
-  ;; fails the first time package is installed, should work fine after reload
-  (setq ssh-config-load-file-dir (substring (find-library-name "ssh-config-mode") 0 -18)))
 (use-package crontab-mode)
 (use-package salt-mode)
 (use-package sicp)
