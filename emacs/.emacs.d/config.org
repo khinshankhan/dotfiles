@@ -73,7 +73,7 @@
   - [[#lua][Lua]]
   - [[#ocaml][OCaml]]
   - [[#python][Python]]
-  - [[#r][R]]
+  - [[#r--julia][R & Julia]]
   - [[#scala][Scala]]
   - [[#swift][Swift]]
 - [[#web-development][Web Development]]
@@ -168,12 +168,20 @@
    #+begin_src emacs-lisp
 (eval-and-compile
   (defun srs|revert-gc ()
+    ;; reset values
     (setq gc-cons-threshold 16777216
           gc-cons-percentage 0.1
-          file-name-handler-alist last-file-name-handler-alist))
+          file-name-handler-alist (append last-file-name-handler-alist
+		                                  file-name-handler-alist))
+    ;; delete any duplicate values
+    (cl-delete-duplicates file-name-handler-alist :test 'equal)
+    ;; get rid of temporarily variables
+    (makunbound 'default-file-name-handler-alist))
 
+  ;; set everything to efficient limits and save values
   (setq gc-cons-threshold most-positive-fixnum
         gc-cons-percentage 0.6
+        last-file-name-handler-alist file-name-handler-alist
         file-name-handler-alist nil)
 
   (add-hook 'after-init-hook 'srs|revert-gc))
@@ -252,6 +260,8 @@
    #+begin_src emacs-lisp
 (use-package dash)
 (use-package dash-functional)
+(use-package f)
+(use-package s)
    #+end_src
 
 ** Personal Variables
@@ -407,6 +417,46 @@
                     (point-max))
            fill-column)))
     (call-interactively #'fill-paragraph)))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
+  "Adds all elements from from-list to to-list"
+  (dolist (elem from-list)
+    (add-to-list to-list elem append compare-fn))
+  to-list)
+
+(defun shan/copy-hooks-to (from-hook to-hook)
+  "Copies one list of hooks to another, without the weird nonc circular list problem"
+  (dolist (hook from-hook)
+    (add-hook to-hook hook)))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(defun shan/call-keymap (map &optional prompt)
+  "Read a key sequence and call the command it's bound to in MAP."
+  (let* ((help-form `(describe-bindings ,(vector map)))
+         (key (read-key-sequence prompt))
+         (cmd (lookup-key map key t)))
+    (if (functionp cmd) (call-interactively cmd)
+      (user-error "%s is undefined" key))))
+
+(defun shan/exec-call-keymap (keymap prompt)
+  "Executes `shan/call-keymap'"
+  (interactive)
+  (shan/call-keymap keymap prompt))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(defun shan/reload ()
+  "Reload the configuration file."
+  (interactive)
+  (load-file shan/init-path))
+
+(defun shan/edit-config ()
+  "Edit the configuration file."
+  (interactive)
+  (find-file shan/config-path))
    #+end_src
 
 * Terminal
@@ -668,7 +718,8 @@
   ("General"
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
-    ("h" hydra-help/body (propertize "+help" 'face 'bold)))
+    ("h" hydra-help/body (propertize "+help" 'face 'bold))
+    ("t" vterm-toggle-cd "terminal"))
    "Short Hands"
    (("f" hydra-file/body (propertize "+file" 'face 'bold))
     ("g" hydra-git/body (propertize "+git" 'face 'bold))
@@ -940,7 +991,7 @@
                           ))
 
   (dashboard-setup-startup-hook)
-  (setq dashboard-startup-banner (if shan/settings-exist
+  (setq dashboard-startup-banner (if shan/settings-exist?
                                      (concat user-emacs-directory shan/preferred-logo)
                                    'logo))
 
@@ -1674,17 +1725,16 @@
   (dap-python-executable shan/python-executable))
    #+end_src
 
-** TODO R
+** TODO R & Julia
 
    Refine this. Perhaps use jupyter stuff.
 
    #+begin_src emacs-lisp
 (use-package ess
-  :pin melpa-stable
+  :defer t
   :mode
-  ("\\.[rR]\\'" . R-mode)
-  :config
-  (require 'ess-site))
+  ("\\.jl\\'" . ess-julia-mode)
+  ("\\.[rR]\\'" . ess-r-mode))
    #+end_src
 
 ** TODO [#D] Scala
@@ -2454,7 +2504,7 @@
   :config
   ;; WORKAROUND: Fix compilation errors on macOS.
   ;; @see https://github.com/politza/pdf-tools/issues/480
-  (when shan/is-a-mac
+  (when shan/is-mac?
     (setenv "PKG_CONFIG_PATH"
             "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
   ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
@@ -2776,7 +2826,7 @@
 
    #+begin_src emacs-lisp
 (use-package wakatime-mode
-  :if shan/settings-exist
+  :if (and (executable-find "wakatime") (boundp 'wakatime-api-key))
   :custom
   (wakatime-cli-path (executable-find "wakatime"))
   :init
@@ -2823,5 +2873,4 @@
 (use-package salt-mode)
 (use-package sicp)
 (use-package rmsbolt)                   ; A compiler output viewer
-(use-package f)                         ; used for file stuff like with shan/org-toc
    #+end_src

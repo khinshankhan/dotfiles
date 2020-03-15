@@ -1,33 +1,78 @@
 ;; -*- lexical-binding: t -*-
 
+(eval-and-compile
+  (defun srs|revert-gc ()
+    ;; reset values
+    (setq gc-cons-threshold 16777216
+          gc-cons-percentage 0.1
+          file-name-handler-alist (append last-file-name-handler-alist
+		                                  file-name-handler-alist))
+    ;; delete any duplicate values
+    (cl-delete-duplicates file-name-handler-alist :test 'equal)
+    ;; get rid of temporarily variables
+    (makunbound 'default-file-name-handler-alist))
+
+  ;; set everything to efficient limits and save values
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6
+        last-file-name-handler-alist file-name-handler-alist
+        file-name-handler-alist nil)
+
+  (add-hook 'after-init-hook 'srs|revert-gc))
+
+(require 'package)
+
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 (eval-when-compile
-  (setq-local gc-cons-threshold most-positive-fixnum)
-  (setq-local gc-cons-percentage 0.6)
-  (setq-local file-name-handler-alist nil))
+  (require 'use-package))
+
+(use-package use-package
+  :config
+  (setq-default use-package-always-defer nil
+                use-package-always-ensure t
+                use-package-always-demand t
+                byte-compile-warnings nil))
+
+(use-package use-package-ensure-system-package)
+
+(use-package try)
+
+(use-package bug-hunter)
+
+(use-package dash)
+(use-package dash-functional)
+(use-package f)
+(use-package s)
 
 (defconst custom-file (concat user-emacs-directory "custom.el"))
 (defconst shan/settings-path (concat user-emacs-directory "personal/settings.el"))
-(defconst shan/settings-exist (file-exists-p shan/settings-path))
-
-(when shan/settings-exist
+(defconst shan/settings-exist? (file-exists-p shan/settings-path))
+(when shan/settings-exist?
   (load-file shan/settings-path))
 
-(defconst shan/is-a-mac (memq window-system '(mac ns)))
+(defconst shan/personal? (-contains? '("shan" "faux-thunkpad") (system-name)))
+(defconst shan/is-mac? (memq window-system '(mac ns)))
 
 (defconst shan/preferred-logo "personal/nezuko-emacs.png")
 (defconst shan/elfeed-file (concat user-emacs-directory "personal/elfeed.org"))
 (defconst shan/elfeed-db (concat user-emacs-directory "personal/elfeeddb"))
 
 (defconst shan/python-executable "python3")
-;; (defconst shan/ipython-executable "ipython3")
+(defconst shan/ipython-executable "ipython3")
 
 (setq shan/home-row
-      (if (string-equal (system-name) "faux-thunkpad")
+      (if shan/personal?
           '(?a ?r ?s ?t ?n ?e ?i ?o)
         '(?a ?s ?d ?f ?j ?k ?l ?\;)))
-
-(defconst shan/init-path (concat user-emacs-directory "init.el"))
-(defconst shan/config-path (concat user-emacs-directory "config.org"))
 
 (defconst shan/dart-path "/opt/flutter/bin/cache/dart-sdk/")
 (defconst shan/flutter-path "/opt/flutter/")
@@ -49,28 +94,13 @@
   (funcall f)
   (funcall to-call-after))
 
-(defun shan/split-window-right ()
-  "Create a new window split to the right and balance the windows."
-  (interactive)
-  (shan/after #'balance-windows #'split-window-right))
-
-(defun shan/split-window-below ()
-  "Create a new window split below and balance the windows."
-  (interactive)
-  (shan/after #'balance-windows #'split-window-below))
-
-(defun shan/delete-window ()
-  "Delete the current window and balance the windows."
-  (interactive)
-  (shan/after #'balance-windows #'delete-window))
-
 (defun shan/refresh-buffer ()
   "Refresh the current buffer."
   (interactive)
   (revert-buffer :ignore-auto :noconfirm))
 
 (defun shan/scratch ()
-  "Create a new scratch buffer to work in. (could be *scratch* - *scratchX*)"
+  "Create a new scratch buffer to work in.  (could be *scratch* - *scratchX*)."
   (interactive)
   (let ((n 0) bufname)
     (while (progn
@@ -82,39 +112,8 @@
     (switch-to-buffer (get-buffer-create bufname))
     (lisp-interaction-mode)))
 
-(defun shan/toggle-mark ()
-  "Pop a mark if one doesn't exist already, deactivate it otherwise."
-  (interactive)
-  (if (region-active-p)
-      (deactivate-mark)
-    (push-mark nil nil t)))
-
-(defun shan/toggle-mark-rectangle ()
-  "Pop a rectangle mark if one doesn't exist already, deactivate it otherwise."
-  (interactive)
-  (if (region-active-p)
-      (deactivate-mark)
-    (rectangle-mark-mode)))
-
-
-(defun shan/first-occurence (f list)
-  "Return the first occurence in LIST which, when applied to PREDICATE returns t."
-  (let ((head (car list))
-        (tail (cdr list)))
-    (if (or (not head) (funcall f head))
-        head
-      (shan/first-occurence f tail))))
-
-(defun shan/last-occurence (predicate list)
-  "Return the last occurence in LIST which, when applied to PREDICATE returns t."
-  (shan/first-occurence predicate (reverse list)))
-
-(defmacro shan/find-executables (list)
-  "Return the first occurence in LIST whose value corresponds to an executable."
-  (shan/first-occurence #'executable-find list))
-
 (defun shan/sudo-edit (file-name)
-  "Like find file, but opens the file as root."
+  "Like find file, but opens FILE-NAME as root."
   (interactive "FSudo Find File: ")
   (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
     (find-file tramp-file-name)))
@@ -156,31 +155,6 @@
   (interactive)
   (kill-new buffer-file-name))
 
-(defun shan/org-toc (&optional shan/file-name)
-  "A nice search utility for org headers in a direcory."
-  (interactive)
-  (unless shan/file-name
-    (setq shan/file-name (read-directory-name "Directory name: ")))
-  (let ((files (f-entries shan/file-name (lambda (f) (f-ext? f "org")) t))
-        (headlines '())
-        choice)
-    (loop for file in files do
-          (with-temp-buffer
-            (insert-file-contents file)
-            (goto-char (point-min))
-            (while (re-search-forward org-heading-regexp nil t)
-              (cl-pushnew (list
-                           (format "%-80s (%s)"
-                                   (match-string 0)
-                                   (file-name-nondirectory file))
-                           :file file
-                           :position (match-beginning 0))
-                          headlines))))
-    (setq choice
-          (completing-read "Headline: " (reverse headlines)))
-    (find-file (plist-get (cdr (assoc choice headlines)) :file))
-    (goto-char (plist-get (cdr (assoc choice headlines)) :position))))
-
 (defun shan/fill-or-unfill ()
   "Fill or unfill based on the previous command."
   (interactive)
@@ -190,12 +164,6 @@
                     (point-max))
            fill-column)))
     (call-interactively #'fill-paragraph)))
-
-(defun shan/save-proper ()
-  (interactive)
-  (remove-hook 'before-save-hook #'delete-trailing-whitespace)
-  (save-buffer)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
   "Adds all elements from from-list to to-list"
@@ -231,38 +199,21 @@
   (interactive)
   (find-file shan/config-path))
 
-(require 'package)
-;; (setq package-enable-at-startup nil)
-(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
-
-(shan/add-list-to-list 'package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                                           ("melpa" . "http://melpa.org/packages/")
-                                           ("melpa-stable" . "http://stable.melpa.org/packages/")
-                                           ("melpa-stable2" . "http://melpa-stable.milkbox.net/packages/")
-                                           ("org" . "https://orgmode.org/elpa/"))
-                       t)
-(package-initialize)
-
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(eval-when-compile
-  (require 'use-package))
-
-(use-package use-package
+(use-package vterm)
+(use-package vterm-toggle
   :config
-  (setq-default use-package-always-defer nil
-                use-package-always-ensure t
-                use-package-always-demand t))
-
-(setq-default byte-compile-warnings nil)
-
-(use-package use-package-ensure-system-package)
-
-(use-package try)
-
-(use-package bug-hunter)
+  ;; I like vterm to 'pop up' on the bottom
+  ;; if anything, I can use zoom-window-zoom to focus
+  (setq vterm-toggle-fullscreen-p nil)
+  (add-to-list 'display-buffer-alist
+               '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
+                 (display-buffer-reuse-window display-buffer-at-bottom)
+                 ;;(display-buffer-reuse-window display-buffer-in-direction)
+                 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                 ;;(direction . bottom)
+                 ;;(dedicated . t) ;dedicated is supported in emacs27
+                 (reusable-frames . visible)
+                 (window-height . 0.3))))
 
 (setq-default locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
@@ -428,7 +379,8 @@
   ("General"
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
-    ("h" hydra-help/body (propertize "+help" 'face 'bold)))
+    ("h" hydra-help/body (propertize "+help" 'face 'bold))
+    ("t" vterm-toggle-cd "terminal"))
    "Short Hands"
    (("f" hydra-file/body (propertize "+file" 'face 'bold))
     ("g" hydra-git/body (propertize "+git" 'face 'bold))
@@ -445,33 +397,13 @@
     ("s" save-buffer "save"))))
 
 (setq inhibit-startup-message t)
-
-(use-package menu-bar
-  :demand t
-  :ensure nil
-  :config
-  (menu-bar-mode 0))
-
-(use-package scroll-bar
-  :demand t
-  :ensure nil
-  :config
-  (toggle-scroll-bar 0))
-
-(use-package tool-bar
-  :demand t
-  :ensure nil
-  :config
-  (tool-bar-mode 0))
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
 
 (cond ((member "Source Code Pro" (font-family-list))
        (set-face-attribute 'default nil
                            :family "Source Code Pro"
-                           :weight 'normal
-                           :width 'normal))
-      ((member "Iosevka" (font-family-list))
-       (set-face-attribute 'default nil
-                           :family "Iosevka"
                            :weight 'normal
                            :width 'normal)))
 
@@ -574,7 +506,6 @@
 (use-package page-break-lines)
 
 (use-package dashboard
-  :after (page-break-lines)
   :bind
   (:map dashboard-mode-map
         ("n" . widget-forward)
@@ -621,7 +552,7 @@
                           ))
 
   (dashboard-setup-startup-hook)
-  (setq dashboard-startup-banner (if shan/settings-exist
+  (setq dashboard-startup-banner (if shan/settings-exist?
                                      (concat user-emacs-directory shan/preferred-logo)
                                    'logo))
 
@@ -837,8 +768,6 @@
   :defer t)
 (use-package gitconfig-mode
   :defer t)
-
-(use-package git-timemachine)
 
 (use-package magit
   :defer t
@@ -1113,33 +1042,12 @@
               (ansi-color-apply-on-region compilation-filter-start (point))))))
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
 
-(use-package julia-mode
-  :mode
-  ("\\.jl\\'" . julia-mode))
-
-;; (use-package flycheck-julia
-;;   :after (julia-mode)
-;;   :hook
-;;   (flycheck-mode . flycheck-julia-setup))
-
 (use-package ein
   :mode
   (".*\\.ipynb\\'" . ein:ipynb-mode)
   :custom
   (ein:completion-backend 'ein:use-company-jedi-backends)
   (ein:use-auto-complete-superpack t))
-
-(use-package kotlin-mode
-  :mode ("\\.kt\\'" . kotlin-mode)
-  :hook (kotlin-mode . lsp)
-  :config
-  (setq lsp-kotlin-language-server-path shan/kotlin-path))
-
-(use-package flycheck-kotlin
-  :config
-  (flycheck-kotlin-setup))
-
-(use-package elisp-format)
 
 (use-package lua-mode
   :after (company)
@@ -1194,50 +1102,10 @@
   (shan/ide-add 'python-mode #'hydra-lsp/body))
 
 (use-package ess
-  :pin melpa-stable
+  :defer t
   :mode
-  ("\\.[rR]\\'" . R-mode)
-  :config
-  (require 'ess-site))
-
-
-
-(use-package scala-mode
-  :after (lsp)
-  :mode "\\.s\\(cala\\|bt\\)$"
-  :hook
-  (scala-mode . lsp)
-  :config
-  (shan/ide-add 'scala-mode #'hydra-lsp/body))
-
-(use-package sbt-mode
-  :commands sbt-start sbt-command
-  :config
-  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-  ;; allows using SPACE when in the minibuffer
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map))
-
-(use-package sh-script
-  :config
-  (shan/add-list-to-list 'auto-mode-alist '(("bash$" . sh-mode)
-                                            ("bash_aliases$" . sh-mode)
-                                            ("bash_exports$" . sh-mode)
-                                            ("bash_functions$" . sh-mode)
-                                            ("bash_logout$" . sh-mode)
-                                            ("bash_prompt$" . sh-mode)
-                                            ("zshrc$" . sh-mode))))
-
-(use-package swift-mode
-  :mode
-  ("\\.swift\\'" . swift-mode))
-
-(use-package flycheck-swift
-  :after flycheck
-  :config
-  (flycheck-swift-setup))
+  ("\\.jl\\'" . ess-julia-mode)
+  ("\\.[rR]\\'" . ess-r-mode))
 
 (use-package web-mode
   :mode
@@ -1281,21 +1149,13 @@
    (rjsx-mode . emmet-mode)
    (web-mode  . emmet-mode)))
 
-(use-package haml-mode
-  :mode
-  ("\\.haml\\'"  . haml-mode)
-  :init
-  (setq haml-indent-offset 2))
-
-(use-package slim-mode
-  :mode
-  ("\\.slim\\'" . slim-mode))
-
 (use-package typescript-mode
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
-         ("\\.tsx\\'" . typescript-mode)))
+         ("\\.tsx\\'" . typescript-mode))
+  :config
+  (shan/ide-add 'typescript-mode #'hydra-lsp/body))
 
 (use-package add-node-modules-path
   :hook
@@ -1418,6 +1278,8 @@
 
 (use-package csv-mode)
 
+(use-package dhall-mode)
+
 (use-package editorconfig
   :hook
   ((prog-mode text-mode) . editorconfig-mode)
@@ -1536,15 +1398,6 @@
 (use-package sql-indent
   :init
   (setq-default sql-indent-offset tab-width))
-
-(use-package lean-mode
-  :if (executable-find "lean")
-  :mode
-  ("\\.lean\\'" . lean-mode)
-  :bind (:map lean-mode-map
-              ("S-SPC" . company-complete))
-  :init
-  (setq lean-rootdir "/usr/local/"))
 
 (use-package org
   :mode
@@ -1676,6 +1529,8 @@
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
 (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
+                                                       ("ts" . "src ts\n")
+                                                       ("js" . "src js\n")
                                                        ("py" . "src python\n")
                                                        ("r" . "src R\n")
                                                        ("sh" . "src shell\n")))
@@ -1767,7 +1622,7 @@
   :config
   ;; WORKAROUND: Fix compilation errors on macOS.
   ;; @see https://github.com/politza/pdf-tools/issues/480
-  (when shan/is-a-mac
+  (when shan/is-mac?
     (setenv "PKG_CONFIG_PATH"
             "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
   ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
@@ -1931,14 +1786,6 @@
       browse-url-firefox-program "firefox"
       browse-url-generic-program "firefox")
 
-(defun browse-lucky (start end)
-  (interactive "r")
-  (let ((q
-         (buffer-substring-no-properties
-          start
-          end)))
-    (browse-url-generic (concat "http://www.google.com/search?btnI&q=" (url-hexify-string q)))))
-
 (defun shan/elfeed-sync-database ()
   "Wrapper to load the elfeed db from disk and update it"
   (interactive)
@@ -2001,19 +1848,6 @@
   (global-emojify-mode)
   (emojify-set-emoji-data))
 
-(use-package imgur
-  :load-path "site-lisp/imgur.el")
-
-(use-package meme
-  :load-path "site-lisp/meme"
-  :commands (meme meme-file)
-  :init
-  (setq meme-char-font "Source Code Pro")
-  (setq meme-font "Iosevka")
-  :config
-  (autoload 'meme "meme.el" "Create a meme from a collection" t)
-  (autoload 'meme-file "meme.el" "Create a meme from a file" t))
-
 (use-package keyfreq
   :config
   (keyfreq-mode t)
@@ -2021,7 +1855,7 @@
   )
 
 (use-package wakatime-mode
-  :if shan/settings-exist
+  :if (and (executable-find "wakatime") (boundp 'wakatime-api-key))
   :custom
   (wakatime-cli-path (executable-find "wakatime"))
   :init
@@ -2032,12 +1866,7 @@
 (use-package demangle-mode)
 (use-package academic-phrases)
 (use-package powerthesaurus)
-(use-package ssh-config-mode
-  :init
-  ;; fails the first time package is installed, should work fine after reload
-  (setq ssh-config-load-file-dir (substring (find-library-name "ssh-config-mode") 0 -18)))
 (use-package crontab-mode)
 (use-package salt-mode)
 (use-package sicp)
 (use-package rmsbolt)                   ; A compiler output viewer
-(use-package f)                         ; used for file stuff like with shan/org-toc
