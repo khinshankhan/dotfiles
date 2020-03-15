@@ -197,7 +197,7 @@
 (defun shan/edit-config ()
   "Edit the configuration file."
   (interactive)
-  (find-file shan/config-path))
+  (find-file (concat user-emacs-directory "config.org")))
 
 (use-package vterm)
 (use-package vterm-toggle
