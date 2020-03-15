@@ -477,6 +477,14 @@
                  ;;(dedicated . t) ;dedicated is supported in emacs27
                  (reusable-frames . visible)
                  (window-height . 0.3))))
+
+(defun shan/vterm-helper ()
+  (interactive)
+  (if (string-equal (buffer-name) "vterm")
+      (progn
+        (kill-buffer "vterm")
+        (delete-window))
+    (vterm-toggle-cd)))
   #+end_src
 
 * Start Up
@@ -719,7 +727,7 @@
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
     ("h" hydra-help/body (propertize "+help" 'face 'bold))
-    ("t" vterm-toggle-cd "terminal"))
+    ("t" shan/vterm-helper "terminal"))
    "Short Hands"
    (("f" hydra-file/body (propertize "+file" 'face 'bold))
     ("g" hydra-git/body (propertize "+git" 'face 'bold))
@@ -1786,7 +1794,7 @@
   (add-to-list 'company-backends 'company-sourcekit))
    #+end_src
 
-* Web Development
+* TODO Web Development
 
   Ara ara, "web development" is huge... let's make it a first level bullet.
 

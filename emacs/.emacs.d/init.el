@@ -215,6 +215,14 @@
                  (reusable-frames . visible)
                  (window-height . 0.3))))
 
+(defun shan/vterm-helper ()
+  (interactive)
+  (if (string-equal (buffer-name) "vterm")
+      (progn
+        (kill-buffer "vterm")
+        (delete-window))
+    (vterm-toggle-cd)))
+
 (setq-default locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
@@ -380,7 +388,7 @@
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
     ("SPC" shan/ide-resolve (propertize "+ide" 'face 'bold))
     ("h" hydra-help/body (propertize "+help" 'face 'bold))
-    ("t" vterm-toggle-cd "terminal"))
+    ("t" shan/vterm-helper "terminal"))
    "Short Hands"
    (("f" hydra-file/body (propertize "+file" 'face 'bold))
     ("g" hydra-git/body (propertize "+git" 'face 'bold))
