@@ -78,6 +78,7 @@
   - [[#scala][Scala]]
   - [[#swift][Swift]]
 - [[#web-development][Web Development]]
+  - [[#restclient][Restclient]]
   - [[#html][HTML]]
   - [[#javascript-typescript][JavaScript/ TypeScript]]
     - [[#general-jsts-projects][General JS/TS Projects]]
@@ -1807,6 +1808,16 @@
 * TODO Web Development
 
   Ara ara, "web development" is huge... let's make it a first level bullet.
+
+** Restclient
+
+   The cleanest part of webdev: testing endpoints within emacs.
+
+   #+begin_src emacs-lisp
+(use-package restclient-mode
+  :ensure restclient
+  :mode ("\\.http\\'"))
+   #+end_src
 
 ** TODO HTML
 

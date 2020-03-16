@@ -1120,6 +1120,10 @@
   ("\\.jl\\'" . ess-julia-mode)
   ("\\.[rR]\\'" . ess-r-mode))
 
+(use-package restclient-mode
+  :ensure restclient
+  :mode ("\\.http\\'"))
+
 (use-package web-mode
   :mode
   (("\\.html?\\'"       . web-mode)
