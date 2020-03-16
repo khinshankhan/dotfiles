@@ -984,6 +984,8 @@
 (use-package elein)
 
 (use-package dart-mode
+  :hook
+  (dart-mode . lsp)
   :custom
   (dart-format-on-save t)
   (dart-sdk-path shan/dart-path))
