@@ -250,6 +250,13 @@
   ;; ("C-h b" . which-key-show-top-level)
   )
 
+(use-package multiple-cursors
+  :config
+  (global-set-key (kbd "C-S-p") 'mc/mark-previous-like-this)
+  (global-set-key (kbd "C-S-n") 'mc/mark-next-like-this)
+  (global-set-key (kbd "C-x r t") 'mc/edit-lines)
+  (define-key mc/keymap (kbd "<return>") nil))
+
 (use-package use-package-chords
   :after (key-chord))
 

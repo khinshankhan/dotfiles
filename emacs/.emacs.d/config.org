@@ -26,6 +26,7 @@
   - [[#bindings][Bindings]]
     - [[#personal-bindings][Personal Bindings]]
     - [[#which-key][Which Key]]
+    - [[#multiple-cursors][Multiple Cursors]]
     - [[#key-chords][Key Chords]]
     - [[#hydra][Hydra]]
     - [[#hydra-map][Hydra Map]]
@@ -549,6 +550,17 @@
   ;; ("C-h m" . which-key-show-major-mode)
   ;; ("C-h b" . which-key-show-top-level)
   )
+    #+end_src
+
+*** Multiple Cursors
+
+    #+begin_src emacs-lisp
+(use-package multiple-cursors
+  :config
+  (global-set-key (kbd "C-S-p") 'mc/mark-previous-like-this)
+  (global-set-key (kbd "C-S-n") 'mc/mark-next-like-this)
+  (global-set-key (kbd "C-x r t") 'mc/edit-lines)
+  (define-key mc/keymap (kbd "<return>") nil))
     #+end_src
 
 *** Key Chords
