@@ -66,6 +66,7 @@
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
   - [[#dart-flutter][Dart/ Flutter]]
+  - [[#elixir][Elixir]]
   - [[#golang][Golang]]
   - [[#haskell][Haskell]]
   - [[#java][Java]]
@@ -1570,6 +1571,16 @@
   :after flutter
   :config
   (flutter-l10n-flycheck-setup))
+   #+end_src
+
+** TODO Elixir
+
+   #+begin_src emacs-lisp
+(use-package elixir-mode
+  :init
+  (add-hook 'elixir-mode-hook #'company-mode))
+
+(use-package alchemist)
    #+end_src
 
 ** Golang

@@ -1000,6 +1000,12 @@
   :config
   (flutter-l10n-flycheck-setup))
 
+(use-package elixir-mode
+  :init
+  (add-hook 'elixir-mode-hook #'company-mode))
+
+(use-package alchemist)
+
 (use-package go-mode
   :if (and (executable-find "go") (executable-find "bingo"))
   :hook
