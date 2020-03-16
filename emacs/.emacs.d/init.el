@@ -943,6 +943,9 @@
   :bind (:map asm-mode-map
 		      ("<f5>" . #'compile)))
 
+(use-package mips-mode
+  :mode "\\.mips$")
+
 (use-package company-c-headers
   :after (company)
   :config

@@ -64,6 +64,7 @@
   - [[#treemacs][Treemacs]]
 - [[#languages][Languages]]
   - [[#asm][ASM]]
+    - [[#mips][MIPS]]
   - [[#c-c][C/ C++]]
   - [[#clojure][Clojure]]
   - [[#dart-flutter][Dart/ Flutter]]
@@ -1490,6 +1491,13 @@
   :bind (:map asm-mode-map
 		      ("<f5>" . #'compile)))
    #+end_src
+
+*** MIPS
+
+    #+begin_src emacs-lisp
+(use-package mips-mode
+  :mode "\\.mips$")
+    #+end_src
 
 ** TODO C/ C++
 
