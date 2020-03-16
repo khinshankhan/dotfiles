@@ -931,6 +931,11 @@
   :after treemacs dired
   :config (treemacs-icons-dired-mode))
 
+(use-package asm-mode
+  :mode "\\.as\\'"
+  :bind (:map asm-mode-map
+		      ("<f5>" . #'compile)))
+
 (use-package company-c-headers
   :after (company)
   :config
