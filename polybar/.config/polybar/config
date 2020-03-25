@@ -51,6 +51,8 @@ ws-icon-5 = 5;五
 ws-icon-6 = 6;六
 ws-icon-7 = 7;七
 ws-icon-8 = 8;八
+ws-icon-9 = 9;九
+;== 0;零
 
 strip-wsnumbers = true
 
