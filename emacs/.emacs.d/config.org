@@ -1743,8 +1743,7 @@
   :mode
   ("requirements\\.txt" . pip-requirements-mode)
   :init
-  (progn
-    (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
+  (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode-hook))
    #+end_src
 
    Remember to install pyls.
@@ -1846,7 +1845,7 @@
 
    The cleanest part of webdev: testing endpoints within emacs.
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 (use-package restclient-mode
   :ensure restclient
   :mode ("\\.http\\'"))
@@ -2231,8 +2230,7 @@
   (("Dockerfile'"       . dockerfile-mode)
    ("\\.Dockerfile\\'"  . dockerfile-mode))
   :init
-  (progn
-    (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook)))
+  (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook))
 
 ;; Emacs interface to docker
 (use-package docker)
