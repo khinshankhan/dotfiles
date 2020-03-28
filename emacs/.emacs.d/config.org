@@ -181,7 +181,7 @@
     ;; delete any duplicate values
     (cl-delete-duplicates file-name-handler-alist :test 'equal)
     ;; get rid of temporarily variables
-    (makunbound 'default-file-name-handler-alist))
+    (makunbound 'last-file-name-handler-alist))
 
   ;; set everything to efficient limits and save values
   (setq gc-cons-threshold most-positive-fixnum
