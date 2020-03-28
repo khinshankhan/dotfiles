@@ -328,6 +328,20 @@
    #+end_src
 
    #+begin_src emacs-lisp
+(defmacro shan--no-hook (f hooks)
+  "Call function F while temporarily removing HOOKS."
+  `(lambda (&rest args)
+     (let ((tbl (cl-loop for hook in ,hooks collect `(,(gensym) . ,hook))))
+       (prog2
+           (dolist (pair tbl)
+             (eval `(setq ,(car pair) ,(cdr pair)))
+             (eval `(setq ,(cdr pair) nil)))
+           (apply ,f args)
+         (dolist (pair tbl)
+           (eval `(setq ,(cdr pair) ,(car pair))))))))
+   #+end_src
+
+   #+begin_src emacs-lisp
 (defun shan/reload ()
   "Reload the configuration file."
   (interactive)
@@ -341,15 +355,7 @@
 (defun shan/vanilla-save ()
   "Save file without any hooks applied."
   (interactive)
-  (setq prev-before-save-hook before-save-hook
-        prev-after-save-hook after-save-hook
-        before-save-hook nil
-        after-save-hook nil)
-  (save-buffer)
-  (setq before-save-hook prev-before-save-hook
-        after-save-hook after-save-hook)
-  (makunbound 'prev-before-save-hook)
-  (makunbound 'prev-after-save-hook))
+  (funcall (shan--no-hook 'save-buffer '(before-save-hook after-save-hook))))
    #+end_src
 
 * Terminal
