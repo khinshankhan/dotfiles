@@ -1359,10 +1359,7 @@
   (setq treemacs-resize-icons 4))
 
 (use-package lsp-treemacs
-  :init (lsp-treemacs-sync-mode 1)
-  :bind (:map java-mode-map
-              ("C-x e l" . lsp-treemacs-errors-list)
-              ("C-x s l" . lsp-treemacs-symbols)))
+  :init (lsp-treemacs-sync-mode 1))
 
 (use-package treemacs-projectile
   :after treemacs projectile)
@@ -1543,6 +1540,9 @@
 (use-package lsp-java
   :after (lsp)
   :hook (java-mode . lsp)
+  :bind (:map java-mode-map
+              ("C-x e l" . lsp-treemacs-errors-list)
+              ("C-x s l" . lsp-treemacs-symbols))
   :config
   (require 'dap-java)
   (shan/ide-add 'java-mode #'hydra-lsp/body))
