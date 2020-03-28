@@ -272,9 +272,19 @@
       (browse-url (concat "file://" file-name)))))
 
 (defun shan/path-copy ()
-  "Copy the current file path to kill ring."
+  "Copy the current file path with to kill ring."
   (interactive)
   (kill-new buffer-file-name))
+
+(defun shan/path-to-file-copy ()
+  "Copy the path to the current file to kill ring."
+  (interactive)
+  (kill-new (f-dirname (f-this-file))))
+
+(defun shan/filename-copy ()
+  "Copy the current file name to kill ring."
+  (interactive)
+  (kill-new (f-filename (f-this-file))))
    #+end_src
 
    #+begin_src emacs-lisp
@@ -327,6 +337,19 @@
   "Edit the configuration file."
   (interactive)
   (find-file (concat user-emacs-directory "config.org")))
+
+(defun shan/vanilla-save ()
+  "Save file without any hooks applied."
+  (interactive)
+  (setq prev-before-save-hook before-save-hook
+        prev-after-save-hook after-save-hook
+        before-save-hook nil
+        after-save-hook nil)
+  (save-buffer)
+  (setq before-save-hook prev-before-save-hook
+        after-save-hook after-save-hook)
+  (makunbound 'prev-before-save-hook)
+  (makunbound 'prev-after-save-hook))
    #+end_src
 
 * Terminal
