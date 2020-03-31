@@ -1,7 +1,6 @@
 ;;; init.el --- starting point of the config -*- lexical-binding: t; -*-
 ;;; Commentary:
 
-;; Heavily inspired by Doom Emacs
 ;;; License: MIT
 ;;; Code:
 
@@ -13,7 +12,7 @@
     (setq gc-cons-threshold 16777216
           gc-cons-percentage 0.1)
 
-    ;; copy values without any duplicate values
+    ;; copy values without any duplicate
     (dolist (handler last--file-name-handler-alist)
       (add-to-list 'file-name-handler-alist handler))
 
@@ -25,6 +24,22 @@
         file-name-handler-alist nil)
 
   (add-hook 'after-init-hook 'shan|revert-gc))
+
+;;;###autoload
+(defconst shan--emacs-dir (file-name-directory load-file-name)
+  "Directory where `init.el' that's being loaded is located.")
+
+(defconst custom-file (expand-file-name "custom.el" shan--emacs-dir))
+
+;;;###autoload
+(defun shan*config-path-expand (dir &optional file)
+  "Expands directory from DIR using Emacs init path.
+It appends the optional FILE argument."
+  (if file (expand-file-name file (expand-file-name dir shan--emacs-dir))
+    (expand-file-name dir shan--emacs-dir)))
+
+(load (shan*config-path-expand "core" "core")
+      nil 'nomessage)
 
 (provide 'init)
 ;;; init.el ends here
