@@ -10,7 +10,7 @@
     ;; delete any duplicate values
     (cl-delete-duplicates file-name-handler-alist :test 'equal)
     ;; get rid of temporarily variables
-    (makunbound 'default-file-name-handler-alist))
+    (makunbound 'last-file-name-handler-alist))
 
   ;; set everything to efficient limits and save values
   (setq gc-cons-threshold most-positive-fixnum
@@ -20,36 +20,36 @@
 
   (add-hook 'after-init-hook 'srs|revert-gc))
 
-(require 'package)
+(setq package-enable-at-startup nil
+      straight-use-package-by-default t
+      straight-recipe-repositories nil)
 
-(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-(package-initialize)
+(setq use-package-always-defer t
+      use-package-verbose t)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(eval-when-compile
-  (require 'use-package))
-
-(use-package use-package
-  :config
-  (setq-default use-package-always-defer nil
-                use-package-always-ensure t
-                use-package-always-demand t
-                byte-compile-warnings nil))
-
-(use-package use-package-ensure-system-package)
+(straight-use-package 'use-package)
 
 (use-package try)
 
 (use-package bug-hunter)
 
-(use-package dash)
-(use-package dash-functional)
+(use-package dash
+  :defer nil)
+(use-package dash-functional
+  :defer nil)
 (use-package f)
 (use-package s)
 
@@ -59,7 +59,7 @@
 (when shan/settings-exist?
   (load-file shan/settings-path))
 
-(defconst shan/personal? (-contains? '("shan" "faux-thunkpad") (system-name)))
+(defconst shan/personal? t) ;;(-contains? '("shan" "faux-thunkpad") (system-name)))
 (defconst shan/is-mac? (memq window-system '(mac ns)))
 
 (defconst shan/preferred-logo "personal/nezuko-emacs.png")
@@ -151,9 +151,19 @@
       (browse-url (concat "file://" file-name)))))
 
 (defun shan/path-copy ()
-  "Copy the current file path to kill ring."
+  "Copy the current file path with to kill ring."
   (interactive)
   (kill-new buffer-file-name))
+
+(defun shan/path-to-file-copy ()
+  "Copy the path to the current file to kill ring."
+  (interactive)
+  (kill-new (f-dirname (f-this-file))))
+
+(defun shan/filename-copy ()
+  "Copy the current file name to kill ring."
+  (interactive)
+  (kill-new (f-filename (f-this-file))))
 
 (defun shan/fill-or-unfill ()
   "Fill or unfill based on the previous command."
@@ -189,6 +199,18 @@
   (interactive)
   (shan/call-keymap keymap prompt))
 
+(defmacro shan--no-hook (f hooks)
+  "Call function F while temporarily removing HOOKS."
+  `(lambda (&rest args)
+     (let ((tbl (cl-loop for hook in ,hooks collect `(,(gensym) . ,hook))))
+       (prog2
+           (dolist (pair tbl)
+             (eval `(setq ,(car pair) ,(cdr pair)))
+             (eval `(setq ,(cdr pair) nil)))
+           (apply ,f args)
+         (dolist (pair tbl)
+           (eval `(setq ,(cdr pair) ,(car pair))))))))
+
 (defun shan/reload ()
   "Reload the configuration file."
   (interactive)
@@ -198,6 +220,11 @@
   "Edit the configuration file."
   (interactive)
   (find-file (concat user-emacs-directory "config.org")))
+
+(defun shan/vanilla-save ()
+  "Save file without any hooks applied."
+  (interactive)
+  (funcall (shan--no-hook 'save-buffer '(before-save-hook after-save-hook))))
 
 (use-package vterm)
 (use-package vterm-toggle
@@ -257,14 +284,15 @@
   (global-set-key (kbd "C-x r t") 'mc/edit-lines)
   (define-key mc/keymap (kbd "<return>") nil))
 
-(use-package use-package-chords
-  :after (key-chord))
-
 (use-package key-chord
+  :demand t
   :custom
   (key-chord-two-keys-delay 0.05)
   :config
   (key-chord-mode t))
+
+(use-package use-package-chords
+  :demand t)
 
 (use-package hydra
   :custom
@@ -275,8 +303,7 @@
   :chords
   ("ao" . hydra-leader/body))
 
-(use-package pretty-hydra
-  :after (hydra))
+(use-package pretty-hydra)
 
 (pretty-hydra-define hydra-config (:exit t :color pink :title " Personal" :quit-key "q")
   (" Configuration"
@@ -436,6 +463,7 @@
   :defer t)
 
 (use-package doom-themes
+  :defer nil
   :custom
   (doom-vibrant-brighter-comments t)
   (doom-vibrant-brighter-modeline t)
@@ -444,6 +472,7 @@
   (load-theme 'doom-dracula t))
 
 (use-package solaire-mode
+  :defer nil
   :functions persp-load-state-from-file
   :hook
   (prog-mode . turn-on-solaire-mode)
@@ -462,6 +491,7 @@
 (column-number-mode t)
 
 (use-package doom-modeline
+  :defer nil
   :custom
   (doom-modeline-python-executable shan/python-executable)
   (doom-modeline-icon t)
@@ -521,6 +551,7 @@
 (use-package page-break-lines)
 
 (use-package dashboard
+  :defer nil
   :bind
   (:map dashboard-mode-map
         ("n" . widget-forward)
@@ -530,7 +561,8 @@
   (dashboard-banner-logo-title
    (format ""
            (float-time (time-subtract after-init-time before-init-time))
-           (length package-activated-list) gcs-done))
+           ;; (length package-activated-list)
+gcs-done))
   (dashboard-set-heading-icons t)
   (dashboard-set-file-icons t)
   (dashboard-set-init-info t)
@@ -905,15 +937,13 @@
   :hook
   (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
   :config
-  (use-package dap-hydra
-    :ensure nil
-    :config
+  (require 'dap-hydra)
     (defhydra+ dap-hydra (:exit nil :foreign-keys run)
       ("d" dap-debug "Start debug session"))
     (pretty-hydra-define+ hydra-lsp ()
       (;; these heads are added to the existing " Exit" column
        " Exit"
-       (("SPC" dap-hydra "dap"))))))
+       (("SPC" dap-hydra "dap")))))
 
 (use-package treemacs
   :bind (:map global-map
@@ -923,10 +953,7 @@
   (setq treemacs-resize-icons 4))
 
 (use-package lsp-treemacs
-  :init (lsp-treemacs-sync-mode 1)
-  :bind (:map java-mode-map
-              ("C-x e l" . lsp-treemacs-errors-list)
-              ("C-x s l" . lsp-treemacs-symbols)))
+  :init (lsp-treemacs-sync-mode 1))
 
 (use-package treemacs-projectile
   :after treemacs projectile)
@@ -958,16 +985,13 @@
   :custom
   (c-basic-offset 4)
   :config
+  (require 'dap-gdb-lldb)
   (setq c-default-style '((c++-mode  . "stroustrup")
                           (awk-mode  . "awk")
                           (java-mode . "java")
                           (other     . "k&r")))
   (shan/ide-add 'c-mode #'hydra-lsp/body)
   (shan/ide-add 'c++-mode #'hydra-lsp/body))
-
-(use-package dap-gdb-lldb
-  :ensure nil
-  :after (dap-mode))
 
 (use-package modern-cpp-font-lock
   :hook
@@ -1049,6 +1073,9 @@
 (use-package lsp-java
   :after (lsp)
   :hook (java-mode . lsp)
+  :bind (:map java-mode-map
+              ("C-x e l" . lsp-treemacs-errors-list)
+              ("C-x s l" . lsp-treemacs-symbols))
   :config
   (require 'dap-java)
   (shan/ide-add 'java-mode #'hydra-lsp/body))
@@ -1091,7 +1118,6 @@
   :if (and (executable-find "ocaml")
            (executable-find "npm")
            t)
-  :ensure-system-package (ocaml-language-server . "npm install -g ocaml-language-server")
   :after (lsp)
   :hook
   (tuareg-mode . lsp)
@@ -1111,8 +1137,7 @@
   :mode
   ("requirements\\.txt" . pip-requirements-mode)
   :init
-  (progn
-    (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode)))
+  (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode-hook))
 
 (use-package python
   :if (executable-find "pyls")
@@ -1137,10 +1162,6 @@
   :mode
   ("\\.jl\\'" . ess-julia-mode)
   ("\\.[rR]\\'" . ess-r-mode))
-
-(use-package restclient-mode
-  :ensure restclient
-  :mode ("\\.http\\'"))
 
 (use-package web-mode
   :mode
@@ -1397,8 +1418,7 @@
   (("Dockerfile'"       . dockerfile-mode)
    ("\\.Dockerfile\\'"  . dockerfile-mode))
   :init
-  (progn
-    (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook)))
+  (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook))
 
 ;; Emacs interface to docker
 (use-package docker)
@@ -1434,10 +1454,9 @@
   :init
   (setq-default sql-indent-offset tab-width))
 
-(use-package org
+(use-package org-plus-contrib
   :mode
   ("\\.\\(org\\|ORG\\)\\'" . org-mode)
-  :ensure org-plus-contrib
   :hook
   (org-babel-after-execute . org-redisplay-inline-images)
   :custom
@@ -1561,7 +1580,7 @@
 
 (use-package htmlize)
 
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+;; (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
 (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
                                                        ("ts" . "src ts\n")
@@ -1577,8 +1596,7 @@
   :init
   (setq olivetti-body-width 0.618))
 
-(use-package tex
-  :ensure auctex
+(use-package auctex
   :mode
   ("\\.tex\\'" . LaTeX-mode)
   :config
@@ -1628,8 +1646,7 @@
   (reftex-save-parse-info t)
   (reftex-use-multiple-selection-buffers t))
 
-(use-package pdf-view
-  :ensure pdf-tools
+(use-package pdf-tools
   :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
   :defines pdf-annot-activate-created-annotations
   :functions my-pdf-view-set-midnight-colors
@@ -1640,6 +1657,8 @@
   :bind (:map pdf-view-mode-map
               ("C-s" . isearch-forward))
   :init
+  (require 'pdf-view)
+
   (setq pdf-annot-activate-created-annotations t)
 
   (defun my-pdf-view-set-midnight-colors ()
