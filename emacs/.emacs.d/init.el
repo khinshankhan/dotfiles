@@ -42,8 +42,6 @@
 
 (straight-use-package 'use-package)
 
-(use-package try)
-
 (use-package bug-hunter)
 
 (use-package dash
@@ -562,7 +560,7 @@
    (format ""
            (float-time (time-subtract after-init-time before-init-time))
            ;; (length package-activated-list)
-gcs-done))
+           gcs-done))
   (dashboard-set-heading-icons t)
   (dashboard-set-file-icons t)
   (dashboard-set-init-info t)
@@ -938,12 +936,12 @@ gcs-done))
   (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
   :config
   (require 'dap-hydra)
-    (defhydra+ dap-hydra (:exit nil :foreign-keys run)
-      ("d" dap-debug "Start debug session"))
-    (pretty-hydra-define+ hydra-lsp ()
-      (;; these heads are added to the existing " Exit" column
-       " Exit"
-       (("SPC" dap-hydra "dap")))))
+  (defhydra+ dap-hydra (:exit nil :foreign-keys run)
+    ("d" dap-debug "Start debug session"))
+  (pretty-hydra-define+ hydra-lsp ()
+    (;; these heads are added to the existing " Exit" column
+     " Exit"
+     (("SPC" dap-hydra "dap")))))
 
 (use-package treemacs
   :bind (:map global-map
@@ -1455,6 +1453,7 @@ gcs-done))
   (setq-default sql-indent-offset tab-width))
 
 (use-package org-plus-contrib
+  :defer nil
   :mode
   ("\\.\\(org\\|ORG\\)\\'" . org-mode)
   :hook
@@ -1512,7 +1511,17 @@ gcs-done))
      ))
 
   (add-to-list 'org-src-lang-modes
-               '("plantuml" . fundamental)))
+               '("plantuml" . fundamental))
+
+  (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+  (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+
+  (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
+                                                         ("ts" . "src ts\n")
+                                                         ("js" . "src js\n")
+                                                         ("py" . "src python\n")
+                                                         ("r" . "src R\n")
+                                                         ("sh" . "src shell\n"))))
 
 (use-package toc-org
   :after (org)
@@ -1566,10 +1575,10 @@ gcs-done))
   ;; symbol for priorities
   (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
 
-(use-package px)
+(use-package px
+  :defer nil)
 
-(use-package ox-gfm
-  :after (org))
+(use-package ox-gfm)
 
 (use-package ox-pandoc)
 
@@ -1578,16 +1587,8 @@ gcs-done))
   (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
   (org-reveal-mathjax t))
 
-(use-package htmlize)
-
-;; (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
-
-(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
-                                                       ("ts" . "src ts\n")
-                                                       ("js" . "src js\n")
-                                                       ("py" . "src python\n")
-                                                       ("r" . "src R\n")
-                                                       ("sh" . "src shell\n")))
+(use-package htmlize
+  :defer nil)
 
 (use-package olivetti
   :diminish

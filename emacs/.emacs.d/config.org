@@ -88,12 +88,6 @@
 
 ** Debug
 
-   The [[https://github.com/larstvei/Try][try]] package lets you try packages before installing them.
-
-   #+begin_src emacs-lisp
-(use-package try)
-   #+end_src
-
    Extremely helpful for figuring out what went wrong with configuration file.
 
    #+begin_quote
@@ -864,7 +858,7 @@
    (format ""
            (float-time (time-subtract after-init-time before-init-time))
            ;; (length package-activated-list)
-gcs-done))
+           gcs-done))
   (dashboard-set-heading-icons t)
   (dashboard-set-file-icons t)
   (dashboard-set-init-info t)
@@ -1328,12 +1322,12 @@ gcs-done))
   (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
   :config
   (require 'dap-hydra)
-    (defhydra+ dap-hydra (:exit nil :foreign-keys run)
-      ("d" dap-debug "Start debug session"))
-    (pretty-hydra-define+ hydra-lsp ()
-      (;; these heads are added to the existing " Exit" column
-       " Exit"
-       (("SPC" dap-hydra "dap")))))
+  (defhydra+ dap-hydra (:exit nil :foreign-keys run)
+    ("d" dap-debug "Start debug session"))
+  (pretty-hydra-define+ hydra-lsp ()
+    (;; these heads are added to the existing " Exit" column
+     " Exit"
+     (("SPC" dap-hydra "dap")))))
    #+end_src
 
 ** Treemacs
@@ -2166,6 +2160,7 @@ gcs-done))
 
   #+begin_src emacs-lisp
 (use-package org-plus-contrib
+  :defer nil
   :mode
   ("\\.\\(org\\|ORG\\)\\'" . org-mode)
   :hook
@@ -2223,7 +2218,17 @@ gcs-done))
      ))
 
   (add-to-list 'org-src-lang-modes
-               '("plantuml" . fundamental)))
+               '("plantuml" . fundamental))
+
+  (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+  (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+
+  (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
+                                                         ("ts" . "src ts\n")
+                                                         ("js" . "src js\n")
+                                                         ("py" . "src python\n")
+                                                         ("r" . "src R\n")
+                                                         ("sh" . "src shell\n"))))
   #+end_src
 
 ** TODO Bullets
@@ -2296,10 +2301,10 @@ gcs-done))
 ** Exports
 
    #+begin_src emacs-lisp
-(use-package px)
+(use-package px
+  :defer nil)
 
-(use-package ox-gfm
-  :after (org))
+(use-package ox-gfm)
 
 (use-package ox-pandoc)
    #+end_src
@@ -2312,23 +2317,8 @@ gcs-done))
   (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
   (org-reveal-mathjax t))
 
-(use-package htmlize)
-   #+end_src
-
-** New Org Hot Fixes
-   This is separated and moved down since org 9.2 seems to get conflicts due to org reveal it seems.
-
-   Seems org now uses =C-c C-,= to choose templates and does its own analysis to decide output.
-
-   #+begin_src emacs-lisp
-;; (setq-default org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
-
-(shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
-                                                       ("ts" . "src ts\n")
-                                                       ("js" . "src js\n")
-                                                       ("py" . "src python\n")
-                                                       ("r" . "src R\n")
-                                                       ("sh" . "src shell\n")))
+(use-package htmlize
+  :defer nil)
    #+end_src
 
 * Writing/ Documents
