@@ -1,7 +1,5 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 
 CMD=$(find -mindepth 1 -maxdepth 1 -path ./.git -prune -o -type d -printf "%P ")
 CMD=${*:-$CMD}
 stow -Rvt ~ $CMD
-

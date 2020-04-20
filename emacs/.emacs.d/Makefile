@@ -24,3 +24,8 @@ cleanall:
 
 fresh:
 	-rm -rf $(GENERATED) $(COMPILED) $(SESSION) $(SAFE)
+
+try:
+	emacs config.org -q --batch -f org-org-export-to-org --kill
+	ntangle config.org.org
+	readlink -f config.org.org | xargs rm
