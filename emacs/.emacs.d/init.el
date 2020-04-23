@@ -917,6 +917,9 @@ NAME and ARGS are as in `use-package'."
         (delete-window))
     (vterm-toggle-cd)))
 
+;;Don't echo passwords when communicating with interactive programs:
+(add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
+
 (use-package company
   :bind
   ("C-/" . company-complete)
@@ -1368,8 +1371,8 @@ NAME and ARGS are as in `use-package'."
   :after
   (typescript-mode js2-mode company flycheck)
   :hook
-  (((js2-mode . typescript-mode) . tide-setup)
-   ((js2-mode . typescript-mode) . tide-hl-identifier-mode)
+  ((typescript-mode . tide-setup)
+   (typescript-mode . tide-hl-identifier-mode)
    (before-save . tide-format-before-save))
   :config
   (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)

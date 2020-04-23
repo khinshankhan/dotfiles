@@ -1350,6 +1350,15 @@ NAME and ARGS are as in `use-package'."
     (vterm-toggle-cd)))
    #+end_src
 
+*** comint
+
+    Command Interpreter
+
+    #+begin_src emacs-lisp
+;;Don't echo passwords when communicating with interactive programs:
+(add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
+    #+end_src
+
 ** TODO Text Completion
 
    Clean this up.
@@ -2036,8 +2045,8 @@ NAME and ARGS are as in `use-package'."
   :after
   (typescript-mode js2-mode company flycheck)
   :hook
-  (((js2-mode . typescript-mode) . tide-setup)
-   ((js2-mode . typescript-mode) . tide-hl-identifier-mode)
+  ((typescript-mode . tide-setup)
+   (typescript-mode . tide-hl-identifier-mode)
    (before-save . tide-format-before-save))
   :config
   (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
@@ -2146,8 +2155,6 @@ NAME and ARGS are as in `use-package'."
     #+end_src
 
 *** Mermaid
-
-    Uses my version of mermaid-mode, since original doesn't use generic browser.
 
     #+begin_src emacs-lisp
 (use-package mermaid-mode
