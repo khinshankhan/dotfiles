@@ -1,0 +1,18 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** TODO [#A] ASM
+
+   #+begin_src emacs-lisp
+(use-package asm-mode
+  :mode "\\.as\\'"
+  :bind (:map asm-mode-map
+		      ("<f5>" . #'compile)))
+   #+end_src
+
+*** MIPS
+
+    #+begin_src emacs-lisp
+(use-package mips-mode
+  :mode "\\.mips$")
+    #+end_src

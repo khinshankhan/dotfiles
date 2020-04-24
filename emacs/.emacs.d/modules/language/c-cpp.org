@@ -1,0 +1,39 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** TODO C/ C++
+
+   #+begin_src emacs-lisp
+(use-package company-c-headers
+  :config
+  (add-to-list 'company-backends 'company-c-headers))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package cc-mode
+  :straight nil
+  :hook
+  ((c-mode c++-mode) . lsp)
+  :custom
+  (c-basic-offset 4)
+  :config
+  (setq c-default-style '((c++-mode  . "stroustrup")
+                          (awk-mode  . "awk")
+                          (java-mode . "java")
+                          (other     . "k&r")))
+  (shan--ide-add 'c-mode #'hydra-lsp/body)
+  (shan--ide-add 'c++-mode #'hydra-lsp/body))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package dap-gdb-lldb
+  :straight nil)
+   #+end_src
+
+   Provides syntax highliting support for modern C++
+
+   #+begin_src emacs-lisp
+(use-package modern-cpp-font-lock
+  :hook
+  (c++-mode . modern-c++-font-lock-mode))
+   #+end_src

@@ -4,15 +4,15 @@
   (defun srs|revert-gc ()
     "Garbage collect and reset values."
     (setq gc-cons-threshold 16777216
-          gc-cons-percentage 0.1
-          file-name-handler-alist (append last-file-name-handler-alist
-		                                  file-name-handler-alist))
+	  gc-cons-percentage 0.1
+	  file-name-handler-alist (append last-file-name-handler-alist
+						  file-name-handler-alist))
     (cl-delete-duplicates file-name-handler-alist :test 'equal)
     (makunbound 'last-file-name-handler-alist))
   (setq gc-cons-threshold most-positive-fixnum
-        gc-cons-percentage 0.6
-        last-file-name-handler-alist file-name-handler-alist
-        file-name-handler-alist nil)
+	gc-cons-percentage 0.6
+	last-file-name-handler-alist file-name-handler-alist
+	file-name-handler-alist nil)
 
   (add-hook 'after-init-hook 'srs|revert-gc))
 
@@ -29,16 +29,16 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
 (setq-default use-package-always-defer nil
-              use-package-always-demand t
-              byte-compile-warnings nil)
+	      use-package-always-demand t
+	      byte-compile-warnings nil)
 ;; (setq use-package-verbose t)
 
 (straight-use-package 'use-package)
@@ -51,8 +51,6 @@
   :init
   (exec-path-from-shell-initialize))
 
-(use-package dash
-  :demand t)
 (use-package dash-functional
   :demand t)
 (use-package f
@@ -128,11 +126,11 @@
   (interactive)
   (let ((n 0) bufname)
     (while (progn
-             (setq bufname (concat "*scratch"
-                                   (if (= n 0) "" (int-to-string n))
-                                   "*"))
-             (setq n (1+ n))
-             (get-buffer bufname)))
+	     (setq bufname (concat "*scratch"
+				   (if (= n 0) "" (int-to-string n))
+				   "*"))
+	     (setq n (1+ n))
+	     (get-buffer bufname)))
     (switch-to-buffer (get-buffer-create bufname))
     (lisp-interaction-mode)))
 
@@ -148,7 +146,7 @@
   (unless (buffer-file-name)
     (error "No file is currently being edited"))
   (when (yes-or-no-p (format "Really delete '%s'?"
-                             (file-name-nondirectory buffer-file-name)))
+			     (file-name-nondirectory buffer-file-name)))
     (delete-file (buffer-file-name))
     (kill-this-buffer)))
 
@@ -156,12 +154,12 @@
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
   (let ((name (buffer-name))
-        (filename (buffer-file-name)))
+	(filename (buffer-file-name)))
     (unless filename
       (error "Buffer '%s' is not visiting a file!" name))
     (progn
       (when (file-exists-p filename)
-        (rename-file filename new-name 1))
+	(rename-file filename new-name 1))
       (set-visited-file-name new-name)
       (rename-buffer new-name))))
 
@@ -170,8 +168,8 @@
   (interactive)
   (let ((file-name (buffer-file-name)))
     (if (and (fboundp 'tramp-tramp-file-p)
-             (tramp-tramp-file-p file-name))
-        (error "Cannot open tramp file")
+	     (tramp-tramp-file-p file-name))
+	(error "Cannot open tramp file")
       (browse-url (concat "file://" file-name)))))
 
 (defun shan/path-copy ()
@@ -183,10 +181,10 @@
   "Fill or unfill based on the previous command."
   (interactive)
   (let ((fill-column
-         (if (eq last-command 'endless/fill-or-unfill)
-             (progn (setq this-command nil)
-                    (point-max))
-           fill-column)))
+	 (if (eq last-command 'endless/fill-or-unfill)
+	     (progn (setq this-command nil)
+		    (point-max))
+	   fill-column)))
     (call-interactively #'fill-paragraph)))
 
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
@@ -205,12 +203,12 @@
   `(lambda (&rest args)
      (let ((tbl (cl-loop for hook in ,hooks collect `(,(gensym) . ,hook))))
        (prog2
-           (dolist (pair tbl)
-             (eval `(setq ,(car pair) ,(cdr pair)))
-             (eval `(setq ,(cdr pair) nil)))
-           (apply ,f args)
-         (dolist (pair tbl)
-           (eval `(setq ,(cdr pair) ,(car pair))))))))
+	   (dolist (pair tbl)
+	     (eval `(setq ,(car pair) ,(cdr pair)))
+	     (eval `(setq ,(cdr pair) nil)))
+	   (apply ,f args)
+	 (dolist (pair tbl)
+	   (eval `(setq ,(cdr pair) ,(car pair))))))))
 
 (defun shan/vanilla-save ()
   "Save file without any hooks applied."
@@ -233,14 +231,14 @@
   (interactive)
   (let ((url (shan/git-url-handler (magit-get "remote.origin.url"))))
     (if (string-prefix-p "http" url)
-        (browse-url url)
+	(browse-url url)
       (message "No remote repository at point!"))))
 
 (defun shan/call-keymap (map &optional prompt)
   "Read a key sequence and call the command it's bound to in MAP."
   (let* ((help-form `(describe-bindings ,(vector map)))
-         (key (read-key-sequence prompt))
-         (cmd (lookup-key map key t)))
+	 (key (read-key-sequence prompt))
+	 (cmd (lookup-key map key t)))
     (if (functionp cmd) (call-interactively cmd)
       (user-error "%s is undefined" key))))
 
@@ -283,9 +281,9 @@ NAME and ARGS are as in `use-package'."
 (use-package unidecode)
 
 (setq-default backup-inhibited t
-              auto-save-default nil
-              create-lockfiles nil
-              make-backup-files nil)
+	      auto-save-default nil
+	      create-lockfiles nil
+	      make-backup-files nil)
 
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
@@ -320,9 +318,9 @@ NAME and ARGS are as in `use-package'."
   :demand t
   :config
   (setq hydra--work-around-dedicated nil
-        hydra-is-helpful t
-        hydra-hint-display-type 'lv
-        lv-use-separator nil)
+	hydra-is-helpful t
+	hydra-hint-display-type 'lv
+	lv-use-separator nil)
   :chords
   ("ao" . hydra-leader/body))
 
@@ -469,9 +467,9 @@ NAME and ARGS are as in `use-package'."
 
 (when (member "Source Code Pro" (font-family-list))
   (set-face-attribute 'default nil
-                      :family "Source Code Pro"
-                      :weight 'normal
-                      :width 'normal))
+		      :family "Source Code Pro"
+		      :weight 'normal
+		      :width 'normal))
 
 (add-to-list 'face-ignored-fonts "Noto Color Emoji")
 
@@ -482,7 +480,7 @@ NAME and ARGS are as in `use-package'."
   :demand t
   :config
   (setq doom-vibrant-brighter-comments t
-        doom-vibrant-brighter-modeline t)
+	doom-vibrant-brighter-modeline t)
   (doom-themes-org-config)
   (load-theme 'doom-dracula t))
 
@@ -495,11 +493,11 @@ NAME and ARGS are as in `use-package'."
   (after-load-theme . solaire-mode-swap-bg)
   :config
   (setq solaire-mode-remap-modeline nil
-        solaire-mode-remap-fringe nil)
+	solaire-mode-remap-fringe nil)
   (solaire-global-mode 1)
   (solaire-mode-swap-bg)
   (advice-add #'persp-load-state-from-file
-              :after #'solaire-mode-restore-persp-mode-buffers))
+	      :after #'solaire-mode-restore-persp-mode-buffers))
 
 (dolist (fn '(line-number-mode column-number-mode))
   (if (fboundp fn)
@@ -509,15 +507,21 @@ NAME and ARGS are as in `use-package'."
   :demand t
   :config
   (setq doom-modeline-python-executable shan/python-executable
-        doom-modeline-icon t
-        doom-modeline-major-mode-icon t
-        doom-modeline-version t
-        doom-modeline-buffer-file-name-style 'file-name)
+	doom-modeline-icon t
+	doom-modeline-major-mode-icon t
+	doom-modeline-version t
+	doom-modeline-buffer-file-name-style 'file-name)
   (doom-modeline-mode))
 
 (use-package hide-mode-line
   :hook
-  ((neotree-mode imenu-list-minor-mode minimap-mode ibuffer-mode help-mode deft-text-mode Man-mode) . hide-mode-line-mode))
+  ((neotree-mode
+    imenu-list-minor-mode
+    minimap-mode ibuffer-mode
+    help-mode
+    deft-text-mode
+    Man-mode)
+   . hide-mode-line-mode))
 
 (use-package default-text-scale
   :init
@@ -528,8 +532,8 @@ NAME and ARGS are as in `use-package'."
   ("C-z" . zoom-window-zoom))
 
 (setq-default visible-bell nil
-              audible-bell nil
-              ring-bell-function 'ignore)
+	      audible-bell nil
+	      ring-bell-function 'ignore)
 
 (defalias 'yes-or-no-p (lambda (&rest _) t))
 (setq-default confirm-kill-emacs nil)
@@ -538,9 +542,9 @@ NAME and ARGS are as in `use-package'."
 (setq save-abbrevs 'silently)
 
 (setq-default transient-mark-mode t
-              visual-line-mode t
-              indent-tabs-mode nil
-              tab-width 4)
+	      visual-line-mode t
+	      indent-tabs-mode nil
+	      tab-width 4)
 
 ;; highlights the line containing mark
 (if (fboundp 'global-hl-line-mode)
@@ -555,14 +559,14 @@ NAME and ARGS are as in `use-package'."
   :demand t
   :bind
   (:map dashboard-mode-map
-        ("n" . widget-forward)
-        ("p" . widget-backward)
-        ("f" . shan/elfeed-update-database))
+	("n" . widget-forward)
+	("p" . widget-backward)
+	("f" . shan/elfeed-update-database))
   :custom
   (dashboard-banner-logo-title
    (format ""
-           (float-time (time-subtract after-init-time before-init-time))
-           gcs-done))
+	   (float-time (time-subtract after-init-time before-init-time))
+	   gcs-done))
   (dashboard-set-heading-icons t)
   (dashboard-set-file-icons t)
   (dashboard-set-init-info t)
@@ -592,16 +596,16 @@ NAME and ARGS are as in `use-package'."
 
   :config
   (setq dashboard-items '((recents  . 5)
-                          ;; (bookmarks . 5)
-                          ;; (projects . 5)
-                          (agenda . 5)
-                          ;; (registers . 5)
-                          ))
+			  ;; (bookmarks . 5)
+			  ;; (projects . 5)
+			  (agenda . 5)
+			  ;; (registers . 5)
+			  ))
 
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner (if shan--settings-exist?
-                                     shan--preferred-logo ;; weird stuff, possibly because of no-littering
-                                   'logo))
+				     shan--preferred-logo ;; weird stuff, possibly because of no-littering
+				   'logo))
 
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 
@@ -622,48 +626,48 @@ NAME and ARGS are as in `use-package'."
   (defun neotree-projectile-toggle ()
     (interactive)
     (let ((project-dir
-           (ignore-errors
-           ;;; Pick one: projectile or find-file-in-project
-             (projectile-project-root)
-             ))
-          (file-name (buffer-file-name))
-          (neo-smart-open t))
+	   (ignore-errors
+	   ;;; Pick one: projectile or find-file-in-project
+	     (projectile-project-root)
+	     ))
+	  (file-name (buffer-file-name))
+	  (neo-smart-open t))
       (if (and (fboundp 'neo-global--window-exists-p)
-               (neo-global--window-exists-p))
-          (neotree-hide)
-        (progn
-          (neotree-show)
-          (if project-dir
-              (neotree-dir project-dir))
-          (if file-name
-              (neotree-find file-name))))))
+	       (neo-global--window-exists-p))
+	  (neotree-hide)
+	(progn
+	  (neotree-show)
+	  (if project-dir
+	      (neotree-dir project-dir))
+	  (if file-name
+	      (neotree-find file-name))))))
 
   (defun neotree-current-dir-toggle ()
     (interactive)
     (let ((project-dir
-           (ignore-errors
-             (ffip-project-root)
-             ))
-          (file-name (buffer-file-name))
-          (neo-smart-open t))
+	   (ignore-errors
+	     (ffip-project-root)
+	     ))
+	  (file-name (buffer-file-name))
+	  (neo-smart-open t))
       (if (and (fboundp 'neo-global--window-exists-p)
-               (neo-global--window-exists-p))
-          (neotree-hide)
-        (progn
-          (neotree-show)
-          (if project-dir
-              (neotree-dir project-dir))
-          (if file-name
-              (neotree-find file-name)))))))
+	       (neo-global--window-exists-p))
+	  (neotree-hide)
+	(progn
+	  (neotree-show)
+	  (if project-dir
+	      (neotree-dir project-dir))
+	  (if file-name
+	      (neotree-find file-name)))))))
 
 (setq-default hscroll-margin 2
-              hscroll-step 1
-              scroll-margin 0
-              scroll-conservatively 10000
-              scroll-preserve-screen-position t
-              auto-window-vscroll nil
-              mouse-wheel-scroll-amount '(5 ((shift) . 2))
-              mouse-wheel-progressive-speed nil)
+	      hscroll-step 1
+	      scroll-margin 0
+	      scroll-conservatively 10000
+	      scroll-preserve-screen-position t
+	      auto-window-vscroll nil
+	      mouse-wheel-scroll-amount '(5 ((shift) . 2))
+	      mouse-wheel-progressive-speed nil)
 
 (remove-hook 'eshell-mode-hook 'hscroll-margin t)
 (remove-hook 'term-mode-hook 'hscroll-margin t)
@@ -672,9 +676,9 @@ NAME and ARGS are as in `use-package'."
     (blink-cursor-mode 0))
 
 (setq-default blink-matching-paren nil
-              visible-cursor nil
-              x-stretch-cursor nil
-              cursor-type 'box)
+	      visible-cursor nil
+	      x-stretch-cursor nil
+	      cursor-type 'box)
 
 (use-package beacon
   :hook
@@ -686,13 +690,13 @@ NAME and ARGS are as in `use-package'."
   :bind
   ([switch-to-buffer] . ivy-switch-buffer)
   (:map ivy-minibuffer-map
-        ([remap xref-find-definitions] . shan/do-nothing)
-        ([remap xref-find-definitions-other-frame] . shan/do-nothing)
-        ([remap xref-find-definitions-other-window] . shan/do-nothing)
-        ([remap xref-find-references] . shan/do-nothing)
-        ([remap xref-find-apropos] . shan/do-nothing)
-        ("<return>" . ivy-alt-done)
-        ("<S-return>" . ivy-immediate-done))
+	([remap xref-find-definitions] . shan/do-nothing)
+	([remap xref-find-definitions-other-frame] . shan/do-nothing)
+	([remap xref-find-definitions-other-window] . shan/do-nothing)
+	([remap xref-find-references] . shan/do-nothing)
+	([remap xref-find-apropos] . shan/do-nothing)
+	("<return>" . ivy-alt-done)
+	("<S-return>" . ivy-immediate-done))
   :custom
   (ivy-use-virtual-buffers t)
   (ivy-count-format "%d/%d ")
@@ -747,7 +751,7 @@ NAME and ARGS are as in `use-package'."
   :demand t
   :config
   (setq show-paren-when-point-in-periphery t
-        show-paren-when-point-inside-paren t)
+	show-paren-when-point-inside-paren t)
   (show-paren-mode t))
 
 (use-package move-text
@@ -761,11 +765,11 @@ NAME and ARGS are as in `use-package'."
     ;; @see https://emacs.stackexchange.com/questions/36420
     (defun my-rainbow-colorize-match (color &optional match)
       (let* ((match (or match 0))
-             (ov (make-overlay (match-beginning match) (match-end match))))
-        (overlay-put ov 'ovrainbow t)
-        (overlay-put ov 'face `((:foreground ,(if (> 0.5 (rainbow-x-color-luminance color))
-                                                  "white" "black"))
-                                (:background ,color)))))
+	     (ov (make-overlay (match-beginning match) (match-end match))))
+	(overlay-put ov 'ovrainbow t)
+	(overlay-put ov 'face `((:foreground ,(if (> 0.5 (rainbow-x-color-luminance color))
+						  "white" "black"))
+				(:background ,color)))))
     (advice-add #'rainbow-colorize-match :override #'my-rainbow-colorize-match)
 
     (defun my-rainbow-clear-overlays ()
@@ -786,13 +790,13 @@ NAME and ARGS are as in `use-package'."
   (prog-mode . hl-todo-mode)
   :config
   (setq hl-todo-highlight-punctuation ":"
-        hl-todo-keyword-faces
-        `(("TODO"       warning bold)
-          ("FIXME"      error bold)
-          ("HACK"       font-lock-constant-face bold)
-          ("REVIEW"     font-lock-keyword-face bold)
-          ("NOTE"       success bold)
-          ("DEPRECATED" font-lock-doc-face bold))))
+	hl-todo-keyword-faces
+	`(("TODO"       warning bold)
+	  ("FIXME"      error bold)
+	  ("HACK"       font-lock-constant-face bold)
+	  ("REVIEW"     font-lock-keyword-face bold)
+	  ("NOTE"       success bold)
+	  ("DEPRECATED" font-lock-doc-face bold))))
 
 (use-package expand-region
   :bind
@@ -802,14 +806,14 @@ NAME and ARGS are as in `use-package'."
   "Fill or unfill based on the previous command."
   (interactive)
   (let ((fill-column
-         (if (eq last-command 'endless/fill-or-unfill)
-             (progn (setq this-command nil)
-                    (point-max))
-           fill-column)))
+	 (if (eq last-command 'endless/fill-or-unfill)
+	     (progn (setq this-command nil)
+		    (point-max))
+	   fill-column)))
     (call-interactively #'fill-paragraph)))
 
 (setq-default require-final-newline t
-              vc-follow-symlinks t)
+	      vc-follow-symlinks t)
 
 (global-subword-mode t)
 (delete-selection-mode t)
@@ -817,10 +821,10 @@ NAME and ARGS are as in `use-package'."
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 (global-set-key [remap fill-paragraph]
-                #'shan/fill-or-unfill)
+		#'shan/fill-or-unfill)
 
 (global-set-key (kbd "M-;")
-                'comment-line)
+		'comment-line)
 
 (use-package avy
   :bind
@@ -844,7 +848,7 @@ NAME and ARGS are as in `use-package'."
   :defer t
   :bind
   (:map magit-status-mode-map
-        ("q" . (lambda () (interactive) (magit-mode-bury-buffer 16))))
+	("q" . (lambda () (interactive) (magit-mode-bury-buffer 16))))
   :config
   ;; allow window to be split vertically rather than horizontally
   (setq split-width-threshold 0)
@@ -873,7 +877,7 @@ NAME and ARGS are as in `use-package'."
   (interactive)
   (let ((hydra (alist-get major-mode shan--ide-alist)))
     (if hydra
-        (funcall hydra)
+	(funcall hydra)
       (message "IDE not found for %s" major-mode))))
 
 (use-package flycheck
@@ -900,21 +904,21 @@ NAME and ARGS are as in `use-package'."
   ;; if anything, I can use zoom-window-zoom to focus
   (setq vterm-toggle-fullscreen-p nil)
   (add-to-list 'display-buffer-alist
-               '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
-                 (display-buffer-reuse-window display-buffer-at-bottom)
-                 ;;(display-buffer-reuse-window display-buffer-in-direction)
-                 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-                 ;;(direction . bottom)
-                 ;;(dedicated . t) ;dedicated is supported in emacs27
-                 (reusable-frames . visible)
-                 (window-height . 0.3))))
+	       '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
+		 (display-buffer-reuse-window display-buffer-at-bottom)
+		 ;;(display-buffer-reuse-window display-buffer-in-direction)
+		 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+		 ;;(direction . bottom)
+		 ;;(dedicated . t) ;dedicated is supported in emacs27
+		 (reusable-frames . visible)
+		 (window-height . 0.3))))
 
 (defun shan/vterm-helper ()
   (interactive)
   (if (string-equal (buffer-name) "vterm")
       (progn
-        (kill-buffer "vterm")
-        (delete-window))
+	(kill-buffer "vterm")
+	(delete-window))
     (vterm-toggle-cd)))
 
 ;;Don't echo passwords when communicating with interactive programs:
@@ -924,11 +928,11 @@ NAME and ARGS are as in `use-package'."
   :bind
   ("C-/" . company-complete)
   (:map company-active-map
-        ("M-/" . company-other-backend)
-        ("M-n" . nil)
-        ("M-p" . nil)
-        ("C-n" . company-select-next)
-        ("C-p" . company-select-previous))
+	("M-/" . company-other-backend)
+	("M-n" . nil)
+	("M-p" . nil)
+	("C-n" . company-select-next)
+	("C-p" . company-select-previous))
   :custom-face
   (company-tooltip ((t (:foreground "#abb2bf" :background "#30343c"))))
   (company-tooltip-annotation ((t (:foreground "#abb2bf" :background "#30343c"))))
@@ -966,16 +970,16 @@ NAME and ARGS are as in `use-package'."
   ;; faster than scp
   (setq tramp-default-method "ssh")
   (add-to-list 'tramp-default-user-alist
-               '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
-               '(nil nil "shan")) ;; fallback login
+	       '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
+	       '(nil nil "shan")) ;; fallback login
 
   (setq password-cache-expiry nil))
 
 ;; this hook makes remote projectile a little lighter
 (add-hook 'find-file-hook
-          (lambda ()
-            (when (file-remote-p default-directory)
-              (setq-local projectile-mode-line "Projectile"))))
+	  (lambda ()
+	    (when (file-remote-p default-directory)
+	      (setq-local projectile-mode-line "Projectile"))))
 
 (use-package lsp-mode
   :custom
@@ -995,8 +999,8 @@ NAME and ARGS are as in `use-package'."
   (lsp-mode . lsp-ui-mode)
   :bind
   (:map lsp-mode-map
-        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-        ([remap xref-find-references]  . lsp-ui-peek-find-references))
+	([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+	([remap xref-find-references]  . lsp-ui-peek-find-references))
   :custom
   (lsp-ui-flycheck-enable t))
 
@@ -1004,7 +1008,7 @@ NAME and ARGS are as in `use-package'."
   :after (company lsp-mode)
   :bind
   (:map lsp-mode-map
-        ("C-/" . company-lsp))
+	("C-/" . company-lsp))
   :custom
   (company-lsp-async t)
   (company-lsp-cache-candidates t)
@@ -1032,8 +1036,8 @@ NAME and ARGS are as in `use-package'."
 
 (use-package treemacs
   :bind (:map global-map
-              ("C-x t t" . treemacs)
-              ("C-x t 1" . treemacs-select-window))
+	      ("C-x t t" . treemacs)
+	      ("C-x t 1" . treemacs-select-window))
   :config
   (setq treemacs-resize-icons 4))
 
@@ -1053,7 +1057,7 @@ NAME and ARGS are as in `use-package'."
 (use-package projectile
   :bind
   (:map projectile-mode-map
-        ("C-c p" . projectile-command-map))
+	("C-c p" . projectile-command-map))
   :custom
   (projectile-project-search-path '("~/Projects/"))
   ;; ignore set up: https://www.youtube.com/watch?v=qpv9i_I4jYU
@@ -1086,7 +1090,6 @@ NAME and ARGS are as in `use-package'."
   :mode "\\.mips$")
 
 (use-package company-c-headers
-  :after (company)
   :config
   (add-to-list 'company-backends 'company-c-headers))
 
@@ -1098,9 +1101,9 @@ NAME and ARGS are as in `use-package'."
   (c-basic-offset 4)
   :config
   (setq c-default-style '((c++-mode  . "stroustrup")
-                          (awk-mode  . "awk")
-                          (java-mode . "java")
-                          (other     . "k&r")))
+			  (awk-mode  . "awk")
+			  (java-mode . "java")
+			  (other     . "k&r")))
   (shan--ide-add 'c-mode #'hydra-lsp/body)
   (shan--ide-add 'c++-mode #'hydra-lsp/body))
 
@@ -1116,7 +1119,7 @@ NAME and ARGS are as in `use-package'."
 (use-package cider
   :bind
   (:map cider-repl-mode-map
-        ("C-l" . cider-repl-clear-buffer))
+	("C-l" . cider-repl-clear-buffer))
   :custom
   (cider-print-fn 'fipp)
   (cider-repl-display-help-banner nil)
@@ -1136,7 +1139,7 @@ NAME and ARGS are as in `use-package'."
 (use-package flutter
   :after dart-mode
   :bind (:map dart-mode-map
-              ("C-M-x" . #'flutter-run-or-hot-reload))
+	      ("C-M-x" . #'flutter-run-or-hot-reload))
   :custom
   (flutter-sdk-path shan--flutter-path))
 
@@ -1158,10 +1161,10 @@ NAME and ARGS are as in `use-package'."
   :mode "\\.go\\'"
   :custom (gofmt-command "goimports")
   :bind (:map go-mode-map
-              ("C-c C-n" . go-run)
-              ("C-c ."   . go-test-current-test)
-              ("C-c f"   . go-test-current-file)
-              ("C-c a"   . go-test-current-project))
+	      ("C-c C-n" . go-run)
+	      ("C-c ."   . go-test-current-test)
+	      ("C-c f"   . go-test-current-file)
+	      ("C-c a"   . go-test-current-project))
   :config
   (add-hook 'before-save-hook #'gofmt-before-save)
 
@@ -1183,8 +1186,8 @@ NAME and ARGS are as in `use-package'."
   :after (lsp)
   :hook (java-mode . lsp)
   :bind (:map java-mode-map
-              ("C-x e l" . lsp-treemacs-errors-list)
-              ("C-x s l" . lsp-treemacs-symbols))
+	      ("C-x e l" . lsp-treemacs-errors-list)
+	      ("C-x s l" . lsp-treemacs-symbols))
   :config
   (require 'dap-java)
   (shan--ide-add 'java-mode #'hydra-lsp/body))
@@ -1204,9 +1207,9 @@ NAME and ARGS are as in `use-package'."
     (require 'ansi-colors)
     (defun colorize-compilation-buffer ()
       (when (eq major-mode 'compilation-mode)
-        (let ((inhibit-read-only t))
-          (if (boundp 'compilation-filter-start)
-              (ansi-color-apply-on-region compilation-filter-start (point))))))
+	(let ((inhibit-read-only t))
+	  (if (boundp 'compilation-filter-start)
+	      (ansi-color-apply-on-region compilation-filter-start (point))))))
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
 
 (use-package ein
@@ -1227,8 +1230,8 @@ NAME and ARGS are as in `use-package'."
 
 (use-package tuareg
   :if (and (executable-find "ocaml")
-           (executable-find "npm")
-           t)
+	   (executable-find "npm")
+	   t)
   :after (lsp)
   :hook
   (tuareg-mode . lsp)
@@ -1265,10 +1268,10 @@ NAME and ARGS are as in `use-package'."
   (py-split-window-on-execute t)
   :config
   (setq lsp-pyls-configuration-sources ["flake8" "pycodestyle"]
-        lsp-pyls-plugins-flake8-enabled t
-        lsp-pyls-plugins-pyflakes-enabled nil
-        lsp-pyls-plugins-pydocstyle-enabled t
-        lsp-pyls-plugins-mccabe-enabled nil)
+	lsp-pyls-plugins-flake8-enabled t
+	lsp-pyls-plugins-pyflakes-enabled nil
+	lsp-pyls-plugins-pydocstyle-enabled t
+	lsp-pyls-plugins-mccabe-enabled nil)
   (shan--ide-add 'python-mode #'hydra-lsp/body))
 
 (use-package dap-python
@@ -1290,13 +1293,13 @@ NAME and ARGS are as in `use-package'."
   (while (re-search-forward sh-mode--string-interpolated-variable-regexp limit t)
     (let ((quoted-stuff (nth 3 (syntax-ppss))))
       (when (and quoted-stuff (member quoted-stuff '(?\" ?`)))
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'font-lock-variable-name-face))))
+	(put-text-property (match-beginning 0) (match-end 0)
+			   'face 'font-lock-variable-name-face))))
   nil)
 
 (font-lock-add-keywords 'sh-mode
-                        `((sh-mode--string-interpolated-variable-font-lock-find))
-                        'append)
+			`((sh-mode--string-interpolated-variable-font-lock-find))
+			'append)
 
 (use-package sh-script
   :mode
@@ -1352,7 +1355,7 @@ NAME and ARGS are as in `use-package'."
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
-         ("\\.tsx\\'" . typescript-mode))
+	 ("\\.tsx\\'" . typescript-mode))
   :config
   (shan--ide-add 'typescript-mode #'hydra-lsp/body))
 
@@ -1404,30 +1407,30 @@ NAME and ARGS are as in `use-package'."
   (defun shan/artist-ido-select-operation (type)
     "Use ido to select a drawing operation in artist-mode"
     (interactive (list (ido-completing-read "Drawing operation: "
-                                            (list "Pen" "Pen Line" "line" "straight line" "rectangle"
-                                                  "square" "poly-line" "straight poly-line" "ellipse"
-                                                  "circle" "text see-thru" "text-overwrite" "spray-can"
-                                                  "erase char" "erase rectangle" "vaporize line" "vaporize lines"
-                                                  "cut rectangle" "cut square" "copy rectangle" "copy square"
-                                                  "paste" "flood-fill"))))
+					    (list "Pen" "Pen Line" "line" "straight line" "rectangle"
+						  "square" "poly-line" "straight poly-line" "ellipse"
+						  "circle" "text see-thru" "text-overwrite" "spray-can"
+						  "erase char" "erase rectangle" "vaporize line" "vaporize lines"
+						  "cut rectangle" "cut square" "copy rectangle" "copy square"
+						  "paste" "flood-fill"))))
     (artist-select-operation type))
 
   ;; also from emacswiki
   (defun shan/artist-ido-select-settings (type)
     "Use ido to select a setting to change in artist-mode"
     (interactive (list (ido-completing-read "Setting: "
-                                            (list "Set Fill" "Set Line" "Set Erase" "Spray-size" "Spray-chars"
-                                                  "Rubber-banding" "Trimming" "Borders"))))
+					    (list "Set Fill" "Set Line" "Set Erase" "Spray-size" "Spray-chars"
+						  "Rubber-banding" "Trimming" "Borders"))))
     (if (equal type "Spray-size")
-        (artist-select-operation "spray set size")
+	(artist-select-operation "spray set size")
       (call-interactively (artist-fc-get-fn-from-symbol
-                           (cdr (assoc type '(("Set Fill" . set-fill)
-                                              ("Set Line" . set-line)
-                                              ("Set Erase" . set-erase)
-                                              ("Rubber-banding" . rubber-band)
-                                              ("Trimming" . trimming)
-                                              ("Borders" . borders)
-                                              ("Spray-chars" . spray-chars))))))))
+			   (cdr (assoc type '(("Set Fill" . set-fill)
+					      ("Set Line" . set-line)
+					      ("Set Erase" . set-erase)
+					      ("Rubber-banding" . rubber-band)
+					      ("Trimming" . trimming)
+					      ("Borders" . borders)
+					      ("Spray-chars" . spray-chars))))))))
 
   (pretty-hydra-define hydra-artist (:exit t :color pink :title " Artist" :quit-key "q")
     ("Find"
@@ -1512,31 +1515,31 @@ NAME and ARGS are as in `use-package'."
 
   (markdown-preview-javascript
    (list (concat "https://github.com/highlightjs/highlight.js/"
-                 "9.15.6/highlight.min.js")
-         "<script>
-            $(document).on('mdContentChange', function() {
-              $('pre code').each(function(i, block)  {
-                hljs.highlightBlock(block);
-              });
-            });
-          </script>"))
+		 "9.15.6/highlight.min.js")
+	 "<script>
+	    $(document).on('mdContentChange', function() {
+	      $('pre code').each(function(i, block)  {
+		hljs.highlightBlock(block);
+	      });
+	    });
+	  </script>"))
   (markdown-preview-stylesheets
    (list (concat "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/"
-                 "3.0.1/github-markdown.min.css")
-         (concat "https://github.com/highlightjs/highlight.js/"
-                 "9.15.6/styles/github.min.css")
+		 "3.0.1/github-markdown.min.css")
+	 (concat "https://github.com/highlightjs/highlight.js/"
+		 "9.15.6/styles/github.min.css")
 
-         "<style>
-            .markdown-body {
-              box-sizing: border-box;
-              min-width: 200px;
-              max-width: 980px;
-              margin: 0 auto;
-              padding: 45px;
-            }
+	 "<style>
+	    .markdown-body {
+	      box-sizing: border-box;
+	      min-width: 200px;
+	      max-width: 980px;
+	      margin: 0 auto;
+	      padding: 45px;
+	    }
 
-            @media (max-width: 767px) { .markdown-body { padding: 15px; } }
-          </style>")))
+	    @media (max-width: 767px) { .markdown-body { padding: 15px; } }
+	  </style>")))
 
 (use-package pkgbuild-mode
   :mode
@@ -1549,7 +1552,7 @@ NAME and ARGS are as in `use-package'."
 (use-package yaml-mode
   :bind
   (:map yaml-mode-map
-        ("C-x C-s" . shan/vanilla-save)))
+	("C-x C-s" . shan/vanilla-save)))
 
 (use-package flycheck-yamllint
   :hook
@@ -1578,19 +1581,19 @@ NAME and ARGS are as in `use-package'."
   (defun shan/set-graphql-url()
     (interactive)
     (let ((shan/user-input '("http://localhost:8000/api/graphql/query"
-                             "http://localhost:3000" "Manual")))
+			     "http://localhost:3000" "Manual")))
       (ivy-read "Set graphql url: " shan/user-input
-                :action #'(lambda(arg)
-                            (setq graphql-url (if (string= arg "Manual")
-                                                  (read-string "Enter graphql url:") arg)))
-                :caller 'shan/set-graphql-url))))
+		:action #'(lambda(arg)
+			    (setq graphql-url (if (string= arg "Manual")
+						  (read-string "Enter graphql url:") arg)))
+		:caller 'shan/set-graphql-url))))
 
 (use-package sql
   :mode
   (("\\.\\(sql\\|psql\\|hql\\|mysql\\|q\\)\\'" . sql-mode))
   :hook
   (sql-mode . (lambda ()
-                (sql-highlight-mysql-keywords))))
+		(sql-highlight-mysql-keywords))))
 
 (use-package sql-indent
   :init
@@ -1602,13 +1605,13 @@ NAME and ARGS are as in `use-package'."
   ("\\.\\(org\\|ORG\\)\\'" . org-mode)
   :config
   (setq org-src-fontify-natively t
-        org-src-window-setup 'current-window
-        org-src-strip-leading-and-trailing-blank-lines t
-        org-src-preserve-indentation t
-        org-src-tab-acts-natively t
-        org-pretty-entities t
-        org-hide-emphasis-markers t
-        org-support-shift-select t)
+	org-src-window-setup 'current-window
+	org-src-strip-leading-and-trailing-blank-lines t
+	org-src-preserve-indentation t
+	org-src-tab-acts-natively t
+	org-pretty-entities t
+	org-hide-emphasis-markers t
+	org-support-shift-select t)
   ;; (use-package ob-ipython)
 
   (org-babel-do-load-languages
@@ -1628,17 +1631,17 @@ NAME and ARGS are as in `use-package'."
      ))
 
   (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar"
-        org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
+	org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
 
   (add-to-list 'org-src-lang-modes
-               '("plantuml" . fundamental))
+	       '("plantuml" . fundamental))
 
   (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
-                                                         ("ts" . "src ts\n")
-                                                         ("js" . "src js\n")
-                                                         ("py" . "src python\n")
-                                                         ("r" . "src R\n")
-                                                         ("sh" . "src shell\n"))))
+							 ("ts" . "src ts\n")
+							 ("js" . "src js\n")
+							 ("py" . "src python\n")
+							 ("r" . "src R\n")
+							 ("sh" . "src shell\n"))))
 
 (use-package toc-org
   :hook
@@ -1654,18 +1657,18 @@ NAME and ARGS are as in `use-package'."
 				      :weight 'bold)
   (set-face-attribute 'org-level-2 nil
 				      :height 1.1
-                      :weight 'bold)
+		      :weight 'bold)
   (set-face-attribute 'org-level-3 nil
 				      :height 1.0
-                      :weight 'bold)
+		      :weight 'bold)
   (set-face-attribute 'org-level-4 nil
 				      :height 1.0
-                      :weight 'bold)
+		      :weight 'bold)
 
   (set-face-attribute 'org-ellipsis nil
-                      :underline nil
-                      :background "#fafafa"
-                      :foreground "#a0a1a7"))
+		      :underline nil
+		      :background "#fafafa"
+		      :foreground "#a0a1a7"))
 
 (use-package px)
 
@@ -1687,10 +1690,10 @@ NAME and ARGS are as in `use-package'."
   :hook (org-mode . org-fancy-priorities-mode)
   :config
   (setq org-priority-faces
-        '((?A . error)
-          (?B . warning)
-          (?C . success)
-          (?D . (:foreground "#87ceeb"))))
+	'((?A . error)
+	  (?B . warning)
+	  (?C . success)
+	  (?D . (:foreground "#87ceeb"))))
   (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
 
 (use-package yasnippet
@@ -1700,7 +1703,7 @@ NAME and ARGS are as in `use-package'."
 
 (use-package flyspell
   :hook ((text-mode . flyspell-mode)
-         (prog-mode . flyspell-prog-mode)))
+	 (prog-mode . flyspell-prog-mode)))
 
 (use-package flyspell-popup
   :preface
@@ -1712,38 +1715,38 @@ NAME and ARGS are as in `use-package'."
     (interactive "p")
     (while (not (= 0 arg))
       (let ((pos (point))
-            (min (point-min)))
-        (if (and (eq (current-buffer) flyspell-old-buffer-error)
-                 (eq pos flyspell-old-pos-error))
-            (progn
-              (if (= flyspell-old-pos-error min)
-                  ;; goto beginning of buffer
-                  (progn
-                    (message "Restarting from end of buffer")
-                    (goto-char (point-max)))
-                (backward-word 1))
-              (setq pos (point))))
-        ;; seek the next error
-        (while (and (> pos min)
-                    (let ((ovs (overlays-at pos))
-                          (r '()))
-                      (while (and (not r) (consp ovs))
-                        (if (flyspell-overlay-p (car ovs))
-                            (setq r t)
-                          (setq ovs (cdr ovs))))
-                      (not r)))
-          (backward-word 1)
-          (setq pos (point)))
-        ;; save the current location for next invocation
-        (setq arg (1- arg))
-        (setq flyspell-old-pos-error pos)
-        (setq flyspell-old-buffer-error (current-buffer))
-        (goto-char pos)
-        (if (= pos min)
-            (progn
-              (message "No more miss-spelled word!")
-              (setq arg 0))
-          (forward-word)))))
+	    (min (point-min)))
+	(if (and (eq (current-buffer) flyspell-old-buffer-error)
+		 (eq pos flyspell-old-pos-error))
+	    (progn
+	      (if (= flyspell-old-pos-error min)
+		  ;; goto beginning of buffer
+		  (progn
+		    (message "Restarting from end of buffer")
+		    (goto-char (point-max)))
+		(backward-word 1))
+	      (setq pos (point))))
+	;; seek the next error
+	(while (and (> pos min)
+		    (let ((ovs (overlays-at pos))
+			  (r '()))
+		      (while (and (not r) (consp ovs))
+			(if (flyspell-overlay-p (car ovs))
+			    (setq r t)
+			  (setq ovs (cdr ovs))))
+		      (not r)))
+	  (backward-word 1)
+	  (setq pos (point)))
+	;; save the current location for next invocation
+	(setq arg (1- arg))
+	(setq flyspell-old-pos-error pos)
+	(setq flyspell-old-buffer-error (current-buffer))
+	(goto-char pos)
+	(if (= pos min)
+	    (progn
+	      (message "No more miss-spelled word!")
+	      (setq arg 0))
+	  (forward-word)))))
 
   (defun muh/flyspell-next-word()
     "Jump to next miss-pelled word and pop-up correction"
@@ -1757,8 +1760,8 @@ NAME and ARGS are as in `use-package'."
     (flyspell-popup-correct))
   :bind
   (:map flyspell-mode-map
-        ("C-," . muh/flyspell-next-word)
-        ("C-M-," . muh/flyspell-prev-word)))
+	("C-," . muh/flyspell-next-word)
+	("C-M-," . muh/flyspell-prev-word)))
 
 (use-package olivetti
   :diminish
@@ -1794,7 +1797,7 @@ NAME and ARGS are as in `use-package'."
   ;; use flymake as checker on latex docs
   (defun flymake-get-tex-args (file-name)
     (list "pdflatex"
-          (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
+	  (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
   (setq auctex-latexmk-inherit-TeX-PDF-mode t))
 
 (use-package cdlatex
@@ -1826,14 +1829,14 @@ NAME and ARGS are as in `use-package'."
   (nov-mode . shan/my-nov-setup)
   :bind
   (:map nov-mode-map
-        ("C-p" . nov-previous-document)
-        ("C-n" . nov-next-document)
-        ("p"   . nov-scroll-up)
-        ("n"   . nov-scroll-down))
+	("C-p" . nov-previous-document)
+	("C-n" . nov-next-document)
+	("p"   . nov-scroll-up)
+	("n"   . nov-scroll-down))
   :config
   (defun shan/my-nov-setup ()
     (if (fboundp 'olivetti-mode)
-        (olivetti-mode 1)))
+	(olivetti-mode 1)))
 
   (setq nov-variable-pitch nil)
   (setq nov-text-width 72))
@@ -1849,7 +1852,7 @@ NAME and ARGS are as in `use-package'."
   :magic ("%PDF" . pdf-view-mode)
   :hook (after-load-theme . my-pdf-view-set-dark-theme)
   :bind (:map pdf-view-mode-map
-              ("C-s" . isearch-forward))
+	      ("C-s" . isearch-forward))
   :init
   ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
   (pdf-tools-install)
@@ -1859,58 +1862,58 @@ NAME and ARGS are as in `use-package'."
   (defun my-pdf-view-set-midnight-colors ()
     "Set pdf-view midnight colors."
     (setq pdf-view-midnight-colors
-          `(,(face-foreground 'default) . ,(face-background 'default))))
+	  `(,(face-foreground 'default) . ,(face-background 'default))))
 
   (defun my-pdf-view-set-dark-theme ()
     "Set pdf-view midnight theme as color theme."
     (my-pdf-view-set-midnight-colors)
     (dolist (buf (buffer-list))
       (with-current-buffer buf
-        (when (eq major-mode 'pdf-view-mode)
-          (pdf-view-midnight-minor-mode (if pdf-view-midnight-minor-mode 1 -1))))))
+	(when (eq major-mode 'pdf-view-mode)
+	  (pdf-view-midnight-minor-mode (if pdf-view-midnight-minor-mode 1 -1))))))
   :config
   ;; WORKAROUND: Fix compilation errors on macOS.
   ;; @see https://github.com/politza/pdf-tools/issues/480
   (when shan--is-mac?
     (setenv "PKG_CONFIG_PATH"
-            "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
+	    "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
   (my-pdf-view-set-midnight-colors)
 
   ;; FIXME: Support retina
   ;; @see https://emacs-china.org/t/pdf-tools-mac-retina-display/10243/
   ;; and https://github.com/politza/pdf-tools/pull/501/
   (setq pdf-view-use-scaling t
-        pdf-view-use-imagemagick nil)
+	pdf-view-use-imagemagick nil)
 
   (with-no-warnings
     (defun pdf-view-use-scaling-p ()
       "Return t if scaling should be used."
       (and (or (and (eq system-type 'darwin) (string-equal emacs-version "27.0.50"))
-               (memq (pdf-view-image-type)
-                     '(imagemagick image-io)))
-           pdf-view-use-scaling))
+	       (memq (pdf-view-image-type)
+		     '(imagemagick image-io)))
+	   pdf-view-use-scaling))
     (defun pdf-view-create-page (page &optional window)
       "Create an image of PAGE for display on WINDOW."
       (let* ((size (pdf-view-desired-image-size page window))
-             (width (if (not (pdf-view-use-scaling-p))
-                        (car size)
-                      (* 2 (car size))))
-             (data (pdf-cache-renderpage
-                    page width width))
-             (hotspots (pdf-view-apply-hotspot-functions
-                        window page size)))
-        (pdf-view-create-image data
-          :width width
-          :scale (if (pdf-view-use-scaling-p) 0.5 1)
-          :map hotspots
-          :pointer 'arrow)))))
+	     (width (if (not (pdf-view-use-scaling-p))
+			(car size)
+		      (* 2 (car size))))
+	     (data (pdf-cache-renderpage
+		    page width width))
+	     (hotspots (pdf-view-apply-hotspot-functions
+			window page size)))
+	(pdf-view-create-image data
+	  :width width
+	  :scale (if (pdf-view-use-scaling-p) 0.5 1)
+	  :map hotspots
+	  :pointer 'arrow)))))
 
 (when (>= emacs-major-version 26)
   (use-package pdf-view-restore
     :if (featurep 'pdf-view)
     :hook (pdf-view-mode . pdf-view-restore-mode)
     :init (setq pdf-view-restore-filename
-                (locate-user-emacs-file ".pdf-view-restore"))))
+		(locate-user-emacs-file ".pdf-view-restore"))))
 
 (use-package pubmed
   :commands (pubmed-search pubmed-advanced-search))
@@ -1918,14 +1921,14 @@ NAME and ARGS are as in `use-package'."
 (setq browse-url-browser-function 'browse-url-generic)
 
 (cond((executable-find "firefox") (setq browse-url-generic-args '("-private")
-                                        browse-url-firefox-program "firefox"
-                                        browse-url-generic-program "firefox"))
+					browse-url-firefox-program "firefox"
+					browse-url-generic-program "firefox"))
      ((executable-find "chromium") (setq browse-url-generic-args '("-incognito")
-                                         browse-url-chromium-program "chromium"
-                                         browse-url-generic-program "chromium"))
+					 browse-url-chromium-program "chromium"
+					 browse-url-generic-program "chromium"))
      ((executable-find "google-chrome") (setq browse-url-generic-args '("-incognito")
-                                              browse-url-chrome-program "google-chrome"
-                                              browse-url-generic-program "chrome")))
+					      browse-url-chrome-program "google-chrome"
+					      browse-url-generic-program "chrome")))
 
 (use-package carbon-now-sh
   :straight (:host github :repo "spicyriceball/carbon-now-sh.el"))
@@ -1967,10 +1970,10 @@ NAME and ARGS are as in `use-package'."
   :if (file-exists-p shan/elfeed-file)
   :bind
   (:map elfeed-search-mode-map
-        ("q" . shan/elfeed-save-db-and-bury)
-        ("Q" . shan/elfeed-save-db-and-bury)
-        ("m" . elfeed-toggle-star)
-        ("M" . elfeed-toggle-star))
+	("q" . shan/elfeed-save-db-and-bury)
+	("Q" . shan/elfeed-save-db-and-bury)
+	("m" . elfeed-toggle-star)
+	("M" . elfeed-toggle-star))
   :custom
   (elfeed-db-directory shan/elfeed-db)
   :config
@@ -1992,8 +1995,8 @@ NAME and ARGS are as in `use-package'."
 (use-package emojify
   :init
   (setq emojify-user-emojis '(("🧚" . (("name" . "Fairy")
-                                       ("image" . "~/.emacs.d/emoji/fairy.png")
-                                       ("style" . "unicode")))))
+				       ("image" . "~/.emacs.d/emoji/fairy.png")
+				       ("style" . "unicode")))))
   (setq emojify-point-entered-behaviour 'uncover)
   (setq emojify-show-help nil)
   (global-emojify-mode)
@@ -2012,13 +2015,3 @@ NAME and ARGS are as in `use-package'."
   :config
   (setq wakatime-cli-path (executable-find "wakatime"))
   (global-wakatime-mode))
-
-;; (use-package speed-type)
-;; (use-package origami)
-;; (use-package demangle-mode)
-;; (use-package academic-phrases)
-;; (use-package powerthesaurus)
-;; (use-package crontab-mode)
-;; (use-package salt-mode)
-;; (use-package sicp)
-;; (use-package rmsbolt)                   ; A compiler output viewer

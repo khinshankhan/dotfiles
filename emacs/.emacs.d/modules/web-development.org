@@ -1,0 +1,143 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Restclient
+
+   The cleanest part of webdev: testing endpoints within emacs.
+
+   #+begin_src emacs-lisp
+(use-package restclient
+  :mode
+  ("\\.http\\'" . restclient-mode))
+   #+end_src
+
+** TODO HTML
+
+   Learn about [[http://web-mode.org/][web-mode]]
+
+   #+begin_src emacs-lisp
+(use-package web-mode
+  :mode
+  (("\\.html?\\'"       . web-mode)
+   ("\\.phtml\\'"       . web-mode)
+   ("\\.tpl\\.php\\'"   . web-mode)
+   ("\\.blade\\.php\\'" . web-mode)
+   ("\\.php$"           . my/php-setup)
+   ("\\.[agj]sp\\'"     . web-mode)
+   ("\\.as[cp]x\\'"     . web-mode)
+   ("\\.erb\\'"         . web-mode)
+   ("\\.mustache\\'"    . web-mode)
+   ("\\.djhtml\\'"      . web-mode)
+   ("\\.jsx\\'"         . web-mode)
+   ("\\.tsx\\'"         . web-mode))
+  :config
+  ;; Highlight the element under the cursor.
+  (setq-default web-mode-enable-current-element-highlight t)
+  ;; built in color for most themes dont work well with my eyes
+  (eval-after-load "web-mode"
+    '(set-face-background 'web-mode-current-element-highlight-face "LightCoral"))
+  :custom
+  (web-mode-attr-indent-offset 2)
+  (web-mode-block-padding 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  (web-mode-comment-style 2)
+  (web-mode-enable-current-element-highlight t)
+  (web-mode-markup-indent-offset 2))
+   #+end_src
+
+   emmet-mode deserves a function to pull up cheatsheet. This is a powerful fork of "zencoding".
+
+   #+begin_src emacs-lisp
+(defun shan/emmet-mode-cheatsheet ()
+  "Open emmet mode cheatsheet"
+  (interactive)
+  (browse-url "https://docs.emmet.io/cheatsheet-a5.pdf"))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package emmet-mode
+  :hook
+  ((css-mode  . emmet-mode)
+   (php-mode  . emmet-mode)
+   (sgml-mode . emmet-mode)
+   (rjsx-mode . emmet-mode)
+   (web-mode  . emmet-mode)))
+   #+end_src
+
+
+** TODO JavaScript/ TypeScript
+
+   These two are probably the hardest configuration to get properly solely because of "standards".
+
+   #+begin_src emacs-lisp
+(use-package typescript-mode
+  :hook
+  (typescript-mode . lsp)
+  :mode (("\\.ts\\'" . typescript-mode)
+         ("\\.tsx\\'" . typescript-mode))
+  :config
+  (shan--ide-add 'typescript-mode #'hydra-lsp/body))
+   #+end_src
+
+*** General JS/TS Projects
+
+    Makes emacs use the node modules. Especially helpful for versions of tools and for stuff like prettier.
+
+    #+begin_src emacs-lisp
+(use-package add-node-modules-path
+  :hook
+  ((web-mode . add-node-modules-path)
+   (rjsx-mode . add-node-modules-path)))
+    #+end_src
+
+    #+begin_src emacs-lisp
+(use-package prettier-js
+  :hook
+  ((js-mode . prettier-js-mode)
+   (typescript-mode . prettier-js-mode)
+   (rjsx-mode . prettier-js-mode)))
+    #+end_src
+
+    #+begin_src emacs-lisp
+(use-package tide
+  :after
+  (typescript-mode js2-mode company flycheck)
+  :hook
+  ((typescript-mode . tide-setup)
+   (typescript-mode . tide-hl-identifier-mode)
+   (before-save . tide-format-before-save))
+  :config
+  (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
+  (flycheck-add-next-checker 'tsx-tide 'javascript-eslint))
+    #+end_src
+
+*** TODO React
+
+    #+begin_src emacs-lisp
+(use-package rjsx-mode
+  :mode
+  (("\\.js\\'"   . rjsx-mode)
+   ("\\.jsx\\'"  . rjsx-mode)
+   ("\\.json\\'" . javascript-mode))
+  :magic ("/\\*\\* @jsx React\\.DOM \\*/" "^import React")
+  :init
+  (setq-default rjsx-basic-offset 2)
+  (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON")))
+    #+end_src
+
+    #+begin_src emacs-lisp
+(use-package react-snippets
+  :after yasnippet)
+    #+end_src
+
+*** TODO Vue
+
+    #+begin_src emacs-lisp
+(use-package vue-html-mode)
+
+(use-package vue-mode
+  :defer t
+  :mode
+  (("\\.vue\\'"  . vue-mode)))
+    #+end_src

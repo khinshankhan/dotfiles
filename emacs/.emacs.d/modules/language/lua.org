@@ -1,0 +1,12 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Lua
+   #+begin_src emacs-lisp
+(use-package lua-mode
+  :after (company)
+  :mode
+  (("\\.lua\\'" . lua-mode))
+  :hook
+  (lua-mode . company-mode))
+   #+end_src

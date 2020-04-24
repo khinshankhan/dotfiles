@@ -1,0 +1,12 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** TODO Elixir
+
+   #+begin_src emacs-lisp
+(use-package elixir-mode
+  :init
+  (add-hook 'elixir-mode-hook #'company-mode))
+
+(use-package alchemist)
+   #+end_src

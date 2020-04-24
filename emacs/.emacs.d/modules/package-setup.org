@@ -1,0 +1,57 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Path to this File
+
+   #+begin_src emacs-lisp
+(defconst shan--config-file (file-name-directory (file-chase-links load-file-name))
+  "Directory where this file exists. Useful for generality in case of `load' or different paths.")
+   #+end_src
+
+** TODO Package Installer
+
+   Explain why straight
+
+   #+begin_src emacs-lisp
+(setq package-enable-at-startup nil
+      straight-use-package-by-default t
+      straight-recipe-repositories nil)
+
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(setq-default use-package-always-defer nil
+              use-package-always-demand t
+              byte-compile-warnings nil)
+;; (setq use-package-verbose t)
+
+(straight-use-package 'use-package)
+   #+end_src
+
+** Package Paths
+
+   Load this before any other third-party packages to keep init directory clean.
+
+   #+begin_src emacs-lisp
+(use-package no-littering
+  :init
+  (require 'no-littering))
+   #+end_src
+
+** Shell Paths
+
+   #+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :init
+  (exec-path-from-shell-initialize))
+   #+end_src

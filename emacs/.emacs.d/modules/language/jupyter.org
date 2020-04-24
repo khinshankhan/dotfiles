@@ -1,0 +1,13 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Jupyter
+
+   #+begin_src emacs-lisp
+(use-package ein
+  :mode
+  (".*\\.ipynb\\'" . ein:ipynb-mode)
+  :custom
+  (ein:completion-backend 'ein:use-company-jedi-backends)
+  (ein:use-auto-complete-superpack t))
+   #+end_src

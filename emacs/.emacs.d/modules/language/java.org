@@ -1,0 +1,36 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Java
+
+   #+begin_src emacs-lisp
+(use-package lsp-java
+  :after (lsp)
+  :hook (java-mode . lsp)
+  :bind (:map java-mode-map
+              ("C-x e l" . lsp-treemacs-errors-list)
+              ("C-x s l" . lsp-treemacs-symbols))
+  :config
+  (require 'dap-java)
+  (shan--ide-add 'java-mode #'hydra-lsp/body))
+
+;; Gradle
+(use-package gradle-mode
+  :hook (java-mode . (lambda () (gradle-mode 1)))
+  :config
+  (defun build-and-run()
+    (interactive)
+    (gradle-run "build run"))
+  (define-key gradle-mode-map (kbd "C-c C-r") 'build-and-run))
+
+(use-package mvn
+  :config
+  (ignore-errors
+    (require 'ansi-colors)
+    (defun colorize-compilation-buffer ()
+      (when (eq major-mode 'compilation-mode)
+        (let ((inhibit-read-only t))
+          (if (boundp 'compilation-filter-start)
+              (ansi-color-apply-on-region compilation-filter-start (point))))))
+    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
+   #+end_src

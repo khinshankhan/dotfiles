@@ -1,0 +1,31 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** TODO Dart/ Flutter
+
+   Add lsp integration.
+
+   #+begin_src emacs-lisp
+(use-package dart-mode
+  :hook
+  (dart-mode . lsp)
+  :custom
+  (dart-format-on-save t)
+  (dart-sdk-path shan--dart-path))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package flutter
+  :after dart-mode
+  :bind (:map dart-mode-map
+              ("C-M-x" . #'flutter-run-or-hot-reload))
+  :custom
+  (flutter-sdk-path shan--flutter-path))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package flutter-l10n-flycheck
+  :after flutter
+  :config
+  (flutter-l10n-flycheck-setup))
+   #+end_src

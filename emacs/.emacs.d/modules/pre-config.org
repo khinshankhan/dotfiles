@@ -1,0 +1,33 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Initialization
+
+   Add [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html][lexical binding]] support globally.
+
+   #+begin_src emacs-lisp
+;; -*- lexical-binding: t -*-
+   #+end_src
+
+** Garbage Collection
+
+   We don't need [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] so low (maybe on a machine from a couple decade ago...) nor does =load-file= need
+   the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Magic-File-Names.html][file name handler]] during start up.
+
+   #+begin_src emacs-lisp
+(eval-and-compile
+  (defun srs|revert-gc ()
+    "Garbage collect and reset values."
+    (setq gc-cons-threshold 16777216
+          gc-cons-percentage 0.1
+          file-name-handler-alist (append last-file-name-handler-alist
+		                                  file-name-handler-alist))
+    (cl-delete-duplicates file-name-handler-alist :test 'equal)
+    (makunbound 'last-file-name-handler-alist))
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6
+        last-file-name-handler-alist file-name-handler-alist
+        file-name-handler-alist nil)
+
+  (add-hook 'after-init-hook 'srs|revert-gc))
+   #+end_src

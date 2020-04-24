@@ -1,0 +1,154 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Auto IDE
+
+   Add an hydra to a list, based on a mode, which then gets resolved by =shan--ide-resolve=.
+
+   #+begin_src emacs-lisp
+(defvar shan--ide-alist '()
+  "List containing relationships of (mode . hydra).")
+
+(defun shan--ide-add (mode hydra)
+  "Add MODE and HYDRA as (mode . hydra) to `shan--ide-alist'."
+  (push `(,mode . ,hydra) shan--ide-alist))
+
+(defun shan--ide-resolve ()
+  "Call a hydra related to active mode if found in `shan--ide-alist'."
+  (interactive)
+  (let ((hydra (alist-get major-mode shan--ide-alist)))
+    (if hydra
+        (funcall hydra)
+      (message "IDE not found for %s" major-mode))))
+   #+end_src
+
+** Syntax Check
+
+   #+begin_src emacs-lisp
+(use-package flycheck
+  :init
+  (global-flycheck-mode 1)
+  :bind (("C-c f" . flycheck-mode))
+  :custom-face
+  (flycheck-info ((t (:underline (:style line :color "#80FF80")))))
+  (flycheck-warning ((t (:underline (:style line :color "#FF9933")))))
+  (flycheck-error ((t (:underline (:style line :color "#FF5C33")))))
+  :config
+  (setq flycheck-emacs-lisp-load-path 'inherit)
+  (setq flycheck-check-syntax-automatically '(mode-enabled save)))
+   #+end_src
+
+*** Disabled Flycheck
+
+    Here we disable have to disable other checkers to use Flycheck.
+
+    #+begin_src emacs-lisp
+(setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc c/c++-clang c/c++-cppcheck c/c++-gcc))
+
+(setq js2-missing-semi-one-line-override t
+      js2-strict-missing-semi-warning nil)
+    #+end_src
+
+** Terminal
+
+   #+begin_src emacs-lisp
+(use-package vterm)
+(use-package vterm-toggle
+  :config
+  ;; I like vterm to 'pop up' on the bottom
+  ;; if anything, I can use zoom-window-zoom to focus
+  (setq vterm-toggle-fullscreen-p nil)
+  (add-to-list 'display-buffer-alist
+               '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
+                 (display-buffer-reuse-window display-buffer-at-bottom)
+                 ;;(display-buffer-reuse-window display-buffer-in-direction)
+                 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                 ;;(direction . bottom)
+                 ;;(dedicated . t) ;dedicated is supported in emacs27
+                 (reusable-frames . visible)
+                 (window-height . 0.3))))
+
+(defun shan/vterm-helper ()
+  (interactive)
+  (if (string-equal (buffer-name) "vterm")
+      (progn
+        (kill-buffer "vterm")
+        (delete-window))
+    (vterm-toggle-cd)))
+   #+end_src
+
+*** comint
+
+    Command Interpreter
+
+    #+begin_src emacs-lisp
+;;Don't echo passwords when communicating with interactive programs:
+(add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
+    #+end_src
+
+** TODO Text Completion
+
+   Clean this up.
+
+   #+begin_src emacs-lisp
+(use-package company
+  :bind
+  ("C-/" . company-complete)
+  (:map company-active-map
+        ("M-/" . company-other-backend)
+        ("M-n" . nil)
+        ("M-p" . nil)
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous))
+  :custom-face
+  (company-tooltip ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-tooltip-annotation ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-tooltip-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
+  (company-tooltip-mouse ((t (:background "#30343c"))))
+  (company-tooltip-common ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-tooltip-common-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
+  (company-preview ((t (:background "#30343c"))))
+  (company-preview-common ((t (:foreground "#abb2bf" :background "#30343c"))))
+  (company-scrollbar-fg ((t (:background "#30343c"))))
+  (company-scrollbar-bg ((t (:background "#30343c"))))
+  (company-template-field ((t (:foreground "#282c34" :background "#c678dd"))))
+  :custom
+  (company-require-match 'never)
+  (company-dabbrev-downcase nil)
+  (company-tooltip-align-annotations t)
+  (company-idle-delay 3) ;; 128)
+  (company-minimum-prefix-length 3) ;; 128)
+  :config
+  (global-company-mode t))
+
+(use-package company-quickhelp
+  :after (company)
+  :config
+  (company-quickhelp-mode))
+
+(use-package company-box
+  :after (company)
+  :hook
+  (company-mode . company-box-mode))
+   #+end_src
+
+** TRAMP
+
+   #+begin_src emacs-lisp
+(use-package tramp
+  :straight nil
+  :config
+  ;; faster than scp
+  (setq tramp-default-method "ssh")
+  (add-to-list 'tramp-default-user-alist
+               '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
+               '(nil nil "shan")) ;; fallback login
+
+  (setq password-cache-expiry nil))
+
+;; this hook makes remote projectile a little lighter
+(add-hook 'find-file-hook
+          (lambda ()
+            (when (file-remote-p default-directory)
+              (setq-local projectile-mode-line "Projectile"))))
+   #+end_src

@@ -1,0 +1,36 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+  #+begin_src emacs-lisp :tangle off
+;; (use-package docker
+;;   :bind (("C-c d" . docker)))
+;; (use-package docker-compose-mode)
+;; (use-package docker-tramp
+;;   :config (setq docker-tramp-use-names t)) ;; name vs id
+;; (use-package undo-tree) ;; figure out toggle
+;; (use-package pass)
+;; (use-package pinentry)
+;; (use-package edit-indirect)
+;; (use-package tablist)
+;; (use-package helpful)
+;; (use-package direnv)
+;; (use-package pyvenv)
+;; (use-package writeroom-mode)
+;; (use-package whitespace-cleanup-mode)
+;; (use-package google-this)
+;; (use-package my-utils)
+;; (use-package recentf)
+  #+end_src
+
+  Now the misc packages
+
+  #+begin_src emacs-lisp
+;; (use-package speed-type)
+;; (use-package origami)
+;; (use-package demangle-mode)
+;; (use-package academic-phrases)
+;; (use-package powerthesaurus)
+;; (use-package crontab-mode)
+;; (use-package salt-mode)
+;; (use-package rmsbolt)                   ; A compiler output viewer
+  #+end_src

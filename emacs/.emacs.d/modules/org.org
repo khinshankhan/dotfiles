@@ -1,0 +1,126 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** General Org
+
+   #+begin_src emacs-lisp
+(use-package org
+  :straight org-plus-contrib
+  :mode
+  ("\\.\\(org\\|ORG\\)\\'" . org-mode)
+  :config
+  (setq org-src-fontify-natively t
+        org-src-window-setup 'current-window
+        org-src-strip-leading-and-trailing-blank-lines t
+        org-src-preserve-indentation t
+        org-src-tab-acts-natively t
+        org-pretty-entities t
+        org-hide-emphasis-markers t
+        org-support-shift-select t)
+  ;; (use-package ob-ipython)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((ditaa      . t)
+     (dot        . t)
+     (emacs-lisp . t)
+     (gnuplot    . t)
+     (js         . t)
+     (latex      . t)
+     (ocaml      . t)
+     (org        . t)
+     (plantuml   . t)
+     (python     . t)
+     (shell      . t)
+     (R          . t)
+     ))
+
+  (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar"
+        org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
+
+  (add-to-list 'org-src-lang-modes
+               '("plantuml" . fundamental))
+
+  (shan/add-list-to-list 'org-structure-template-alist '(("el" . "src emacs-lisp\n")
+                                                         ("ts" . "src ts\n")
+                                                         ("js" . "src js\n")
+                                                         ("py" . "src python\n")
+                                                         ("r" . "src R\n")
+                                                         ("sh" . "src shell\n"))))
+   #+end_src
+
+** Bullets
+
+   #+begin_src emacs-lisp
+(use-package toc-org
+  :hook
+  (org-mode . toc-org-enable))
+
+(use-package org-bullets
+  :hook
+  (org-mode . org-bullets-mode)
+  :config
+  (setq org-bullets-bullet-list '("⁖"))
+  (set-face-attribute 'org-level-1 nil
+				      :height 1.25
+				      :weight 'bold)
+  (set-face-attribute 'org-level-2 nil
+				      :height 1.1
+                      :weight 'bold)
+  (set-face-attribute 'org-level-3 nil
+				      :height 1.0
+                      :weight 'bold)
+  (set-face-attribute 'org-level-4 nil
+				      :height 1.0
+                      :weight 'bold)
+
+  (set-face-attribute 'org-ellipsis nil
+                      :underline nil
+                      :background "#fafafa"
+                      :foreground "#a0a1a7"))
+   #+end_src
+
+** Exports
+
+   #+begin_src emacs-lisp
+(use-package px)
+
+(use-package ox-gfm
+  :after (org))
+
+(use-package ox-pandoc)
+   #+end_src
+
+** Reveal.js
+
+   #+begin_src emacs-lisp
+(use-package ox-reveal
+  :custom
+  (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
+  (org-reveal-mathjax t))
+
+(use-package htmlize)
+   #+end_src
+
+** Priorities
+
+   Nicer priorities, don't see myself using more than 4.
+
+   - Red: HIGH
+   - Yellow: MID
+   - Green: LOW
+   - Sky blue: OPTIONAL
+
+   #+begin_src emacs-lisp
+(use-package org-fancy-priorities
+  :diminish
+  :defines org-fancy-priority-list
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-priority-faces
+        '((?A . error)
+          (?B . warning)
+          (?C . success)
+          (?D . (:foreground "#87ceeb"))))
+  (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
+   #+end_src

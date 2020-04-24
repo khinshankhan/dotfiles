@@ -1,0 +1,189 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Olivetti
+
+   I'm starting to think a hydra for things that can be toggled..
+
+   #+begin_src emacs-lisp
+(use-package olivetti
+  :diminish
+  :bind
+  ("<f7>" . olivetti-mode)
+  :init
+  (setq olivetti-body-width 0.618))
+   #+end_src
+** TODO LaTeX
+
+   #+begin_src emacs-lisp
+(use-package tex
+  :straight auctex
+  :mode
+  ("\\.tex\\'" . LaTeX-mode)
+  :config
+  (pretty-hydra-define hydra-latex (:exit t :color pink :title " Latex" :quit-key "q")
+    (
+     " Exit"
+     (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
+  ;; interestingly enough, auto ide doesnt like the latex formatted latex
+  (shan--ide-add 'latex-mode #'hydra-latex/body))
+
+(use-package auctex-latexmk
+  :hook
+  (LaTeX-mode . flymake-mode)
+  :init
+  (setq TeX-show-compilation nil)
+  (setq TeX-save-query nil)
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  ;; (setq TeX-PDF-mode t)
+  (auctex-latexmk-setup)
+  :config
+  ;; use flymake as checker on latex docs
+  (defun flymake-get-tex-args (file-name)
+    (list "pdflatex"
+          (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
+
+(use-package cdlatex
+  :hook
+  (LaTeX-mode . turn-on-cdlatex))
+
+(use-package company-auctex
+  :after (auctex company)
+  :config
+  (company-auctex-init))
+   #+end_src
+
+   Completion back-ends for math unicode sysmbols and latex tags
+
+   #+begin_src emacs-lisp
+(use-package company-math
+  :after (auctex company)
+  :config
+  (add-to-list 'company-backends 'company-math-symbols-unicode))
+   #+end_src
+
+   #+begin_src emacs-lisp
+(use-package reftex
+  :after auctex
+  :custom
+  (reftex-plug-into-AUCTeX t)
+  (reftex-save-parse-info t)
+  (reftex-use-multiple-selection-buffers t))
+   #+end_src
+
+** TODO EPUB
+
+   Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
+
+   #+begin_src emacs-lisp
+(use-package nov
+  :after (olivetti)
+  :mode
+  ("\\.epub\\'" . nov-mode)
+  :hook
+  (nov-mode . shan/my-nov-setup)
+  :bind
+  (:map nov-mode-map
+        ("C-p" . nov-previous-document)
+        ("C-n" . nov-next-document)
+        ("p"   . nov-scroll-up)
+        ("n"   . nov-scroll-down))
+  :config
+  (defun shan/my-nov-setup ()
+    (if (fboundp 'olivetti-mode)
+        (olivetti-mode 1)))
+
+  (setq nov-variable-pitch nil)
+  (setq nov-text-width 72))
+   #+end_src
+
+** PDF
+
+   Taken from Centaur Emacs mostly.
+
+*** Basic PDF
+
+    #+begin_src emacs-lisp
+(use-package pdf-view
+  :if shan--personal?
+  :straight pdf-tools
+  :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
+  :defines pdf-annot-activate-created-annotations
+  :functions my-pdf-view-set-midnight-colors
+  :commands pdf-view-midnight-minor-mode
+  :mode ("\\.[pP][dD][fF]\\'" . pdf-view-mode)
+  :magic ("%PDF" . pdf-view-mode)
+  :hook (after-load-theme . my-pdf-view-set-dark-theme)
+  :bind (:map pdf-view-mode-map
+              ("C-s" . isearch-forward))
+  :init
+  ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
+  (pdf-tools-install)
+
+  (setq pdf-annot-activate-created-annotations t)
+
+  (defun my-pdf-view-set-midnight-colors ()
+    "Set pdf-view midnight colors."
+    (setq pdf-view-midnight-colors
+          `(,(face-foreground 'default) . ,(face-background 'default))))
+
+  (defun my-pdf-view-set-dark-theme ()
+    "Set pdf-view midnight theme as color theme."
+    (my-pdf-view-set-midnight-colors)
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (eq major-mode 'pdf-view-mode)
+          (pdf-view-midnight-minor-mode (if pdf-view-midnight-minor-mode 1 -1))))))
+  :config
+  ;; WORKAROUND: Fix compilation errors on macOS.
+  ;; @see https://github.com/politza/pdf-tools/issues/480
+  (when shan--is-mac?
+    (setenv "PKG_CONFIG_PATH"
+            "/usr/local/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig"))
+  (my-pdf-view-set-midnight-colors)
+
+  ;; FIXME: Support retina
+  ;; @see https://emacs-china.org/t/pdf-tools-mac-retina-display/10243/
+  ;; and https://github.com/politza/pdf-tools/pull/501/
+  (setq pdf-view-use-scaling t
+        pdf-view-use-imagemagick nil)
+
+  (with-no-warnings
+    (defun pdf-view-use-scaling-p ()
+      "Return t if scaling should be used."
+      (and (or (and (eq system-type 'darwin) (string-equal emacs-version "27.0.50"))
+               (memq (pdf-view-image-type)
+                     '(imagemagick image-io)))
+           pdf-view-use-scaling))
+    (defun pdf-view-create-page (page &optional window)
+      "Create an image of PAGE for display on WINDOW."
+      (let* ((size (pdf-view-desired-image-size page window))
+             (width (if (not (pdf-view-use-scaling-p))
+                        (car size)
+                      (* 2 (car size))))
+             (data (pdf-cache-renderpage
+                    page width width))
+             (hotspots (pdf-view-apply-hotspot-functions
+                        window page size)))
+        (pdf-view-create-image data
+          :width width
+          :scale (if (pdf-view-use-scaling-p) 0.5 1)
+          :map hotspots
+          :pointer 'arrow)))))
+    #+end_src
+
+*** Recover PDF Position
+
+    Recover last viewed position
+
+    #+begin_src emacs-lisp
+(when (>= emacs-major-version 26)
+  (use-package pdf-view-restore
+    :if (featurep 'pdf-view)
+    :hook (pdf-view-mode . pdf-view-restore-mode)
+    :init (setq pdf-view-restore-filename
+                (locate-user-emacs-file ".pdf-view-restore"))))
+    #+end_src

@@ -1,0 +1,13 @@
+#+STARTUP: overview
+#+PRIORITIES: A D B
+
+** Lisp
+
+*** Debug
+
+    Used to be extremely helpful for figuring out what went wrong with configuration file. Nowadays it's only help
+    for writing my own package or debugging someone else's package.
+
+    #+begin_src emacs-lisp
+(use-package bug-hunter)
+    #+end_src
