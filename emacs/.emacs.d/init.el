@@ -220,6 +220,31 @@
   (interactive)
   (find-file (concat user-emacs-directory "config.org")))
 
+(defun shan/org-toc (&optional shan/file-name)
+  "A nice search utility for org headers in a direcory."
+  (interactive)
+  (unless shan/file-name
+    (setq shan/file-name (read-directory-name "Directory name: ")))
+  (let ((files (f-entries shan/file-name (lambda (f) (f-ext? f "org")) t))
+	(headlines '())
+	choice)
+    (loop for file in files do
+	  (with-temp-buffer
+	    (insert-file-contents file)
+	    (goto-char (point-min))
+	    (while (re-search-forward org-heading-regexp nil t)
+	      (cl-pushnew (list
+			   (format "%-80s (%s)"
+				   (match-string 0)
+				   (file-name-nondirectory file))
+			   :file file
+			   :position (match-beginning 0))
+			  headlines))))
+    (setq choice
+	  (completing-read "Headline: " (reverse headlines)))
+    (find-file (plist-get (cdr (assoc choice headlines)) :file))
+    (goto-char (plist-get (cdr (assoc choice headlines)) :position))))
+
 (defun shan/git-url-handler (url)
   "Hacky fix, if URL is ssh url, it will make it into https url or else return as is."
   (if (string-prefix-p "git" url)
@@ -725,6 +750,11 @@ NAME and ARGS are as in `use-package'."
   :bind
   ("C-s" . swiper-isearch)
   ("C-r" . swiper-isearch-backward))
+
+(use-package ag
+  :commands (ag ag-files ag-regexp ag-project ag-dired helm-ag)
+  :config (setq ag-highlight-search t
+		ag-reuse-buffers t))
 
 (use-package ivy-rich
   :init
@@ -1855,7 +1885,8 @@ NAME and ARGS are as in `use-package'."
 	      ("C-s" . isearch-forward))
   :init
   ;; (pdf-tools-install t nil t t) ;; FIRST TIME INSTALL USAGE
-  (pdf-tools-install)
+  ;; (pdf-tools-install)
+  (pdf-loader-install)
 
   (setq pdf-annot-activate-created-annotations t)
 

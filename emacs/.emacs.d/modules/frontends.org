@@ -46,6 +46,8 @@
 
 ** Search
 
+*** In buffer
+
    #+begin_src emacs-lisp
 (use-package swiper
   :bind
@@ -53,6 +55,14 @@
   ("C-r" . swiper-isearch-backward))
    #+end_src
 
+*** Ag
+
+    #+begin_src emacs-lisp
+(use-package ag
+  :commands (ag ag-files ag-regexp ag-project ag-dired helm-ag)
+  :config (setq ag-highlight-search t
+                ag-reuse-buffers t))
+    #+end_src
 ** Rich Hints
 
    #+begin_src emacs-lisp

@@ -224,6 +224,31 @@
   "Edit the configuration file."
   (interactive)
   (find-file (concat user-emacs-directory "config.org")))
+
+(defun shan/org-toc (&optional shan/file-name)
+  "A nice search utility for org headers in a direcory."
+  (interactive)
+  (unless shan/file-name
+    (setq shan/file-name (read-directory-name "Directory name: ")))
+  (let ((files (f-entries shan/file-name (lambda (f) (f-ext? f "org")) t))
+        (headlines '())
+        choice)
+    (loop for file in files do
+          (with-temp-buffer
+            (insert-file-contents file)
+            (goto-char (point-min))
+            (while (re-search-forward org-heading-regexp nil t)
+              (cl-pushnew (list
+                           (format "%-80s (%s)"
+                                   (match-string 0)
+                                   (file-name-nondirectory file))
+                           :file file
+                           :position (match-beginning 0))
+                          headlines))))
+    (setq choice
+          (completing-read "Headline: " (reverse headlines)))
+    (find-file (plist-get (cdr (assoc choice headlines)) :file))
+    (goto-char (plist-get (cdr (assoc choice headlines)) :position))))
    #+end_src
 
    This bit will require Magit and it's a bit dumb, but it's proven to be quite useful.
