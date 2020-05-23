@@ -65,6 +65,12 @@ eval "$(pyenv virtualenv-init -)"
 # executables via luarocks
 export PATH="${PATH}:${HOME}/.luarocks/bin"
 
+# erlang and elixir
+test -s "$HOME/.kiex/scripts/kiex" && source "$HOME/.kiex/scripts/kiex"
+. /home/shan/.erlang_vm/23.0/activate &> /dev/null
+kiex use 1.10.3 &> /dev/null
+
+
 # some folders than should contain executable files
 export PATH="${PATH}:${HOME}/bin"
 export PATH="${PATH}:${HOME}/.local/bin"
