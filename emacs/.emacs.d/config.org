@@ -695,6 +695,8 @@ NAME and ARGS are as in `use-package'."
 (pretty-hydra-define hydra-git (:exit nil :color pink :title " Git" :quit-key "q")
   ("Commands"
    (("g" magit "magit" :exit t)
+    ("i" magit-init "init" :exit t)
+    ("c" magit-clone "clone" :exit t)
     ("t" git-timemachine "timemachine" :exit t))
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
