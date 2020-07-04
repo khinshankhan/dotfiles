@@ -431,7 +431,7 @@ for_window [workspace="8"] floating enable
 for_window [workspace="9"] floating enable
 
 # make caps lock control
-exec setxkbmap -option ctrl:nocaps
+# exec setxkbmap -option ctrl:nocaps
 
 # switch between layouts quickly
 #bindcode Shift+50 exec setxkbmap -layout dvorak
