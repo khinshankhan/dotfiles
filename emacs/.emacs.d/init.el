@@ -2002,7 +2002,7 @@ NAME and ARGS are as in `use-package'."
                                               browse-url-generic-program "chrome")))
 
 (use-package carbon-now-sh
-  :straight (:host github :repo "spicyriceball/carbon-now-sh.el"))
+  :straight (:host github :repo "shan-emacs/carbon-now-sh.el"))
 
 (use-package elcord
   :if (and (executable-find "discord") shan--personal?)

@@ -2937,7 +2937,7 @@ NAME and ARGS are as in `use-package'."
 
    #+begin_src emacs-lisp
 (use-package carbon-now-sh
-  :straight (:host github :repo "spicyriceball/carbon-now-sh.el"))
+  :straight (:host github :repo "shan-emacs/carbon-now-sh.el"))
    #+end_src
 
 ** Discord Rich Presence
