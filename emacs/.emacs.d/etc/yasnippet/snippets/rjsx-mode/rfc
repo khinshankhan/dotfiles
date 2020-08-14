@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: rfc
+# key: rfc
+# --
+import React from "react"
+
+const `(capitalize (file-name-sans-extension (buffer-name)))` = ({$1}) => {
+  return <>$2</>
+}
+
+export default `(capitalize (file-name-sans-extension (buffer-name)))`;
