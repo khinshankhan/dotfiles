@@ -1636,12 +1636,12 @@ NAME and ARGS are as in `use-package'."
   :init
   (setq-default sql-indent-offset tab-width))
 
-(defconst shan--org-features '(org-macs)
+(defconst shan--org-features '(org-macs org-compat ol)
   "Features that may have been loaded by builtin Org but we want to use new Org's version.")
 (defconst shan--reload-org-features-p (and (featurep 'org-macs) (s-contains? "usr" (feature-file 'org-macs)))
   "A bit hard-coded, but determines if we have to reload features due to builtin Org features being loaded.")
 
-;; yeet bult in Org path from load-path, so that a new Org path will definitely take precedence
+;; yeet built in Org path from load-path, so that a new Org path will definitely take precedence
 (when-let (orglib (locate-library "org" nil load-path))
   (setq load-path (delete (substring (file-name-directory orglib) 0 -1)
                           load-path)))
