@@ -78,3 +78,6 @@ export PATH="${PATH}:${HOME}/.myscripts"
 
 # weird gtk issue
 export NO_AT_BRIDGE=1
+
+#weird font issues
+export FONTCONFIG_PATH=/etc/fonts
