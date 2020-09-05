@@ -1323,6 +1323,41 @@ NAME and ARGS are as in `use-package'."
   ("\\.jl\\'" . ess-julia-mode)
   ("\\.[rR]\\'" . ess-r-mode))
 
+(use-package scala-mode
+  :mode "\\.s\\(cala\\|bt\\)$"
+  :config
+  (setq scala-indent:align-parameters t
+        ;; indent block comments to first asterix, not second
+        scala-indent:use-javadoc-style t))
+
+(use-package sbt-mode
+  :commands sbt-start sbt-command
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+
+  (defun +scala/open-repl ()
+    "Open a scala repl. Uses `run-scala' if in a sbt project."
+    (interactive)
+    (if (and (require 'sbt-mode nil t)
+             (sbt:find-root))
+        (let ((buffer-name (sbt:buffer-name)))
+          (unless (comint-check-proc buffer-name)
+            (kill-buffer buffer-name))
+          (run-scala)
+          (get-buffer buffer-name))
+      (let* ((buffer-name "*scala-repl")
+             (buffer
+              (if (comint-check-proc buffer-name)
+                  (get-buffer buffer-name)
+                (make-comint-in-buffer "scala-repl" buffer-name "scala"))))
+        (display-buffer buffer)
+        buffer))))
+
 (defconst sh-mode--string-interpolated-variable-regexp
   "{\\$[^}\n\\\\]*\\(?:\\\\.[^}\n\\\\]*\\)*}\\|\\${\\sw+}\\|\\$\\sw+")
 

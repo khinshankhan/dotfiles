@@ -1928,16 +1928,15 @@ NAME and ARGS are as in `use-package'."
 
 ** TODO [#D] Scala
 
-   Enable scala-mode and sbt-mode. Used [[https://scalameta.org/metals/docs/editors/emacs.html][scala metals]].
+   Enable scala-mode and sbt-mode.
 
-   #+begin_src emacs-lisp :tangle off
+   #+begin_src emacs-lisp
 (use-package scala-mode
-  :after (lsp)
   :mode "\\.s\\(cala\\|bt\\)$"
-  :hook
-  (scala-mode . lsp)
   :config
-  (shan--ide-add 'scala-mode #'hydra-lsp/body))
+  (setq scala-indent:align-parameters t
+        ;; indent block comments to first asterix, not second
+        scala-indent:use-javadoc-style t))
 
 (use-package sbt-mode
   :commands sbt-start sbt-command
@@ -1947,7 +1946,25 @@ NAME and ARGS are as in `use-package'."
   (substitute-key-definition
    'minibuffer-complete-word
    'self-insert-command
-   minibuffer-local-completion-map))
+   minibuffer-local-completion-map)
+
+  (defun +scala/open-repl ()
+    "Open a scala repl. Uses `run-scala' if in a sbt project."
+    (interactive)
+    (if (and (require 'sbt-mode nil t)
+             (sbt:find-root))
+        (let ((buffer-name (sbt:buffer-name)))
+          (unless (comint-check-proc buffer-name)
+            (kill-buffer buffer-name))
+          (run-scala)
+          (get-buffer buffer-name))
+      (let* ((buffer-name "*scala-repl")
+             (buffer
+              (if (comint-check-proc buffer-name)
+                  (get-buffer buffer-name)
+                (make-comint-in-buffer "scala-repl" buffer-name "scala"))))
+        (display-buffer buffer)
+        buffer))))
    #+end_src
 
 ** Shell
