@@ -172,6 +172,8 @@ Another Opinionated Emacs Configuration
   :demand t)
 (use-package s
   :demand t)
+(use-package string-inflection
+  :demand t)
 (require 'loadhist)
    #+end_src
 
