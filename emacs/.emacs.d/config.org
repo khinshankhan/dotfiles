@@ -2474,7 +2474,7 @@ NAME and ARGS are as in `use-package'."
 ** New Org
 
    #+begin_src emacs-lisp
-(defconst shan--org-features '(org-macs org-compat ol)
+(defconst shan--org-features '(org-macs org-compat ol ob-exp)
   "Features that may have been loaded by builtin Org but we want to use new Org's version.")
 (defconst shan--reload-org-features-p (and (featurep 'org-macs) (s-contains? "usr" (feature-file 'org-macs)))
   "A bit hard-coded, but determines if we have to reload features due to builtin Org features being loaded.")

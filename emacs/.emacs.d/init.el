@@ -62,6 +62,8 @@
   :demand t)
 (use-package s
   :demand t)
+(use-package string-inflection
+  :demand t)
 (require 'loadhist)
 
 (defconst custom-file (concat user-emacs-directory "custom.el"))
@@ -1671,7 +1673,7 @@ NAME and ARGS are as in `use-package'."
   :init
   (setq-default sql-indent-offset tab-width))
 
-(defconst shan--org-features '(org-macs org-compat ol)
+(defconst shan--org-features '(org-macs org-compat ol ob-exp)
   "Features that may have been loaded by builtin Org but we want to use new Org's version.")
 (defconst shan--reload-org-features-p (and (featurep 'org-macs) (s-contains? "usr" (feature-file 'org-macs)))
   "A bit hard-coded, but determines if we have to reload features due to builtin Org features being loaded.")
