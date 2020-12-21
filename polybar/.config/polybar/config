@@ -39,6 +39,8 @@ modules-right = battery date
 tray-position = right
 tray-padding = 0
 
+enable-ipc = true
+
 ;== Workspace Numbers ========================================================
 [module/workspaces]
 type = internal/i3
