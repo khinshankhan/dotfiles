@@ -70,6 +70,11 @@ test -s "$HOME/.kiex/scripts/kiex" && source "$HOME/.kiex/scripts/kiex"
 . /home/shan/.erlang_vm/23.0/activate &> /dev/null
 kiex use 1.10.3 &> /dev/null
 
+# coursier install directory
+export PATH="$PATH:/home/shan/.local/share/coursier/bin"
+
+# haskell
+[ -f "/home/shan/.ghcup/env" ] && source "/home/shan/.ghcup/env" # ghcup-env
 
 # some folders than should contain executable files
 export PATH="${PATH}:${HOME}/bin"
