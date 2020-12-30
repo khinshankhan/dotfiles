@@ -43,8 +43,8 @@ Another Opinionated Emacs Configuration
 - [[#package-setup][Package Setup]]
   - [[#path-to-this-file][Path to this File]]
   - [[#package-installer][Package Installer]]
+  - [[#better-straight][Better straight]]
   - [[#package-paths][Package Paths]]
-  - [[#shell-paths][Shell Paths]]
 - [[#tricks-n-gimmicks-for-sweeter-configuration][Tricks n Gimmicks for Sweeter Configuration]]
   - [[#helpful-libraries][Helpful Libraries]]
   - [[#personal-variables][Personal Variables]]
@@ -137,6 +137,10 @@ Another Opinionated Emacs Configuration
   - [[#pdf][PDF]]
 - [[#hobbies][Hobbies]]
   - [[#medical][Medical]]
+- [[#os][OS]]
+  - [[#shell-paths][Shell Paths]]
+  - [[#copying][Copying]]
+  - [[#macos][MacOS]]
 - [[#community][Community]]
   - [[#browser][Browser]]
   - [[#key-frequency][Key Frequency]]
@@ -225,22 +229,45 @@ Another Opinionated Emacs Configuration
 (straight-use-package 'use-package)
    #+end_src
 
+** Better straight
+
+   #+begin_src emacs-lisp
+(defvar shan--loaded-packages '()
+  "List containing loaded packages.")
+
+(defmacro package! (name &rest args)
+  "Like `use-package', but cooler since it also tracks which packages were loaded.
+NAME and ARGS are as in `use-package'."
+  (declare (indent defun))
+  (add-to-list 'shan--loaded-packages name)
+  `(use-package ,name
+     ,@args))
+
+(defmacro feature! (name &rest args)
+  "Like `use-package', but with `straight-use-package-by-default' disabled.
+NAME and ARGS are as in `use-package'."
+  (declare (indent defun))
+  (add-to-list 'shan--loaded-packages name)
+  `(use-package ,name
+     :straight nil
+     ,@args))
+
+;; (defmacro feature-after! (name wait &rest args)
+;;   "Like `use-package', but with `straight-use-package-by-default' disabled and `with-eval-after-load' on WAIT.
+;; NAME and ARGS are as in `use-package'."
+;;   (declare (indent defun))
+;;   `(with-eval-after-load ',wait
+;;     (feature! ,name ,@args))
+   #+end_src
+
 ** TODO Package Paths
 
    Load this before any other third-party packages to keep init directory clean.
 
    #+begin_src emacs-lisp
-(use-package no-littering
+(package! no-littering
   :init
   (require 'no-littering))
-   #+end_src
-
-** Shell Paths
-
-   #+begin_src emacs-lisp
-(use-package exec-path-from-shell
-  :init
-  (exec-path-from-shell-initialize))
    #+end_src
 
 * Tricks n Gimmicks for Sweeter Configuration
@@ -252,13 +279,13 @@ Another Opinionated Emacs Configuration
    These are just cool libraries I’d like to use during my configuration, or many of the packages use them.
 
    #+begin_src emacs-lisp
-(use-package dash-functional
+(package! dash-functional
   :demand t)
-(use-package f
+(package! f
   :demand t)
-(use-package s
+(package! s
   :demand t)
-(use-package string-inflection
+(package! string-inflection
   :demand t)
 
 (require 'loadhist)
@@ -347,13 +374,13 @@ Another Opinionated Emacs Configuration
    Some macros, the bread and better of lisp right after lists.
 
    #+begin_src emacs-lisp
-(defmacro shan!k-time (&rest body)
+(defmacro k-time! (&rest body)
   "Measure and return the time it takes evaluating BODY."
   `(let ((time (current-time)))
      ,@body
      (float-time (time-since time))))
 
-(defmacro shan--no-hook (f hooks)
+(defmacro no-hook! (f hooks)
   "Call function F while temporarily removing HOOKS."
   `(lambda (&rest args)
      (let ((tbl (cl-loop for hook in ,hooks collect `(,(gensym) . ,hook))))
@@ -364,6 +391,12 @@ Another Opinionated Emacs Configuration
            (apply ,f args)
          (dolist (pair tbl)
            (eval `(setq ,(cdr pair) ,(car pair))))))))
+
+(defmacro with-os! (os &rest body)
+  "Execute BODY if current os is OS."
+  (declare (indent 1))
+  `(when (if (consp ',os) (memq system-type ',os) (eq system-type ',os))
+     ,@body))
    #+end_src
 
    Quality functions...
@@ -475,7 +508,7 @@ Another Opinionated Emacs Configuration
 (defun shan/vanilla-save ()
   "Save file without any hooks applied."
   (interactive)
-  (funcall (shan--no-hook 'save-buffer '(before-save-hook after-save-hook))))
+  (funcall (no-hook! 'save-buffer '(before-save-hook after-save-hook))))
    #+end_src
 
    Some config functions.
@@ -564,7 +597,7 @@ Another Opinionated Emacs Configuration
   "Runs gc and outputs messages if debugging."
   (if shan--k-gc-debug-p
       (message "Garbage Collector has run for %.06fsec"
-               (shan!k-time (garbage-collect)))
+               (k-time! (garbage-collect)))
     (garbage-collect)))
 
 (defun shan--gc-start ()
@@ -599,7 +632,7 @@ Another Opinionated Emacs Configuration
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package unidecode)
+(package! unidecode)
    #+end_src
 
 ** Backups
@@ -657,7 +690,7 @@ Another Opinionated Emacs Configuration
    Doom themes are best esp since I use Doom modeline. Also, Doom Dracula just has better keyword support as far as I’ve seen. It’s also just easy on my eyes.
 
    #+begin_src emacs-lisp
-(use-package doom-themes
+(package! doom-themes
   :demand t
   :config
   (setq doom-vibrant-brighter-comments t
@@ -669,7 +702,7 @@ Another Opinionated Emacs Configuration
    The dark nights sometimes need a little sun. The slight brightness is nice for the eyes.
 
    #+begin_src emacs-lisp
-(use-package solaire-mode
+(package! solaire-mode
   :demand t
   :functions persp-load-state-from-file
   :hook
@@ -698,7 +731,7 @@ Another Opinionated Emacs Configuration
    The cleanest modeline I’ve ever used.
 
    #+begin_src emacs-lisp
-(use-package doom-modeline
+(package! doom-modeline
   :demand t
   :config
   (setq doom-modeline-python-executable "python3"
@@ -713,7 +746,7 @@ Another Opinionated Emacs Configuration
    toggle it off to focus...
 
    #+begin_src emacs-lisp
-(use-package hide-mode-line
+(package! hide-mode-line
   :hook
   ((neotree-mode
     imenu-list-minor-mode
@@ -731,7 +764,7 @@ Another Opinionated Emacs Configuration
     Increases the font in all buffers, great for when I have to use external monitors or present. A bit buggy...
 
     #+begin_src emacs-lisp
-(use-package default-text-scale
+(package! default-text-scale
   :init
   (default-text-scale-mode))
     #+end_src
@@ -741,7 +774,7 @@ Another Opinionated Emacs Configuration
     Useful for zero-ing in on a file for a bit, but keeping the rest of the setup.
 
     #+begin_src emacs-lisp
-(use-package zoom-window
+(package! zoom-window
   :bind
   ("C-z" . zoom-window-zoom)
   :config
@@ -798,9 +831,9 @@ Another Opinionated Emacs Configuration
 ** Splash Screen
 
    #+begin_src emacs-lisp
-(use-package page-break-lines)
+(package! page-break-lines)
 
-(use-package dashboard
+(package! dashboard
   :demand t
   :bind
   (:map dashboard-mode-map
@@ -811,8 +844,8 @@ Another Opinionated Emacs Configuration
   (setq dashboard-banner-logo-title "Do you ever wonder why we're always, like, wearing gloves?"
         dashboard-set-heading-icons t
         dashboard-set-file-icons t
-        dashboard-set-init-info t
         dashboard-center-content t
+        dashboard-set-init-info t
         dashboard-set-footer nil)
 
   ;; (setq dashboard-set-navigator t)
@@ -830,7 +863,13 @@ Another Opinionated Emacs Configuration
                                    'logo))
 
   ;; (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
-  )
+
+  (defun shan--dashboard-set-init-info()
+    (setq dashboard-init-info
+	      (format "%d packages loaded in %s sec."
+		          (length shan--loaded-packages)
+                  (emacs-init-time))))
+  (add-hook 'after-init-hook 'shan--dashboard-set-init-info))
    #+end_src
 
 ** UI
@@ -852,7 +891,7 @@ Another Opinionated Emacs Configuration
     TODO: Need to get to cutomizing [[https://github.com/Malabarba/beacon][this]] later.
 
     #+begin_src emacs-lisp
-(use-package beacon
+(package! beacon
   :hook
   (focus-in . beacon-blink)
   :config
@@ -864,7 +903,7 @@ Another Opinionated Emacs Configuration
 ** General Completion
 
    #+begin_src emacs-lisp
-(use-package ivy
+(package! ivy
   :bind
   ([switch-to-buffer] . ivy-switch-buffer)
   (:map ivy-minibuffer-map
@@ -891,7 +930,7 @@ Another Opinionated Emacs Configuration
 ** Dialog Box
 
    #+begin_src emacs-lisp
-(use-package counsel
+(package! counsel
   :bind
   ("M-x" . counsel-M-x)
   ("C-x C-f" . counsel-find-file)
@@ -909,7 +948,7 @@ Another Opinionated Emacs Configuration
 *** In buffer
 
     #+begin_src emacs-lisp
-(use-package swiper
+(package! swiper
   :bind
   ("C-s" . swiper-isearch)
   ("C-r" . swiper-isearch-backward))
@@ -918,7 +957,7 @@ Another Opinionated Emacs Configuration
 *** Ag
 
     #+begin_src emacs-lisp
-(use-package ag
+(package! ag
   :commands (ag ag-files ag-regexp ag-project ag-dired helm-ag)
   :config (setq ag-highlight-search t
                 ag-reuse-buffers t))
@@ -926,7 +965,7 @@ Another Opinionated Emacs Configuration
 ** Rich Hints
 
    #+begin_src emacs-lisp
-(use-package ivy-rich
+(package! ivy-rich
   :init
   (ivy-rich-mode 1)
   :config
@@ -937,7 +976,7 @@ Another Opinionated Emacs Configuration
 ** Icons
 
    #+begin_src emacs-lisp
-(use-package all-the-icons)
+(package! all-the-icons)
    #+end_src
 
 * General Editing
@@ -945,11 +984,11 @@ Another Opinionated Emacs Configuration
   These guys are almost always active and a series of small things that have become second nature by now.
 
   #+begin_src emacs-lisp
-(use-package rainbow-delimiters
+(package! rainbow-delimiters
   :hook
   (prog-mode . rainbow-delimiters-mode))
 
-(use-package smartparens
+(package! smartparens
   :hook
   (prog-mode . smartparens-mode)
   :custom
@@ -957,14 +996,14 @@ Another Opinionated Emacs Configuration
   :config
   (require 'smartparens-config))
 
-(use-package paren
+(package! paren
   :demand t
   :config
   (setq show-paren-when-point-in-periphery t
         show-paren-when-point-inside-paren t)
   (show-paren-mode t))
 
-(use-package move-text
+(package! move-text
   :config
   (move-text-default-bindings))
   #+end_src
@@ -973,7 +1012,7 @@ Another Opinionated Emacs Configuration
   it's active all the time... but global rainbow may be bad for big or messy files, so watch out!
 
   #+begin_src emacs-lisp
-(use-package rainbow-mode
+(package! rainbow-mode
   :config
   (with-no-warnings
     ;; HACK: Use overlay instead of text properties to override `hl-line' faces.
@@ -1009,7 +1048,7 @@ Another Opinionated Emacs Configuration
   re-bindings). Rest is all me and what I find sane.
 
   #+begin_src emacs-lisp
-(use-package expand-region
+(package! expand-region
   :bind
   ("C-=" . er/expand-region))
 
@@ -1042,7 +1081,7 @@ Another Opinionated Emacs Configuration
   colors from Doom. It seems to break shell mode special operators though…
 
   #+begin_src emacs-lisp
-(use-package hl-todo
+(package! hl-todo
   :hook
   (prog-mode . hl-todo-mode)
   :config
@@ -1059,13 +1098,13 @@ Another Opinionated Emacs Configuration
   Navigation
 
   #+begin_src emacs-lisp
-(use-package avy
+(package! avy
   :bind
   ("C-'" . avy-goto-char-2)
   :custom
   (avy-keys shan--home-row))
 
-(use-package ace-window
+(package! ace-window
   :bind
   ("C-x C-w" . ace-window)
   :custom
@@ -1075,7 +1114,7 @@ Another Opinionated Emacs Configuration
   Helpful for screencasting usually. Sometimes as a sanity check on myself.
 
   #+begin_src emacs-lisp
-(use-package command-log-mode)
+(package! command-log-mode)
   #+end_src
 
 * Bindings
@@ -1092,7 +1131,7 @@ Another Opinionated Emacs Configuration
    Display available keybindings in a popup.
 
    #+begin_src emacs-lisp
-(use-package which-key
+(package! which-key
   :init
   (which-key-mode 1))
 ;; :bind
@@ -1103,7 +1142,7 @@ Another Opinionated Emacs Configuration
 ** TODO Multiple Cursors
 
    #+begin_src emacs-lisp
-(use-package multiple-cursors
+(package! multiple-cursors
   :config
   (global-set-key (kbd "C-S-p") 'mc/mark-previous-like-this)
   (global-set-key (kbd "C-S-n") 'mc/mark-next-like-this)
@@ -1115,13 +1154,13 @@ Another Opinionated Emacs Configuration
 *** Key Chords
 
     #+begin_src emacs-lisp
-(use-package key-chord
+(package! key-chord
   :demand t
   :config
   (setq key-chord-two-keys-delay 0.05)
   (key-chord-mode t))
 
-(use-package use-package-chords
+(package! use-package-chords
   :demand t)
     #+end_src
 
@@ -1140,7 +1179,7 @@ Another Opinionated Emacs Configuration
   |------------+-----------------------+-----------------------+-----------------|
 
   #+begin_src emacs-lisp
-(use-package hydra
+(package! hydra
   :demand t
   :config
   (setq hydra--work-around-dedicated nil
@@ -1150,7 +1189,7 @@ Another Opinionated Emacs Configuration
   :chords
   ("ao" . hydra-leader/body))
 
-(use-package pretty-hydra
+(package! pretty-hydra
   :demand t)
   #+end_src
 
@@ -1319,9 +1358,9 @@ Another Opinionated Emacs Configuration
 ** General Git
 
    #+begin_src emacs-lisp
-(use-package gitattributes-mode)
-(use-package gitignore-mode)
-(use-package gitconfig-mode)
+(package! gitattributes-mode)
+(package! gitignore-mode)
+(package! gitconfig-mode)
    #+end_src
 
 ** Magit
@@ -1329,7 +1368,7 @@ Another Opinionated Emacs Configuration
    Some people download emacs just for magit, it'd be crazy to not use it for vc.
 
    #+begin_src emacs-lisp
-(use-package magit
+(package! magit
   :defer t
   :bind
   (:map magit-status-mode-map
@@ -1343,7 +1382,7 @@ Another Opinionated Emacs Configuration
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package transient
+(package! transient
   :defer t
   :config
   (transient-bind-q-to-quit))
@@ -1354,7 +1393,7 @@ Another Opinionated Emacs Configuration
    Not currently using, but could be powerful in the future. (Should look into gh cli tool)
 
    #+begin_src emacs-lisp :tangle off
-(use-package forge)
+(package! forge)
    #+end_src
 
 * Programming Environment
@@ -1383,7 +1422,7 @@ Another Opinionated Emacs Configuration
 ** Syntax Check
 
    #+begin_src emacs-lisp
-(use-package flycheck
+(package! flycheck
   :init
   (global-flycheck-mode 1)
   :bind (("C-c f" . flycheck-mode))
@@ -1410,8 +1449,8 @@ Another Opinionated Emacs Configuration
 ** Terminal
 
    #+begin_src emacs-lisp
-(use-package vterm)
-(use-package vterm-toggle
+(package! vterm)
+(package! vterm-toggle
   :config
   ;; I like vterm to 'pop up' on the bottom
   ;; if anything, I can use zoom-window-zoom to focus
@@ -1449,7 +1488,7 @@ Another Opinionated Emacs Configuration
    Clean this up.
 
    #+begin_src emacs-lisp
-(use-package company
+(package! company
   :bind
   (:map company-mode-map
         ("C-/" . company-complete))
@@ -1476,7 +1515,7 @@ Another Opinionated Emacs Configuration
    [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] has much potential, hopefully it gets even better. For now, this configuration is great.
 
    #+begin_src emacs-lisp
-(use-package lsp-mode
+(package! lsp-mode
   :bind
   (:map lsp-mode-map
         ([remap xref-find-definitions] . lsp-find-definition)
@@ -1492,7 +1531,7 @@ Another Opinionated Emacs Configuration
   (lsp-prefer-capf t)
   (lsp-print-io nil)) ; debug?
 
-(use-package lsp-ui
+(package! lsp-ui
   :after (lsp-mode)
   :hook
   (lsp-mode . lsp-ui-mode)
@@ -1514,25 +1553,24 @@ Another Opinionated Emacs Configuration
 
 ** Debuggers
 
-   Great for debugging... once you learn how to use a debugger. Don't worry about eager expansion errors.
+   Great for debugging... once you learn how to use a debugger.
 
-   #+begin_src emacs-lisp :tangle off
-(use-package dap-mode
-  :after (hydra)
-  :hook
-  (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
-  ;; FIXME: super broken with straight
-  ;; :config
-  ;; (use-package dap-hydra
-  ;;   :straight nil
-  ;;   :config
-  ;;   (defhydra+ dap-hydra (:exit nil :foreign-keys run)
-  ;;     ("d" dap-debug "Start debug session"))
-  ;;   (pretty-hydra-define+ hydra-lsp ()
-  ;;     (;; these heads are added to the existing " Exit" column
-  ;;      " Exit"
-  ;;      (("SPC" dap-hydra "dap")))))
-  )
+   #+begin_src emacs-lisp
+(package! dap-mode
+  :after (hydra))
+
+(feature! dap-hydra
+  :after (hydra dap-mode))
+
+(with-eval-after-load 'dap-hydra
+  ;; add start dap debug within hydra because convenience is key
+  (defhydra+ dap-hydra (:exit nil :foreign-keys run)
+    ("d" dap-debug "Start debug session"))
+
+  (pretty-hydra-define+ hydra-lsp ()
+    (;; these heads are added to the existing " Exit" column in hydra-lsp
+     " Exit"
+     (("SPC" dap-hydra "dap")))))
    #+end_src
 
 ** Treemacs
@@ -1540,23 +1578,23 @@ Another Opinionated Emacs Configuration
    Sneaky on Dreameh.
 
    #+begin_src emacs-lisp
-(use-package treemacs
+(package! treemacs
   :bind (:map global-map
               ("C-x t t" . treemacs)
               ("C-x t 1" . treemacs-select-window))
   :config
   (setq treemacs-resize-icons 4))
 
-(use-package lsp-treemacs
+(package! lsp-treemacs
   :init (lsp-treemacs-sync-mode 1))
 
-(use-package treemacs-projectile
+(package! treemacs-projectile
   :after treemacs projectile)
 
-(use-package treemacs-magit
+(package! treemacs-magit
   :after treemacs magit)
 
-(use-package treemacs-icons-dired
+(package! treemacs-icons-dired
   :after treemacs dired
   :config (treemacs-icons-dired-mode))
    #+end_src
@@ -1564,7 +1602,7 @@ Another Opinionated Emacs Configuration
 ** Projectile
 
    #+begin_src emacs-lisp
-(use-package projectile
+(package! projectile
   :bind
   (:map projectile-mode-map
         ("C-c p" . projectile-command-map))
@@ -1579,7 +1617,7 @@ Another Opinionated Emacs Configuration
   :config
   (projectile-mode t))
 
-(use-package counsel-projectile
+(package! counsel-projectile
   :disabled
   :after
   (counsel projectile)
@@ -1599,7 +1637,7 @@ Another Opinionated Emacs Configuration
 ** TODO [#A] ASM
 
    #+begin_src emacs-lisp
-(use-package asm-mode
+(package! asm-mode
   :mode "\\.as\\'"
   :bind (:map asm-mode-map
               ("<f5>" . #'compile)))
@@ -1608,21 +1646,20 @@ Another Opinionated Emacs Configuration
 *** MIPS
 
     #+begin_src emacs-lisp
-(use-package mips-mode
+(package! mips-mode
   :mode "\\.mips$")
     #+end_src
 
 ** TODO C/ C++
 
    #+begin_src emacs-lisp
-(use-package company-c-headers
+(package! company-c-headers
   :config
   (add-to-list 'company-backends 'company-c-headers))
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package cc-mode
-  :straight nil
+(feature! cc-mode
   :hook
   ((c-mode c++-mode) . lsp)
   :custom
@@ -1636,15 +1673,15 @@ Another Opinionated Emacs Configuration
   (shan--ide-add 'c++-mode #'hydra-lsp/body))
    #+end_src
 
-   #+begin_src emacs-lisp :tangle off
-(use-package dap-gdb-lldb
-  :straight nil)
+   #+begin_src emacs-lisp
+(with-eval-after-load 'dap-hydra
+  (feature! dap-gdb-lldb))
    #+end_src
 
    Provides syntax highliting support for modern C++
 
    #+begin_src emacs-lisp
-(use-package modern-cpp-font-lock
+(package! modern-cpp-font-lock
   :hook
   (c++-mode . modern-c++-font-lock-mode))
    #+end_src
@@ -1652,9 +1689,9 @@ Another Opinionated Emacs Configuration
 ** Clojure
 
    #+begin_src emacs-lisp
-(use-package clojure-mode)
+(package! clojure-mode)
 
-(use-package cider
+(package! cider
   :bind
   (:map cider-repl-mode-map
         ("C-l" . cider-repl-clear-buffer))
@@ -1665,7 +1702,7 @@ Another Opinionated Emacs Configuration
   (cider-repl-display-in-current-window nil)
   (cider-font-lock-dynamically t))
 
-(use-package elein)
+(package! elein)
    #+end_src
 
 ** TODO Dart/ Flutter
@@ -1673,7 +1710,7 @@ Another Opinionated Emacs Configuration
    Add lsp integration.
 
    #+begin_src emacs-lisp
-(use-package dart-mode
+(package! dart-mode
   :hook
   (dart-mode . lsp)
   :custom
@@ -1682,7 +1719,7 @@ Another Opinionated Emacs Configuration
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package flutter
+(package! flutter
   :after dart-mode
   :bind (:map dart-mode-map
               ("C-M-x" . #'flutter-run-or-hot-reload))
@@ -1691,7 +1728,7 @@ Another Opinionated Emacs Configuration
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package flutter-l10n-flycheck
+(package! flutter-l10n-flycheck
   :after flutter
   :config
   (flutter-l10n-flycheck-setup))
@@ -1700,17 +1737,19 @@ Another Opinionated Emacs Configuration
 ** TODO Elixir
 
    #+begin_src emacs-lisp
-(use-package elixir-mode
+(package! elixir-mode
   :init
   (add-hook 'elixir-mode-hook #'company-mode))
 
-(use-package alchemist)
+(package! alchemist)
    #+end_src
 
 ** Golang
 
+   Usually I'm lazy and install/ update the toolchain using VSC, should probably figure out a non VSC way...
+
    #+begin_src emacs-lisp
-(use-package go-mode
+(package! go-mode
   :if (executable-find "go")
   :hook
   (go-mode . lsp)
@@ -1724,10 +1763,10 @@ Another Opinionated Emacs Configuration
   :config
   (add-hook 'before-save-hook #'gofmt-before-save)
 
-  (use-package gotest
+  (package! gotest
     :after go)
 
-  (use-package go-tag
+  (package! go-tag
     :after go
     :config
     (setq go-tag-args (list "-transform" "camelcase")))
@@ -1735,12 +1774,17 @@ Another Opinionated Emacs Configuration
   (shan--ide-add 'go-mode #'hydra-lsp/body))
    #+end_src
 
+   #+begin_src emacs-lisp
+(with-eval-after-load 'dap-hydra
+  (feature! dap-go))
+   #+end_src
+
 ** TODO [#C] Haskell
 
    Play with this.
 
    #+begin_src emacs-lisp
-(use-package haskell-mode
+(package! haskell-mode
   :if (executable-find "ghc")
   :mode "\\.hs\\'"
   :config
@@ -1750,7 +1794,7 @@ Another Opinionated Emacs Configuration
 ** Java
 
    #+begin_src emacs-lisp
-(use-package lsp-java
+(package! lsp-java
   :after (lsp)
   :hook (java-mode . lsp)
   :bind (:map java-mode-map
@@ -1761,7 +1805,7 @@ Another Opinionated Emacs Configuration
   (shan--ide-add 'java-mode #'hydra-lsp/body))
 
 ;; Gradle
-(use-package gradle-mode
+(package! gradle-mode
   :hook (java-mode . (lambda () (gradle-mode 1)))
   :config
   (defun build-and-run()
@@ -1769,7 +1813,7 @@ Another Opinionated Emacs Configuration
     (gradle-run "build run"))
   (define-key gradle-mode-map (kbd "C-c C-r") 'build-and-run))
 
-(use-package mvn
+(package! mvn
   :config
   (ignore-errors
     (require 'ansi-colors)
@@ -1784,7 +1828,7 @@ Another Opinionated Emacs Configuration
 ** Jupyter
 
    #+begin_src emacs-lisp
-(use-package ein
+(package! ein
   :mode
   (".*\\.ipynb\\'" . ein:ipynb-mode)
   :custom
@@ -1794,14 +1838,16 @@ Another Opinionated Emacs Configuration
 
 ** TODO [#B] Kotlin
 
+   Kotlin lsp is a hot mess.
+
    #+begin_src emacs-lisp :tangle off
-(use-package kotlin-mode
+(package! kotlin-mode
   :mode ("\\.kt\\'" . kotlin-mode)
   :hook (kotlin-mode . lsp)
   :config
   (setq lsp-kotlin-language-server-path shan--kotlin-path))
 
-(use-package flycheck-kotlin
+(package! flycheck-kotlin
   :config
   (flycheck-kotlin-setup))
    #+end_src
@@ -1814,12 +1860,12 @@ Another Opinionated Emacs Configuration
     for writing my own package or debugging someone else's package.
 
     #+begin_src emacs-lisp
-(use-package bug-hunter)
+(package! bug-hunter)
     #+end_src
 
 ** Lua
    #+begin_src emacs-lisp
-(use-package lua-mode
+(package! lua-mode
   :after (company)
   :mode
   (("\\.lua\\'" . lua-mode))
@@ -1827,10 +1873,10 @@ Another Opinionated Emacs Configuration
   (lua-mode . company-mode))
    #+end_src
 
-** OCaml
+** TODO OCaml
 
    #+begin_src emacs-lisp
-(use-package tuareg
+(package! tuareg
   :if (and (executable-find "ocaml")
            (executable-find "npm")
            t)
@@ -1855,7 +1901,7 @@ Another Opinionated Emacs Configuration
    A reasonable guess.
 
    #+begin_src emacs-lisp
-(use-package pip-requirements
+(package! pip-requirements
   :mode
   ("requirements\\.txt" . pip-requirements-mode)
   :init
@@ -1865,30 +1911,19 @@ Another Opinionated Emacs Configuration
    Remember to install pyls.
 
    #+begin_src emacs-lisp
-
-(use-package python
+(package! python
   :ensure nil
+  :hook
+  (python-mode . lsp)
   :custom
   (python-indent 4)
-  (py-split-window-on-execute t))
-
-;; Required for MacOS, prevents newlines from being displayed as ^G
-(setq python-shell-interpreter-args (if (equal system-type 'darwin)
-					                    "-c \"exec('__import__(\\'readline\\')')\" -i"
-				                      "-i"))
-
-(use-package pyvenv
-  :after python
-  :hook
-  (python-mode . pyvenv-mode))
-
-(use-package cython-mode)
-(use-package flycheck-cython
-  :after flycheck
+  (py-split-window-on-execute t)
   :config
-  (add-to-list 'flycheck-checkers 'cython))
-
-(add-hook 'python-mode-hook #'lsp)
+  ;; Required for MacOS, prevents newlines from being displayed as ^G
+  (setq python-shell-interpreter-args (if (equal system-type 'darwin)
+					                      "-c \"exec('__import__(\\'readline\\')')\" -i"
+				                        "-i"))
+  (shan--ide-add 'python-mode #'hydra-lsp/body))
 
 (with-eval-after-load 'lsp-mode
   (setq lsp-pyls-plugins-autopep8-enabled nil
@@ -1898,15 +1933,23 @@ Another Opinionated Emacs Configuration
         lsp-pyls-plugins-pyflakes-enabled nil
         lsp-pyls-plugins-yapf-enabled nil))
 
-(shan--ide-add 'python-mode #'hydra-lsp/body)
+(package! pyvenv
+  :after python
+  :hook
+  (python-mode . pyvenv-mode))
+
+(package! cython-mode)
+(package! flycheck-cython
+  :after flycheck
+  :config
+  (add-to-list 'flycheck-checkers 'cython))
    #+end_src
 
-   #+begin_src emacs-lisp :tangle off
-(use-package dap-python
-  :straight nil
-  :after dap-mode
-  :custom
-  (dap-python-executable shan/python-executable))
+   #+begin_src emacs-lisp
+(with-eval-after-load 'dap-hydra
+  (feature! dap-python
+    :custom
+    (dap-python-executable shan/python-executable)))
    #+end_src
 
 ** TODO R & Julia
@@ -1914,7 +1957,7 @@ Another Opinionated Emacs Configuration
    Refine this. Perhaps use jupyter stuff.
 
    #+begin_src emacs-lisp
-(use-package ess
+(package! ess
   :defer t
   :mode
   ("\\.jl\\'" . ess-julia-mode)
@@ -1926,14 +1969,14 @@ Another Opinionated Emacs Configuration
    Enable scala-mode and sbt-mode.
 
    #+begin_src emacs-lisp
-(use-package scala-mode
+(package! scala-mode
   :mode "\\.s\\(cala\\|bt\\)$"
   :config
   (setq scala-indent:align-parameters t
         ;; indent block comments to first asterix, not second
         scala-indent:use-javadoc-style t))
 
-(use-package sbt-mode
+(package! sbt-mode
   :commands sbt-start sbt-command
   :config
   ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
@@ -1984,15 +2027,17 @@ Another Opinionated Emacs Configuration
                         `((sh-mode--string-interpolated-variable-font-lock-find))
                         'append)
 
-(use-package sh-script
+(package! sh-script
   :mode
   ("\\.env\\'" . sh-mode))
    #+end_src
 
 ** TODO [#D] Swift
 
+   Figure out maybe when I actually code some swift(?)
+
    #+begin_src emacs-lisp :tangle off
-(use-package swift-mode
+(package! swift-mode
   :mode
   ("\\.swift\\'" . swift-mode))
    #+end_src
@@ -2000,7 +2045,7 @@ Another Opinionated Emacs Configuration
    Seems swift needs special flycheck support. Need to set executable path later.
 
    #+begin_src emacs-lisp :tangle off
-(use-package flycheck-swift
+(package! flycheck-swift
   :after flycheck
   :config
   (flycheck-swift-setup))
@@ -2009,7 +2054,7 @@ Another Opinionated Emacs Configuration
    Figuring this out
 
    #+begin_src emacs-lisp :tangle off
-(use-package company-sourcekit
+(package! company-sourcekit
   :config
   (add-to-list 'company-backends 'company-sourcekit))
    #+end_src
@@ -2023,7 +2068,7 @@ Another Opinionated Emacs Configuration
    The cleanest part of webdev: testing endpoints within emacs.
 
    #+begin_src emacs-lisp
-(use-package restclient
+(package! restclient
   :mode
   ("\\.http\\'" . restclient-mode))
    #+end_src
@@ -2033,7 +2078,7 @@ Another Opinionated Emacs Configuration
    Learn about [[http://web-mode.org/][web-mode]]
 
    #+begin_src emacs-lisp
-(use-package web-mode
+(package! web-mode
   :mode
   (("\\.html?\\'"       . web-mode)
    ("\\.phtml\\'"       . web-mode)
@@ -2073,7 +2118,7 @@ Another Opinionated Emacs Configuration
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package emmet-mode
+(package! emmet-mode
   :hook
   ((css-mode  . emmet-mode)
    (php-mode  . emmet-mode)
@@ -2087,7 +2132,7 @@ Another Opinionated Emacs Configuration
    These two are probably the hardest configuration to get properly solely because of "standards".
 
    #+begin_src emacs-lisp
-(use-package typescript-mode
+(package! typescript-mode
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
@@ -2101,14 +2146,14 @@ Another Opinionated Emacs Configuration
     Makes emacs use the node modules. Especially helpful for versions of tools and for stuff like prettier.
 
     #+begin_src emacs-lisp
-(use-package add-node-modules-path
+(package! add-node-modules-path
   :hook
   ((web-mode . add-node-modules-path)
    (rjsx-mode . add-node-modules-path)))
     #+end_src
 
     #+begin_src emacs-lisp
-(use-package prettier-js
+(package! prettier-js
   :hook
   ((js-mode . prettier-js-mode)
    (typescript-mode . prettier-js-mode)
@@ -2116,7 +2161,7 @@ Another Opinionated Emacs Configuration
     #+end_src
 
     #+begin_src emacs-lisp
-(use-package tide
+(package! tide
   :after
   (typescript-mode js2-mode company flycheck)
   :hook
@@ -2131,7 +2176,7 @@ Another Opinionated Emacs Configuration
 *** TODO React
 
     #+begin_src emacs-lisp
-(use-package rjsx-mode
+(package! rjsx-mode
   :mode
   (("\\.js\\'"   . rjsx-mode)
    ("\\.jsx\\'"  . rjsx-mode)
@@ -2143,16 +2188,16 @@ Another Opinionated Emacs Configuration
     #+end_src
 
     #+begin_src emacs-lisp
-(use-package react-snippets
+(package! react-snippets
   :after yasnippet)
     #+end_src
 
 *** TODO Vue
 
     #+begin_src emacs-lisp
-(use-package vue-html-mode)
+(package! vue-html-mode)
 
-(use-package vue-mode
+(package! vue-mode
   :defer t
   :mode
   (("\\.vue\\'"  . vue-mode)))
@@ -2167,7 +2212,7 @@ Another Opinionated Emacs Configuration
 *** Artist
 
     #+begin_src emacs-lisp
-(use-package artist
+(package! artist
   :config
   ;; this is from emacswiki
   (defun shan/artist-ido-select-operation (type)
@@ -2222,9 +2267,9 @@ Another Opinionated Emacs Configuration
 *** GNU Plot
 
     #+begin_src emacs-lisp
-(use-package gnuplot)
+(package! gnuplot)
 
-(use-package gnuplot-mode
+(package! gnuplot-mode
   :mode
   ("\\.gp\\'" "\\.gnuplot\\'"))
     #+end_src
@@ -2232,7 +2277,7 @@ Another Opinionated Emacs Configuration
 *** Mermaid
 
     #+begin_src emacs-lisp
-(use-package mermaid-mode
+(package! mermaid-mode
   :if (executable-find "mmdc")
   :mode
   (("\\.mmd\\'" . mermaid-mode)
@@ -2244,7 +2289,7 @@ Another Opinionated Emacs Configuration
 *** PlantUML
 
     #+begin_src emacs-lisp
-(use-package plantuml-mode
+(package! plantuml-mode
   :if (file-exists-p shan--plantuml-path)
   :mode
   ("\\.\\(plant\\)?uml\\'" . plantuml-mode)
@@ -2261,13 +2306,13 @@ Another Opinionated Emacs Configuration
 *** CSV
 
     #+begin_src emacs-lisp
-(use-package csv-mode)
+(package! csv-mode)
     #+end_src
 
 *** dhall
 
     #+begin_src emacs-lisp
-(use-package dhall-mode)
+(package! dhall-mode)
     #+end_src
 
 *** TODO [#A] Editor Config
@@ -2275,7 +2320,7 @@ Another Opinionated Emacs Configuration
     Make this work
 
     #+begin_src emacs-lisp
-(use-package editorconfig
+(package! editorconfig
   :hook
   ((prog-mode text-mode) . editorconfig-mode)
   :config
@@ -2285,7 +2330,7 @@ Another Opinionated Emacs Configuration
 *** Groovy
 
     #+begin_src emacs-lisp
-(use-package groovy-mode
+(package! groovy-mode
   :defer t
   :mode
   (("\\.groovy$" . groovy-mode)
@@ -2295,7 +2340,7 @@ Another Opinionated Emacs Configuration
 *** Info
 
     #+begin_src emacs-lisp
-(use-package info
+(package! info
   :mode
   ("\\.info\\'" . info-mode))
     #+end_src
@@ -2303,7 +2348,7 @@ Another Opinionated Emacs Configuration
 *** Json
 
     #+begin_src emacs-lisp
-(use-package json-mode
+(package! json-mode
   :mode
   ("\\.json\\'" . json-mode)
   :init
@@ -2319,11 +2364,11 @@ Another Opinionated Emacs Configuration
     Thinking about markdown hydra
 
     #+begin_src emacs-lisp
-(use-package markdown-mode
+(package! markdown-mode
   :mode
   ("\\.\\(md\\|markdown\\)\\'" . markdown-mode))
 
-(use-package markdown-preview-mode
+(package! markdown-preview-mode
   :if (executable-find "pandoc")
   :after (markdown-mode)
   :custom
@@ -2361,7 +2406,7 @@ Another Opinionated Emacs Configuration
 *** pkgbuilds
 
     #+begin_src emacs-lisp
-(use-package pkgbuild-mode
+(package! pkgbuild-mode
   :mode
   (("/PKGBUILD/" . pkgbuild-mode)))
     #+end_src
@@ -2369,13 +2414,13 @@ Another Opinionated Emacs Configuration
 *** Protocol Buffer
 
     #+begin_src emacs-lisp
-(use-package protobuf-mode)
+(package! protobuf-mode)
     #+end_src
 
 *** Toml
 
     #+begin_src emacs-lisp
-(use-package toml-mode)
+(package! toml-mode)
     #+end_src
 
 *** YAML
@@ -2384,12 +2429,12 @@ Another Opinionated Emacs Configuration
     like newline in a markdown, you have 2 trailing spaces), hence the hook.
 
     #+begin_src emacs-lisp
-(use-package yaml-mode
+(package! yaml-mode
   :bind
   (:map yaml-mode-map
         ("C-x C-s" . shan/vanilla-save)))
 
-(use-package flycheck-yamllint
+(package! flycheck-yamllint
   :hook
   (flycheck-mode . flycheck-yamllint-setup))
     #+end_src
@@ -2401,7 +2446,7 @@ Another Opinionated Emacs Configuration
     Figure this out
 
     #+begin_src emacs-lisp
-(use-package dockerfile-mode
+(package! dockerfile-mode
   :mode
   (("Dockerfile'"       . dockerfile-mode)
    ("\\.Dockerfile\\'"  . dockerfile-mode))
@@ -2409,7 +2454,7 @@ Another Opinionated Emacs Configuration
   (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook))
 
 ;; Emacs interface to docker
-(use-package docker)
+(package! docker)
     #+end_src
 
 *** TODO [#D] Kubernetes
@@ -2417,7 +2462,7 @@ Another Opinionated Emacs Configuration
     k8s stuff
 
     #+begin_src emacs-lisp
-(use-package kubernetes
+(package! kubernetes
   :commands
   (kubernetes-overview))
     #+end_src
@@ -2427,9 +2472,9 @@ Another Opinionated Emacs Configuration
 *** GraphQL
 
     #+begin_src emacs-lisp
-(use-package graphql)
+(package! graphql)
 
-(use-package graphql-mode
+(package! graphql-mode
   :mode
   (("\\.\\(gql\\|graphql\\)\\'" . graphql-mode))
   :config
@@ -2447,14 +2492,14 @@ Another Opinionated Emacs Configuration
 *** SQL
 
     #+begin_src emacs-lisp
-(use-package sql
+(package! sql
   :mode
   (("\\.\\(sql\\|psql\\|hql\\|mysql\\|q\\)\\'" . sql-mode))
   :hook
   (sql-mode . (lambda ()
                 (sql-highlight-mysql-keywords))))
 
-(use-package sql-indent
+(package! sql-indent
   :init
   (setq-default sql-indent-offset tab-width))
     #+end_src
@@ -2493,7 +2538,7 @@ Another Opinionated Emacs Configuration
 
 (add-hook 'straight-use-package-pre-build-functions '+org-fix-package-h)
 
-(use-package org
+(package! org
   :straight (org-mode
              :host github
              :repo "emacs-straight/org-mode"
@@ -2517,7 +2562,7 @@ Another Opinionated Emacs Configuration
       org-pretty-entities t
       org-hide-emphasis-markers t
       org-support-shift-select t)
-;; (use-package ob-ipython)
+;; (package! ob-ipython)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -2546,7 +2591,8 @@ Another Opinionated Emacs Configuration
                                                        ("js" . "src js\n")
                                                        ("py" . "src python\n")
                                                        ("r" . "src R\n")
-                                                       ("sh" . "src shell\n")))
+                                                       ("sh" . "src shell\n")
+                                                       ("sc" . "src scala\n")))
    #+end_src
 
 ** TODO Bullets
@@ -2554,11 +2600,11 @@ Another Opinionated Emacs Configuration
    This might be a bottle neck actually.
 
    #+begin_src emacs-lisp
-(use-package toc-org
+(package! toc-org
   :hook
   (org-mode . toc-org-enable))
 
-(use-package org-bullets
+(package! org-bullets
   :hook
   (org-mode . org-bullets-mode)
   :config
@@ -2585,23 +2631,23 @@ Another Opinionated Emacs Configuration
 ** Exports
 
    #+begin_src emacs-lisp
-(use-package px)
+(package! px)
 
-(use-package ox-gfm
+(package! ox-gfm
   :after (org))
 
-(use-package ox-pandoc)
+(package! ox-pandoc)
    #+end_src
 
 ** Reveal.js
 
    #+begin_src emacs-lisp
-(use-package ox-reveal
+(package! ox-reveal
   :custom
   (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
   (org-reveal-mathjax t))
 
-(use-package htmlize)
+(package! htmlize)
    #+end_src
 
 ** Priorities
@@ -2614,7 +2660,7 @@ Another Opinionated Emacs Configuration
    - Sky blue: OPTIONAL
 
    #+begin_src emacs-lisp
-(use-package org-fancy-priorities
+(package! org-fancy-priorities
   :diminish
   :defines org-fancy-priority-list
   :hook (org-mode . org-fancy-priorities-mode)
@@ -2632,14 +2678,14 @@ Another Opinionated Emacs Configuration
 ** Yasnippet
 
    #+begin_src emacs-lisp
-(use-package yasnippet
+(package! yasnippet
   :config
-  (use-package yasnippet-snippets)
+  (package! yasnippet-snippets)
   (yas-global-mode 1))
    #+end_src
 
    #+begin_src
-(use-package auto-yasnippet)
+(package! auto-yasnippet)
    #+end_src
 
 ** Orthography
@@ -2647,7 +2693,7 @@ Another Opinionated Emacs Configuration
 *** Grammar
 
     #+begin_src
-(use-package langtool
+(package! langtool
   :init
   (setq langtool-default-language "en-US")
   (setq langtool-mother-tongue "en")
@@ -2657,11 +2703,11 @@ Another Opinionated Emacs Configuration
 *** Spelling
 
     #+begin_src emacs-lisp
-(use-package flyspell
+(package! flyspell
   :hook ((text-mode . flyspell-mode)
          (prog-mode . flyspell-prog-mode)))
 
-(use-package flyspell-popup
+(package! flyspell-popup
   :preface
   ;; move point to previous error
   ;; based on code by hatschipuh at
@@ -2727,7 +2773,7 @@ Another Opinionated Emacs Configuration
    I'm starting to think a hydra for things that can be toggled..
 
    #+begin_src emacs-lisp
-(use-package olivetti
+(package! olivetti
   :diminish
   :bind
   ("<f7>" . olivetti-mode)
@@ -2738,7 +2784,7 @@ Another Opinionated Emacs Configuration
 ** TODO LaTeX
 
    #+begin_src emacs-lisp
-(use-package tex
+(package! tex
   :straight auctex
   :mode
   ("\\.tex\\'" . LaTeX-mode)
@@ -2750,7 +2796,7 @@ Another Opinionated Emacs Configuration
   ;; interestingly enough, auto ide doesnt like the latex formatted latex
   (shan--ide-add 'latex-mode #'hydra-latex/body))
 
-(use-package auctex-latexmk
+(package! auctex-latexmk
   :hook
   (LaTeX-mode . flymake-mode)
   :init
@@ -2768,11 +2814,11 @@ Another Opinionated Emacs Configuration
           (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
   (setq auctex-latexmk-inherit-TeX-PDF-mode t))
 
-(use-package cdlatex
+(package! cdlatex
   :hook
   (LaTeX-mode . turn-on-cdlatex))
 
-(use-package company-auctex
+(package! company-auctex
   :after (auctex company)
   :config
   (company-auctex-init))
@@ -2781,14 +2827,14 @@ Another Opinionated Emacs Configuration
    Completion back-ends for math unicode sysmbols and latex tags
 
    #+begin_src emacs-lisp
-(use-package company-math
+(package! company-math
   :after (auctex company)
   :config
   (add-to-list 'company-backends 'company-math-symbols-unicode))
    #+end_src
 
    #+begin_src emacs-lisp
-(use-package reftex
+(package! reftex
   :after auctex
   :custom
   (reftex-plug-into-AUCTeX t)
@@ -2801,7 +2847,7 @@ Another Opinionated Emacs Configuration
    Maybe use =olivetti= in unison here. Also... possibly auto ide hydra?
 
    #+begin_src emacs-lisp
-(use-package nov
+(package! nov
   :after (olivetti)
   :mode
   ("\\.epub\\'" . nov-mode)
@@ -2829,7 +2875,7 @@ Another Opinionated Emacs Configuration
 *** Basic PDF
 
     #+begin_src emacs-lisp
-(use-package pdf-view
+(package! pdf-view
   :if shan--personal?
   :straight pdf-tools
   :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
@@ -2904,7 +2950,7 @@ Another Opinionated Emacs Configuration
 
     #+begin_src emacs-lisp
 (when (>= emacs-major-version 26)
-  (use-package pdf-view-restore
+  (package! pdf-view-restore
     :if (featurep 'pdf-view)
     :hook (pdf-view-mode . pdf-view-restore-mode)
     :init (setq pdf-view-restore-filename
@@ -2920,8 +2966,55 @@ Another Opinionated Emacs Configuration
    This requires =unidecode=. A rather edgy package, emacs hangs a lot.
 
    #+begin_src emacs-lisp
-(use-package pubmed
+(package! pubmed
   :commands (pubmed-search pubmed-advanced-search))
+   #+end_src
+
+* OS
+
+  Some final OS specific touch ups
+
+** TODO Shell Paths
+
+   Consider building out =exec-path-from-shell-variables= using packages(?)
+
+   #+begin_src emacs-lisp
+(with-os! (gnu/linux darwin)
+  (package! exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize)))
+   #+end_src
+
+** TODO Copying
+
+   pbcopy is tricky...
+
+   #+begin_src emacs-lisp
+(with-os! gnu/linux
+  (package! xclip
+    :config
+    (xclip-mode 1)))
+
+;; (with-os! darwin
+;; (package! pbcopy))
+   #+end_src
+
+** MacOS
+
+   Some sane defaults for mac... supposedly. Nothing is ever sane with you're not in the same env.
+
+   #+begin_src emacs-lisp
+(with-os! darwin
+  (setq mac-option-modifier 'super)
+  (setq mac-command-modifier 'meta)
+  (setq ns-auto-hide-menu-bar t)
+  (setq ns-use-proxy-icon nil)
+  (setq initial-frame-alist
+        (append
+         '((ns-transparent-titlebar . t)
+           (ns-appearance . dark)
+           (vertical-scroll-bars . nil)
+           (internal-border-width . 0)))))
    #+end_src
 
 * Community
@@ -2951,11 +3044,10 @@ Another Opinionated Emacs Configuration
    For later use, when I try to finally optimize my workflow + ergonomics.
 
    #+begin_src emacs-lisp
-(use-package keyfreq
+(package! keyfreq
   :config
-  (keyfreq-mode t)
-  ;;(keyfreq-autosave-mode 1)
-  )
+  (keyfreq-autosave-mode t)
+  (keyfreq-mode t))
    #+end_src
 
 ** TODO SICP
@@ -2963,7 +3055,7 @@ Another Opinionated Emacs Configuration
    If I have the book, I've lost an excuse to not read it... hopefully. Might as well make this section TODO too...
 
    #+begin_src emacs-lisp
-(use-package sicp)
+(package! sicp)
    #+end_src
 
 ** Wakatime
@@ -2971,7 +3063,7 @@ Another Opinionated Emacs Configuration
    Monitor my coding activity. Remember to set =wakatime-api-key= in =personal/settings.el=.
 
    #+begin_src emacs-lisp
-(use-package wakatime-mode
+(package! wakatime-mode
   :if (and (executable-find "wakatime") (boundp 'wakatime-api-key))
   :config
   (setq wakatime-cli-path (executable-find "wakatime"))
@@ -2985,35 +3077,35 @@ Another Opinionated Emacs Configuration
   Problematic packages first, tangled off and commented.
 
   #+begin_src emacs-lisp :tangle off
-;; (use-package docker
+;; (package! docker
 ;;   :bind (("C-c d" . docker)))
-;; (use-package docker-compose-mode)
-;; (use-package docker-tramp
+;; (package! docker-compose-mode)
+;; (package! docker-tramp
 ;;   :config (setq docker-tramp-use-names t)) ;; name vs id
-;; (use-package undo-tree) ;; figure out toggle
-;; (use-package pass)
-;; (use-package pinentry)
-;; (use-package edit-indirect)
-;; (use-package tablist)
-;; (use-package helpful)
-;; (use-package direnv)
-;; (use-package pyvenv)
-;; (use-package writeroom-mode)
-;; (use-package whitespace-cleanup-mode)
-;; (use-package google-this)
-;; (use-package my-utils)
-;; (use-package recentf)
+;; (package! undo-tree) ;; figure out toggle
+;; (package! pass)
+;; (package! pinentry)
+;; (package! edit-indirect)
+;; (package! tablist)
+;; (package! helpful)
+;; (package! direnv)
+;; (package! pyvenv)
+;; (package! writeroom-mode)
+;; (package! whitespace-cleanup-mode)
+;; (package! google-this)
+;; (package! my-utils)
+;; (package! recentf)
   #+end_src
 
   Now the misc packages
 
   #+begin_src emacs-lisp
-;; (use-package speed-type)
-;; (use-package origami)
-;; (use-package demangle-mode)
-;; (use-package academic-phrases)
-;; (use-package powerthesaurus)
-;; (use-package crontab-mode)
-;; (use-package salt-mode)
-;; (use-package rmsbolt)                   ; A compiler output viewer
+;; (package! speed-type)
+;; (package! origami)
+;; (package! demangle-mode)
+;; (package! academic-phrases)
+;; (package! powerthesaurus)
+;; (package! crontab-mode)
+;; (package! salt-mode)
+;; (package! rmsbolt)                   ; A compiler output viewer
   #+end_src
