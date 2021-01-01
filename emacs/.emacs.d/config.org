@@ -862,7 +862,7 @@ NAME and ARGS are as in `use-package'."
                                      shan--preferred-logo ;; weird stuff, possibly because of no-littering
                                    'logo))
 
-  ;; (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
   (defun shan--dashboard-set-init-info()
     (setq dashboard-init-info
@@ -1002,10 +1002,6 @@ NAME and ARGS are as in `use-package'."
   (setq show-paren-when-point-in-periphery t
         show-paren-when-point-inside-paren t)
   (show-paren-mode t))
-
-(package! move-text
-  :config
-  (move-text-default-bindings))
   #+end_src
 
   Lifted the overlay code from Centaur Emacs (gives priority to rainbow mode). The rest makes the minor mode global so
@@ -1124,6 +1120,12 @@ NAME and ARGS are as in `use-package'."
    #+begin_src emacs-lisp
 (bind-key* "C-;" 'company-yasnippet)
 (windmove-default-keybindings 'meta)
+   #+end_src
+
+   #+begin_src emacs-lisp
+(package! move-text
+  :config
+  (move-text-default-bindings))
    #+end_src
 
 ** Which Key
@@ -1573,11 +1575,11 @@ NAME and ARGS are as in `use-package'."
      (("SPC" dap-hydra "dap")))))
    #+end_src
 
-** Treemacs
+** TODO Treemacs
 
    Sneaky on Dreameh.
 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle off
 (package! treemacs
   :bind (:map global-map
               ("C-x t t" . treemacs)
@@ -1791,9 +1793,11 @@ NAME and ARGS are as in `use-package'."
   (setq haskell-mode-hook 'haskell-mode-defaults))
    #+end_src
 
-** Java
+** TODO Java
 
-   #+begin_src emacs-lisp
+   Figure this out after treemacs
+
+   #+begin_src emacs-lisp :tangle off
 (package! lsp-java
   :after (lsp)
   :hook (java-mode . lsp)

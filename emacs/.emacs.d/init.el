@@ -478,7 +478,7 @@ NAME and ARGS are as in `use-package'."
                                      shan--preferred-logo ;; weird stuff, possibly because of no-littering
                                    'logo))
 
-  ;; (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
   (defun shan--dashboard-set-init-info()
     (setq dashboard-init-info
@@ -574,10 +574,6 @@ NAME and ARGS are as in `use-package'."
         show-paren-when-point-inside-paren t)
   (show-paren-mode t))
 
-(package! move-text
-  :config
-  (move-text-default-bindings))
-
 (package! rainbow-mode
   :config
   (with-no-warnings
@@ -662,6 +658,10 @@ NAME and ARGS are as in `use-package'."
 
 (bind-key* "C-;" 'company-yasnippet)
 (windmove-default-keybindings 'meta)
+
+(package! move-text
+  :config
+  (move-text-default-bindings))
 
 (package! which-key
   :init
@@ -983,26 +983,6 @@ NAME and ARGS are as in `use-package'."
      " Exit"
      (("SPC" dap-hydra "dap")))))
 
-(package! treemacs
-  :bind (:map global-map
-              ("C-x t t" . treemacs)
-              ("C-x t 1" . treemacs-select-window))
-  :config
-  (setq treemacs-resize-icons 4))
-
-(package! lsp-treemacs
-  :init (lsp-treemacs-sync-mode 1))
-
-(package! treemacs-projectile
-  :after treemacs projectile)
-
-(package! treemacs-magit
-  :after treemacs magit)
-
-(package! treemacs-icons-dired
-  :after treemacs dired
-  :config (treemacs-icons-dired-mode))
-
 (package! projectile
   :bind
   (:map projectile-mode-map
@@ -1134,36 +1114,6 @@ NAME and ARGS are as in `use-package'."
   :mode "\\.hs\\'"
   :config
   (setq haskell-mode-hook 'haskell-mode-defaults))
-
-(package! lsp-java
-  :after (lsp)
-  :hook (java-mode . lsp)
-  :bind (:map java-mode-map
-              ("C-x e l" . lsp-treemacs-errors-list)
-              ("C-x s l" . lsp-treemacs-symbols))
-  :config
-  (require 'dap-java)
-  (shan--ide-add 'java-mode #'hydra-lsp/body))
-
-;; Gradle
-(package! gradle-mode
-  :hook (java-mode . (lambda () (gradle-mode 1)))
-  :config
-  (defun build-and-run()
-    (interactive)
-    (gradle-run "build run"))
-  (define-key gradle-mode-map (kbd "C-c C-r") 'build-and-run))
-
-(package! mvn
-  :config
-  (ignore-errors
-    (require 'ansi-colors)
-    (defun colorize-compilation-buffer ()
-      (when (eq major-mode 'compilation-mode)
-        (let ((inhibit-read-only t))
-          (if (boundp 'compilation-filter-start)
-              (ansi-color-apply-on-region compilation-filter-start (point))))))
-    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
 
 (package! ein
   :mode
