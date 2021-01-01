@@ -14,10 +14,10 @@ NEVER = Makefile config.org personal
 .PHONY: default clean cleanall fresh
 
 default:
-	@emacs&
-
-d:
 	@./bin/e
+
+v:
+	@emacs&
 
 r: clean
 	ntangle config.org
