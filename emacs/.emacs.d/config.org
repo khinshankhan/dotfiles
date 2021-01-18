@@ -1360,9 +1360,12 @@ NAME and ARGS are as in `use-package'."
 ** General Git
 
    #+begin_src emacs-lisp
-(package! gitattributes-mode)
-(package! gitignore-mode)
-(package! gitconfig-mode)
+(package! gitattributes-mode
+  :mode "\\.gitattributes\\'")
+(package! gitignore-mode
+  :mode "\\.gitignore\\'")
+(package! gitconfig-mode
+  :mode "\\.gitconfig\\'")
    #+end_src
 
 ** Magit

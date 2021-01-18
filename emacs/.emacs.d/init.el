@@ -835,9 +835,12 @@ NAME and ARGS are as in `use-package'."
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-(package! gitattributes-mode)
-(package! gitignore-mode)
-(package! gitconfig-mode)
+(package! gitattributes-mode
+  :mode "\\.gitattributes\\'")
+(package! gitignore-mode
+  :mode "\\.gitignore\\'")
+(package! gitconfig-mode
+  :mode "\\.gitconfig\\'")
 
 (package! magit
   :defer t
