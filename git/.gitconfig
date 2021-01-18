@@ -1,0 +1,15 @@
+[user]
+	name = Khinshan Khan
+[push]
+	default = simple
+[pull]
+	ff = only
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[core]
+	editor = emacsclient -a '' -c
+[include]
+    path = ~/local.gitconfig # contains some personal information like email and secondary includes
