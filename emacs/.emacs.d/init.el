@@ -940,7 +940,9 @@ NAME and ARGS are as in `use-package'."
   (company-dabbrev-downcase nil)
   (company-tooltip-align-annotations t)
   (company-idle-delay nil)
-  (company-backends '(company-capf)))
+  (company-backends '(company-capf))
+  :config
+  (global-company-mode))
 
 (package! lsp-mode
   :bind
