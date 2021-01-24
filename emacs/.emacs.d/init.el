@@ -656,6 +656,13 @@ NAME and ARGS are as in `use-package'."
 
 (package! command-log-mode)
 
+(package! yasnippet
+  :config
+  (package! yasnippet-snippets)
+  (when (< (length yas-snippet-dirs) 2)
+    (yas-reload-all))
+  (yas-global-mode 1))
+
 (bind-key* "C-;" 'company-yasnippet)
 (windmove-default-keybindings 'meta)
 
@@ -1681,11 +1688,6 @@ NAME and ARGS are as in `use-package'."
           (?C . success)
           (?D . (:foreground "#87ceeb"))))
   (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
-
-(package! yasnippet
-  :config
-  (package! yasnippet-snippets)
-  (yas-global-mode 1))
 
 (package! flyspell
   :hook ((text-mode . flyspell-mode)

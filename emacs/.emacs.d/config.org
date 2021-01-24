@@ -71,6 +71,7 @@ Another Opinionated Emacs Configuration
   - [[#rich-hints][Rich Hints]]
   - [[#icons][Icons]]
 - [[#general-editing][General Editing]]
+  - [[#yasnippet][Yasnippet]]
 - [[#bindings][Bindings]]
   - [[#personal-bindings][Personal Bindings]]
   - [[#which-key][Which Key]]
@@ -128,7 +129,6 @@ Another Opinionated Emacs Configuration
   - [[#revealjs][Reveal.js]]
   - [[#priorities][Priorities]]
 - [[#language-augmentation][Language Augmentation]]
-  - [[#yasnippet][Yasnippet]]
   - [[#orthography][Orthography]]
 - [[#writing-documents][Writing/ Documents]]
   - [[#olivetti][Olivetti]]
@@ -1112,6 +1112,21 @@ NAME and ARGS are as in `use-package'."
   #+begin_src emacs-lisp
 (package! command-log-mode)
   #+end_src
+
+** Yasnippet
+
+   #+begin_src emacs-lisp
+(package! yasnippet
+  :config
+  (package! yasnippet-snippets)
+  (when (< (length yas-snippet-dirs) 2)
+    (yas-reload-all))
+  (yas-global-mode 1))
+   #+end_src
+
+   #+begin_src
+(package! auto-yasnippet)
+   #+end_src
 
 * Bindings
 
@@ -2681,19 +2696,6 @@ NAME and ARGS are as in `use-package'."
    #+end_src
 
 * Language Augmentation
-
-** Yasnippet
-
-   #+begin_src emacs-lisp
-(package! yasnippet
-  :config
-  (package! yasnippet-snippets)
-  (yas-global-mode 1))
-   #+end_src
-
-   #+begin_src
-(package! auto-yasnippet)
-   #+end_src
 
 ** Orthography
 
