@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if ! emacsclient -e 0 &> /dev/null; then
+    emacs --daemon;
+fi;
+
+emacsclient -c "$@" &

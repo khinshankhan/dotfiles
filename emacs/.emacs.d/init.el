@@ -1,23 +1,21 @@
 ;; -*- lexical-binding: t -*-
 
-(eval-and-compile
-  (defun shan|revert-gc ()
-    "Garbage collect and reset values."
-    (setq gc-cons-threshold 16777216
-          gc-cons-percentage 0.1
-          file-name-handler-alist (append last-file-name-handler-alist
-                                          file-name-handler-alist))
-    (cl-delete-duplicates file-name-handler-alist :test 'equal)
-    (makunbound 'last-file-name-handler-alist))
-  (setq gc-cons-threshold most-positive-fixnum
-        gc-cons-percentage 0.6
-        last-file-name-handler-alist file-name-handler-alist
-        file-name-handler-alist nil)
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6
+      last-file-name-handler-alist file-name-handler-alist
+      file-name-handler-alist nil)
 
-  (add-hook 'after-init-hook 'shan|revert-gc))
+(defun shan|revert-gc ()
+  "Reset values and garbage collect."
+  (setq gc-cons-threshold 16777216
+        gc-cons-percentage 0.1
+        file-name-handler-alist (append last-file-name-handler-alist
+                                        file-name-handler-alist))
+  (cl-delete-duplicates file-name-handler-alist :test 'equal)
+  (makunbound 'last-file-name-handler-alist)
+  (garbage-collect))
 
-(defvar shan-dir (file-name-directory (file-chase-links load-file-name))
-  "Directory where this file exists. Useful for generality in case of `load' or different paths.")
+(add-hook 'after-init-hook 'shan|revert-gc)
 
 (defconst shan--config-dir (file-name-directory (file-chase-links load-file-name))
   "Directory where this file exists. Useful for generality in case of `load' or different paths.")
@@ -41,30 +39,56 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+;; TODO: I still have some stray demands in my config, should figure that out sometime
 (setq-default use-package-always-defer nil
-              use-package-always-demand t
-              byte-compile-warnings nil)
+	          use-package-always-demand t
+	          byte-compile-warnings nil)
 ;; (setq use-package-verbose t)
 
 (straight-use-package 'use-package)
 
-(use-package no-littering
+(defvar shan--loaded-packages '()
+  "List containing loaded packages.")
+
+(defmacro package! (name &rest args)
+  "Like `use-package', but cooler since it also tracks which packages were loaded.
+NAME and ARGS are as in `use-package'."
+  (declare (indent defun))
+  (add-to-list 'shan--loaded-packages name)
+  `(use-package ,name
+     ,@args))
+
+(defmacro feature! (name &rest args)
+  "Like `use-package', but with `straight-use-package-by-default' disabled.
+NAME and ARGS are as in `use-package'."
+  (declare (indent defun))
+  (add-to-list 'shan--loaded-packages name)
+  `(use-package ,name
+     :straight nil
+     ,@args))
+
+;; (defmacro feature-after! (name wait &rest args)
+;;   "Like `use-package', but with `straight-use-package-by-default' disabled and `with-eval-after-load' on WAIT.
+;; NAME and ARGS are as in `use-package'."
+;;   (declare (indent defun))
+;;   `(with-eval-after-load ',wait
+;;     (feature! ,name ,@args))
+
+(package! no-littering
   :init
   (require 'no-littering))
 
-(use-package exec-path-from-shell
-  :init
-  (exec-path-from-shell-initialize))
+(package! dash-functional
+  :demand t)
+(package! f
+  :demand t)
+(package! s
+  :demand t)
+(package! string-inflection
+  :demand t)
 
-(use-package dash-functional
-  :demand t)
-(use-package f
-  :demand t)
-(use-package s
-  :demand t)
-(use-package string-inflection
-  :demand t)
 (require 'loadhist)
+(require 'cl-seq)
 
 (defconst custom-file (concat user-emacs-directory "custom.el"))
 (defconst shan--settings-path (concat user-emacs-directory "personal/settings.el")
@@ -72,8 +96,14 @@
 (defconst shan--settings-exist? (file-exists-p shan--settings-path)
   "Checks if shan--settings-path exists.")
 
-(when shan--settings-exist?
-  (load-file shan--settings-path))
+(if shan--settings-exist?
+    (load-file shan--settings-path)
+  (message "Settings file not found!"))
+
+(defconst shan--preferred-logo (concat user-emacs-directory "personal/nezuko-emacs.png")
+  "Preferred logo for dashboard startup. If not found, use default.")
+(defconst shan/elfeed-file (concat user-emacs-directory "personal/elfeed.org"))
+(defconst shan/elfeed-db (concat user-emacs-directory "personal/elfeeddb"))
 
 (defconst shan--gh-access (string-prefix-p "Hi" (shell-command-to-string "ssh -T git@github.com"))
   "Checks if Emacs has ssh access for GitHub (inherited path).")
@@ -90,11 +120,6 @@
 (defconst shan--is-mac? (memq window-system '(mac ns))
   "Checks if computer is a mac.")
 
-(defconst shan--preferred-logo (concat user-emacs-directory "personal/nezuko-emacs.png")
-  "Preferred logo for dashboard startup. If not found, use default.")
-(defconst shan/elfeed-file (concat user-emacs-directory "personal/elfeed.org"))
-(defconst shan/elfeed-db (concat user-emacs-directory "personal/elfeeddb"))
-
 (defconst shan/python-executable "python3")
 (defconst shan/ipython-executable "ipython3")
 (defconst shan--home-row
@@ -106,6 +131,35 @@
 (defconst shan--flutter-path "/opt/flutter/")
 (defconst shan--plantuml-path "/usr/share/java/plantuml/plantuml.jar")
 (defconst shan--kotlin-path "/home/shan/kotlin-language-server/server/build/install/server/bin/kotlin-language-server")
+
+(defmacro k-time! (&rest body)
+  "Measure and return the time it takes evaluating BODY."
+  `(let ((time (current-time)))
+     ,@body
+     (float-time (time-since time))))
+
+(defmacro no-hook! (f hooks)
+  "Call function F while temporarily removing HOOKS."
+  `(lambda (&rest args)
+     (let ((tbl (cl-loop for hook in ,hooks collect `(,(gensym) . ,hook))))
+       (prog2
+           (dolist (pair tbl)
+             (eval `(setq ,(car pair) ,(cdr pair)))
+             (eval `(setq ,(cdr pair) nil)))
+           (apply ,f args)
+         (dolist (pair tbl)
+           (eval `(setq ,(cdr pair) ,(car pair))))))))
+
+(defmacro with-os! (os &rest body)
+  "Execute BODY if current os is OS."
+  (declare (indent 1))
+  `(when (if (consp ',os) (memq system-type ',os) (eq system-type ',os))
+     ,@body))
+
+(defmacro do-once-1-sec-after-emacs-startup (&rest body)
+  `(run-with-idle-timer 1 ; run this after emacs is idle for 1 second
+                        nil ; do this just once; don't repeat
+                        (lambda () ,@body)))
 
 (defun shan/do-nothing ()
   "Do nothing."
@@ -183,16 +237,6 @@
   (interactive)
   (kill-new buffer-file-name))
 
-(defun shan/fill-or-unfill ()
-  "Fill or unfill based on the previous command."
-  (interactive)
-  (let ((fill-column
-         (if (eq last-command 'endless/fill-or-unfill)
-             (progn (setq this-command nil)
-                    (point-max))
-           fill-column)))
-    (call-interactively #'fill-paragraph)))
-
 (defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
   "Add all elements from FROM-LIST to TO-LIST.  APPEND and COMPARE-FN work as they in `add-to-list'."
   (dolist (elem from-list)
@@ -204,22 +248,10 @@
   (dolist (hook from-hook)
     (add-hook to-hook hook)))
 
-(defmacro shan--no-hook (f hooks)
-  "Call function F while temporarily removing HOOKS."
-  `(lambda (&rest args)
-     (let ((tbl (cl-loop for hook in ,hooks collect `(,(gensym) . ,hook))))
-       (prog2
-           (dolist (pair tbl)
-             (eval `(setq ,(car pair) ,(cdr pair)))
-             (eval `(setq ,(cdr pair) nil)))
-           (apply ,f args)
-         (dolist (pair tbl)
-           (eval `(setq ,(cdr pair) ,(car pair))))))))
-
 (defun shan/vanilla-save ()
   "Save file without any hooks applied."
   (interactive)
-  (funcall (shan--no-hook 'save-buffer '(before-save-hook after-save-hook))))
+  (funcall (no-hook! 'save-buffer '(before-save-hook after-save-hook))))
 
 (defun shan/edit-config ()
   "Edit the configuration file."
@@ -278,37 +310,44 @@
   (interactive)
   (shan/call-keymap keymap prompt))
 
-(defmacro package! (name &rest args)
-  "Like `use-package', but shorter and cooler.
-NAME and ARGS are as in `use-package'."
-  (declare (indent defun))
-  `(use-package ,name
-     :straight t
-     ,@args))
+(defvar shan--k-gc-debug-p t
+  "Boolean to determine whether to echo message for gc or not.")
 
-(defmacro feature! (name &rest args)
-  "Like `use-package', but with `straight-use-package-by-default' disabled.
-NAME and ARGS are as in `use-package'."
-  (declare (indent defun))
-  `(use-package ,name
-     :straight nil
-     ,@args))
+(defvar shan--gc-timeout 45
+  "Time limit for idleness until gc starts.")
+(defvar shan--gc-timer nil
+  "Timer which periodically runs gc logic. nil if not active.")
 
-(defmacro require! (name &rest args)
-  "Like `use-package', but automagically requires the package as well. Useful for antiquated packages.
-NAME and ARGS are as in `use-package'."
-  (declare (indent defun))
-  `(package! ,name
-     :init
-     (require ',name)
-     ,@args))
+(defun shan|gc-collect()
+  "Runs gc and outputs messages if debugging."
+  (if shan--k-gc-debug-p
+      (message "Garbage Collector has run for %.06fsec"
+               (k-time! (garbage-collect)))
+    (garbage-collect)))
 
+(defun shan--gc-start ()
+  "Start watching for when idle for shan--gc-timeout seconds to run the GC."
+  (interactive)
+  (unless shan--gc-timer
+    (setq shan--gc-timer (run-with-idle-timer shan--gc-timeout t 'shan|gc-collect))))
+
+(defun shan--gc-cancel ()
+  "Stop idle gc."
+  (interactive)
+  (when shan--gc-timer
+    (cancel-timer shan--gc-timer)
+    (setq shan--gc-timer nil)))
+
+(add-hook 'after-init-hook 'shan--gc-start)
+
+(when (fboundp 'set-charset-priority)
+  (set-charset-priority 'unicode))
 (setq-default locale-coding-system 'utf-8)
 (dolist (fn '(set-terminal-coding-system set-keyboard-coding-system set-selection-coding-system prefer-coding-system))
   (if (fboundp fn)
       (funcall fn 'utf-8)))
 
-(use-package unidecode)
+(package! unidecode)
 
 (setq-default backup-inhibited t
               auto-save-default nil
@@ -318,33 +357,358 @@ NAME and ARGS are as in `use-package'."
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
 
+(with-os! (gnu/linux darwin)
+  (package! exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize)))
+
+(setq inhibit-startup-message t)
+(dolist (fn '(tool-bar-mode scroll-bar-mode menu-bar-mode))
+  (if (fboundp fn)
+      (funcall fn -1)))
+
+(when (member "Source Code Pro" (font-family-list))
+  (set-face-attribute 'default nil
+                      :family "Source Code Pro"
+                      :weight 'normal
+                      :width 'normal))
+
+(add-to-list 'face-ignored-fonts "Noto Color Emoji")
+
+(when (member "Symbola" (font-family-list))
+  (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+
+(package! doom-themes
+  :demand t
+  :config
+  (setq doom-vibrant-brighter-comments t
+        doom-vibrant-brighter-modeline t)
+  (doom-themes-org-config)
+  (load-theme 'doom-dracula t))
+
+(package! solaire-mode
+  :demand t
+  :functions persp-load-state-from-file
+  :hook
+  (prog-mode . turn-on-solaire-mode)
+  (minibuffer-setup . solaire-mode-in-minibuffer)
+  (after-load-theme . solaire-mode-swap-bg)
+  :config
+  (setq solaire-mode-remap-modeline nil
+        solaire-mode-remap-fringe nil)
+  (solaire-global-mode 1)
+  (solaire-mode-swap-bg)
+  (advice-add #'persp-load-state-from-file
+              :after #'solaire-mode-restore-persp-mode-buffers))
+
+(dolist (fn '(line-number-mode column-number-mode))
+  (if (fboundp fn)
+      (funcall fn t)))
+
+(package! doom-modeline
+  :demand t
+  :config
+  (setq doom-modeline-python-executable "python3"
+        doom-modeline-icon t
+        doom-modeline-major-mode-icon t
+        doom-modeline-version t
+        doom-modeline-buffer-file-name-style 'file-name)
+  (doom-modeline-mode))
+
+(package! hide-mode-line
+  :hook
+  ((neotree-mode
+    imenu-list-minor-mode
+    minimap-mode ibuffer-mode
+    help-mode
+    deft-text-mode
+    Man-mode)
+   . hide-mode-line-mode))
+
+(package! default-text-scale
+  :init
+  (default-text-scale-mode))
+
+(package! zoom-window
+  :bind
+  ("C-z" . zoom-window-zoom)
+  :config
+  (setq zoom-window-mode-line-color "#412170"))
+
+(setq-default visible-bell nil
+              audible-bell nil
+              ring-bell-function 'ignore)
+
+(defalias 'yes-or-no-p (lambda (&rest _) t))
+(setq-default confirm-kill-emacs nil)
+(setq save-abbrevs t)
+(setq-default abbrev-mode t)
+(setq save-abbrevs 'silently)
+
+(setq-default transient-mark-mode t
+              visual-line-mode t
+              indent-tabs-mode nil
+              tab-width 4)
+
+;; highlights the line containing mark
+(if (fboundp 'global-hl-line-mode)
+    (global-hl-line-mode t))
+
+(setq-default initial-major-mode 'lisp-interaction-mode)
+(setq initial-scratch-message nil)
+
+(package! page-break-lines)
+
+(package! dashboard
+  :demand t
+  :bind
+  (:map dashboard-mode-map
+        ("n" . widget-forward)
+        ("p" . widget-backward)
+        ("f" . shan/elfeed-update-database))
+  :config
+  (setq dashboard-banner-logo-title "Do you ever wonder why we're always, like, wearing gloves?"
+        dashboard-set-heading-icons t
+        dashboard-set-file-icons t
+        dashboard-center-content t
+        dashboard-set-init-info t
+        dashboard-set-footer nil)
+
+  ;; (setq dashboard-set-navigator t)
+
+  (setq dashboard-items '((recents  . 5)
+                          ;; (bookmarks . 5)
+                          ;; (projects . 5)
+                          (agenda . 5)
+                          ;; (registers . 5)
+                          ))
+
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner (if shan--settings-exist?
+                                     shan--preferred-logo ;; weird stuff, possibly because of no-littering
+                                   'logo))
+
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+
+  (defun shan--dashboard-set-init-info()
+    (setq dashboard-init-info
+	      (format "%d packages loaded in %s sec."
+		          (length shan--loaded-packages)
+                  (emacs-init-time))))
+  (add-hook 'after-init-hook 'shan--dashboard-set-init-info))
+
+(when (fboundp 'blink-cursor-mode)
+  (blink-cursor-mode 0))
+
+(setq-default blink-matching-paren nil
+              visible-cursor nil
+              x-stretch-cursor nil
+              cursor-type 'box)
+
+(package! beacon
+  :hook
+  (focus-in . beacon-blink)
+  :config
+  (beacon-mode))
+
+(package! ivy
+  :bind
+  ([switch-to-buffer] . ivy-switch-buffer)
+  (:map ivy-minibuffer-map
+        ([remap xref-find-definitions] . shan/do-nothing)
+        ([remap xref-find-definitions-other-frame] . shan/do-nothing)
+        ([remap xref-find-definitions-other-window] . shan/do-nothing)
+        ([remap xref-find-references] . shan/do-nothing)
+        ([remap xref-find-apropos] . shan/do-nothing)
+        ("<return>" . ivy-alt-done)
+        ("<S-return>" . ivy-immediate-done))
+  :custom
+  (ivy-use-virtual-buffers t)
+  (ivy-count-format "%d/%d ")
+  (ivy-height 20)
+  (ivy-display-style 'fancy)
+  (ivy-format-function 'ivy-format-function-line)
+  (ivy-re-builders-alist
+   '((t . ivy--regex-plus)))
+  (ivy-initial-inputs-alist nil)
+  :config
+  (ivy-mode))
+
+(package! counsel
+  :bind
+  ("M-x" . counsel-M-x)
+  ("C-x C-f" . counsel-find-file)
+  ("C-h v" . counsel-describe-variable)
+  ("C-h f" . counsel-describe-function)
+  ("C-x b" . counsel-switch-buffer)
+  :config
+  (counsel-mode t)
+  ;; weird because of a top-level push in source code
+  (setq-default ivy-initial-inputs-alist nil))
+
+(package! swiper
+  :bind
+  ("C-s" . swiper-isearch)
+  ("C-r" . swiper-isearch-backward))
+
+(package! ag
+  :commands (ag ag-files ag-regexp ag-project ag-dired helm-ag)
+  :config (setq ag-highlight-search t
+                ag-reuse-buffers t))
+
+(package! ivy-rich
+  :init
+  (ivy-rich-mode 1)
+  :config
+  (setq ivy-rich-parse-remote-buffer nil)
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+
+(package! all-the-icons
+  :config
+  (do-once-1-sec-after-emacs-startup
+   (unless (find-font (font-spec :name "all-the-icons"))
+     (all-the-icons-install-fonts t))))
+
+(package! rainbow-delimiters
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
+
+(package! smartparens
+  :hook
+  (prog-mode . smartparens-mode)
+  :custom
+  (sp-escape-quotes-after-insert nil)
+  :config
+  (require 'smartparens-config))
+
+(package! paren
+  :demand t
+  :config
+  (setq show-paren-when-point-in-periphery t
+        show-paren-when-point-inside-paren t)
+  (show-paren-mode t))
+
+(package! rainbow-mode
+  :config
+  (with-no-warnings
+    ;; HACK: Use overlay instead of text properties to override `hl-line' faces.
+    ;; @see https://emacs.stackexchange.com/questions/36420
+    (defun my-rainbow-colorize-match (color &optional match)
+      (let* ((match (or match 0))
+             (ov (make-overlay (match-beginning match) (match-end match))))
+        (overlay-put ov 'ovrainbow t)
+        (overlay-put ov 'face `((:foreground ,(if (> 0.5 (rainbow-x-color-luminance color))
+                                                  "white" "black"))
+                                (:background ,color)))))
+    (advice-add #'rainbow-colorize-match :override #'my-rainbow-colorize-match)
+
+    (defun my-rainbow-clear-overlays ()
+      "Clear all rainbow overlays."
+      (remove-overlays (point-min) (point-max) 'ovrainbow t))
+    (advice-add #'rainbow-turn-off :after #'my-rainbow-clear-overlays))
+
+  (define-globalized-minor-mode global-rainbow-mode rainbow-mode
+    (lambda () (rainbow-mode 1)))
+  (global-rainbow-mode 1))
+
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+
+(package! expand-region
+  :bind
+  ("C-=" . er/expand-region))
+
+(defun shan/fill-or-unfill ()
+  "Fill or unfill based on the previous command."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
+(setq-default require-final-newline t
+              vc-follow-symlinks t)
+
+(global-subword-mode t)
+(delete-selection-mode t)
+(global-font-lock-mode t)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
+
+(global-set-key [remap fill-paragraph]
+                #'shan/fill-or-unfill)
+
+(global-set-key (kbd "M-;")
+                'comment-line)
+
+(package! hl-todo
+  :hook
+  (prog-mode . hl-todo-mode)
+  :config
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        `(("TODO"       warning bold)
+          ("FIXME"      error bold)
+          ("HACK"       font-lock-constant-face bold)
+          ("REVIEW"     font-lock-keyword-face bold)
+          ("NOTE"       success bold)
+          ("DEPRECATED" font-lock-doc-face bold))))
+
+(package! avy
+  :bind
+  ("C-'" . avy-goto-char-2)
+  :custom
+  (avy-keys shan--home-row))
+
+(package! ace-window
+  :bind
+  ("C-x C-w" . ace-window)
+  :custom
+  (aw-keys shan--home-row))
+
+(package! command-log-mode)
+
+(package! yasnippet
+  :config
+  (package! yasnippet-snippets)
+  (when (< (length yas-snippet-dirs) 2)
+    (yas-reload-all))
+  (yas-global-mode 1))
+
 (bind-key* "C-;" 'company-yasnippet)
 (windmove-default-keybindings 'meta)
 
-(use-package which-key
+(package! move-text
+  :config
+  (move-text-default-bindings))
+
+(package! which-key
   :init
   (which-key-mode 1))
 ;; :bind
 ;; ("C-h m" . which-key-show-major-mode)
 ;; ("C-h b" . which-key-show-top-level)
 
-(use-package multiple-cursors
+(package! multiple-cursors
   :config
   (global-set-key (kbd "C-S-p") 'mc/mark-previous-like-this)
   (global-set-key (kbd "C-S-n") 'mc/mark-next-like-this)
   (global-set-key (kbd "C-x r t") 'mc/edit-lines)
+  (global-set-key (kbd "C-S-<mouse-1>") 'mc/add-cursor-on-click)
   (define-key mc/keymap (kbd "<return>") nil))
 
-(use-package key-chord
+(package! key-chord
   :demand t
   :config
   (setq key-chord-two-keys-delay 0.05)
   (key-chord-mode t))
 
-(use-package use-package-chords
+(package! use-package-chords
   :demand t)
 
-(use-package hydra
+(package! hydra
   :demand t
   :config
   (setq hydra--work-around-dedicated nil
@@ -354,7 +718,7 @@ NAME and ARGS are as in `use-package'."
   :chords
   ("ao" . hydra-leader/body))
 
-(use-package pretty-hydra
+(package! pretty-hydra
   :demand t)
 
 (pretty-hydra-define hydra-config (:exit t :color pink :title " Personal" :quit-key "q")
@@ -457,20 +821,6 @@ NAME and ARGS are as in `use-package'."
    " Exit"
    (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold) :exit t))))
 
-(pretty-hydra-define hydra-lsp (:exit t :color pink :title " LSP" :quit-key "q")
-  ("Find"
-   (("." lsp-ui-peek-find-references "find references")
-    ("d" lsp-find-definition "find definition")
-    ("t" lsp-find-type-definition "find type definition"))
-   "Refactor"
-   (("e" lsp-rename "rename symbol at point")
-    ("f" lsp-format-buffer "format buffer"))
-   "Show"
-   (("j" lsp-ui-imenu "symbol table")
-    ("l" lsp-ui-flycheck-list "error list"))
-   " Exit"
-   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
-
 (pretty-hydra-define hydra-leader (:exit t :color pink :title " Leader" :quit-key "q")
   ("General"
    (("RET" hydra-config/body (propertize "+config" 'face 'bold))
@@ -492,398 +842,28 @@ NAME and ARGS are as in `use-package'."
     (";" counsel-M-x "M-x")
     ("s" save-buffer "save"))))
 
-(setq inhibit-startup-message t)
-(dolist (fn '(tool-bar-mode scroll-bar-mode menu-bar-mode))
-  (if (fboundp fn)
-      (funcall fn -1)))
+(pretty-hydra-define hydra-lsp (:exit t :color pink :title " LSP" :quit-key "q")
+  ("Find"
+   (("." lsp-ui-peek-find-references "find references")
+    ("d" lsp-find-definition "find definition")
+    ("t" lsp-find-type-definition "find type definition"))
+   "Refactor"
+   (("e" lsp-rename "rename symbol at point")
+    ("f" lsp-format-buffer "format buffer"))
+   "Show"
+   (("j" lsp-ui-imenu "symbol table")
+    ("l" lsp-ui-flycheck-list "error list"))
+   " Exit"
+   (("DEL" hydra-leader/body (propertize "+leader" 'face 'bold)))))
 
-(when (member "Source Code Pro" (font-family-list))
-  (set-face-attribute 'default nil
-                      :family "Source Code Pro"
-                      :weight 'normal
-                      :width 'normal))
+(package! gitattributes-mode
+  :mode "\\.gitattributes\\'")
+(package! gitignore-mode
+  :mode "\\.gitignore\\'")
+(package! gitconfig-mode
+  :mode "\\.gitconfig\\'")
 
-(add-to-list 'face-ignored-fonts "Noto Color Emoji")
-
-(when (member "Symbola" (font-family-list))
-  (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-
-(use-package doom-themes
-  :demand t
-  :config
-  (setq doom-vibrant-brighter-comments t
-        doom-vibrant-brighter-modeline t)
-  (doom-themes-org-config)
-  (load-theme 'doom-dracula t))
-
-(use-package solaire-mode
-  :demand t
-  :functions persp-load-state-from-file
-  :hook
-  (prog-mode . turn-on-solaire-mode)
-  (minibuffer-setup . solaire-mode-in-minibuffer)
-  (after-load-theme . solaire-mode-swap-bg)
-  :config
-  (setq solaire-mode-remap-modeline nil
-        solaire-mode-remap-fringe nil)
-  (solaire-global-mode 1)
-  (solaire-mode-swap-bg)
-  (advice-add #'persp-load-state-from-file
-              :after #'solaire-mode-restore-persp-mode-buffers))
-
-(dolist (fn '(line-number-mode column-number-mode))
-  (if (fboundp fn)
-      (funcall fn t)))
-
-(use-package doom-modeline
-  :demand t
-  :config
-  (setq doom-modeline-python-executable shan/python-executable
-        doom-modeline-icon t
-        doom-modeline-major-mode-icon t
-        doom-modeline-version t
-        doom-modeline-buffer-file-name-style 'file-name)
-  (doom-modeline-mode))
-
-(use-package hide-mode-line
-  :hook
-  ((neotree-mode
-    imenu-list-minor-mode
-    minimap-mode ibuffer-mode
-    help-mode
-    deft-text-mode
-    Man-mode)
-   . hide-mode-line-mode))
-
-(use-package default-text-scale
-  :init
-  (default-text-scale-mode))
-
-(use-package zoom-window
-  :bind
-  ("C-z" . zoom-window-zoom)
-  :config
-  (setq zoom-window-mode-line-color "#412170"))
-
-(setq-default visible-bell nil
-              audible-bell nil
-              ring-bell-function 'ignore)
-
-(defalias 'yes-or-no-p (lambda (&rest _) t))
-(setq-default confirm-kill-emacs nil)
-(setq save-abbrevs t)
-(setq-default abbrev-mode t)
-(setq save-abbrevs 'silently)
-
-(setq-default transient-mark-mode t
-              visual-line-mode t
-              indent-tabs-mode nil
-              tab-width 4)
-
-;; highlights the line containing mark
-(if (fboundp 'global-hl-line-mode)
-    (global-hl-line-mode t))
-
-(setq-default initial-major-mode 'lisp-interaction-mode)
-(setq initial-scratch-message nil)
-
-(use-package page-break-lines)
-
-(use-package dashboard
-  :demand t
-  :bind
-  (:map dashboard-mode-map
-        ("n" . widget-forward)
-        ("p" . widget-backward)
-        ("f" . shan/elfeed-update-database))
-  :custom
-  (dashboard-banner-logo-title
-   (format ""
-           (float-time (time-subtract after-init-time before-init-time))
-           gcs-done))
-  (dashboard-set-heading-icons t)
-  (dashboard-set-file-icons t)
-  (dashboard-set-init-info t)
-  (dashboard-center-content t)
-  (dashboard-set-footer nil)
-
-  (dashboard-set-navigator t)
-  (dashboard-navigator-buttons
-   `((
-
-      (,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
-       ""
-       "GH Repos"
-       (lambda (&rest _) (browse-url "https://github.com/kkhan01?tab=repositories")))
-
-      (,(all-the-icons-material "update" :height 1.2 :v-adjust -0.24)
-       ""
-       "Update emacs"
-       (lambda (&rest _) (shan/elfeed-update-database)))
-
-      (,(all-the-icons-material "autorenew" :height 1.2 :v-adjust -0.15)
-       ""
-       "Restart emacs"
-       (lambda (&rest _) (shan/reload)))
-
-      )))
-
-  :config
-  (setq dashboard-items '((recents  . 5)
-                          ;; (bookmarks . 5)
-                          ;; (projects . 5)
-                          (agenda . 5)
-                          ;; (registers . 5)
-                          ))
-
-  (dashboard-setup-startup-hook)
-  (setq dashboard-startup-banner (if shan--settings-exist?
-                                     shan--preferred-logo ;; weird stuff, possibly because of no-littering
-                                   'logo))
-
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
-
-(use-package neotree
-  :after
-  (projectile)
-  :commands
-  (neotree-show neotree-hide neotree-dir neotree-find)
-  :init
-  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-  :custom
-  (neo-theme 'nerd2)
-  (neo-window-position 'left)
-  :bind
-  ([f8] . neotree-current-dir-toggle)
-  ([f9] . neotree-projectile-toggle)
-  :preface
-  (defun neotree-projectile-toggle ()
-    (interactive)
-    (let ((project-dir
-           (ignore-errors
-           ;;; Pick one: projectile or find-file-in-project
-             (projectile-project-root)
-             ))
-          (file-name (buffer-file-name))
-          (neo-smart-open t))
-      (if (and (fboundp 'neo-global--window-exists-p)
-               (neo-global--window-exists-p))
-          (neotree-hide)
-        (progn
-          (neotree-show)
-          (if project-dir
-              (neotree-dir project-dir))
-          (if file-name
-              (neotree-find file-name))))))
-
-  (defun neotree-current-dir-toggle ()
-    (interactive)
-    (let ((project-dir
-           (ignore-errors
-             (ffip-project-root)
-             ))
-          (file-name (buffer-file-name))
-          (neo-smart-open t))
-      (if (and (fboundp 'neo-global--window-exists-p)
-               (neo-global--window-exists-p))
-          (neotree-hide)
-        (progn
-          (neotree-show)
-          (if project-dir
-              (neotree-dir project-dir))
-          (if file-name
-              (neotree-find file-name)))))))
-
-(setq-default hscroll-margin 2
-              hscroll-step 1
-              scroll-margin 0
-              scroll-conservatively 10000
-              scroll-preserve-screen-position t
-              auto-window-vscroll nil
-              mouse-wheel-scroll-amount '(5 ((shift) . 2))
-              mouse-wheel-progressive-speed nil)
-
-(remove-hook 'eshell-mode-hook 'hscroll-margin t)
-(remove-hook 'term-mode-hook 'hscroll-margin t)
-
-(if (fboundp 'blink-cursor-mode)
-    (blink-cursor-mode 0))
-
-(setq-default blink-matching-paren nil
-              visible-cursor nil
-              x-stretch-cursor nil
-              cursor-type 'box)
-
-(use-package beacon
-  :hook
-  (focus-in . beacon-blink)
-  :config
-  (beacon-mode))
-
-(use-package ivy
-  :bind
-  ([switch-to-buffer] . ivy-switch-buffer)
-  (:map ivy-minibuffer-map
-        ([remap xref-find-definitions] . shan/do-nothing)
-        ([remap xref-find-definitions-other-frame] . shan/do-nothing)
-        ([remap xref-find-definitions-other-window] . shan/do-nothing)
-        ([remap xref-find-references] . shan/do-nothing)
-        ([remap xref-find-apropos] . shan/do-nothing)
-        ("<return>" . ivy-alt-done)
-        ("<S-return>" . ivy-immediate-done))
-  :custom
-  (ivy-use-virtual-buffers t)
-  (ivy-count-format "%d/%d ")
-  (ivy-height 20)
-  (ivy-display-style 'fancy)
-  (ivy-format-function 'ivy-format-function-line)
-  (ivy-re-builders-alist
-   '((t . ivy--regex-plus)))
-  (ivy-initial-inputs-alist nil)
-  :config
-  (ivy-mode))
-
-(use-package counsel
-  :bind
-  ("M-x" . counsel-M-x)
-  ("C-x C-f" . counsel-find-file)
-  ("C-h v" . counsel-describe-variable)
-  ("C-h f" . counsel-describe-function)
-  ("C-x b" . counsel-switch-buffer)
-  :config
-  (counsel-mode t)
-  ;; weird because of a top-level push in source code
-  (setq-default ivy-initial-inputs-alist nil))
-
-(use-package swiper
-  :bind
-  ("C-s" . swiper-isearch)
-  ("C-r" . swiper-isearch-backward))
-
-(use-package ag
-  :commands (ag ag-files ag-regexp ag-project ag-dired helm-ag)
-  :config (setq ag-highlight-search t
-                ag-reuse-buffers t))
-
-(use-package ivy-rich
-  :init
-  (ivy-rich-mode 1)
-  :config
-  (setq ivy-rich-parse-remote-buffer nil)
-  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
-
-(use-package all-the-icons)
-
-(use-package rainbow-delimiters
-  :hook
-  (prog-mode . rainbow-delimiters-mode))
-
-(use-package smartparens
-  :hook
-  (prog-mode . smartparens-mode)
-  :custom
-  (sp-escape-quotes-after-insert nil)
-  :config
-  (require 'smartparens-config))
-
-(use-package paren
-  :demand t
-  :config
-  (setq show-paren-when-point-in-periphery t
-        show-paren-when-point-inside-paren t)
-  (show-paren-mode t))
-
-(use-package move-text
-  :config
-  (move-text-default-bindings))
-
-(use-package rainbow-mode
-  :config
-  (with-no-warnings
-    ;; HACK: Use overlay instead of text properties to override `hl-line' faces.
-    ;; @see https://emacs.stackexchange.com/questions/36420
-    (defun my-rainbow-colorize-match (color &optional match)
-      (let* ((match (or match 0))
-             (ov (make-overlay (match-beginning match) (match-end match))))
-        (overlay-put ov 'ovrainbow t)
-        (overlay-put ov 'face `((:foreground ,(if (> 0.5 (rainbow-x-color-luminance color))
-                                                  "white" "black"))
-                                (:background ,color)))))
-    (advice-add #'rainbow-colorize-match :override #'my-rainbow-colorize-match)
-
-    (defun my-rainbow-clear-overlays ()
-      "Clear all rainbow overlays."
-      (remove-overlays (point-min) (point-max) 'ovrainbow t))
-    (advice-add #'rainbow-turn-off :after #'my-rainbow-clear-overlays))
-
-  (define-globalized-minor-mode global-rainbow-mode rainbow-mode
-    (lambda () (rainbow-mode 1)))
-  (global-rainbow-mode 1))
-
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
-
-(use-package hl-todo
-  :hook
-  (prog-mode . hl-todo-mode)
-  :config
-  (setq hl-todo-highlight-punctuation ":"
-        hl-todo-keyword-faces
-        `(("TODO"       warning bold)
-          ("FIXME"      error bold)
-          ("HACK"       font-lock-constant-face bold)
-          ("REVIEW"     font-lock-keyword-face bold)
-          ("NOTE"       success bold)
-          ("DEPRECATED" font-lock-doc-face bold))))
-
-(use-package expand-region
-  :bind
-  ("C-=" . er/expand-region))
-
-(defun shan/fill-or-unfill ()
-  "Fill or unfill based on the previous command."
-  (interactive)
-  (let ((fill-column
-         (if (eq last-command 'endless/fill-or-unfill)
-             (progn (setq this-command nil)
-                    (point-max))
-           fill-column)))
-    (call-interactively #'fill-paragraph)))
-
-(setq-default require-final-newline t
-              vc-follow-symlinks t)
-
-(global-subword-mode t)
-(delete-selection-mode t)
-(global-font-lock-mode t)
-(add-hook 'before-save-hook #'delete-trailing-whitespace)
-
-(global-set-key [remap fill-paragraph]
-                #'shan/fill-or-unfill)
-
-(global-set-key (kbd "M-;")
-                'comment-line)
-
-(use-package avy
-  :bind
-  ("C-'" . avy-goto-char-2)
-  :custom
-  (avy-keys shan--home-row))
-
-(use-package ace-window
-  :bind
-  ("C-x C-w" . ace-window)
-  :custom
-  (aw-keys shan--home-row))
-
-(use-package command-log-mode)
-
-(use-package gitattributes-mode)
-(use-package gitignore-mode)
-(use-package gitconfig-mode)
-
-(use-package magit
+(package! magit
   :defer t
   :bind
   (:map magit-status-mode-map
@@ -895,14 +875,10 @@ NAME and ARGS are as in `use-package'."
   ;; full window magit
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
 
-(use-package transient
+(package! transient
   :defer t
   :config
   (transient-bind-q-to-quit))
-
-(use-package forge)
-
-(use-package git-timemachine)
 
 (defvar shan--ide-alist '()
   "List containing relationships of (mode . hydra).")
@@ -919,7 +895,7 @@ NAME and ARGS are as in `use-package'."
         (funcall hydra)
       (message "IDE not found for %s" major-mode))))
 
-(use-package flycheck
+(package! flycheck
   :init
   (global-flycheck-mode 1)
   :bind (("C-c f" . flycheck-mode))
@@ -936,8 +912,8 @@ NAME and ARGS are as in `use-package'."
 (setq js2-missing-semi-one-line-override t
       js2-strict-missing-semi-warning nil)
 
-(use-package vterm)
-(use-package vterm-toggle
+(package! vterm)
+(package! vterm-toggle
   :config
   ;; I like vterm to 'pop up' on the bottom
   ;; if anything, I can use zoom-window-zoom to focus
@@ -963,64 +939,31 @@ NAME and ARGS are as in `use-package'."
 ;;Don't echo passwords when communicating with interactive programs:
 (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
 
-(use-package company
+(package! company
   :bind
-  ("C-/" . company-complete)
+  (:map company-mode-map
+        ("C-/" . company-complete))
   (:map company-active-map
-        ("M-/" . company-other-backend)
+        ("C-/" . company-other-backend)
         ("M-n" . nil)
         ("M-p" . nil)
         ("C-n" . company-select-next)
         ("C-p" . company-select-previous))
-  :custom-face
-  (company-tooltip ((t (:foreground "#abb2bf" :background "#30343c"))))
-  (company-tooltip-annotation ((t (:foreground "#abb2bf" :background "#30343c"))))
-  (company-tooltip-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
-  (company-tooltip-mouse ((t (:background "#30343c"))))
-  (company-tooltip-common ((t (:foreground "#abb2bf" :background "#30343c"))))
-  (company-tooltip-common-selection ((t (:foreground "#abb2bf" :background "#393f49"))))
-  (company-preview ((t (:background "#30343c"))))
-  (company-preview-common ((t (:foreground "#abb2bf" :background "#30343c"))))
-  (company-scrollbar-fg ((t (:background "#30343c"))))
-  (company-scrollbar-bg ((t (:background "#30343c"))))
-  (company-template-field ((t (:foreground "#282c34" :background "#c678dd"))))
   :custom
   (company-require-match 'never)
   (company-dabbrev-downcase nil)
   (company-tooltip-align-annotations t)
-  (company-idle-delay 3) ;; 128)
-  (company-minimum-prefix-length 3) ;; 128)
+  (company-idle-delay nil)
+  (company-backends '(company-capf))
   :config
-  (global-company-mode t))
+  (global-company-mode))
 
-(use-package company-quickhelp
-  :after (company)
-  :config
-  (company-quickhelp-mode))
-
-(use-package company-box
-  :after (company)
-  :hook
-  (company-mode . company-box-mode))
-
-(use-package tramp
-  :straight nil
-  :config
-  ;; faster than scp
-  (setq tramp-default-method "ssh")
-  (add-to-list 'tramp-default-user-alist
-               '("ssh" "eniac.*.edu\\'" "Khinshan.Khan44") ;; current eniac logins
-               '(nil nil "shan")) ;; fallback login
-
-  (setq password-cache-expiry nil))
-
-;; this hook makes remote projectile a little lighter
-(add-hook 'find-file-hook
-          (lambda ()
-            (when (file-remote-p default-directory)
-              (setq-local projectile-mode-line "Projectile"))))
-
-(use-package lsp-mode
+(package! lsp-mode
+  :bind
+  (:map lsp-mode-map
+        ([remap xref-find-definitions] . lsp-find-definition)
+        ("C-c e" . lsp-rename)
+        ("C-c f" . lsp-format-buffer))
   :custom
   (lsp-auto-guess-root t)
   (lsp-before-save-edits t)
@@ -1028,72 +971,45 @@ NAME and ARGS are as in `use-package'."
   (lsp-auto-configure t)
   (lsp-enable-snippet nil)
   (lsp-prefer-flymake nil)
-  :config
-  (require 'lsp-clients) ;; due to lsp-auto-configure being nil
-  (setq lsp-print-io t))
+  (lsp-prefer-capf t)
+  (lsp-print-io nil)) ; debug?
 
-(use-package lsp-ui
+(package! lsp-ui
   :after (lsp-mode)
   :hook
   (lsp-mode . lsp-ui-mode)
   :bind
   (:map lsp-mode-map
-        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-        ([remap xref-find-references]  . lsp-ui-peek-find-references))
+        ([remap xref-find-references] . lsp-ui-peek-find-references)
+        ([remap flycheck-list-errors] . lsp-ui-flycheck-list))
   :custom
-  (lsp-ui-flycheck-enable t))
-
-(use-package company-lsp
-  :after (company lsp-mode)
-  :bind
-  (:map lsp-mode-map
-        ("C-/" . company-lsp))
-  :custom
-  (company-lsp-async t)
-  (company-lsp-cache-candidates t)
-  (company-lsp-enable-snippets nil)
-  (company-lsp-enable-recompletion t)
+  (lsp-ui-doc-border (face-foreground 'default))
+  (lsp-ui-flycheck-enable t)
+  (lsp-headerline-breadcrumb-enable nil)
+  ;; (lsp-ui-doc-include-signature t)
   :config
-  (add-to-list 'company-backends #'company-lsp))
+  (with-eval-after-load 'hl-line
+    (set-face-background 'lsp-ui-doc-background (face-background 'hl-line))))
 
-(use-package dap-mode
-  :after (hydra)
-  :hook
-  (lsp-mode . (lambda () (dap-mode t) (dap-ui-mode t)))
-  ;; FIXME: super broken with straight
-  ;; :config
-  ;; (use-package dap-hydra
-  ;;   :straight nil
-  ;;   :config
-  ;;   (defhydra+ dap-hydra (:exit nil :foreign-keys run)
-  ;;     ("d" dap-debug "Start debug session"))
-  ;;   (pretty-hydra-define+ hydra-lsp ()
-  ;;     (;; these heads are added to the existing " Exit" column
-  ;;      " Exit"
-  ;;      (("SPC" dap-hydra "dap")))))
-  )
+(add-hook 'lsp-mode-hook #'company-mode)
 
-(use-package treemacs
-  :bind (:map global-map
-              ("C-x t t" . treemacs)
-              ("C-x t 1" . treemacs-select-window))
-  :config
-  (setq treemacs-resize-icons 4))
+(package! dap-mode
+  :after (hydra))
 
-(use-package lsp-treemacs
-  :init (lsp-treemacs-sync-mode 1))
+(feature! dap-hydra
+  :after (hydra dap-mode))
 
-(use-package treemacs-projectile
-  :after treemacs projectile)
+(with-eval-after-load 'dap-hydra
+  ;; add start dap debug within hydra because convenience is key
+  (defhydra+ dap-hydra (:exit nil :foreign-keys run)
+    ("d" dap-debug "Start debug session"))
 
-(use-package treemacs-magit
-  :after treemacs magit)
+  (pretty-hydra-define+ hydra-lsp ()
+    (;; these heads are added to the existing " Exit" column in hydra-lsp
+     " Exit"
+     (("SPC" dap-hydra "dap")))))
 
-(use-package treemacs-icons-dired
-  :after treemacs dired
-  :config (treemacs-icons-dired-mode))
-
-(use-package projectile
+(package! projectile
   :bind
   (:map projectile-mode-map
         ("C-c p" . projectile-command-map))
@@ -1108,7 +1024,7 @@ NAME and ARGS are as in `use-package'."
   :config
   (projectile-mode t))
 
-(use-package counsel-projectile
+(package! counsel-projectile
   :disabled
   :after
   (counsel projectile)
@@ -1120,20 +1036,19 @@ NAME and ARGS are as in `use-package'."
   (defalias 'projectile-grep 'counsel-projectile-grep)
   (defalias 'projectile-switch-project 'counsel-projectile-switch-project))
 
-(use-package asm-mode
+(package! asm-mode
   :mode "\\.as\\'"
   :bind (:map asm-mode-map
               ("<f5>" . #'compile)))
 
-(use-package mips-mode
+(package! mips-mode
   :mode "\\.mips$")
 
-(use-package company-c-headers
+(package! company-c-headers
   :config
   (add-to-list 'company-backends 'company-c-headers))
 
-(use-package cc-mode
-  :straight nil
+(feature! cc-mode
   :hook
   ((c-mode c++-mode) . lsp)
   :custom
@@ -1146,16 +1061,16 @@ NAME and ARGS are as in `use-package'."
   (shan--ide-add 'c-mode #'hydra-lsp/body)
   (shan--ide-add 'c++-mode #'hydra-lsp/body))
 
-(use-package dap-gdb-lldb
-  :straight nil)
+(with-eval-after-load 'dap-hydra
+  (feature! dap-gdb-lldb))
 
-(use-package modern-cpp-font-lock
+(package! modern-cpp-font-lock
   :hook
   (c++-mode . modern-c++-font-lock-mode))
 
-(use-package clojure-mode)
+(package! clojure-mode)
 
-(use-package cider
+(package! cider
   :bind
   (:map cider-repl-mode-map
         ("C-l" . cider-repl-clear-buffer))
@@ -1166,35 +1081,35 @@ NAME and ARGS are as in `use-package'."
   (cider-repl-display-in-current-window nil)
   (cider-font-lock-dynamically t))
 
-(use-package elein)
+(package! elein)
 
-(use-package dart-mode
+(package! dart-mode
   :hook
   (dart-mode . lsp)
   :custom
   (dart-format-on-save t)
   (dart-sdk-path shan--dart-path))
 
-(use-package flutter
+(package! flutter
   :after dart-mode
   :bind (:map dart-mode-map
               ("C-M-x" . #'flutter-run-or-hot-reload))
   :custom
   (flutter-sdk-path shan--flutter-path))
 
-(use-package flutter-l10n-flycheck
+(package! flutter-l10n-flycheck
   :after flutter
   :config
   (flutter-l10n-flycheck-setup))
 
-(use-package elixir-mode
+(package! elixir-mode
   :init
   (add-hook 'elixir-mode-hook #'company-mode))
 
-(use-package alchemist)
+(package! alchemist)
 
-(use-package go-mode
-  :if (and (executable-find "go") (executable-find "bingo"))
+(package! go-mode
+  :if (executable-find "go")
   :hook
   (go-mode . lsp)
   :mode "\\.go\\'"
@@ -1207,67 +1122,42 @@ NAME and ARGS are as in `use-package'."
   :config
   (add-hook 'before-save-hook #'gofmt-before-save)
 
-  (use-package gotest
+  (package! gotest
     :after go)
 
-  (use-package go-tag
+  (package! go-tag
     :after go
     :config
-    (setq go-tag-args (list "-transform" "camelcase"))))
+    (setq go-tag-args (list "-transform" "camelcase")))
 
-(use-package haskell-mode
+  (shan--ide-add 'go-mode #'hydra-lsp/body))
+
+(with-eval-after-load 'dap-hydra
+  (feature! dap-go))
+
+(package! haskell-mode
   :if (executable-find "ghc")
   :mode "\\.hs\\'"
   :config
   (setq haskell-mode-hook 'haskell-mode-defaults))
 
-(use-package lsp-java
-  :after (lsp)
-  :hook (java-mode . lsp)
-  :bind (:map java-mode-map
-              ("C-x e l" . lsp-treemacs-errors-list)
-              ("C-x s l" . lsp-treemacs-symbols))
-  :config
-  (require 'dap-java)
-  (shan--ide-add 'java-mode #'hydra-lsp/body))
-
-;; Gradle
-(use-package gradle-mode
-  :hook (java-mode . (lambda () (gradle-mode 1)))
-  :config
-  (defun build-and-run()
-    (interactive)
-    (gradle-run "build run"))
-  (define-key gradle-mode-map (kbd "C-c C-r") 'build-and-run))
-
-(use-package mvn
-  :config
-  (ignore-errors
-    (require 'ansi-colors)
-    (defun colorize-compilation-buffer ()
-      (when (eq major-mode 'compilation-mode)
-        (let ((inhibit-read-only t))
-          (if (boundp 'compilation-filter-start)
-              (ansi-color-apply-on-region compilation-filter-start (point))))))
-    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)))
-
-(use-package ein
+(package! ein
   :mode
   (".*\\.ipynb\\'" . ein:ipynb-mode)
   :custom
   (ein:completion-backend 'ein:use-company-jedi-backends)
   (ein:use-auto-complete-superpack t))
 
-(use-package bug-hunter)
+(package! bug-hunter)
 
-(use-package lua-mode
+(package! lua-mode
   :after (company)
   :mode
   (("\\.lua\\'" . lua-mode))
   :hook
   (lua-mode . company-mode))
 
-(use-package tuareg
+(package! tuareg
   :if (and (executable-find "ocaml")
            (executable-find "npm")
            t)
@@ -1286,53 +1176,64 @@ NAME and ARGS are as in `use-package'."
   :config
   (shan--ide-add 'tuareg-mode #'hydra-lsp/body))
 
-(use-package pip-requirements
+(package! pip-requirements
   :mode
   ("requirements\\.txt" . pip-requirements-mode)
   :init
   (shan/copy-hooks-to text-mode-hook 'pip-requirements-mode-hook))
 
-(use-package python
-  :if (executable-find "pyls")
-  :straight nil
+(package! python
+  :ensure nil
   :hook
   (python-mode . lsp)
   :custom
   (python-indent 4)
-  (python-shell-interpreter shan/python-executable)
-  ;; Required for MacOS, prevents newlines from being displayed as ^G
-  (python-shell-interpreter-args (if (eq system-type 'darwin) "-c exec('__import__(\\'readline\\')') -i" "-i"))
-  ;; (gud-pdb-command-name (concat shan/python-executable " -m pdb"))
-  (python-fill-docstring-style 'pep-257)
   (py-split-window-on-execute t)
   :config
-  (setq lsp-pyls-configuration-sources ["flake8" "pycodestyle"]
-        lsp-pyls-plugins-flake8-enabled t
-        lsp-pyls-plugins-pyflakes-enabled nil
-        lsp-pyls-plugins-pydocstyle-enabled t
-        lsp-pyls-plugins-mccabe-enabled nil)
+  ;; Required for MacOS, prevents newlines from being displayed as ^G
+  (setq python-shell-interpreter-args (if (equal system-type 'darwin)
+					                      "-c \"exec('__import__(\\'readline\\')')\" -i"
+				                        "-i"))
   (shan--ide-add 'python-mode #'hydra-lsp/body))
 
-(use-package dap-python
-  :straight nil
-  :after dap-mode
-  :custom
-  (dap-python-executable shan/python-executable))
+(with-eval-after-load 'lsp-mode
+  (setq lsp-pyls-plugins-autopep8-enabled nil
+        lsp-pyls-plugins-flake8-enabled t
+        lsp-pyls-plugins-mccabe-enabled nil
+        lsp-pyls-plugins-pycodestyle-enabled nil
+        lsp-pyls-plugins-pyflakes-enabled nil
+        lsp-pyls-plugins-yapf-enabled nil))
 
-(use-package ess
+(package! pyvenv
+  :after python
+  :hook
+  (python-mode . pyvenv-mode))
+
+(package! cython-mode)
+(package! flycheck-cython
+  :after flycheck
+  :config
+  (add-to-list 'flycheck-checkers 'cython))
+
+(with-eval-after-load 'dap-hydra
+  (feature! dap-python
+    :custom
+    (dap-python-executable shan/python-executable)))
+
+(package! ess
   :defer t
   :mode
   ("\\.jl\\'" . ess-julia-mode)
   ("\\.[rR]\\'" . ess-r-mode))
 
-(use-package scala-mode
+(package! scala-mode
   :mode "\\.s\\(cala\\|bt\\)$"
   :config
   (setq scala-indent:align-parameters t
         ;; indent block comments to first asterix, not second
         scala-indent:use-javadoc-style t))
 
-(use-package sbt-mode
+(package! sbt-mode
   :commands sbt-start sbt-command
   :config
   ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
@@ -1375,15 +1276,15 @@ NAME and ARGS are as in `use-package'."
                         `((sh-mode--string-interpolated-variable-font-lock-find))
                         'append)
 
-(use-package sh-script
+(package! sh-script
   :mode
   ("\\.env\\'" . sh-mode))
 
-(use-package restclient
+(package! restclient
   :mode
   ("\\.http\\'" . restclient-mode))
 
-(use-package web-mode
+(package! web-mode
   :mode
   (("\\.html?\\'"       . web-mode)
    ("\\.phtml\\'"       . web-mode)
@@ -1417,7 +1318,7 @@ NAME and ARGS are as in `use-package'."
   (interactive)
   (browse-url "https://docs.emmet.io/cheatsheet-a5.pdf"))
 
-(use-package emmet-mode
+(package! emmet-mode
   :hook
   ((css-mode  . emmet-mode)
    (php-mode  . emmet-mode)
@@ -1425,7 +1326,7 @@ NAME and ARGS are as in `use-package'."
    (rjsx-mode . emmet-mode)
    (web-mode  . emmet-mode)))
 
-(use-package typescript-mode
+(package! typescript-mode
   :hook
   (typescript-mode . lsp)
   :mode (("\\.ts\\'" . typescript-mode)
@@ -1433,18 +1334,18 @@ NAME and ARGS are as in `use-package'."
   :config
   (shan--ide-add 'typescript-mode #'hydra-lsp/body))
 
-(use-package add-node-modules-path
+(package! add-node-modules-path
   :hook
   ((web-mode . add-node-modules-path)
    (rjsx-mode . add-node-modules-path)))
 
-(use-package prettier-js
+(package! prettier-js
   :hook
   ((js-mode . prettier-js-mode)
    (typescript-mode . prettier-js-mode)
    (rjsx-mode . prettier-js-mode)))
 
-(use-package tide
+(package! tide
   :after
   (typescript-mode js2-mode company flycheck)
   :hook
@@ -1455,7 +1356,7 @@ NAME and ARGS are as in `use-package'."
   (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
   (flycheck-add-next-checker 'tsx-tide 'javascript-eslint))
 
-(use-package rjsx-mode
+(package! rjsx-mode
   :mode
   (("\\.js\\'"   . rjsx-mode)
    ("\\.jsx\\'"  . rjsx-mode)
@@ -1465,17 +1366,17 @@ NAME and ARGS are as in `use-package'."
   (setq-default rjsx-basic-offset 2)
   (setq-default rjsx-global-externs '("module" "require" "assert" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON")))
 
-(use-package react-snippets
+(package! react-snippets
   :after yasnippet)
 
-(use-package vue-html-mode)
+(package! vue-html-mode)
 
-(use-package vue-mode
+(package! vue-mode
   :defer t
   :mode
   (("\\.vue\\'"  . vue-mode)))
 
-(use-package artist
+(package! artist
   :config
   ;; this is from emacswiki
   (defun shan/artist-ido-select-operation (type)
@@ -1526,13 +1427,13 @@ NAME and ARGS are as in `use-package'."
 
   (shan--ide-add 'picture-mode #'hydra-artist/body))
 
-(use-package gnuplot)
+(package! gnuplot)
 
-(use-package gnuplot-mode
+(package! gnuplot-mode
   :mode
   ("\\.gp\\'" "\\.gnuplot\\'"))
 
-(use-package mermaid-mode
+(package! mermaid-mode
   :if (executable-find "mmdc")
   :mode
   (("\\.mmd\\'" . mermaid-mode)
@@ -1540,7 +1441,7 @@ NAME and ARGS are as in `use-package'."
   :init
   (setq mermaid-mmdc-location (executable-find "mmdc")))
 
-(use-package plantuml-mode
+(package! plantuml-mode
   :if (file-exists-p shan--plantuml-path)
   :mode
   ("\\.\\(plant\\)?uml\\'" . plantuml-mode)
@@ -1551,37 +1452,37 @@ NAME and ARGS are as in `use-package'."
   (plantuml-output-type "png")
   (plantuml-options "-charset UTF-8"))
 
-(use-package csv-mode)
+(package! csv-mode)
 
-(use-package dhall-mode)
+(package! dhall-mode)
 
-(use-package editorconfig
+(package! editorconfig
   :hook
   ((prog-mode text-mode) . editorconfig-mode)
   :config
   (editorconfig-mode 1))
 
-(use-package groovy-mode
+(package! groovy-mode
   :defer t
   :mode
   (("\\.groovy$" . groovy-mode)
    ("\\.gradle$" . groovy-mode)))
 
-(use-package info
+(package! info
   :mode
   ("\\.info\\'" . info-mode))
 
-(use-package json-mode
+(package! json-mode
   :mode
   ("\\.json\\'" . json-mode)
   :init
   (setq-default js-indent-level 2))
 
-(use-package markdown-mode
+(package! markdown-mode
   :mode
   ("\\.\\(md\\|markdown\\)\\'" . markdown-mode))
 
-(use-package markdown-preview-mode
+(package! markdown-preview-mode
   :if (executable-find "pandoc")
   :after (markdown-mode)
   :custom
@@ -1615,24 +1516,24 @@ NAME and ARGS are as in `use-package'."
             @media (max-width: 767px) { .markdown-body { padding: 15px; } }
           </style>")))
 
-(use-package pkgbuild-mode
+(package! pkgbuild-mode
   :mode
   (("/PKGBUILD/" . pkgbuild-mode)))
 
-(use-package protobuf-mode)
+(package! protobuf-mode)
 
-(use-package toml-mode)
+(package! toml-mode)
 
-(use-package yaml-mode
+(package! yaml-mode
   :bind
   (:map yaml-mode-map
         ("C-x C-s" . shan/vanilla-save)))
 
-(use-package flycheck-yamllint
+(package! flycheck-yamllint
   :hook
   (flycheck-mode . flycheck-yamllint-setup))
 
-(use-package dockerfile-mode
+(package! dockerfile-mode
   :mode
   (("Dockerfile'"       . dockerfile-mode)
    ("\\.Dockerfile\\'"  . dockerfile-mode))
@@ -1640,15 +1541,15 @@ NAME and ARGS are as in `use-package'."
   (shan/copy-hooks-to text-mode-hook 'dockerfile-mode-hook))
 
 ;; Emacs interface to docker
-(use-package docker)
+(package! docker)
 
-(use-package kubernetes
+(package! kubernetes
   :commands
   (kubernetes-overview))
 
-(use-package graphql)
+(package! graphql)
 
-(use-package graphql-mode
+(package! graphql-mode
   :mode
   (("\\.\\(gql\\|graphql\\)\\'" . graphql-mode))
   :config
@@ -1662,14 +1563,14 @@ NAME and ARGS are as in `use-package'."
                                                   (read-string "Enter graphql url:") arg)))
                 :caller 'shan/set-graphql-url))))
 
-(use-package sql
+(package! sql
   :mode
   (("\\.\\(sql\\|psql\\|hql\\|mysql\\|q\\)\\'" . sql-mode))
   :hook
   (sql-mode . (lambda ()
                 (sql-highlight-mysql-keywords))))
 
-(use-package sql-indent
+(package! sql-indent
   :init
   (setq-default sql-indent-offset tab-width))
 
@@ -1699,7 +1600,7 @@ NAME and ARGS are as in `use-package'."
 
 (add-hook 'straight-use-package-pre-build-functions '+org-fix-package-h)
 
-(use-package org
+(package! org
   :straight (org-mode
              :host github
              :repo "emacs-straight/org-mode"
@@ -1719,7 +1620,7 @@ NAME and ARGS are as in `use-package'."
       org-pretty-entities t
       org-hide-emphasis-markers t
       org-support-shift-select t)
-;; (use-package ob-ipython)
+;; (package! ob-ipython)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -1748,13 +1649,14 @@ NAME and ARGS are as in `use-package'."
                                                        ("js" . "src js\n")
                                                        ("py" . "src python\n")
                                                        ("r" . "src R\n")
-                                                       ("sh" . "src shell\n")))
+                                                       ("sh" . "src shell\n")
+                                                       ("sc" . "src scala\n")))
 
-(use-package toc-org
+(package! toc-org
   :hook
   (org-mode . toc-org-enable))
 
-(use-package org-bullets
+(package! org-bullets
   :hook
   (org-mode . org-bullets-mode)
   :config
@@ -1777,21 +1679,21 @@ NAME and ARGS are as in `use-package'."
                       :background "#fafafa"
                       :foreground "#a0a1a7"))
 
-(use-package px)
+(package! px)
 
-(use-package ox-gfm
+(package! ox-gfm
   :after (org))
 
-(use-package ox-pandoc)
+(package! ox-pandoc)
 
-(use-package ox-reveal
+(package! ox-reveal
   :custom
   (org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/") ;; possibly make this local
   (org-reveal-mathjax t))
 
-(use-package htmlize)
+(package! htmlize)
 
-(use-package org-fancy-priorities
+(package! org-fancy-priorities
   :diminish
   :defines org-fancy-priority-list
   :hook (org-mode . org-fancy-priorities-mode)
@@ -1803,16 +1705,11 @@ NAME and ARGS are as in `use-package'."
           (?D . (:foreground "#87ceeb"))))
   (setq org-fancy-priorities-list '("⬛" "⬛" "⬛" "⬛")))
 
-(use-package yasnippet
-  :config
-  (use-package yasnippet-snippets)
-  (yas-global-mode 1))
-
-(use-package flyspell
+(package! flyspell
   :hook ((text-mode . flyspell-mode)
          (prog-mode . flyspell-prog-mode)))
 
-(use-package flyspell-popup
+(package! flyspell-popup
   :preface
   ;; move point to previous error
   ;; based on code by hatschipuh at
@@ -1870,14 +1767,14 @@ NAME and ARGS are as in `use-package'."
         ("C-," . muh/flyspell-next-word)
         ("C-M-," . muh/flyspell-prev-word)))
 
-(use-package olivetti
+(package! olivetti
   :diminish
   :bind
   ("<f7>" . olivetti-mode)
   :init
   (setq olivetti-body-width 0.618))
 
-(use-package tex
+(package! tex
   :straight auctex
   :mode
   ("\\.tex\\'" . LaTeX-mode)
@@ -1889,7 +1786,7 @@ NAME and ARGS are as in `use-package'."
   ;; interestingly enough, auto ide doesnt like the latex formatted latex
   (shan--ide-add 'latex-mode #'hydra-latex/body))
 
-(use-package auctex-latexmk
+(package! auctex-latexmk
   :hook
   (LaTeX-mode . flymake-mode)
   :init
@@ -1907,28 +1804,28 @@ NAME and ARGS are as in `use-package'."
           (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
   (setq auctex-latexmk-inherit-TeX-PDF-mode t))
 
-(use-package cdlatex
+(package! cdlatex
   :hook
   (LaTeX-mode . turn-on-cdlatex))
 
-(use-package company-auctex
+(package! company-auctex
   :after (auctex company)
   :config
   (company-auctex-init))
 
-(use-package company-math
+(package! company-math
   :after (auctex company)
   :config
   (add-to-list 'company-backends 'company-math-symbols-unicode))
 
-(use-package reftex
+(package! reftex
   :after auctex
   :custom
   (reftex-plug-into-AUCTeX t)
   (reftex-save-parse-info t)
   (reftex-use-multiple-selection-buffers t))
 
-(use-package nov
+(package! nov
   :after (olivetti)
   :mode
   ("\\.epub\\'" . nov-mode)
@@ -1948,7 +1845,7 @@ NAME and ARGS are as in `use-package'."
   (setq nov-variable-pitch nil)
   (setq nov-text-width 72))
 
-(use-package pdf-view
+(package! pdf-view
   :if shan--personal?
   :straight pdf-tools
   :diminish (pdf-view-midnight-minor-mode pdf-view-printer-minor-mode)
@@ -2017,14 +1914,34 @@ NAME and ARGS are as in `use-package'."
           :pointer 'arrow)))))
 
 (when (>= emacs-major-version 26)
-  (use-package pdf-view-restore
+  (package! pdf-view-restore
     :if (featurep 'pdf-view)
     :hook (pdf-view-mode . pdf-view-restore-mode)
     :init (setq pdf-view-restore-filename
                 (locate-user-emacs-file ".pdf-view-restore"))))
 
-(use-package pubmed
+(package! pubmed
   :commands (pubmed-search pubmed-advanced-search))
+
+(with-os! gnu/linux
+  (package! xclip
+    :config
+    (xclip-mode 1)))
+
+;; (with-os! darwin
+;; (package! pbcopy))
+
+(with-os! darwin
+  (setq mac-option-modifier 'super)
+  (setq mac-command-modifier 'meta)
+  (setq ns-auto-hide-menu-bar t)
+  (setq ns-use-proxy-icon nil)
+  (setq initial-frame-alist
+        (append
+         '((ns-transparent-titlebar . t)
+           (ns-appearance . dark)
+           (vertical-scroll-bars . nil)
+           (internal-border-width . 0)))))
 
 (setq browse-url-browser-function 'browse-url-generic)
 
@@ -2038,105 +1955,24 @@ NAME and ARGS are as in `use-package'."
                                               browse-url-chrome-program "google-chrome"
                                               browse-url-generic-program "chrome")))
 
-(use-package carbon-now-sh
-  :straight (:host github :repo "shan-emacs/carbon-now-sh.el"))
-
-(use-package elcord
-  :if (and (executable-find "discord") shan--personal?)
+(package! keyfreq
   :config
-  (setq elcord-use-major-mode-as-main-icon t)
-  :init
-  (elcord-mode))
+  (keyfreq-autosave-mode t)
+  (keyfreq-mode t))
 
-(defun shan/elfeed-sync-database ()
-  "Wrapper to load the elfeed db from disk and update it"
-  (interactive)
-  (elfeed-db-load)
-  (elfeed-update))
+(package! sicp)
 
-(defun shan/elfeed-load-db-and-open ()
-  "Wrapper to load the elfeed db from disk before opening"
-  (interactive)
-  (shan/elfeed-sync-database)
-  (elfeed)
-  (elfeed-search-update--force))
-
-;;write to disk when quiting
-(defun bjm/elfeed-save-db-and-bury ()
-  "Wrapper to save the elfeed db to disk before burying buffer"
-  (interactive)
-  (elfeed-db-save)
-  (quit-window))
-
-(defun elfeed-mark-all-as-read ()
-  "Wrapper to mark all elfeed entries in a buffer as read"
-  (interactive)
-  (mark-whole-buffer)
-  (elfeed-search-untag-all-unread))
-
-(use-package elfeed
-  :if (file-exists-p shan/elfeed-file)
-  :bind
-  (:map elfeed-search-mode-map
-        ("q" . shan/elfeed-save-db-and-bury)
-        ("Q" . shan/elfeed-save-db-and-bury)
-        ("m" . elfeed-toggle-star)
-        ("M" . elfeed-toggle-star))
-  :custom
-  (elfeed-db-directory shan/elfeed-db)
-  :config
-  (defalias 'elfeed-toggle-star
-    (elfeed-expose #'elfeed-search-toggle-all 'star)))
-
-(use-package elfeed-org
-  :after (elfeed)
-  :custom
-  (rmh-elfeed-org-files (list shan/elfeed-file))
-  :config
-  (elfeed-org))
-
-(use-package elfeed-goodies
-  :after (elfeed elfeed-org)
-  :config
-  (elfeed-goodies/setup))
-
-(use-package emojify
-  :init
-  (setq emojify-user-emojis '(("🧚" . (("name" . "Fairy")
-                                       ("image" . "~/.emacs.d/emoji/fairy.png")
-                                       ("style" . "unicode")))))
-  (setq emojify-point-entered-behaviour 'uncover)
-  (setq emojify-show-help nil)
-  (global-emojify-mode)
-  (emojify-set-emoji-data))
-
-(use-package keyfreq
-  :config
-  (keyfreq-mode t)
-  ;;(keyfreq-autosave-mode 1)
-  )
-
-(use-package leetcode
-  :if shan--personal?
-  :config
-  (setq leetcode-prefer-language "python3"
-        leetcode-prefer-sql "mysql"
-        leetcode-save-solutions t
-        leetcode-directory "~/leetcode"))
-
-(use-package sicp)
-
-(use-package wakatime-mode
+(package! wakatime-mode
   :if (and (executable-find "wakatime") (boundp 'wakatime-api-key))
   :config
   (setq wakatime-cli-path (executable-find "wakatime"))
   (global-wakatime-mode))
 
-;; (use-package speed-type)
-;; (use-package origami)
-;; (use-package demangle-mode)
-;; (use-package academic-phrases)
-;; (use-package powerthesaurus)
-;; (use-package crontab-mode)
-;; (use-package salt-mode)
-;; (use-package rmsbolt)                   ; A compiler output viewer
+;; (package! speed-type)
+;; (package! origami)
+;; (package! demangle-mode)
+;; (package! academic-phrases)
+;; (package! powerthesaurus)
+;; (package! crontab-mode)
+;; (package! salt-mode)
+;; (package! rmsbolt)                   ; A compiler output viewer
