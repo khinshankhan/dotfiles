@@ -156,6 +156,11 @@ NAME and ARGS are as in `use-package'."
   `(when (if (consp ',os) (memq system-type ',os) (eq system-type ',os))
      ,@body))
 
+(defmacro do-once-1-sec-after-emacs-startup (&rest body)
+  `(run-with-idle-timer 1 ; run this after emacs is idle for 1 second
+                        nil ; do this just once; don't repeat
+                        (lambda () ,@body)))
+
 (defun shan/do-nothing ()
   "Do nothing."
   (interactive)
@@ -351,6 +356,11 @@ NAME and ARGS are as in `use-package'."
 
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
+
+(with-os! (gnu/linux darwin)
+  (package! exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize)))
 
 (setq inhibit-startup-message t)
 (dolist (fn '(tool-bar-mode scroll-bar-mode menu-bar-mode))
@@ -555,19 +565,9 @@ NAME and ARGS are as in `use-package'."
 
 (package! all-the-icons
   :config
-  (defconst all-the-icons-font-dir (cl-case window-system
-                                     (x  (concat (or (getenv "XDG_DATA_HOME")                  ;; Default Linux install directories
-                                                     (concat (getenv "HOME") "/.local/share"))
-                                                 "/fonts/"))
-                                     (mac (concat (getenv "HOME") "/Library/Fonts/" ))
-                                     (ns (concat (getenv "HOME") "/Library/Fonts/" )))         ;; Default MacOS install directory
-    "Directory where all-the-icons .tff files will install into.")
-  (when (not (and (stringp all-the-icons-font-dir)
-                  (--all?
-                   (f-exists? (f-join all-the-icons-font-dir it))
-                   all-the-icons-font-names)))
-    (message "Seems some of the icons are missing from all the icons.")
-    (all-the-icons-install-fonts)))
+  (do-once-1-sec-after-emacs-startup
+   (unless (find-font (font-spec :name "all-the-icons"))
+     (all-the-icons-install-fonts t))))
 
 (package! rainbow-delimiters
   :hook
@@ -1922,11 +1922,6 @@ NAME and ARGS are as in `use-package'."
 
 (package! pubmed
   :commands (pubmed-search pubmed-advanced-search))
-
-(with-os! (gnu/linux darwin)
-  (package! exec-path-from-shell
-    :config
-    (exec-path-from-shell-initialize)))
 
 (with-os! gnu/linux
   (package! xclip

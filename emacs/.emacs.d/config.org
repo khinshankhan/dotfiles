@@ -55,6 +55,7 @@ Another Opinionated Emacs Configuration
   - [[#encoding][Encoding]]
   - [[#backups][Backups]]
   - [[#version-specific][Version Specific]]
+  - [[#shell-paths][Shell Paths]]
 - [[#appearance][Appearance]]
   - [[#gui][GUI]]
   - [[#font][Font]]
@@ -138,7 +139,6 @@ Another Opinionated Emacs Configuration
 - [[#hobbies][Hobbies]]
   - [[#medical][Medical]]
 - [[#os][OS]]
-  - [[#shell-paths][Shell Paths]]
   - [[#copying][Copying]]
   - [[#macos][MacOS]]
 - [[#community][Community]]
@@ -397,6 +397,11 @@ NAME and ARGS are as in `use-package'."
   (declare (indent 1))
   `(when (if (consp ',os) (memq system-type ',os) (eq system-type ',os))
      ,@body))
+
+(defmacro do-once-1-sec-after-emacs-startup (&rest body)
+  `(run-with-idle-timer 1 ; run this after emacs is idle for 1 second
+                        nil ; do this just once; don't repeat
+                        (lambda () ,@body)))
    #+end_src
 
    Quality functions...
@@ -653,6 +658,19 @@ NAME and ARGS are as in `use-package'."
    #+begin_src emacs-lisp
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
+   #+end_src
+
+** TODO Shell Paths
+
+   This would be in the OS section, but it's needed for packages later on :sweat_smile:
+
+   Consider building out =exec-path-from-shell-variables= using packages(?)
+
+   #+begin_src emacs-lisp
+(with-os! (gnu/linux darwin)
+  (package! exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize)))
    #+end_src
 
 * Appearance
@@ -973,13 +991,16 @@ NAME and ARGS are as in `use-package'."
   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
    #+end_src
 
-** Icons
+** TODO Icons
+
+   Currently dealing with a hack. Need to look into refining font spec when in daemon mode.
 
    #+begin_src emacs-lisp
 (package! all-the-icons
   :config
-  (unless (find-font (font-spec :name "all-the-icons"))
-    (all-the-icons-install-fonts t)))
+  (do-once-1-sec-after-emacs-startup
+   (unless (find-font (font-spec :name "all-the-icons"))
+     (all-the-icons-install-fonts t))))
    #+end_src
 
 * General Editing
@@ -2987,17 +3008,6 @@ NAME and ARGS are as in `use-package'."
 * OS
 
   Some final OS specific touch ups
-
-** TODO Shell Paths
-
-   Consider building out =exec-path-from-shell-variables= using packages(?)
-
-   #+begin_src emacs-lisp
-(with-os! (gnu/linux darwin)
-  (package! exec-path-from-shell
-    :config
-    (exec-path-from-shell-initialize)))
-   #+end_src
 
 ** TODO Copying
 
