@@ -1083,7 +1083,8 @@ NAME and ARGS are as in `use-package'."
     (call-interactively #'fill-paragraph)))
 
 (setq-default require-final-newline t
-              vc-follow-symlinks t)
+              vc-follow-symlinks t
+              fill-column 120)
 
 (global-subword-mode t)
 (delete-selection-mode t)

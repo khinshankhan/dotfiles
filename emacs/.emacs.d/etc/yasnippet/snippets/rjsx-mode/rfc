@@ -4,8 +4,8 @@
 # --
 import React from "react"
 
-const `(capitalize (file-name-sans-extension (buffer-name)))` = ({$1}) => {
+const `(s-upper-camel-case (file-name-sans-extension (buffer-name)))` = ({$1}) => {
   return <>$2</>
 }
 
-export default `(capitalize (file-name-sans-extension (buffer-name)))`;
+export default `(s-upper-camel-case (file-name-sans-extension (buffer-name)))`;
