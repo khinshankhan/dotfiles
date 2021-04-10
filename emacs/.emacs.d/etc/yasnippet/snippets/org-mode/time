@@ -1,6 +1,0 @@
-# -*- coding: utf-8 -*-
-# name: time
-# key: time
-# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
-# --
-`(format-time-string "%H:%M:%S")`
