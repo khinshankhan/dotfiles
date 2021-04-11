@@ -5,6 +5,7 @@
 
 (require 'core-paths)
 
+(add-to-list 'load-path (expand-file-name "lib" shan-core-dir))
 
 ;; For the vars/ macros/ fns/ tricks n gimmicks: defines functions and macros used throughout the configuration.
 ;; Personal functions, some packages are reliant on these, so it goes on top. Working on credit for people not mentioned

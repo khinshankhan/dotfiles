@@ -42,3 +42,6 @@
 
 ;; Load the heart of config
 (load (expand-file-name "core" (expand-file-name "core" user-emacs-directory)) nil 'nomessage)
+
+;; Load modules that were requested
+(load (expand-file-name "modules" user-emacs-directory))
