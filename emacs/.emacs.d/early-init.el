@@ -1,4 +1,6 @@
-;;; early-init.el -*- lexical-binding: t; -*-
+;;; early-init.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
 
 ;; Mostly from Doom
 
@@ -6,6 +8,7 @@
 ;; package and UI initialization happens, and before site files are loaded.
 
 ;;; Code:
+
 (require 'cl-lib)
 
 ;; Defer garbage collection further back in the startup process
@@ -45,3 +48,6 @@
 
 ;; Load modules that were requested
 (load (expand-file-name "modules" user-emacs-directory))
+
+(provide 'early-init)
+;;; early-init.el ends here

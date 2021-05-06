@@ -1,3 +1,7 @@
+;;; dashboard.el --- dashboard
+;;; Commentary:
+;;; Code:
+
 (require 'core-straight)
 
 (package! page-break-lines)
@@ -39,3 +43,6 @@
 		          (length shan--loaded-packages)
                   (emacs-init-time))))
   (add-hook 'after-init-hook 'shan--dashboard-set-init-info))
+
+(provide 'dashboard)
+;;; dashboard.el ends here

@@ -1,8 +1,12 @@
+;;; python.el --- python
+;;; Commentary:
+;;; Code:
+
 (require 'core-straight)
 
 (use-package python
   :defer t
-  :ensure nil
+  :straight (:type built-in)
   :custom
   (python-indent 4)
   (py-split-window-on-execute t))
@@ -13,6 +17,7 @@
 				                      "-i"))
 
 (defun igneous--activate-venv ()
+  "Activates a venv."
   (interactive)
   (unless (bound-and-true-p pyvenv-virtual-env-name)
     (call-interactively #'pyvenv-activate)))
@@ -48,3 +53,6 @@
         lsp-pyls-plugins-pycodestyle-enabled nil
         lsp-pyls-plugins-pyflakes-enabled nil
         lsp-pyls-plugins-yapf-enabled nil))
+
+(provide 'python)
+;;; python.el ends here

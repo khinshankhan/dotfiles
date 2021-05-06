@@ -1,3 +1,7 @@
+;;; modeline.el --- modeline
+;;; Commentary:
+;;; Code:
+
 (require 'core-straight)
 
 (dolist (fn '(line-number-mode column-number-mode))
@@ -23,3 +27,6 @@
     deft-text-mode
     Man-mode)
    . hide-mode-line-mode))
+
+(provide 'modeline)
+;;; modeline.el ends here

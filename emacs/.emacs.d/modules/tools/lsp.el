@@ -1,3 +1,7 @@
+;;; lsp.el --- lsp
+;;; Commentary:
+;;; Code:
+
 (require 'core-straight)
 (require 'core-module)
 
@@ -51,3 +55,6 @@
 
 (with-module! :editor company
               (add-hook 'lsp-mode-hook #'company-mode))
+
+(provide 'lsp)
+;;; lsp.el ends here

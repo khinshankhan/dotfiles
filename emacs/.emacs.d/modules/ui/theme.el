@@ -1,3 +1,7 @@
+;;; theme.el --- theme
+;;; Commentary:
+;;; Code:
+
 (require 'core-straight)
 
 (package! doom-themes
@@ -22,3 +26,6 @@
   (solaire-mode-swap-bg)
   (advice-add #'persp-load-state-from-file
               :after #'solaire-mode-restore-persp-mode-buffers))
+
+(provide 'theme)
+;;; theme.el ends here

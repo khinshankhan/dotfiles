@@ -34,7 +34,7 @@
   "List containing loaded packages.")
 
 (defmacro package! (name &rest args)
-  "Like `use-package', but cooler since it also tracks which packages were loaded.
+  "Like `use-package', but cooler since it also tracks which packages loaded.
 NAME and ARGS are as in `use-package'."
   (declare (indent defun))
   (add-to-list 'shan--loaded-packages name)
