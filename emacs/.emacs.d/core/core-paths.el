@@ -1,4 +1,6 @@
 ;;; core-paths.el --- some path logic -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 
 (require 'find-lisp)
 
@@ -8,13 +10,6 @@
   "Directory with all the module files.")
 
 (add-to-list 'load-path shan-core-dir)
-
-(defconst shan--module-paths '()
-  "List of all paths in `modules' directory to an elisp file.")
-
-(mapc (lambda (filename)
-        (push filename shan--module-paths))
-      (find-lisp-find-files shan-modules-dir "\\.el$"))
 
 (provide 'core-paths)
 ;;; core-paths.el ends here

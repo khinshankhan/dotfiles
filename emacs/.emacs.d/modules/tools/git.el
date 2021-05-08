@@ -22,7 +22,7 @@
   :config
   (transient-bind-q-to-quit))
 
-(use-package vc-hooks
+(package! vc-hooks
   :straight (:type built-in)
   :config
   ;; I mostly use Git, makes sense to have it at the beginning of the list

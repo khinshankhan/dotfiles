@@ -11,10 +11,10 @@
 (defvar shan--gc-timeout 45
   "Time limit for idleness until gc starts.")
 (defvar shan--gc-timer nil
-  "Timer which periodically runs gc logic. nil if not active.")
+  "Timer which periodically runs gc logic.  nil if not active.")
 
 (defun shan|gc-collect()
-  "Runs gc and outputs messages if debugging."
+  "Run gc and outputs messages if debugging."
   (if shan--k-gc-debug-p
       (message "Garbage Collector has run for %.06fsec"
                (k-time! (garbage-collect)))
@@ -36,4 +36,4 @@
 (add-hook 'after-init-hook 'shan--gc-start)
 
 (provide 'core-gc)
-;;; core-straight.el ends here
+;;; core-gc.el ends here

@@ -10,7 +10,10 @@
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (expand-file-name "bootstrap.el"
+                         (expand-file-name "straight.el"
+                                           (expand-file-name "repos"
+                                                             (expand-file-name "straight" user-emacs-directory)))))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -39,15 +42,6 @@ NAME and ARGS are as in `use-package'."
   (declare (indent defun))
   (add-to-list 'shan--loaded-packages name)
   `(use-package ,name
-     ,@args))
-
-(defmacro feature! (name &rest args)
-  "Like `use-package', but with `straight-use-package-by-default' disabled.
-NAME and ARGS are as in `use-package'."
-  (declare (indent defun))
-  (add-to-list 'shan--loaded-packages name)
-  `(use-package ,name
-     :straight nil
      ,@args))
 
 (provide 'core-straight)

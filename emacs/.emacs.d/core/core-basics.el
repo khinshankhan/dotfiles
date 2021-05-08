@@ -21,8 +21,7 @@
               create-lockfiles nil
               make-backup-files nil)
 
-;; Weird errors of GTK without this
-
+;; kill processes when leaving emacs
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
 
@@ -68,7 +67,20 @@
 (setq-default initial-major-mode 'lisp-interaction-mode)
 (setq initial-scratch-message nil)
 
+(setq-default require-final-newline t
+              vc-follow-symlinks t
+              fill-column 120)
+
+(global-subword-mode t)
+(delete-selection-mode t)
+(global-font-lock-mode t)
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
+
+(global-set-key [remap fill-paragraph]
+                #'shan/fill-or-unfill)
+
+(global-set-key (kbd "M-;")
+                'comment-line)
 
 (provide 'core-basics)
 ;;; core-basics.el ends here
