@@ -42,7 +42,7 @@
                                      'alien)
         projectile-require-project-root t
         projectile-sort-order 'access-time
-        projectile-completion-system (if (module-p! :ui ivy)
+        projectile-completion-system (if (module-p! :completion ivy)
                                          'ivy
                                        'auto))
   (projectile-mode t)
@@ -51,7 +51,44 @@
   ;; until it's actually needed. Also clean up non-existing projects too!
   (add-transient-hook! 'projectile-relevant-known-projects
                        (projectile-cleanup-known-projects)
-                       (projectile-discover-projects-in-search-path)))
+                       (projectile-discover-projects-in-search-path))
+  ;; Projectile runs four functions to determine the root (in this order):
+  ;;
+  ;; + `projectile-root-local' -> checks the `projectile-project-root' variable
+  ;;    for an explicit path.
+  ;; + `projectile-root-bottom-up' -> searches from / to your current directory
+  ;;   for the paths listed in `projectile-project-root-files-bottom-up'. This
+  ;;   includes .git and .project
+  ;; + `projectile-root-top-down' -> searches from the current directory down to
+  ;;   / the paths listed in `projectile-root-files', like package.json,
+  ;;   setup.py, or Cargo.toml
+  ;; + `projectile-root-top-down-recurring' -> searches from the current
+  ;;   directory down to / for a directory that has one of
+  ;;   `projectile-project-root-files-top-down-recurring' but doesn't have a
+  ;;   parent directory with the same file.
+  ;;
+  ;; In the interest of performance, we reduce the number of project root marker
+  ;; files/directories projectile searches for when resolving the project root.
+  (setq projectile-project-root-files-bottom-up
+        (append '(".projectile"  ; projectile's root marker
+                  ".project"     ; doom project marker
+                  ".git")        ; Git VCS root dir
+                (when (executable-find "hg")
+                  '(".hg"))      ; Mercurial VCS root dir
+                (when (executable-find "bzr")
+                  '(".bzr")))    ; Bazaar VCS root dir
+        ;; This will be filled by other modules. We build this list manually so
+        ;; projectile doesn't perform so many file checks every time it resolves
+        ;; a project's root -- particularly when a file has no project.
+        ;; TODO: actually fill this
+        ;; projectile-project-root-files '()
+        projectile-project-root-files-top-down-recurring '("Makefile"))
+
+  (push (abbreviate-file-name shan-local-dir) projectile-globally-ignored-directories)
+
+  ;; Per-project compilation buffers
+  (setq compilation-buffer-name-function #'projectile-compilation-buffer-name
+        compilation-save-buffers-predicate #'projectile-current-project-buffer-p))
 
 (defun doom-cleanup-project-cache-h ()
   "Purge projectile cache entries that:
@@ -84,7 +121,7 @@ c) are not valid projectile projects."
 (add-hook 'kill-emacs-hook 'doom-cleanup-project-cache-h)
 
 (package! counsel-projectile
-  :if (module-p! :ui ivy)
+  :if (module-p! :completion ivy)
   :after
   (counsel projectile)
   :config
