@@ -47,7 +47,7 @@
 (load (expand-file-name "core" (expand-file-name "core" user-emacs-directory)) nil 'nomessage)
 
 ;; Load modules that were requested
-(load (expand-file-name "modules" user-emacs-directory))
+(load (expand-file-name "modules" user-emacs-directory) nil 'nomessage)
 
 (provide 'early-init)
 ;;; early-init.el ends here

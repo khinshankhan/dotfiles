@@ -29,5 +29,16 @@
     :config
     (exec-path-from-shell-initialize)))
 
+;; Check git access
+(defconst shan--gh-access (string-prefix-p "Hi" (shell-command-to-string "ssh -T git@github.com"))
+  "Checks if Emacs has ssh access for GitHub (inherited path).")
+(defconst shan--gl-access (string-prefix-p "Welcome" (shell-command-to-string "ssh -T git@gitlab.com"))
+  "Checks if Emacs has ssh access for GitLab (inherited path).")
+
+(if (and shan--gh-access shan--gl-access)
+    (setq straight-vc-git-default-protocol 'ssh)
+  (message "GH ACCESS: %s" shan--gh-access)
+  (message "GL ACCESS: %s" shan--gl-access))
+
 (provide 'tricks-n-gimmicks)
 ;;; tricks-n-gimmicks.el ends here

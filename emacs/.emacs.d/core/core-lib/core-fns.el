@@ -1,4 +1,6 @@
-;;; core-fns.el -*- lexical-binding: t -*-
+;;; core-fns.el --- -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 
 (require 'core-macros)
 
@@ -92,7 +94,8 @@
   to-list)
 
 (defun shan/copy-hooks-to (from-hook to-hook)
-  "Copies one list of hooks to another, without the weird nonc circular list problem"
+  "Copy one list of hooks to another, from FROM-HOOK into TO-HOOK.
+This avoid without the weird nonc circular list problem."
   (dolist (hook from-hook)
     (add-hook to-hook hook)))
 
@@ -110,7 +113,8 @@
 
 ;; supposedly I can let go of `C-x' and `M-x' with these
 (defun shan/call-keymap (map &optional prompt)
-  "Read a key sequence and call the command it's bound to in MAP."
+  "Read a key sequence and call the command it's bound to in MAP.
+It can use PROMPT for the key sequence."
   (let* ((help-form `(describe-bindings ,(vector map)))
          (key (read-key-sequence prompt))
          (cmd (lookup-key map key t)))
@@ -118,9 +122,16 @@
       (user-error "%s is undefined" key))))
 
 (defun shan/exec-call-keymap (keymap prompt)
-  "Executes `shan/call-keymap'"
+  "Execute `shan/call-keymap' using KEYMAP and PROMPT."
   (interactive)
   (shan/call-keymap keymap prompt))
+
+(defun doom-unquote (exp)
+  "Return EXP unquoted."
+  (declare (pure t) (side-effect-free t))
+  (while (memq (car-safe exp) '(quote function))
+    (setq exp (cadr exp)))
+  exp)
 
 (provide 'core-fns)
 ;;; core-fns.el ends here

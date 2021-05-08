@@ -1,4 +1,6 @@
-;;; core-macros.el -*- lexical-binding: t -*-
+;;; core-macros.el --- -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 
 (require 'cl-macs)
 
@@ -27,9 +29,36 @@
      ,@body))
 
 (defmacro do-once-1-sec-after-emacs-startup (&rest body)
+  "Does BODY after 1 second of loaded config."
   `(run-with-idle-timer 1 ; run this after emacs is idle for 1 second
                         nil ; do this just once; don't repeat
                         (lambda () ,@body)))
+
+(defvar doom--transient-counter 0)
+(defmacro add-transient-hook! (hook-or-function &rest forms)
+  "Attaches a self-removing function to HOOK-OR-FUNCTION.
+FORMS are evaluated once, when that function/hook is first invoked, then never
+again.
+HOOK-OR-FUNCTION can be a quoted hook or a sharp-quoted function (which will be
+advised)."
+  (declare (indent 1))
+  (let ((append (if (eq (car forms) :after) (pop forms)))
+        ;; Avoid `make-symbol' and `gensym' here because an interned symbol is
+        ;; easier to debug in backtraces (and is visible to `describe-function')
+        (fn (intern (format "doom--transient-%d-h" (cl-incf doom--transient-counter)))))
+    `(let ((sym ,hook-or-function))
+       (defun ,fn (&rest _)
+         ,(format "Transient hook for %S" (doom-unquote hook-or-function))
+         ,@forms
+         (let ((sym ,hook-or-function))
+           (cond ((functionp sym) (advice-remove sym #',fn))
+                 ((symbolp sym)   (remove-hook sym #',fn))))
+         (unintern ',fn nil))
+       (cond ((functionp sym)
+              (advice-add ,hook-or-function ,(if append :after :before) #',fn))
+             ((symbolp sym)
+              (put ',fn 'permanent-local-hook t)
+              (add-hook sym #',fn ,append))))))
 
 (provide 'core-macros)
 ;;; core-macros.el ends here

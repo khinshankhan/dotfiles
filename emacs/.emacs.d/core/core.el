@@ -11,7 +11,8 @@
     core-straight
     core-lib
     core-gc
-    core-basics))
+    core-basics
+    core-projects))
 
 ;; load rest of core modules
 (dolist (module shan--core-modules)

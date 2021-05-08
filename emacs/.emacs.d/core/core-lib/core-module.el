@@ -57,7 +57,9 @@ and the rest are the features to enable for that module..")
          (module (f-filename module-file-name)))
     (load (if (f-exists? (concat module-file-name ".el"))
                          module-file-name
-                         (f-join module-file-name module)))))
+            (f-join module-file-name module))
+          nil
+          'nomessage)))
 
 ;; utils
 (defun igneous--modules (category)

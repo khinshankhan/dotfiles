@@ -11,7 +11,7 @@
   "Checks if shan--settings-path exists.")
 
 (if shan--settings-exist?
-    (load-file shan--settings-path)
+    (load shan--settings-path nil 'nomessage)
   (message "Settings file not found!"))
 
 (defconst shan--preferred-logo

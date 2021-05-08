@@ -14,6 +14,9 @@
 ;; like auto completing any 'custom' function off of this one prefix instead of remembering more which people may have
 ;; originally defined for themselves. One day I'll get to attributing everyone...
 
+;; NOTE: Even though some of the functions leverage some macros, the order is
+;; okay because it's fine to be in the body of functions. Would be an issue if
+;; unless the body of the file used the macros.
 (defvar shan--core-lib-modules
   '(core-vars
     core-macros
