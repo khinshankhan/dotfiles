@@ -60,6 +60,7 @@ and the rest are the features to enable for that module..")
     (-map #'cadr)))
 
 (defmacro with-module! (category module &rest body)
+  "Execute BODY if MODULE is activated in CATEGORY."
   (declare (indent 2))
   `(when (igneous--module-activated-p ',category ',module)
      ,@body))
@@ -75,16 +76,19 @@ and the rest are the features to enable for that module..")
 (defmacro with-feature! (feature &rest body)
   "Execute BODY if FEATURE is activated."
   (declare (indent 1))
-  `(when (igneous--feature-activated-p (igneous--current-category) (igneous--current-module) ',feature)
+  `(when (shan--feature-activated-p (shan--current-category) (shan--current-module) ',feature)
      ,@body))
 
 (defmacro feature-p! (feature)
   "Return nil if the FEATURE is not activated in the current category and module, t otherwise."
-  `(igneous--feature-activated-p (igneous--current-category) (igneous--current-module) ',feature))
+  `(shan--feature-activated-p (shan--current-category) (shan--current-module) ',feature))
 
-(defun igneous--feature-activated-p (category module feature)
+(defun shan--feature-activated-p (category module feature)
   "Return nil if the FEATURE is not activated in the right CATEGORY and MODULE, t otherwise."
-  (memq feature (igneous--features category module)))
+  (let ((feat (if (stringp feature)
+                  (intern feature)
+                feature)))
+    (memq feat (igneous--features category module))))
 
 (defun igneous--features (category module)
   "Return the features given a CATEGORY and MODULE by looking in the variable `shan--modules'."
@@ -92,16 +96,20 @@ and the rest are the features to enable for that module..")
     (--filter (and (-> it car (eq category)) (-> it cadr (eq module))))
     cddar))
 
-(defun igneous--current-category ()
+(defun shan--current-category ()
   "Return the current category."
-  (when (string-prefix-p shan-modules-dir load-file-name)
+  (let ((file-name (if (string-prefix-p shan-modules-dir load-file-name)
+                       load-file-name
+                     (expand-file-name (buffer-name)))))
     (cl-flet ((add-prefix (string prefix) (concat prefix string)))
-      (-> load-file-name f-split (last 2) car (add-prefix ":") intern))))
+      (-> file-name f-split (last 2) car (add-prefix ":") intern))))
 
-(defun igneous--current-module ()
+(defun shan--current-module ()
   "Return the current module."
-  (when (string-prefix-p shan-modules-dir load-file-name)
-    (-> load-file-name file-name-sans-extension f-split last car intern)))
+  (let ((file-name (if (string-prefix-p shan-modules-dir load-file-name)
+                       load-file-name
+                     (expand-file-name (buffer-name)))))
+    (-> file-name file-name-sans-extension f-split last car intern)))
 
 (provide 'core-module)
 ;;; core-module.el ends here
