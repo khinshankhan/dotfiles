@@ -21,7 +21,7 @@ and the rest are the features to enable for that module..")
   "Load the MODULES, internals of `load!'."
   (dolist (pair (igneous--hierarchical-cons-to-pairs 'keywordp modules :.))
     (add-to-list 'shan--modules pair t))
-  (mapcar #'igneous--load-pair shan--modules))
+  (mapcar #'shan--load-pair shan--modules))
 
 (defun igneous--hierarchical-cons-to-pairs (predicate list default)
   "Return a list of pairs based on LIST where the left element is the last element which satisfies PREDICATE."
@@ -35,22 +35,29 @@ and the rest are the features to enable for that module..")
         (t (cons `(,default . (,(car list)))
                  (igneous--hierarchical-cons-to-pairs predicate (cdr list) default)))))
 
-(defun igneous--load-pair (pair)
+(defun shan--load-pair (pair)
   "Convert a PAIR (:category . '(module features?)) to a string \"category/module\"."
   (pcase-let ((`(,category . ,module) pair))
-    (-> category
-      symbol-name
-      (substring 1)
-      (concat "/" (symbol-name (car module)))
-      shan--load-module)))
+    (shan--load-module
+     (-> category
+       symbol-name
+       (substring 1))
+     (symbol-name (car module)))))
 
-(defun shan--load-module (&optional module-file-name)
-  "Load MODULE-FILE-NAME."
+(defun shan--load-module (&optional category module)
+  "Load CATEGORY/MODULE or CATEGORY/MODULE/MODULE."
   (interactive)
-  (unless module-file-name
-    (setq module-file-name
-          (file-name-nondirectory (read-file-name "Enter module: " shan-modules-dir))))
-  (load (expand-file-name module-file-name shan-modules-dir)))
+  (let* ((module-file-name (if module
+                               (expand-file-name
+                                (f-join category module)
+                                shan-modules-dir)
+                             ;; NOTE: this relies on the right module entered
+                             (f-no-ext
+                              (read-file-name "Enter module: " shan-modules-dir))))
+         (module (f-filename module-file-name)))
+    (load (if (f-exists? (concat module-file-name ".el"))
+                         module-file-name
+                         (f-join module-file-name module)))))
 
 ;; utils
 (defun igneous--modules (category)
@@ -61,7 +68,7 @@ and the rest are the features to enable for that module..")
 
 (defmacro with-module! (category module &rest body)
   "Execute BODY if MODULE is activated in CATEGORY."
-  (declare (indent 2))
+  (declare (indent defun))
   `(when (igneous--module-activated-p ',category ',module)
      ,@body))
 
@@ -75,8 +82,14 @@ and the rest are the features to enable for that module..")
 
 (defmacro with-feature! (feature &rest body)
   "Execute BODY if FEATURE is activated."
-  (declare (indent 1))
+  (declare (indent defun))
   `(when (shan--feature-activated-p (shan--current-category) (shan--current-module) ',feature)
+     ,@body))
+
+(defmacro with-module-feature! (category module feature &rest body)
+  "Execute BODY if FEATURE is activated in MODULE under CATEGORY."
+  (declare (indent defun))
+  `(when (shan--feature-activated-p ',category ',module ',feature)
      ,@body))
 
 (defmacro feature-p! (feature)

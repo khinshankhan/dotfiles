@@ -76,6 +76,20 @@
 (global-font-lock-mode t)
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
 
+(package! expand-region
+  :bind
+  ("C-=" . er/expand-region))
+
+(defun shan/fill-or-unfill ()
+  "Fill or unfill based on the previous command."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'endless/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
 (global-set-key [remap fill-paragraph]
                 #'shan/fill-or-unfill)
 
