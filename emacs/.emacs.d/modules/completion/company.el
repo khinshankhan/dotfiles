@@ -1,11 +1,15 @@
+;;; company.el --- -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+
 (require 'core-straight)
 
-(use-package company
+(package! company
   :bind
   (:map company-mode-map
-        ("M-/" . company-complete))
+        ("C-/" . company-complete))
   (:map company-active-map
-        ("M-/" . company-other-backend)
+        ("C-/" . company-other-backend)
         ("M-n" . nil)
         ("M-p" . nil)
         ("C-n" . company-select-next)
@@ -15,4 +19,10 @@
   (company-dabbrev-downcase nil)
   (company-tooltip-align-annotations t)
   (company-idle-delay nil)
-  (company-backends '(company-capf)))
+  (company-minimum-prefix-length 1)
+  ;; (company-backends '(company-capf))
+  :config
+  (global-company-mode))
+
+(provide 'company)
+;;; company.el ends here

@@ -1,4 +1,4 @@
-;;; ivy.el --- ivy
+;;; ivy.el --- -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
 
