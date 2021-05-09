@@ -9,28 +9,33 @@
 (require 'core-module)
 
 (load!
- :tools
- lsp
- git
  :editor
- company
- ;; editorconfig
- ;; expand-region
+ editorconfig
  flycheck
  ;; hungry-delete
+ ;; hydra
  ;; multiple-cursors
- ;; parentheses
- ;; project
+ (parentheses
+  +rainbow)
+ (yasnippets ; this module is necessary for lsp apparently (?)
+  )
  zoom
+ :completion
+ company
+ (ivy
+  +swiper)
+ :tools
+ git
+ (lsp
+  +dap)
  :lang
- json
- (python +cython +lsp)
- (javascript)
+ go
  :ui
- theme
- modeline
  dashboard
- (ivy +swiper))
+ discoverability
+ hl-todo
+ modeline
+ theme)
 
 (provide 'modules)
 ;;; modules.el ends here
