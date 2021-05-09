@@ -4,6 +4,19 @@
 
 (require 'core-macros)
 
+;; quality of life a la doom
+(defun doom-unquote (exp)
+  "Return EXP unquoted."
+  (declare (pure t) (side-effect-free t))
+  (while (memq (car-safe exp) '(quote function))
+    (setq exp (cadr exp)))
+  exp)
+
+(defun doom-enlist (exp)
+  "Return EXP wrapped in a list, or as-is if already a list."
+  (declare (pure t) (side-effect-free t))
+  (if (listp exp) exp (list exp)))
+
 ;; these are helpful for binding
 (defun shan/do-nothing ()
   "Do nothing."
@@ -125,13 +138,6 @@ It can use PROMPT for the key sequence."
   "Execute `shan/call-keymap' using KEYMAP and PROMPT."
   (interactive)
   (shan/call-keymap keymap prompt))
-
-(defun doom-unquote (exp)
-  "Return EXP unquoted."
-  (declare (pure t) (side-effect-free t))
-  (while (memq (car-safe exp) '(quote function))
-    (setq exp (cadr exp)))
-  exp)
 
 (provide 'core-fns)
 ;;; core-fns.el ends here
