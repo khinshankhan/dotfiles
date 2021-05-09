@@ -37,6 +37,15 @@
 ;;  | blue       | blue                  | Allow and Quit        | Quit            |
 ;;  |------------+-----------------------+-----------------------+-----------------|
 
+;; Load up hydra maps
+;; TODO: finish this up and add maps
+(let ((hydra-maps (igneous--features (shan--current-category) (shan--current-module)))
+      (parent-path (f-dirname load-file-name)))
+  (dolist (hydra-map hydra-maps)
+    (print parent-path)
+    (print hydra-map)
+    (print (f-join parent-path (symbol-name hydra-map)))))
+
 (with-module! :tools lsp
   (with-module-feature! :tools lsp +dap
     (require 'dap-hydra)

@@ -7,6 +7,7 @@
 (require 'cl-lib)
 (require 'dash)
 (require 'f)
+(require 's)
 
 (defvar shan--modules nil
   "List containing the loaded modules, filled by `load!'.
@@ -113,11 +114,26 @@ and the rest are the features to enable for that module..")
 
 (defun shan--current-category ()
   "Return the current category."
-  (let ((file-name (if (string-prefix-p shan-modules-dir load-file-name)
+  (let* ((file-name (if (string-prefix-p shan-modules-dir load-file-name)
                        load-file-name
-                     (expand-file-name (buffer-name)))))
+                      (expand-file-name (buffer-name))))
+         ;; NOTE: I don't have a good way of checking symlinks generally besides
+         ;; depending on my own setup, which clones the dotfiles and symlinks
+         ;; there. Perhaps there's a way using `f.el'? We're basically checking
+         ;; if not a symlink, but it's possible the config may have been cloned
+         ;; directly somewhere. I'm too lazy to think of scenarios that won't
+         ;; affect me for my config.
+         (modules-dir (if (s-contains? "dotfiles" file-name)
+                          (file-chase-links shan-modules-dir)
+                        shan-modules-dir)))
     (cl-flet ((add-prefix (string prefix) (concat prefix string)))
-      (-> file-name f-split (last 2) car (add-prefix ":") intern))))
+      (--> file-name
+        expand-file-name
+        (s-chop-prefix modules-dir it)
+        f-split
+        -second-item
+        (add-prefix it ":")
+        intern))))
 
 (defun shan--current-module ()
   "Return the current module."
