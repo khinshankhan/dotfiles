@@ -13,8 +13,7 @@
  editorconfig
  flycheck
  ;; hungry-delete
- ;; hydra
- ;; multiple-cursors
+ multiple-cursors
  (parentheses
   +rainbow)
  (yasnippets ; this module is necessary for lsp apparently (?)
@@ -30,12 +29,17 @@
   +dap)
  :lang
  go
+ javascript
+ (web
+  +restclient
+  +emmet)
  :ui
  dashboard
  discoverability
  hl-todo
  modeline
- theme)
+ theme
+ (hydra))
 
 (provide 'modules)
 ;;; modules.el ends here
