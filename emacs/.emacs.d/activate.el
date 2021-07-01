@@ -36,7 +36,11 @@
          +rainbow)
         (zoom +text +window)
         :lang
+        ;; (asm +mips)
         (go +lsp +dap)
+        ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
+        shell
+        ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
         :hobbies
         ;; medical
         :community
