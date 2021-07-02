@@ -41,10 +41,11 @@
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
+        :app
+        browser
         :hobbies
         ;; medical
         :community
-        browser
         keyfreq
         sicp
         wakatime
