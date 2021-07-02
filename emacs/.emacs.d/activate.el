@@ -13,14 +13,6 @@
         (vc
          +git
          +hydra-git)
-        :appearance
-        dashboard                 ; TODO: customize this some more
-        discoverability
-        hl-todo
-        (hydra +hydra-window)
-        modeline
-        rainbow
-        (theme +solaire)
         :checkers
         (syntax +flycheck)
         :completion
@@ -41,6 +33,14 @@
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
+        :ui
+        dashboard                 ; TODO: customize this some more
+        discoverability
+        hl-todo
+        (hydra +hydra-window)
+        modeline
+        rainbow
+        (theme +solaire)
         :app
         browser
         :hobbies
