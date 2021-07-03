@@ -14,6 +14,6 @@
         flycheck-check-syntax-automatically '(mode-enabled save)
         ;; default numbers never make sense
         flycheck-display-errors-delay 0.25
-        flycheck-checker-error-threshold 1500
-        ;; disable elisp checkdoc, it's way too annoying and needless for module files
-        flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+        flycheck-checker-error-threshold 1500)
+  ;; disable elisp checkdoc, it's way too annoying and needless for module files
+  (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
