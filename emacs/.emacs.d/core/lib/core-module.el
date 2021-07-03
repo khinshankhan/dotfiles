@@ -31,6 +31,7 @@ and the rest are the features to enable for that module..")
 
 ;;; Check if module is toggled
 (defun modulation--module-toggled-p (category module)
+  "Return nil if the MODULE is not toggled in the right CATEGORY, t otherwise."
   (->> category
     modulation--modules
     (--filter (eq (car it) module))
@@ -38,7 +39,7 @@ and the rest are the features to enable for that module..")
 
 (defmacro module-p! (category module)
   "Return nil if the MODULE is not activated in the right CATEGORY, t otherwise."
-  `(modulation--module-toggled-p ',category ',module))
+  `(not (null (modulation--module-toggled-p ',category ',module))))
 
 (defmacro with-module! (category module &rest body)
   "Execute BODY if MODULE is activated in CATEGORY."
@@ -68,7 +69,7 @@ and the rest are the features to enable for that module..")
 
 (defmacro feature-p! (feature)
   "Return nil if the FEATURE is not toggled in the current category and module, t otherwise."
-  `(modulation--feature-toggled-p modulation--current-category modulation--current-module ',feature))
+  `(not (null (modulation--feature-toggled-p modulation--current-category modulation--current-module ',feature))))
 
 (defun features-p! (features)
   "Return nil if any of the FEATURES are not toggled in the current category and module, t otherwise."
@@ -91,7 +92,7 @@ and the rest are the features to enable for that module..")
 ;;; Check if combo of module + feature is toggled
 (defmacro module-feature-p! (category module feature)
   "Return nil if FEATURE isn't toggled under MODULE under CATEGORY, t otherwise."
-  `(modulation--feature-toggled-p ',category ',module ',feature))
+  `(not (null (modulation--feature-toggled-p ',category ',module ',feature))))
 
 (defmacro with-module-feature! (category module feature &rest body)
   "Execute BODY if FEATURE is toggled under MODULE under CATEGORY."
