@@ -59,8 +59,11 @@ export PATH="${PATH}:${HOME}/kotlin-language-server/server/build/install/server/
 export PATH="${PATH}:${HOME}/go/bin"
 
 # activate pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+# eval "$(pyenv virtualenv-init -)"
 
 # executables via luarocks
 export PATH="${PATH}:${HOME}/.luarocks/bin"
