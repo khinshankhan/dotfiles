@@ -8,6 +8,7 @@
 (setq shan--active-modules
       '(
         :checkers
+        (spell +flyspell +aspell)
         (syntax +flycheck)
 
         :completion
