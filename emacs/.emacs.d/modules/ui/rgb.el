@@ -4,6 +4,7 @@
 ;; mode). The rest makes the minor mode global so it’s active all the time… but
 ;; global rainbow may be bad for big or messy files, so watch out!
 (package! rainbow-mode
+  :if (feature-p! +rainbow)
   :config
   (with-no-warnings
     ;; HACK: Use overlay instead of text properties to override `hl-line' faces.

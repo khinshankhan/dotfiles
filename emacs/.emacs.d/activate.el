@@ -7,19 +7,15 @@
 
 (setq shan--active-modules
       '(
-        :tools
-        (auto-ide +hydra-auto-ide)
-        (lsp +dap +ui)
-        (vc
-         +git
-         +hydra-git)
         :checkers
         (syntax +flycheck)
+
         :completion
         company
         (ivy +counsel +rich)
         search
         (yasnippets +snippets)
+
         :editor
         editorconfig
         ;; hungry-delete          ; FIXME: breaks ivy and other tools
@@ -27,28 +23,40 @@
         (parentheses
          +rainbow)
         (zoom +text +window)
+
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
+
+        :app
+        browser
+
+        :hobbies
+        ;; medical
+
+        :misc
+        keyfreq
+        sicp
+        wakatime
+
+        :tools
+        (auto-ide +hydra-auto-ide)
+        (lsp +dap +ui)
+        (vc
+         +git
+         +hydra-git)
+
         :ui
         dashboard                 ; TODO: customize this some more
         discoverability
         hl-todo
         (hydra +hydra-window)
         modeline
-        rainbow
+        (rgb +rainbow)
         (theme +solaire)
-        :app
-        browser
-        :hobbies
-        ;; medical
-        :community
-        keyfreq
-        sicp
-        wakatime
         ))
 
 (provide 'activate)
