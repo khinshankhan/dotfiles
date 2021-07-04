@@ -26,19 +26,20 @@ and the rest are the features to enable for that module..")
 (defun modulation--modules (category)
   "Return the modules given a CATEGORY by looking in the variable `modulation--list'."
   (->> modulation--list
-    (--filter (eq (car it) category))
-    (-map #'cdr)))
+       (--filter (eq (car it) category))
+       (-map #'cdr)))
 
 ;;; Check if module is toggled
 (defun modulation--module-toggled-p (category module)
   "Return nil if the MODULE is not toggled in the right CATEGORY, t otherwise."
   (->> category
-    modulation--modules
-    (--filter (eq (car it) module))
-    car))
+       modulation--modules
+       (--filter (eq (car it) module))
+       car))
 
 (defmacro module-p! (category module)
   "Return nil if the MODULE is not activated in the right CATEGORY, t otherwise."
+  (declare (indent defun))
   `(not (null (modulation--module-toggled-p ',category ',module))))
 
 (defmacro with-module! (category module &rest body)
@@ -58,10 +59,10 @@ and the rest are the features to enable for that module..")
 (defun feature-substring! (str)
   "Return all toggled features that are substrings of STR."
   (->> modulation--list
-    (-map #'cddr)
-    -flatten
-    (-map #'symbol-name)
-    (--filter (s-contains? str it))))
+       (-map #'cddr)
+       -flatten
+       (-map #'symbol-name)
+       (--filter (s-contains? str it))))
 
 (defun features! ()
   "Return all toggled features under current module under current category."
@@ -69,6 +70,7 @@ and the rest are the features to enable for that module..")
 
 (defmacro feature-p! (feature)
   "Return nil if the FEATURE is not toggled in the current category and module, t otherwise."
+  (declare (indent defun))
   `(not (null (modulation--feature-toggled-p modulation--current-category modulation--current-module ',feature))))
 
 (defun features-p! (features)
@@ -92,10 +94,12 @@ and the rest are the features to enable for that module..")
 ;;; Check if combo of module + feature is toggled
 (defmacro module-feature-p! (category module feature)
   "Return nil if FEATURE isn't toggled under MODULE under CATEGORY, t otherwise."
+  (declare (indent defun))
   `(not (null (modulation--feature-toggled-p ',category ',module ',feature))))
 
 (defmacro with-module-feature! (category module feature &rest body)
   "Execute BODY if FEATURE is toggled under MODULE under CATEGORY."
+  (declare (indent defun))
   `(when (module-feature-p! ,category ,module ,feature)
      ,@body))
 
@@ -106,7 +110,8 @@ Will also execute any BODY code if lsp is active."
   (declare (indent defun))
   `(with-feature! +lsp
      (with-module! :tools lsp
-       ,@body
+       (with-eval-after-load 'lsp-mode
+         ,@body)
        (add-hook (symbol-append ',mode '-hook) #'lsp))))
 
 (defmacro dap! (&rest body)
@@ -114,7 +119,8 @@ Will also execute any BODY code if lsp is active."
   (declare (indent defun))
   `(with-feature! +dap
      (with-module-feature! :tools lsp +dap
-       ,@body)))
+       (with-eval-after-load 'dap-mode
+         ,@body))))
 
 ;; Parse modules to load them
 (defun modulation--hierarchical-cons-to-pairs (predicate list default)
@@ -152,11 +158,11 @@ Will also execute any BODY code if lsp is active."
           modulation--current-features (cdr module))
     (modulation--load-module
      (-> category
-       symbol-name
-       (substring 1))
+         symbol-name
+         (substring 1))
      (-> module
-       car
-       symbol-name))))
+         car
+         symbol-name))))
 
 (defun modulation--load (modules)
   "Load the MODULES."
