@@ -95,6 +95,13 @@ DOCSTRING and BODY are as in `defun'.
          (dolist (target (cdr targets))
            (advice-add target (car targets) #',symbol))))))
 
+(defmacro pushnew! (place &rest values)
+  "Push VALUES sequentially into PLACE, if they aren't already present.
+This is a variadic `cl-pushnew'."
+  (let ((var (make-symbol "result")))
+    `(dolist (,var (list ,@values) (with-no-warnings ,place))
+       (cl-pushnew ,var ,place :test #'equal))))
+
 ;; Au revoir Doom...
 
 (defun shan/do-nothing ()
@@ -175,12 +182,6 @@ DOCSTRING and BODY are as in `defun'.
   "Copy the current file path to kill ring."
   (interactive)
   (kill-new buffer-file-name))
-
-(defun shan/add-list-to-list (to-list from-list &optional append compare-fn)
-  "Add all elements from FROM-LIST to TO-LIST.  APPEND and COMPARE-FN work as they in `add-to-list'."
-  (dolist (elem from-list)
-    (add-to-list to-list elem append compare-fn))
-  to-list)
 
 (defun shan/copy-hooks-to (from-hook to-hook)
   "Copy one list of hooks to another, from FROM-HOOK into TO-HOOK.
