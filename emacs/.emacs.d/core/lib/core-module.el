@@ -109,18 +109,16 @@ and the rest are the features to enable for that module..")
 Will also execute any BODY code if lsp is active."
   (declare (indent defun))
   `(with-feature! +lsp
-     (with-module! :tools lsp
-       (with-eval-after-load 'lsp-mode
-         ,@body)
+     (after! lsp-mode
+       ,@body
        (add-hook (symbol-append ',mode '-hook) #'lsp))))
 
 (defmacro dap! (&rest body)
   "Execute any BODY code if dap feature is active for module and in general."
   (declare (indent defun))
   `(with-feature! +dap
-     (with-module-feature! :tools lsp +dap
-       (with-eval-after-load 'dap-mode
-         ,@body))))
+     (after! dap-mode
+       ,@body)))
 
 ;; Parse modules to load them
 (defun modulation--hierarchical-cons-to-pairs (predicate list default)
