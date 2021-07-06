@@ -31,6 +31,7 @@
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
+        (web +restclient +emmet +lsp +dap)
 
         :app
         browser
