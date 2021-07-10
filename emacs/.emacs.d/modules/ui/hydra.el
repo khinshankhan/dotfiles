@@ -36,10 +36,9 @@
   ;; messes up a lot words with 'oa' such as 'load'.
   ("ao" . hydra-leader/body))
 
-(package! pretty-hydra
-  :demand t)
-
+(package! pretty-hydra)
 (require 'pretty-hydra)
+
 ;;; I feel like pink hydras are the way to go, since I enjoy being about to use
 ;;; continuous undo or highlighting for a region based hydra command. But, feel
 ;;; free to change as you see fit.
