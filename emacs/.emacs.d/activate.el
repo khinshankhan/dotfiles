@@ -28,6 +28,7 @@
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
+        json
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
