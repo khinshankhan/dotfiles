@@ -1,9 +1,0 @@
-;; -*- mode: emacs-lisp -*-
-(require 'org)
-(require 'find-lisp)
-
-;; org-babel-tangle-file
-(mapc 'print
-      (find-lisp-find-files
-       (expand-file-name ".." (file-name-directory (file-chase-links load-file-name)))
-       "\\.org$"))

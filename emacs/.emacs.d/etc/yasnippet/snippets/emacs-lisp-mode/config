@@ -3,11 +3,13 @@
 # key: conf
 # expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
 # --
-;;; `(buffer-name)` --- $0 -*- lexical-binding: t; -*-
+;;; `(buffer-name)` --- -*- lexical-binding: t; -*-
 ;;; Commentary:
-
 ;;; Code:
 
+(require 'core-straight)
+
+$0
 
 (provide '`(s-chop-suffix ".el" (buffer-name))`)
 ;;; `(buffer-name)` ends here

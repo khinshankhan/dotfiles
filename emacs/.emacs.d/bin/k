@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-emacsclient -e '(save-buffers-kill-emacs)'
