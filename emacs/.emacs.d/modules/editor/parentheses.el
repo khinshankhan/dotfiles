@@ -16,3 +16,5 @@
   :if (feature-p! +rainbow)
   :hook
   (prog-mode . rainbow-delimiters-mode))
+
+(package! smartparens)
