@@ -28,6 +28,7 @@
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
+        (js +ts +jsx +tsx +vue +lsp +dap)
         json
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
