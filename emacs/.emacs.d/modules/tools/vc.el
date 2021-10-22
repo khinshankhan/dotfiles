@@ -2,13 +2,8 @@
 (require 'core-fboundp)
 
 ;; Git
-(with-feature! +git
-  (package! gitattributes-mode
-    :mode "\\.gitattributes\\'")
-  (package! gitignore-mode
-    :mode "\\.gitignore\\'")
-  (package! gitconfig-mode
-    :mode "\\.gitconfig\\'"))
+(package! git-modes
+  :if (feature-p! +git))
 
 ;;; Some people download emacs just for magit, it’d be crazy to not use it for vc.
 (package! magit
