@@ -103,6 +103,12 @@ and the rest are the features to enable for that module..")
   `(when (module-feature-p! ,category ,module ,feature)
      ,@body))
 
+(defvar shan--lsp-ignore-alist '())
+(defun activate-lsp()
+  (unless (-contains? shan--lsp-ignore-alist major-mode)
+    ;; trust that modules/tools/lsp will be activated
+    ;; by the time files open
+    (lsp)))
 ;;; Specific module macros which were significant enough
 (defmacro lsp! (mode &rest body)
   "Add lsp to MODE if lsp feature is active for module and in general.
@@ -111,7 +117,7 @@ Will also execute any BODY code if lsp is active."
   `(with-feature! +lsp
      (after! lsp-mode
        ,@body
-       (add-hook (symbol-append ',mode '-hook) #'lsp))))
+       (add-hook (symbol-append ',mode '-hook) #'activate-lsp))))
 
 (defmacro dap! (&rest body)
   "Execute any BODY code if dap feature is active for module and in general."

@@ -1,4 +1,5 @@
 (require 'core-straight)
+(require 'core-module)
 
 ;; The cleanest part of webdev: testing endpoints within emacs.
 ;; TODO: sike, need to fix network
@@ -46,8 +47,7 @@
    ;; ("\\.jsx\\'"         . web-mode)
    ;; ("\\.tsx\\'"         . web-mode)
    ("\\.mustache\\'"    . web-mode)
-   ("\\.djhtml\\'"      . web-mode)
-   ("\\.vtl$"           . web-mode))
+   ("\\.djhtml\\'"      . web-mode))
   :config
   (setq web-mode-enable-html-entities-fontification t
         web-mode-auto-close-style 1
@@ -83,6 +83,11 @@
   ;; actual elixir
   (with-module! :lang elixir
     (add-to-list 'web-mode-engines-alist '("elixir" . "\\.eex\\'"))))
+
+(with-feature! +vtl
+  (define-derived-mode vtl-mode web-mode "vtl")
+  (add-to-list 'shan--lsp-ignore-alist 'vtl-mode)
+  (add-to-list 'auto-mode-alist '("\\.vtl$" . vtl-mode)))
 
 
 ;; TODO: maybe it isn't wise to have all of web mode hooked with lsp
