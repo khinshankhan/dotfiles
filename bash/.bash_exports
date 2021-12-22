@@ -89,3 +89,6 @@ export NO_AT_BRIDGE=1
 
 #weird font issues
 export FONTCONFIG_PATH=/etc/fonts
+
+# Nix
+if [ -e /home/shan/.nix-profile/etc/profile.d/nix.sh ]; then . /home/shan/.nix-profile/etc/profile.d/nix.sh; fi
