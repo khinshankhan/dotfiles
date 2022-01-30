@@ -1,0 +1,1 @@
+brightnessctl | grep % | awk -F ' ' '{print $3,$4}'
