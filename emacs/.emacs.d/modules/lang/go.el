@@ -3,8 +3,10 @@
 
 (package! go-mode
   :mode "\\.go\\'"
-  :custom (gofmt-command "goimports")
   :config
+  (setq go-test-verbose t
+        gofmt-command "gofmt"
+        gofmt-args '("-s"))
   (add-hook 'before-save-hook #'gofmt-before-save))
 
 (package! gotest)
