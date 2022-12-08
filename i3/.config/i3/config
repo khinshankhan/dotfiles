@@ -374,8 +374,14 @@ set_from_resource $term_color15    color15
 # bindsym XF86MonBrightnessDown exec "xbacklight -dec 10; notify-send 'brightness down'"
 
 # Backlight control
-bindsym XF86MonBrightnessUp exec xbacklight +10; notify-send 'backlight up'
-bindsym XF86MonBrightnessDown exec xbacklight -10; notify-send 'backlight down'
+# bindsym XF86MonBrightnessUp exec xbacklight +10; notify-send 'backlight up'
+# bindsym XF86MonBrightnessDown exec xbacklight -10; notify-send 'backlight down'
+
+bindsym Shift+XF86MonBrightnessUp exec --no-startup-id brightnessctl set +1% && notify-send --hint=string:x-dunst-stack-tag:test brightness: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
+bindsym Shift+XF86MonBrightnessDown exec --no-startup-id brightnessctl set 1%- && notify-send --hint=string:x-dunst-stack-tag:test brightness: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
+
+bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5% && notify-send --hint=string:x-dunst-stack-tag:test brightness: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
+bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%- && notify-send --hint=string:x-dunst-stack-tag:test brightness: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
 
 # volume
 # bindsym XF86AudioRaiseVolume exec amixer -D pulse sset Master 5%+ && pkill -RTMIN+1 i3blocks
@@ -404,8 +410,14 @@ bindsym XF86MonBrightnessDown exec xbacklight -10; notify-send 'backlight down'
 # bindsym XF86AudioNext exec playerctl next
 # bindsym XF86AudioPrev exec playerctl previous
 
+# works with headphones
+bindsym XF86AudioPlay exec playerctl play
+bindsym XF86AudioPause exec playerctl pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
 # Redirect sound to headphones
-# bindsym $mod+p exec /usr/local/bin/switch-audio-port
+bindsym $mod+p exec /usr/local/bin/switch-audio-port
 
 #########################
 #* executable bindings: #
