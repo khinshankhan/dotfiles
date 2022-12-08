@@ -1,5 +1,6 @@
 [user]
 	name = Khinshan Khan
+	email = shan@uptogood.dev
 [push]
 	default = simple
 [pull]
@@ -13,3 +14,5 @@
 	editor = emacsclient -a '' -c
 [include]
     path = ~/local.gitconfig # contains some personal information like email and secondary includes
+[init]
+	defaultBranch = main
