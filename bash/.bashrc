@@ -49,3 +49,8 @@ eval "$(hub alias -s)"
 # tabtab source for packages
 # uninstall by removing these lines
 [ -f ~/.config/tabtab/bash/__tabtab.bash ] && . ~/.config/tabtab/bash/__tabtab.bash || true
+
+# pnpm
+export PNPM_HOME="/home/shan/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
