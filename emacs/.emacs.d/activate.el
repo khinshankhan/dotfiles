@@ -25,6 +25,21 @@
          +rainbow)
         (zoom +text +window)
 
+        :tools
+        (lsp +dap +ui)
+        (vc
+         +git
+         +hydra-git)
+
+        :ui
+        dashboard                 ; TODO: customize this some more
+        discoverability
+        hl-todo
+        (hydra +hydra-auto-ide +hydra-window)
+        modeline
+        (rgb +rainbow)
+        (theme +solaire)
+
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
@@ -44,23 +59,7 @@
         :misc
         keyfreq
         sicp
-        wakatime
-
-        :tools
-        (auto-ide +hydra-auto-ide)
-        (lsp +dap +ui)
-        (vc
-         +git
-         +hydra-git)
-
-        :ui
-        dashboard                 ; TODO: customize this some more
-        discoverability
-        hl-todo
-        (hydra +hydra-window)
-        modeline
-        (rgb +rainbow)
-        (theme +solaire)
+        ;; wakatime
         ))
 
 (provide 'activate)

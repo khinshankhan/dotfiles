@@ -102,6 +102,9 @@
       (progn
         (define-derived-mode typescript-tsx-mode web-mode "TypeScript-tsx")
         (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-tsx-mode))
+        (shan--ide-add 'typescript-tsx-mode #'hydra-lsp/body)
+        ;; HACK: quick fix to get lsp in ts files, will look into later
+        (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-tsx-mode))
 
         (with-module-feature! :lang web +emmet
           (add-hook 'typescript-tsx-mode-hook #'emmet-mode))

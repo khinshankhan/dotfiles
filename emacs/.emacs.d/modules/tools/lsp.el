@@ -34,6 +34,12 @@
         ;; I think they actually got rid of this because no one uses flymake...
         lsp-prefer-flymake nil))
 
+;; https://emacs.stackexchange.com/a/68951
+(add-hook 'lsp-after-apply-edits-hook
+          (lambda (operation)
+            (when (eq operation 'rename)
+              (save-buffer))))
+
 ;;; Great for debugging... once you learn how to use a debugger...
 (package! dap-mode
   :if (feature-p! +dap)

@@ -18,4 +18,5 @@
 (lsp! go-mode
   (dap!
     (require 'dap-gdb-lldb)
-    (require 'dap-go)))
+    (require 'dap-go))
+  (shan--ide-add 'go-mode #'hydra-lsp/body))
