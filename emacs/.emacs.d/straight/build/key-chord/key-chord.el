@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/key-chord/key-chord.el

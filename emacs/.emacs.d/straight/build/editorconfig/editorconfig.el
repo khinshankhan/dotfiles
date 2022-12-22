@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/editorconfig-emacs/editorconfig.el

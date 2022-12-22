@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/unidecode/data/unidecode-x020.eld

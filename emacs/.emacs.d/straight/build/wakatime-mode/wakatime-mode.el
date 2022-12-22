@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/wakatime-mode/wakatime-mode.el

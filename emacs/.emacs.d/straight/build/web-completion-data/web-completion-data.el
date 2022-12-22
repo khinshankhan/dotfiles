@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/web-completion-data/web-completion-data.el

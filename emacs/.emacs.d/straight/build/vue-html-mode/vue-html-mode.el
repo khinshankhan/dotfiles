@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/vue-html-mode/vue-html-mode.el

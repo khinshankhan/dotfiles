@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/emacs-go-tag/go-tag.el

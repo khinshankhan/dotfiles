@@ -1,0 +1,1 @@
+/home/shan/.emacs.d/straight/repos/emacs-dashboard/banners/1.txt
