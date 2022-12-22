@@ -94,7 +94,7 @@ hide_edge_borders none
 
 # change borders
 bindsym $mod+u border none
-# bindsym $mod+y border pixel 1
+bindsym $mod+y border pixel 1
 bindsym $mod+n border normal
 
 # show window title bars (not officially supported with i3gaps)
@@ -424,7 +424,7 @@ bindcode Shift+62 exec setxkbmap us -variant colemak
 
 # sometimes picom dies, kill and restart it
 bindsym $mod+t exec --no-startup-id pkill picom
-bindsym $mod+Ctrl+t exec --no-startup-id picom -b
+bindsym $mod+Shift+t exec --no-startup-id picom -b
 
 # same deal as picom but for dunst
 bindsym $mod+Shift+d --release exec "killall dunst; exec notify-send 'restart dunst'"
