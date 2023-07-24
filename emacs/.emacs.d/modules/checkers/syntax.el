@@ -14,6 +14,12 @@
         flycheck-check-syntax-automatically '(mode-enabled save)
         ;; default numbers never make sense
         flycheck-display-errors-delay 0.25
-        flycheck-checker-error-threshold 1500)
+        flycheck-checker-error-threshold 1500
+
+        ;; For the above functionality, check syntax in a buffer that you switched to
+        ;; only briefly. This allows "refreshing" the syntax check state for several
+        ;; buffers quickly after e.g. changing a config file.
+        flycheck-buffer-switch-check-intermediate-buffers t
+        )
   ;; disable elisp checkdoc, it's way too annoying and needless for module files
   (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))

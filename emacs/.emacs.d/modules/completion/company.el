@@ -11,13 +11,14 @@
         ("C-n" . company-select-next)
         ("C-p" . company-select-previous))
   :config
-  (setq company-minimum-prefix-length 1
-        company-tooltip-limit 14
+  (setq company-minimum-prefix-length 2
+        company-tooltip-limit 15
         company-idle-delay nil
         company-require-match 'never
         company-dabbrev-downcase nil
         company-tooltip-align-annotations t
         company-auto-complete nil
+        company-auto-commit nil
         company-auto-complete-chars nil
         company-dabbrev-ignore-case nil
         company-dabbrev-downcase nil

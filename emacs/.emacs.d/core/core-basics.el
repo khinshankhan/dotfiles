@@ -85,8 +85,10 @@
 
 ;; Actual Core Basics -- Default Sane Config
 (setq-default require-final-newline t
+              fill-column 120
               vc-follow-symlinks t
-              fill-column 120)
+              find-file-visit-truename t
+              inhibit-compacting-font-caches t)
 
 (global-subword-mode t)
 (delete-selection-mode t)
@@ -96,8 +98,8 @@
 (global-set-key (kbd "M-;")
                 'comment-line)
 
-;; (put 'upcase-region 'disabled nil)
-;; (put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
 ;; (put 'narrow-to-region 'disabled nil)
 
 ;;; how do people live without smart expansion?

@@ -12,7 +12,7 @@
         doom-modeline-major-mode-icon t
         doom-modeline-version t
         doom-modeline-buffer-file-name-style 'file-name)
-  (doom-modeline-mode))
+  (doom-modeline-mode t))
 
 (package! hide-mode-line
   :hook
