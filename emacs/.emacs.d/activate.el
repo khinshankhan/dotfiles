@@ -10,6 +10,8 @@
         :checkers
         (spell +flyspell +aspell)
         (syntax +flycheck)
+        (grammar
+         +lsp)                    ; pnpm -g add @emacs-grammarly/grammarly-languageserver
 
         :completion
         company
