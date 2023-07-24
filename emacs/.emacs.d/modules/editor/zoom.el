@@ -3,7 +3,15 @@
 (package! default-text-scale
   :if (feature-p! +text)
   :init
-  (default-text-scale-mode))
+  (default-text-scale-mode)
+  :config
+  ;; HACK: try preemptively setting the font to my preferred font size
+  (do-once-n-sec-after-emacs-startup!
+   0.1
+   (default-text-scale-increment
+     ;; TODO: account for different machines
+     (- 120
+        (face-attribute 'default :height)))))
 
 (package! zoom-window
   :if (feature-p! +window)

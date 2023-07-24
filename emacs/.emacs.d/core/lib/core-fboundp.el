@@ -28,11 +28,15 @@
          (dolist (pair tbl)
            (eval `(setq ,(cdr pair) ,(car pair))))))))
 
-(defmacro do-once-1-sec-after-emacs-startup (&rest body)
+(defmacro do-once-n-sec-after-emacs-startup! (n &rest body)
   "Does BODY after 1 second of loaded config."
-  `(run-with-idle-timer 1 ; run this after emacs is idle for 1 second
+  `(run-with-idle-timer ,n ; run this after emacs is idle for 1 second
                         nil ; do this just once; don't repeat
                         (lambda () ,@body)))
+
+(defmacro do-once-1-sec-after-emacs-startup! (&rest body)
+  "Does BODY after 1 second of loaded config."
+  `(do-once-n-sec-after-emacs-startup! 1 ,@body))
 
 ;; Quality of Life a la Doom
 (defun doom-unquote (exp)
