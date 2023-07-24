@@ -18,7 +18,7 @@
         :editor
         editorconfig
         ;; hungry-delete          ; FIXME: breaks ivy and other tools
-        ;; multiple-cursors       ; FIXME: false negative activations
+        multiple-cursors
         (parentheses
          +rainbow)
         (zoom +text +window)
@@ -27,7 +27,9 @@
         (lsp +dap +ui)
         (vc
          +git
-         +hydra-git)
+         +hydra-git
+         +forge
+         +gutter)
 
         :ui
         iconography               ; required for doom-modeline
