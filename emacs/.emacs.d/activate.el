@@ -54,6 +54,8 @@
          +vtl
          +lsp
          +dap)
+        (graphql
+         +lsp)                    ; pnpm -g add graphql graphql-language-service-cli
         (yaml
          +lsp)                    ; pnpm -g add yaml-language-server
         json
