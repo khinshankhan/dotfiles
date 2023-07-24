@@ -54,6 +54,8 @@
          +vtl
          +lsp
          +dap)
+        (yaml
+         +lsp)                    ; pnpm -g add yaml-language-server
         json
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
