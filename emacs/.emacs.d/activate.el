@@ -32,13 +32,14 @@
          +hydra-git)
 
         :ui
+        iconography               ; required for doom-modeline
         dashboard                 ; TODO: customize this some more
         discoverability
         hl-todo
         (hydra +hydra-auto-ide +hydra-window)
-        modeline
         (rgb +rainbow)
         (theme +solaire)
+        modeline
 
         :lang
         ;; (asm +mips)
