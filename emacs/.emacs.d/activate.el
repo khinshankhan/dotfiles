@@ -68,6 +68,9 @@
         :misc
         keyfreq
         ;; sicp
+
+        :input
+        macos
         ))
 
 (provide 'activate)
