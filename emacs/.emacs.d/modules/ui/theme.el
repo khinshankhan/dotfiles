@@ -1,5 +1,7 @@
 (require 'core-straight)
 
+(setq frame-background-mode 'dark)
+
 ;; Doom themes are best esp since I use Doom modeline. Also, Doom Dracula just
 ;; has better keyword support as far as I’ve seen. It’s also just easy on my
 ;; eyes.

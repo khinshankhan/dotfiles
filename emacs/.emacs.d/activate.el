@@ -13,9 +13,7 @@
 
         :completion
         company
-        (ivy +counsel +rich)
-        search
-        (yasnippets +snippets)
+        vertico
 
         :editor
         editorconfig
