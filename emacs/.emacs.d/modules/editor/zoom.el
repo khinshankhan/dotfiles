@@ -9,8 +9,10 @@
   (do-once-n-sec-after-emacs-startup!
    0.1
    (default-text-scale-increment
-     ;; TODO: account for different machines
-     (- 120
+     ;; TODO: account for different machines properly
+     (- (if (equal system-type 'darwin)
+            150
+          120)
         (face-attribute 'default :height)))))
 
 (package! zoom-window
