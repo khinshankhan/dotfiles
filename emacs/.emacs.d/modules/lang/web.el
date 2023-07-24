@@ -1,13 +1,6 @@
 (require 'core-straight)
 (require 'core-module)
 
-;; The cleanest part of webdev: testing endpoints within emacs.
-;; TODO: sike, need to fix network
-(package! restclient
-  :if (feature-p! +restclient)
-  :mode
-  ("\\.http\\'" . restclient-mode))
-
 ;; TODO: learn these someday, I think I've only use `!' and `C-j' for
 ;; expansions, but emmet has so much more potential
 ;; TODO: look into emmet for jsx/ tsx?
@@ -84,11 +77,11 @@
   (with-module! :lang elixir
     (add-to-list 'web-mode-engines-alist '("elixir" . "\\.eex\\'"))))
 
+;; this is better than vtl-mode package?
 (with-feature! +vtl
   (define-derived-mode vtl-mode web-mode "vtl")
   (add-to-list 'shan--lsp-ignore-alist 'vtl-mode)
   (add-to-list 'auto-mode-alist '("\\.vtl$" . vtl-mode)))
-
 
 ;; TODO: maybe it isn't wise to have all of web mode hooked with lsp
 ;; but I haven't needed vanilla files in a while so we can keep it

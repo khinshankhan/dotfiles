@@ -29,7 +29,7 @@
          +git
          +hydra-git
          +forge
-         +gutter)
+         +gutter)                 ; NOTE: flycheck errors take priority in fringe
 
         :ui
         iconography               ; required for doom-modeline
@@ -43,24 +43,23 @@
 
         :lang
         ;; (asm +mips)
-        (go +lsp +dap)
         (js +ts +jsx +tsx +vue +lsp +dap)
+        (go
+         +lsp                     ; install via vscode for now...
+         +dap)
+        (web
+         +emmet
+         +vtl
+         +lsp
+         +dap)
         json
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
-        (web +restclient +emmet +vtl +lsp +dap)
-
-        :app
-        browser
-
-        :hobbies
-        ;; medical
 
         :misc
         keyfreq
-        sicp
-        ;; wakatime
+        ;; sicp
         ))
 
 (provide 'activate)
