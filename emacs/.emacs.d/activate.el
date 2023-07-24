@@ -61,6 +61,8 @@
         json
         ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
         shell
+        (python
+         +lsp)                    ; pnpm -g add pyright
         ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
 
         :misc
