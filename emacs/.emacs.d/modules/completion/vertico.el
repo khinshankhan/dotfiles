@@ -7,9 +7,23 @@
    completion-category-overrides '((file (styles basic partial-completion)))))
 
 (package! vertico
-  :bind (:map vertico-map (("RET" . vertico-exit)))
+  :straight (:host github :repo "minad/vertico"
+             :files (:defaults "extensions/*")
+             :includes (vertico-buffer
+                        vertico-directory
+                        vertico-flat
+                        vertico-indexed
+                        vertico-mouse
+                        vertico-quick
+                        vertico-repeat
+                        vertico-reverse))
+  :bind (:map vertico-map
+              ;; More convenient directory navigation commands
+              ("RET" . vertico-directory-enter))
   :init
   (vertico-mode t)
+  ;; Tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
   :config
   (setq vertico-resize t
         vertico-cycle t
