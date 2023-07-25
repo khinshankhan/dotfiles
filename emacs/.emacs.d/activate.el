@@ -16,6 +16,7 @@
         :completion
         company
         vertico
+        snippets
 
         :editor
         editorconfig
