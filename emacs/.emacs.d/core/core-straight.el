@@ -7,20 +7,18 @@
 (defvar native-comp-deferred-compilation-deny-list
   (bound-and-true-p native-comp-async-env-modifier-form))
 
-(defconst package-enable-at-startup nil)
+(defconst straight-repository-branch "master") ; more stable branch
 (defconst straight-use-package-by-default t)
 (defconst straight-recipe-repositories nil)
-(defconst straight-repository-branch "master")
-;; (defconst straight-fix-org nil)
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
+      (bootstrap-version 6))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
@@ -37,26 +35,15 @@
 (straight-use-package 'use-package)
 (require 'use-package)
 
-;; betterify straight
-(defvar shan--loaded-packages '()
+;; abstract straight so it can be observed and potentially hot swappable later
+(defvar core-straight--loaded-packages '()
   "List containing loaded packages.")
-
-;; TODO: refactor use-package! and package! such that they
-;; load packages and require separately like doom
-(defmacro use-package! (name &rest args)
-  "Like `use-package', but cooler since it also tracks which packages loaded.
-NAME and ARGS are as in `use-package'."
-  (declare (indent defun))
-  `(progn
-     (add-to-list 'shan--loaded-packages ',name)
-     (use-package ,name
-       ,@args)))
 
 (defmacro package! (name &rest args)
   "Like `use-package', but cooler since it also tracks which packages loaded.
 NAME and ARGS are as in `use-package'."
   (declare (indent defun))
-  (add-to-list 'shan--loaded-packages name)
+  (add-to-list 'core-straight--loaded-packages name)
   `(use-package ,name
      ,@args))
 

@@ -7,4 +7,4 @@
    ("\\.Procfile\\'"   . yaml-mode)))
 
 (lsp! yaml-mode
-  (shan--ide-add 'yaml-mode #'hydra-lsp/body))
+  (auto-ide/add! 'yaml-mode #'hydra-lsp/body))

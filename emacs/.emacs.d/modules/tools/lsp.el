@@ -1,6 +1,19 @@
 (require 'core-straight)
 (require 'core-paths)
 
+(defvar lsp-custom--ignore-alist '())
+
+(defun lsp-custom/ignore-mode (mode)
+  "Ignore `mode' for lsp activation."
+  (interactive)
+  (add-to-list 'lsp-custom--ignore-alist mode))
+
+(defun lsp-custom/activate-lsp ()
+  (unless (-contains? lsp-custom--ignore-alist major-mode)
+    ;; trust that modules/tools/lsp will be activated
+    ;; by the time files open
+    (lsp)))
+
 (package! lsp-mode
   :commands lsp-install-server
   :bind

@@ -56,7 +56,7 @@
 
 ;; Load modules that were requested
 (require 'core-module)
-(shan--load-config)
+(core-module/load-config)
 
 (provide 'early-init)
 ;;; early-init.el ends here

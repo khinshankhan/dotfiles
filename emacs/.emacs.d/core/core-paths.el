@@ -7,6 +7,8 @@
 (defconst shan-interactive-p (not noninteractive)
   "If non-nil, Emacs is in interactive mode.")
 
+(defconst custom-file (concat user-emacs-directory "custom.el"))
+
 (defvar shan-core-dir (expand-file-name "core" user-emacs-directory)
   "Directory with all the core files.")
 

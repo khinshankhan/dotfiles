@@ -128,6 +128,7 @@ is deferred until the file is saved. Respects `git-gutter:disabled-modes'."
 
   (setq git-gutter:update-interval 0.05))
 
+;; NOTE: flycheck errors take priority in fringe
 (package! git-gutter-fringe
   :if (feature-p! +gutter)
   :config

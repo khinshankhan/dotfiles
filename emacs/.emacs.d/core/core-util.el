@@ -1,4 +1,4 @@
-;;; core-fboundp.el --- mostly stuff that goes into the function space -*- lexical-binding: t -*-
+;;; core-util.el --- defines utility variables, functions, and macros -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
 
@@ -33,10 +33,6 @@
   `(run-with-idle-timer ,n ; run this after emacs is idle for 1 second
                         nil ; do this just once; don't repeat
                         (lambda () ,@body)))
-
-(defmacro do-once-1-sec-after-emacs-startup! (&rest body)
-  "Does BODY after 1 second of loaded config."
-  `(do-once-n-sec-after-emacs-startup! 1 ,@body))
 
 ;; Quality of Life a la Doom
 (defun doom-unquote (exp)
@@ -150,21 +146,6 @@ This is a wrapper around `eval-after-load' that:
 
 ;; Au revoir Doom...
 
-(defun shan/do-nothing ()
-  "Do nothing."
-  (interactive)
-  nil)
-
-(defun shan/before (to-call-before f)
-  "Run TO-CALL-BEFORE then run F."
-  (funcall to-call-before)
-  (funcall f))
-
-(defun shan/after (to-call-after f)
-  "Run F then run TO-CALL-AFTER."
-  (funcall f)
-  (funcall to-call-after))
-
 (defun shan/refresh-buffer ()
   "Refresh the current buffer."
   (interactive)
@@ -241,24 +222,39 @@ This avoid without the weird nonc circular list problem."
   (interactive)
   (funcall (no-hook! 'save-buffer '(before-save-hook after-save-hook))))
 
-(defun shan/call-keymap (map &optional prompt)
-  "Read a key sequence and call the command it's bound to in MAP.
-It can use PROMPT for the key sequence."
-  (let* ((help-form `(describe-bindings ,(vector map)))
-         (key (read-key-sequence prompt))
-         (cmd (lookup-key map key t)))
-    (if (functionp cmd) (call-interactively cmd)
-      (user-error "%s is undefined" key))))
-
-(defun shan/exec-call-keymap (keymap prompt)
-  "Execute `shan/call-keymap' using KEYMAP and PROMPT."
-  (interactive)
-  (shan/call-keymap keymap prompt))
-
-(defun symbol-append (&rest symbols)
+(defun shan/symbol-append (&rest symbols)
   "Concatenate n SYMBOLS and return a symbol."
   (intern (apply #'s-concat
                  (mapcar #'symbol-name symbols))))
 
-(provide 'core-fboundp)
-;;; core-fboundp.el ends here
+(defun shan/ensure-list (item)
+  "Ensure that ITEM is a list. If it's not a list, wrap it in a list."
+  (if (listp item)
+      item
+    (list item)))
+
+(defun shan/random-element-from-list (lst)
+  "Choose a random element from the given list `LST'."
+  (if lst
+      (nth (random (length lst)) lst)
+    nil))
+
+(defun shan/chunk-string-length-n (n str)
+  "Chunk the string `STR' into groups with a maximum length of `N'."
+  (if (<= n 0)
+      (error "Chunk size (n) must be greater than 0")
+    (let ((chunks '())
+          (current-chunk "")
+          (remaining-length n))
+      (dolist (char (append str nil))
+        (if (> remaining-length 0)
+            (setq current-chunk (concat current-chunk (string char))
+                  remaining-length (- remaining-length 1))
+          (setq chunks (cons current-chunk chunks)
+                current-chunk (string char)
+                remaining-length (- n 1))))
+      (setq chunks (cons current-chunk chunks))
+      (nreverse chunks))))
+
+(provide 'core-util)
+;;; core-util.el ends here

@@ -5,21 +5,21 @@
 
 (defvar shan--active-modules)
 
+;;; Order slightly matters, maybe auto-ide should be part of core?
 (setq shan--active-modules
       '(
         :tools
+        (auto-ide +hydra-auto-ide)
         (lsp +dap +ui)
-        (vc
-         +git
-         +hydra-git
-         +forge
-         +gutter)                 ; NOTE: flycheck errors take priority in fringe
+        (vc +git +gutter +hydra-git)
+
+        :input
+        macos
 
         :checkers
         (spell +flyspell +aspell)
         (syntax +flycheck)
-        (grammar
-         +lsp)                    ; pnpm -g add @emacs-grammarly/grammarly-languageserver
+        (grammar +lsp) ; requires node 16 and pnpm -g add @emacs-grammarly/grammarly-languageserver
 
         :completion
         company
@@ -28,10 +28,9 @@
 
         :editor
         editorconfig
-        ;; hungry-delete          ; FIXME: breaks ivy and other tools
+        ;; hungry-delete ; FIXME: breaks ivy and other tools
         multiple-cursors
-        (parentheses
-         +rainbow)
+        (parentheses +rainbow)
         (zoom +text +window)
 
         :ui
@@ -40,37 +39,25 @@
         (theme +solaire)
         modeline
         dashboard                 ; TODO: customize this some more
-        (hydra +hydra-auto-ide +hydra-window)
+        (hydra +hydra-window)
         discoverability
 
         :lang
         ;; (asm +mips)
-        (js +ts +jsx +tsx +vue +lsp +dap)
-        (go
-         +lsp                     ; install via vscode for now...
-         +dap)
-        (web
-         +emmet
-         +vtl
-         +lsp
-         +dap)
-        (graphql
-         +lsp)                    ; pnpm -g add graphql graphql-language-service-cli
-        (yaml
-         +lsp)                    ; pnpm -g add yaml-language-server
-        json
-        ;; scala                  ; FIXME: wayy down the backlog, used scala for college last
+        ;; (js +ts +jsx +tsx +vue +lsp +dap)
+        ;; (go +lsp +dap) ; install via vscode for now...
+        ;; (web +emmet +vtl +lsp +dap)
+        ;; (graphql +lsp) ; pnpm -g add graphql graphql-language-service-cli
+        ;; scala ; FIXME: wayy down the backlog, used scala for college last
         shell
-        (python
-         +lsp)                    ; pnpm -g add pyright
-        ;; swift                  ; FIXME: wayy down the backlog, I don't do swift dev
+        ;; (python +lsp) ; pnpm -g add pyright
+        ;; swift ; FIXME: wayy down the backlog, I don't do swift dev
+        (yaml +lsp) ; pnpm -g add yaml-language-server
+        json
 
         :misc
         keyfreq
         ;; sicp
-
-        :input
-        macos
         ))
 
 (provide 'activate)

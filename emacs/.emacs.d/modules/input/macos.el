@@ -1,5 +1,5 @@
 (require 'core-straight)
-(require 'core-module)
+(require 'core-util)
 
 (with-os! (darwin)
   (setq mac-command-modifier 'meta)
