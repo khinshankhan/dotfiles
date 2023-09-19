@@ -8,8 +8,8 @@
 (package! doom-themes
   :demand t
   :config
-  (setq doom-vibrant-brighter-comments t
-        doom-vibrant-brighter-modeline t)
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
   (doom-themes-org-config)
   (load-theme 'doom-dracula t))
 
