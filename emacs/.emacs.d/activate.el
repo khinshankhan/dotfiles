@@ -35,14 +35,13 @@
          +gutter)                 ; NOTE: flycheck errors take priority in fringe
 
         :ui
+        (color +todo +whitespace +nums +tokens)
         iconography               ; required for doom-modeline
-        dashboard                 ; TODO: customize this some more
-        discoverability
-        hl-todo
-        (hydra +hydra-auto-ide +hydra-window)
-        (rgb +rainbow)
         (theme +solaire)
         modeline
+        dashboard                 ; TODO: customize this some more
+        (hydra +hydra-auto-ide +hydra-window)
+        discoverability
 
         :lang
         ;; (asm +mips)
