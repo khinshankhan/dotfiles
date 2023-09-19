@@ -1,6 +1,6 @@
 (require 'core-straight)
 
-(use-package orderless
+(package! orderless
   :config
   (setq
    completion-styles '(orderless basic)

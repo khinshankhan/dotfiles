@@ -13,7 +13,7 @@
   (if (fboundp fn)
       (funcall fn 'utf-8)))
 
-(use-package! unidecode)
+(package! unidecode)
 
 ;; Backups
 ;;; I don't particularly need backup files, and `~' + `#' files are a pain to clean anyways
@@ -42,15 +42,20 @@
   (if (fboundp fn)
       (funcall fn -1)))
 
-;;; source code pro is good just the way it is. Noto just seems to break emacs(?). Symbola for emoji!
+;;; prevents some cases of flickering.
+(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+
+;;; source code pro is good just the way it is.
 (when (member "Source Code Pro" (font-family-list))
   (set-face-attribute 'default nil
                       :family "Source Code Pro"
                       :weight 'normal
                       :width 'normal))
 
+;;; Noto just seems to break emacs(?)
 (add-to-list 'face-ignored-fonts "Noto Color Emoji")
 
+;;; Symbola for emoji!
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
 
@@ -65,6 +70,9 @@
               visual-line-mode t
               indent-tabs-mode nil
               tab-width 4)
+
+;;; line numbers are pretty slow, line numbers in the modeline should be good enough
+(setq display-line-numbers-type nil)
 
 ;;; highlights the line containing mark
 (when (fboundp 'global-hl-line-mode)
@@ -103,7 +111,7 @@
 ;; (put 'narrow-to-region 'disabled nil)
 
 ;;; how do people live without smart expansion?
-(use-package! expand-region
+(package! expand-region
   :bind
   ("C-=" . er/expand-region))
 
@@ -121,7 +129,7 @@
                 #'shan/fill-or-unfill)
 
 ;;; TODO: look into moving larger bulks of texts
-(use-package! move-text
+(package! move-text
   :config
   (move-text-default-bindings))
 

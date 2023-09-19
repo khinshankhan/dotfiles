@@ -15,6 +15,9 @@
 (package! rainbow-delimiters
   :if (feature-p! +rainbow)
   :hook
-  (prog-mode . rainbow-delimiters-mode))
+  (prog-mode . rainbow-delimiters-mode)
+  :config
+  ;; I'm small-brained enough to only need 4 and get the perf boost
+  (setq rainbow-delimiters-max-face-count 4))
 
 (package! smartparens)

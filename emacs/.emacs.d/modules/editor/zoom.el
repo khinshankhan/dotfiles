@@ -20,4 +20,4 @@
   :bind
   ("C-z" . zoom-window-zoom)
   :config
-  (setq zoom-window-mode-line-color "#412170"))
+  (setq zoom-window-mode-line-color "#130321"))

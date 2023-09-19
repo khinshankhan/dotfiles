@@ -1,6 +1,5 @@
 (require 'core-straight)
 
-
 (package! yasnippet
   :config
   ;; disable annoying messages
