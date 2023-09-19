@@ -1,5 +1,5 @@
 (require 'pretty-hydra)
-(require 'core-fboundp)
+(require 'core-util)
 
 ;; Hirose Yuuji and Bob Wiener
 ;; https://www.emacswiki.org/emacs/WindowResize
@@ -12,21 +12,21 @@
   (let (c)
     (catch 'done
       (while t
-	    (message
-	     "h=heighten, s=shrink, w=widen, n=narrow (by %d);  1-9=unit, q=quit"
-	     arg)
-	    (setq c (read-char))
-	    (condition-case ()
-	        (cond
-	         ((= c ?h) (enlarge-window arg))
-	         ((= c ?s) (shrink-window arg))
-	         ((= c ?w) (enlarge-window-horizontally arg))
-	         ((= c ?n) (shrink-window-horizontally arg))
-	         ((= c ?\^G) (keyboard-quit))
-	         ((= c ?q) (throw 'done t))
-	         ((and (> c ?0) (<= c ?9)) (setq arg (- c ?0)))
-	         (t (beep)))
-	      (error (beep)))))
+   (message
+    "h=heighten, s=shrink, w=widen, n=narrow (by %d);  1-9=unit, q=quit"
+    arg)
+   (setq c (read-char))
+   (condition-case ()
+       (cond
+        ((= c ?h) (enlarge-window arg))
+        ((= c ?s) (shrink-window arg))
+        ((= c ?w) (enlarge-window-horizontally arg))
+        ((= c ?n) (shrink-window-horizontally arg))
+        ((= c ?\^G) (keyboard-quit))
+        ((= c ?q) (throw 'done t))
+        ((and (> c ?0) (<= c ?9)) (setq arg (- c ?0)))
+        (t (beep)))
+     (error (beep)))))
     (message "Done.")))
 
 ;; TODO: add in window movement relative to focus window using `wind'

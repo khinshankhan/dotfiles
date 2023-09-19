@@ -55,13 +55,11 @@
    ()
    "RSI Binds"
    (("u" undo "undo" :exit nil)
-    ("a" (shan/exec-call-keymap 'Control-X-prefix "C-x") "C-x")
-    (";" counsel-M-x "M-x")
     ("v" shan/vanilla-save "vanilla save"))))
 
 (let ((current-dir (file-name-directory load-file-name)))
   (dolist (hydra-name (feature-substring! "+hydra"))
     (--> hydra-name
-      (substring it 7)
-      (f-join current-dir "hydra-maps" it)
-      (load it nil 'nomessage))))
+         (substring it 7)
+         (f-join current-dir "hydra-maps" it)
+         (load it nil 'nomessage))))
