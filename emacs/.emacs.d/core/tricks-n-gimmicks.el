@@ -34,19 +34,20 @@
   (setq straight-vc-git-default-protocol 'ssh))
 
 ;; custom settings
+(defvar shan--preferred-logo 'logo
+  "Preferred logo for dashboard startup.  If not found, use default.")
+
 (defconst shan--settings-path
   (expand-file-name "settings.el"
                     (expand-file-name "personal" user-emacs-directory))
   "Path to personal settings meant not be public (api keys and stuff).")
+
 (defconst shan--settings-exist? (file-exists-p shan--settings-path)
   "Checks if shan--settings-path exists.")
 
 (if shan--settings-exist?
     (load shan--settings-path nil 'nomessage)
   (message "Settings file not found!"))
-
-(defconst shan--preferred-logo 'logo
-  "Preferred logo for dashboard startup.  If not found, use default.")
 
 ;; From doom: these two functions don't exist in terminal Emacs, but some Emacs
 ;; packages (internal and external) use it anyway, leading to void-function

@@ -38,7 +38,7 @@
         iconography               ; required for doom-modeline
         (theme +solaire)
         modeline
-        dashboard                 ; TODO: customize this some more
+        dashboard
         (hydra +hydra-window)
         discoverability
 
