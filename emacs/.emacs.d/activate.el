@@ -7,6 +7,14 @@
 
 (setq shan--active-modules
       '(
+        :tools
+        (lsp +dap +ui)
+        (vc
+         +git
+         +hydra-git
+         +forge
+         +gutter)                 ; NOTE: flycheck errors take priority in fringe
+
         :checkers
         (spell +flyspell +aspell)
         (syntax +flycheck)
@@ -25,14 +33,6 @@
         (parentheses
          +rainbow)
         (zoom +text +window)
-
-        :tools
-        (lsp +dap +ui)
-        (vc
-         +git
-         +hydra-git
-         +forge
-         +gutter)                 ; NOTE: flycheck errors take priority in fringe
 
         :ui
         (color +todo +whitespace +nums +tokens)

@@ -1,23 +1,34 @@
 (require 'core-straight)
-(require 'core-fboundp)
+(require 'core-paths)
+
+(package! vc
+  :straight (:type built-in)
+  :config
+  ;; Remove RCS, CVS, SCCS, SRC, and Bzr, because it's a lot less work for vc to
+  ;; check them all (especially in TRAMP buffers), and who uses any of these in
+  ;; 2021, amirite?
+  (setq-default vc-handled-backends '(Git SVN Hg)))
+
+(package! vc-annotate
+  :straight (:type built-in))
+
+(package! smerge-mode
+  :straight (:type built-in))
 
 ;; Git
-(package! git-modes
-  :if (feature-p! +git))
-
 ;;; Some people download emacs just for magit, it’d be crazy to not use it for vc.
 (package! magit
   :if (feature-p! +git)
   :defer t
   :init
-  (defun shan/magit-true-buffer-bury()
+  (defun magit-custom/true-buffer-bury()
     "Get rid of buffers for realsies."
     (interactive)
     (magit-mode-bury-buffer t))
   :bind
   ("C-c g" . magit)
   (:map magit-status-mode-map
-        ("q" . shan/magit-true-buffer-bury))
+        ("q" . magit-custom/true-buffer-bury))
   :config
   (setq magit-diff-refine-hunk t ; show granular diffs in selected hunk
         ;; Don't autosave repo buffers. This is too magical, and saving can
@@ -37,9 +48,7 @@
   (transient-append-suffix 'magit-fetch "-p"
     '("-t" "Fetch all tags" ("-t" "--tags")))
   (transient-append-suffix 'magit-pull "-r"
-    '("-a" "Autostash" "--autostash"))
-
-  )
+    '("-a" "Autostash" "--autostash")))
 
 (package! transient
   :if (feature-p! +git)
@@ -53,29 +62,21 @@
   (transient-bind-q-to-quit)
   (setq transient-default-level 5))
 
-;;; Some optimization for git projects.
-(package! vc-hooks
-  :straight (:type built-in)
+(package! git-commit
+  :if (feature-p! +git)
   :config
-  ;; I mostly use Git, makes sense to have it at the beginning of the list
-  (setq vc-handled-backends
-        (cons 'Git (remove 'Git vc-handled-backends))))
+  ;; Enforce git commit conventions.
+  ;; See https://chris.beams.io/posts/git-commit/
+  (setq git-commit-summary-max-length 50
+        git-commit-style-convention-checks '(overlong-summary-line non-empty-second-line))
 
-;; Forge
-(package! forge
-  :if (feature-p! +forge)
-  :defer t
-  :commands forge-create-pullreq forge-create-issue
-  :init
-  (setq forge-database-file (concat shan-cache-dir "/forge/forge-database.sqlite")))
+  (global-git-commit-mode t))
 
-(package! code-review
-  :if (feature-p! +forge)
-  :defer t)
-
+(package! git-modes
+  :if (feature-p! +git))
 
 ;; Gutters, mostly doom logic
-(use-package! git-gutter
+(package! git-gutter
   :if (feature-p! +gutter)
   :commands git-gutter:revert-hunk git-gutter:stage-hunk git-gutter:previous-hunk git-gutter:next-hunk
   :init
@@ -135,5 +136,5 @@ is deferred until the file is saved. Respects `git-gutter:disabled-modes'."
   (define-fringe-bitmap 'git-gutter-fr:modified [#b11100000] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [#b11100000] nil nil '(center repeated)))
 
-(use-package! diff-hl
+(package! diff-hl
   :if (feature-p! +gutter))
