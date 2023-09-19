@@ -22,7 +22,7 @@
         (grammar +lsp) ; requires node 16 and pnpm -g add @emacs-grammarly/grammarly-languageserver
 
         :completion
-        company
+        (company +childframe)
         vertico
         snippets
 

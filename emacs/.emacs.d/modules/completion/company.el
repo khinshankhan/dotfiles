@@ -26,5 +26,9 @@
         company-backends '(company-capf))
   (global-company-mode))
 
+(package! company-box
+  :if (feature-p! +childframe)
+  :hook (company-mode . company-box-mode))
+
 (with-module! :tools lsp
   (add-hook 'lsp-mode-hook #'company-mode))
