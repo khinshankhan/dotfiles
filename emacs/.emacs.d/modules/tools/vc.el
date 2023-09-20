@@ -26,7 +26,7 @@
     (interactive)
     (magit-mode-bury-buffer t))
   :bind
-  ("C-c g" . magit)
+  ("C-c m" . magit)
   (:map magit-status-mode-map
         ("q" . magit-custom/true-buffer-bury))
   :config

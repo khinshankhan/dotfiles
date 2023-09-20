@@ -19,7 +19,8 @@
                         vertico-reverse))
   :bind (:map vertico-map
               ;; More convenient directory navigation commands
-              ("RET" . vertico-directory-enter))
+              ("<return>"   . vertico-directory-enter)
+              ("<S-return>" . vertico-exit-input))
   :init
   (vertico-mode t)
   ;; Tidy shadowed file names

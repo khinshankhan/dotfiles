@@ -205,10 +205,15 @@ This is a wrapper around `eval-after-load' that:
         (error "Cannot open tramp file")
       (browse-url (concat "file://" file-name)))))
 
-(defun shan/path-copy ()
+(defun shan/copy-real-path ()
   "Copy the current file path to kill ring."
   (interactive)
   (kill-new buffer-file-name))
+
+(defun shan/copy-buffer-name ()
+  "Copy the current file path to kill ring."
+  (interactive)
+  (kill-new (buffer-name)))
 
 (defun shan/copy-hooks-to (from-hook to-hook)
   "Copy one list of hooks to another, from FROM-HOOK into TO-HOOK.

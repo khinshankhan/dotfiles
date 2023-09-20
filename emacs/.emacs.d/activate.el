@@ -35,7 +35,7 @@
 
         :ui
         (color +todo +whitespace +nums +tokens)
-        iconography               ; required for doom-modeline
+        iconography
         (theme +solaire)
         modeline
         dashboard
