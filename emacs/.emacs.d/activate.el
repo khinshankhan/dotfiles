@@ -9,9 +9,9 @@
 (setq shan--active-modules
       '(
         :tools
-        (auto-ide +hydra-auto-ide)
+        auto-ide
         (lsp +dap +ui)
-        (vc +git +gutter +hydra-git)
+        (vc +git +gutter)
 
         :input
         macos
@@ -39,19 +39,11 @@
         (theme +solaire)
         modeline
         dashboard
-        (hydra +hydra-window)
         discoverability
 
         :lang
         ;; (asm +mips)
-        ;; (js +ts +jsx +tsx +vue +lsp +dap)
-        ;; (go +lsp +dap) ; install via vscode for now...
-        ;; (web +emmet +vtl +lsp +dap)
-        ;; (graphql +lsp) ; pnpm -g add graphql graphql-language-service-cli
-        ;; scala ; FIXME: wayy down the backlog, used scala for college last
         shell
-        ;; (python +lsp) ; pnpm -g add pyright
-        ;; swift ; FIXME: wayy down the backlog, I don't do swift dev
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
 
