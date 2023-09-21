@@ -106,6 +106,12 @@ and nil otherwise."
        (-map #'symbol-name)
        (--filter (s-contains? str it))))
 
+(defmacro with-module-feature! (category module feature &rest body)
+  "Execute BODY if FEATURE is toggled under MODULE under CATEGORY."
+  (declare (indent defun))
+  `(when (core-module/feature-p modulation--categories ,category ',module ',feature)
+     ,@body))
+
 ;; lsp go brr
 (defmacro lsp! (mode &rest body)
   "Add lsp to MODE if lsp feature is active for module and in general.
