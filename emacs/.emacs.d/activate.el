@@ -51,7 +51,7 @@
         (graphql +lsp)
 
         :misc
-        keyfreq
+        (key-logger +freq +commands)
         ;; sicp
         ))
 
