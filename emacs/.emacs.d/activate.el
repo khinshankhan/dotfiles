@@ -32,6 +32,7 @@
         multiple-cursors
         (parentheses +rainbow)
         (zoom +text +window)
+        neotree
 
         :ui
         (color +todo +whitespace +nums +tokens)
