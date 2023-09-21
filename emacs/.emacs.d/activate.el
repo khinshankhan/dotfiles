@@ -27,7 +27,6 @@
         snippets
 
         :editor
-        editorconfig
         ;; hungry-delete ; FIXME: breaks ivy and other tools
         multiple-cursors
         (parentheses +rainbow)
