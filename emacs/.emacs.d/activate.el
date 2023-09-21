@@ -43,6 +43,7 @@
 
         :lang
         ;; (asm +mips)
+        (go +lsp +dap)
         shell
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
