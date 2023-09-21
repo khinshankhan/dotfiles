@@ -44,9 +44,11 @@
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
+        js
         shell
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
+        (graphql +lsp)
 
         :misc
         keyfreq

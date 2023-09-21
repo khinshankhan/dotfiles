@@ -72,5 +72,11 @@ disable it to fix all that visual noise."
    ("rc\\'" . conf-mode)
    ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)))
 
+;;; Multiple languages can be useful when dealing with templates
+(package! mmm-mode
+  :config
+  (setq mmm-global-mode 'maybe)
+  (setq mmm-submode-decoration-level 0))
+
 (provide 'tricks-n-gimmicks)
 ;;; tricks-n-gimmicks.el ends here
