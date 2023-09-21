@@ -47,6 +47,7 @@
         (go +lsp +dap)
         (js +ts +jsx +tsx +vue +lsp +dap)
         (web +emmet +vtl +lsp +dap)
+        (python +lsp +dap)
         shell
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
