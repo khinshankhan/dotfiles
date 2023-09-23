@@ -130,5 +130,17 @@
       :face mmm-declaration-submode-face
       :front " ?\\(?:GraphQL ?\\*/ ?\\|gql\\)`" ;; match either starting with "/* GraphQl */`" or "gql`" case and space insensitive
       :back "`")))
+
   (dolist (mode '(js-mode js2-mode))
     (mmm-add-mode-ext-class mode nil 'js-graphql)))
+
+(after! web-mode
+  (mmm-add-classes
+   '((js-html
+      :submode web-mode
+      :face mmm-declaration-submode-face
+      :front " ?\\(?:html ?\\*/ ?\\|html\\)`" ;; match either starting with "/* GraphQl */`" or "gql`" case and space insensitive
+      :back "`")))
+
+  (dolist (mode '(js-mode js2-mode))
+    (mmm-add-mode-ext-class mode nil 'js-html)))
