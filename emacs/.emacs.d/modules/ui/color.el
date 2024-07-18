@@ -94,3 +94,17 @@ or if the current buffer is read-only or not file-visiting."
   (define-globalized-minor-mode global-rainbow-mode rainbow-mode
     (lambda () (rainbow-mode 1)))
   (global-rainbow-mode 1))
+
+(package! highlight-indent-guides
+  :if (feature-p! +indents)
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guides-auto-enabled nil
+        highlight-indent-guides-responsive t
+        highlight-indent-guides-method 'character
+        highlight-indent-guides-responsive 'stack
+        highlight-indent-guides-character ?\┊)
+
+  (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+  (set-face-background 'highlight-indent-guides-even-face "dimgray")
+  (set-face-foreground 'highlight-indent-guides-character-face "dimgray"))
