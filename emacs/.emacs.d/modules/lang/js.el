@@ -5,10 +5,7 @@
   (pushnew! projectile-project-root-files "package.json")
   (pushnew! projectile-globally-ignored-directories "^node_modules$"))
 
-(after! yasnippet
-  (package! react-snippets))
-
-;; actual js config
+;; core js (js)
 (package! js2-mode
   :mode "\\.[mc]?js\\'"
   :mode "\\.es6\\'"
@@ -54,9 +51,9 @@
     (if (= n 1) (rjsx-maybe-reparse)))
 
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
-    (add-to-list 'auto-mode-alist '("components/.+\\.js$" . rjsx-mode)))
+  (add-to-list 'auto-mode-alist '("components/.+\\.js$" . rjsx-mode)))
 
-;; typescript
+;; core ts (ts)
 (package! typescript-mode
   :if (feature-p! +ts)
   :hook (typescript-mode . rainbow-delimiters-mode)
@@ -88,6 +85,14 @@
         (flycheck-add-mode 'javascript-eslint 'typescript-tsx-mode))
 
     (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-mode))))
+
+;; TODO: look into custom snippets
+(with-feature! +jsx
+  (after! yasnippet
+    (package! react-snippets)))
+(with-feature! +tsx
+  (after! yasnippet
+    (package! react-snippets)))
 
 ;; vue
 (with-feature! +vue
