@@ -1,9 +1,45 @@
 (require 'core-straight)
 
-;; Ensure projectile is configured to handle JavaScript projects
+;; Setup
+;;; Ensure projectile is configured to handle JavaScript projects
 (with-eval-after-load 'projectile
   (pushnew! projectile-project-root-files "package.json")
   (pushnew! projectile-globally-ignored-directories "^node_modules$"))
+
+(package! add-node-modules-path
+  :hook
+  ((html-mode
+    css-mode
+    web-mode
+    markdown-mode
+    js-mode
+    js2-mode
+    json-mode
+    rjsx-mode
+    typescript-mode
+    typescript-tsx-mode
+    solidity-mode) . add-node-modules-path)
+  :init
+  (setq add-node-modules-path-command
+        '(
+          "pnpm bin"
+          "pnpm bin -w"
+          "yarn bin"
+          "npm bin")))
+
+(package! prettier
+  :hook
+  ((html-mode
+    css-mode
+    web-mode
+    markdown-mode
+    js-mode
+    js2-mode
+    json-mode
+    rjsx-mode
+    typescript-mode
+    typescript-tsx-mode
+    solidity-mode) . prettier-mode))
 
 ;; core js (js)
 (package! js2-mode
