@@ -29,6 +29,11 @@
   ("C-c m" . magit)
   (:map magit-status-mode-map
         ("q" . magit-custom/true-buffer-bury))
+  :init
+  ;; Enforce git commit conventions.
+  ;; See https://chris.beams.io/posts/git-commit/
+  (setq git-commit-summary-max-length 50
+        git-commit-style-convention-checks '(overlong-summary-line non-empty-second-line))
   :config
   (setq magit-diff-refine-hunk t ; show granular diffs in selected hunk
         ;; Don't autosave repo buffers. This is too magical, and saving can
@@ -61,16 +66,6 @@
   :config
   (transient-bind-q-to-quit)
   (setq transient-default-level 5))
-
-(package! git-commit
-  :if (feature-p! +git)
-  :config
-  ;; Enforce git commit conventions.
-  ;; See https://chris.beams.io/posts/git-commit/
-  (setq git-commit-summary-max-length 50
-        git-commit-style-convention-checks '(overlong-summary-line non-empty-second-line))
-
-  (global-git-commit-mode t))
 
 (package! git-modes
   :if (feature-p! +git))
