@@ -1,12 +1,8 @@
 ;;; early-init.el --- config entry point -*- lexical-binding: t; -*-
-
 ;;; Commentary:
-
 ;; Mostly from Doom
-
 ;; Emacs 27.1 introduced early-init.el, which is run before init.el, before
 ;; package and UI initialization happens, and before site files are loaded.
-
 ;;; Code:
 
 (require 'cl-lib)

@@ -1,9 +1,6 @@
 ;;; init.el --- possible config entry point -*- lexical-binding: t; -*-
-
 ;;; Commentary:
-
 ;; More Doom safety logic
-
 ;;; Code:
 
 ;; In the strange case that early-init.el wasn't loaded (e.g. you're using

@@ -1,5 +1,6 @@
 (require 'core-straight)
 
+;; sync with https://github.com/jchedal-anglay/emacs.d/blob/rewrite/modules/language/python.el
 (package! python
   :defer t
   :ensure nil
