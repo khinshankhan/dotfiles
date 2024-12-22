@@ -15,7 +15,7 @@
         ;; copilot
 
         :input
-        macos
+        os
 
         :checkers
         (spell +flyspell +aspell)
