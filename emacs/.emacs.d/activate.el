@@ -52,6 +52,7 @@
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
         (graphql +lsp) ; graphql-language-service-cli
+        (markdown +mdx)
 
         :misc
         (key-logger +freq +commands)
