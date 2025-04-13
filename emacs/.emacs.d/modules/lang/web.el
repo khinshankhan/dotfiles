@@ -21,7 +21,6 @@
       json-mode
       rjsx-mode
       typescript-mode
-      typescript-tsx-mode
       solidity-mode
       php-mode
       sgml-mode) . emmet-mode)))
