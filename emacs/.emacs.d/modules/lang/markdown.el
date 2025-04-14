@@ -26,9 +26,13 @@
     :override #'markdown-match-generic-metadata
     (ignore (goto-char (point-max))))
 
-  ;; jsx and tsx are currently breaking
-  (dolist (pair '(("js" . typescript-mode)
-                  ("ts" . typescript-mode)
+  ;; Highlight common fenced block languages
+  (dolist (pair '(("js"  . typescript-mode)
+                  ("ts"  . typescript-mode)
+                  ;; jsx and tsx are currently slightly broken
                   ("jsx" . typescript-mode)
-                  ("tsx" . typescript-mode)))
+                  ("tsx" . typescript-mode)
+                  ("json". json-mode)
+                  ("sh"  . sh-mode)
+                  ("go"  . go-mode)))
     (add-to-list 'markdown-code-lang-modes pair)))
