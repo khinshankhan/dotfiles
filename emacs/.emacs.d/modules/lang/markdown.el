@@ -27,12 +27,16 @@
     (ignore (goto-char (point-max))))
 
   ;; Highlight common fenced block languages
-  (dolist (pair '(("js"  . typescript-mode)
-                  ("ts"  . typescript-mode)
+  (dolist (pair '(("js"   . typescript-mode)
+                  ("ts"   . typescript-mode)
                   ;; jsx and tsx are currently slightly broken
-                  ("jsx" . typescript-mode)
-                  ("tsx" . typescript-mode)
-                  ("json". json-mode)
-                  ("sh"  . sh-mode)
-                  ("go"  . go-mode)))
+                  ("jsx"  . typescript-mode)
+                  ("tsx"  . typescript-mode)
+                  ("html" . web-mode)
+                  ("json" . json-mode)
+                  ("sh"   . sh-mode)
+                  ("go"   . go-mode)
+                  ("ini"  . conf-mode)
+                  ("py"   . python-mode)
+                  ("md"   . markdown-mode)))
     (add-to-list 'markdown-code-lang-modes pair)))
