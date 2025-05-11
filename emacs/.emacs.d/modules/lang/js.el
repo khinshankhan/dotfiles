@@ -91,15 +91,31 @@
 (package! typescript-mode
   :if (feature-p! +ts)
   :hook (typescript-mode . rainbow-delimiters-mode)
-  :mode (("\\.tsx\\'" . typescript-mode))
   :config
-  ;; TODO: figure out doom hooks
-  ;; HACK Fixes comment continuation on newline
-  ;; (setq-hook! 'typescript-mode-hook
-  ;; comment-line-break-function #'js2-line-break)
-
   (lsp! typescript-mode
     (auto-ide/add! 'typescript-mode #'hydra-lsp/body)))
+
+;; react (tsx)
+;; REVIEW We associate TSX files with `typescript-tsx-mode' derived from
+;;        `web-mode' because `typescript-mode' does not officially support
+;;        JSX/TSX. See
+;;        https://github.com/emacs-typescript/typescript.el/issues/4
+(with-feature! +tsx
+  (if (module-p! :lang web)
+      (progn
+        (define-derived-mode typescript-tsx-mode web-mode "TypeScript-tsx")
+        (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-tsx-mode))
+        (auto-ide/add! 'typescript-tsx-mode #'hydra-lsp/body)
+        ;; HACK: quick fix to get lsp in ts files, will look into later
+        (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-tsx-mode))
+
+        (with-module-feature! :lang web +emmet
+          (add-hook 'typescript-tsx-mode-hook #'emmet-mode))
+
+        (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
+        (flycheck-add-mode 'javascript-eslint 'typescript-tsx-mode))
+
+    (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-mode))))
 
 ;; TODO: look into custom snippets
 (with-feature! +jsx
