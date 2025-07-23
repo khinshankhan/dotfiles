@@ -3,7 +3,7 @@
 ;; https://github.com/zerolfx/copilot.el
 (package! copilot
   :demand t
-  :straight (:host github :repo "zerolfx/copilot.el"
+  :straight (:host github :repo "copilot-emacs/copilot.el"
                    :files ("dist" "*.el"))
   :hook (prog-mode . copilot-mode)
   :config
