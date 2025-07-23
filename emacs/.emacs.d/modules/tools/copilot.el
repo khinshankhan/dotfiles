@@ -2,6 +2,7 @@
 
 ;; https://github.com/zerolfx/copilot.el
 (package! copilot
+  :if (feature-p! +complete)
   :demand t
   :straight (:host github :repo "copilot-emacs/copilot.el"
                    :files ("dist" "*.el"))
