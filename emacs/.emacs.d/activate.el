@@ -12,7 +12,7 @@
         auto-ide
         (lsp +dap +ui)
         (vc +git +gutter)
-        (copilot +complete)
+        (copilot +complete +chat)
 
         :input
         os

@@ -10,3 +10,10 @@
   :config
   (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
   (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion))
+
+(package! gptel
+  :if (feature-p! +chat)
+  :demand t
+  :config
+  (setq gptel-backend (gptel-make-gh-copilot "Copilot")
+        gptel-model 'claude-3.7-sonnet))
