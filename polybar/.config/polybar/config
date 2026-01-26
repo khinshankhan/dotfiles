@@ -11,12 +11,13 @@ salmon = #f08080
 
 red = #ff0000
 yellow = #ffff00
+orange = #ffa500
 lgreen = #9eff9e
 blue = #0000ff
 
 ;== General ========================================================
-[bar/main]
-monitor = ${env:MONITOR:eDP-1}
+[section/base]
+monitor = ${env:MONITOR:eDP}
 width = 100%
 height = 30
 
@@ -31,12 +32,7 @@ font-3 = "FontAwesome:pixelsize=10:0"
 font-4 = "siji:pixelsize=13;1"
 
 ;== Module Positions ========================================================
-
-modules-left = workspaces
-modules-center =
-modules-right = battery date
-
-tray-position = right
+tray-position = ${env:TRAY_POS:right}
 tray-padding = 0
 
 enable-ipc = true
@@ -54,6 +50,7 @@ ws-icon-6 = 6;六
 ws-icon-7 = 7;七
 ws-icon-8 = 8;八
 ws-icon-9 = 9;九
+ws-icon-10 = 10;十
 ;== 0;零
 
 strip-wsnumbers = true
@@ -85,22 +82,26 @@ type = internal/battery
 battery = BAT0
 adapter = AC
 full-at = 99
+low-at = 30
+label-low = BATTERY LOW
 
-format-charging = <animation-charging>   <label-charging>
+format-charging = <animation-charging> <label-charging>
 format-charging-underline = #ffb52a
 
-format-discharging = <ramp-capacity>   <label-discharging>
+format-discharging = <ramp-capacity> <label-discharging>
 format-discharging-underline = ${self.format-charging-underline}
 
-format-full = <ramp-capacity>   <label-full>
+format-full = <ramp-capacity> <label-full>
 format-full-underline = ${self.format-charging-underline}
 
 ramp-capacity-0 = 
 ramp-capacity-1 = 
-ramp-capacity-2 = 
+ramp-capacity-2 = 
+ramp-capacity-3 = 
 ramp-capacity-0-foreground = ${color.red}
 ramp-capacity-1-foreground = ${color.yellow}
-ramp-capacity-2-foreground = ${color.lgreen}
+ramp-capacity-2-foreground = ${color.orange}
+ramp-capacity-3-foreground = ${color.lgreen}
 
 animation-charging-0 = 
 animation-charging-1 = 
@@ -125,5 +126,20 @@ format-background =
 format-underline = #0a6cf5
 
 label = " |%date% %time% | "
+
+;== Bars =======================================================
+[bar/main]
+inherit = section/base
+
+modules-left = workspaces
+modules-center =
+modules-right = battery date
+
+[bar/secondary]
+inherit = section/base
+
+modules-left = workspaces
+modules-center =
+modules-right = battery date
 
 ;== EOF ========================================================

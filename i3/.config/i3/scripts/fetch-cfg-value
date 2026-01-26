@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if [ -r $1 ]; then
+    group="NONE"
+    IFS="="
+    while read -r name value
+    do
+        if [ -z "$value" ]; then
+            group=$(echo "$name" | sed 's/[][]//g')
+        else
+            if [[ $group == $2 && $name == $3 ]]; then
+                echo $value
+                break
+            fi
+        fi
+    done < $1
+else
+    echo "Could not read $1"
+fi
