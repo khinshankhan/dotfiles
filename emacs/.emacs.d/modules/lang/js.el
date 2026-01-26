@@ -26,6 +26,27 @@
           "yarn bin"
           "npm bin")))
 
+;; Conditionally enable prettier-mode only if available
+(defun +prettier-safe-to-enable-p ()
+  "Return t if Prettier is installed and the current project is not explicitly excluded."
+  (and (projectile-project-p)
+       ;; No broken plugin file in this project
+       (not (file-exists-p
+             (expand-file-name "plugins/prettier-md.cjs"
+                               (projectile-project-root))))
+       ;; Prettier is available somewhere
+       (or (executable-find "prettier")
+           (let ((bin (expand-file-name
+                       "node_modules/.bin/prettier"
+                       (projectile-project-root))))
+             (file-executable-p bin)))))
+
+(defun +conditionally-enable-prettier ()
+  "Enable prettier-mode if prettier is available and the buffer is suitable."
+  (when (+prettier-safe-to-enable-p)
+    (message "Prettier available -- enabling prettier-mode")
+    (prettier-mode 1)))
+
 (package! prettier
   :hook
   ((html-mode
