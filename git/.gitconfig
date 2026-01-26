@@ -1,18 +1,25 @@
 [user]
-	name = Khinshan Khan
-	email = shan@uptogood.dev
+	name = "Khinshan Khan"
+	email = "shan@uptogood.dev"
+
 [push]
 	default = simple
+
 [pull]
 	ff = only
+
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[core]
-	editor = emacsclient -a '' -c
-[include]
-    path = ~/local.gitconfig # contains some personal information like email and secondary includes
+
 [init]
 	defaultBranch = main
+
+[core]
+	sshCommand = "ssh -o IdentitiesOnly=yes -F /dev/null -i ~/.ssh/khinshankhan"
+	editor = emacsclient -a '' -c
+
+[include]
+    path = "~/.local.gitconfig" # contains some personal information like email and secondary includes
