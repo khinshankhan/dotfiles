@@ -45,6 +45,7 @@
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
+        (rust +lsp +dap)
         (js +ts +jsx +tsx +vue +lsp +dap)
         (web +emmet +vtl +lsp +dap)
         (python +lsp +dap)
