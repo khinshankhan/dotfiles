@@ -5,15 +5,16 @@
   :init
   (default-text-scale-mode)
   :config
-  ;; HACK: try preemptively setting the font to my preferred font size
+  ;; HACK: try preemptively setting the font size based on the operating system
   (do-once-n-sec-after-emacs-startup!
    0.1
    (default-text-scale-increment
-     ;; TODO: account for different machines properly
-     (- (if (equal system-type 'darwin)
-            150
-          120)
-        (face-attribute 'default :height)))))
+    ;; TODO: account for different machines properly (by name in settings)
+    (- (cond
+        ((equal system-type 'darwin) 150)    ;; macOS
+        ((equal system-type 'gnu/linux) 150) ;; GNU/Linux
+        (t 120))                            ;; Default for other systems
+       (face-attribute 'default :height)))))
 
 (package! zoom-window
   :if (feature-p! +window)

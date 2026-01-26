@@ -1,6 +1,11 @@
 (require 'core-straight)
 
-;; tools
+;; Setup
+;;; Ensure projectile is configured to handle JavaScript projects
+(with-eval-after-load 'projectile
+  (pushnew! projectile-project-root-files "package.json")
+  (pushnew! projectile-globally-ignored-directories "^node_modules$"))
+
 (package! add-node-modules-path
   :hook
   ((html-mode
@@ -12,10 +17,37 @@
     json-mode
     rjsx-mode
     typescript-mode
-    typescript-tsx-mode
-    solidity-mode) . add-node-modules-path))
+    solidity-mode) . add-node-modules-path)
+  :init
+  (setq add-node-modules-path-command
+        '(
+          "pnpm bin"
+          "pnpm bin -w"
+          "yarn bin"
+          "npm bin")))
 
-(package! prettier-js
+;; Conditionally enable prettier-mode only if available
+(defun +prettier-safe-to-enable-p ()
+  "Return t if Prettier is installed and the current project is not explicitly excluded."
+  (and (projectile-project-p)
+       ;; No broken plugin file in this project
+       (not (file-exists-p
+             (expand-file-name "plugins/prettier-md.cjs"
+                               (projectile-project-root))))
+       ;; Prettier is available somewhere
+       (or (executable-find "prettier")
+           (let ((bin (expand-file-name
+                       "node_modules/.bin/prettier"
+                       (projectile-project-root))))
+             (file-executable-p bin)))))
+
+(defun +conditionally-enable-prettier ()
+  "Enable prettier-mode if prettier is available and the buffer is suitable."
+  (when (+prettier-safe-to-enable-p)
+    (message "Prettier available -- enabling prettier-mode")
+    (prettier-mode 1)))
+
+(package! prettier
   :hook
   ((html-mode
     css-mode
@@ -26,13 +58,9 @@
     json-mode
     rjsx-mode
     typescript-mode
-    typescript-tsx-mode
-    solidity-mode) . prettier-js-mode))
+    solidity-mode) . prettier-mode))
 
-(after! yasnippet
-  (package! react-snippets))
-
-;; actual js config
+;; core js (js)
 (package! js2-mode
   :mode "\\.[mc]?js\\'"
   :mode "\\.es6\\'"
@@ -78,18 +106,15 @@
     (if (= n 1) (rjsx-maybe-reparse)))
 
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
-    (add-to-list 'auto-mode-alist '("components/.+\\.js$" . rjsx-mode)))
+  (add-to-list 'auto-mode-alist '("components/.+\\.js$" . rjsx-mode)))
 
-;; typescript
+;; core ts (ts)
 (package! typescript-mode
   :if (feature-p! +ts)
   :hook (typescript-mode . rainbow-delimiters-mode)
-  ;; :config
-  ;; TODO: figure out doom hooks
-  ;; HACK Fixes comment continuation on newline
-  ;; (setq-hook! 'typescript-mode-hook
-  ;; comment-line-break-function #'js2-line-break)
-  )
+  :config
+  (lsp! typescript-mode
+    (auto-ide/add! 'typescript-mode #'hydra-lsp/body)))
 
 ;; react (tsx)
 ;; REVIEW We associate TSX files with `typescript-tsx-mode' derived from
@@ -112,6 +137,14 @@
         (flycheck-add-mode 'javascript-eslint 'typescript-tsx-mode))
 
     (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-mode))))
+
+;; TODO: look into custom snippets
+(with-feature! +jsx
+  (after! yasnippet
+    (package! react-snippets)))
+(with-feature! +tsx
+  (after! yasnippet
+    (package! react-snippets)))
 
 ;; vue
 (with-feature! +vue

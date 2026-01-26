@@ -13,8 +13,11 @@
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
@@ -36,7 +39,11 @@
 (require 'use-package)
 
 ;; abstract straight so it can be observed and potentially hot swappable later
-(defvar core-straight--loaded-packages '()
+(defvar core-straight--loaded-packages
+  '(
+   ;; packages added above
+    straight
+    use-package)
   "List containing loaded packages.")
 
 (defmacro package! (name &rest args)

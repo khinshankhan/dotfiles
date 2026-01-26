@@ -12,10 +12,10 @@
         auto-ide
         (lsp +dap +ui)
         (vc +git +gutter)
-        ;; copilot
+        (copilot +complete +chat)
 
         :input
-        macos
+        os
 
         :checkers
         (spell +flyspell +aspell)
@@ -45,13 +45,15 @@
         :lang
         ;; (asm +mips)
         (go +lsp +dap)
+        (rust +lsp +dap)
         (js +ts +jsx +tsx +vue +lsp +dap)
         (web +emmet +vtl +lsp +dap)
         (python +lsp +dap)
         shell
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
-        (graphql +lsp)
+        (graphql +lsp) ; graphql-language-service-cli
+        markdown
 
         :misc
         (key-logger +freq +commands)

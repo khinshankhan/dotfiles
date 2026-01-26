@@ -11,7 +11,6 @@
                                      ("Sleep is for the we(a | e)k" . "Shan")
                                      ))
 
-(length "Do you ever wonder why we're always, like, wearing gloves?")
 (defconst dashboard-custom--max-quote-length 99)
 
 (defun dashboard-custom/get-random-title()
@@ -57,6 +56,20 @@
   (setq dashboard-startup-banner (if shan--settings-exist?
                                      shan--preferred-logo ;; weird stuff, possibly because of no-littering
                                    'logo))
+
+  (setq dashboard-startupify-list
+        '(
+          dashboard-insert-banner
+          dashboard-insert-newline
+          dashboard-insert-banner-title
+          dashboard-insert-newline
+          dashboard-insert-navigator
+          dashboard-insert-newline
+          dashboard-insert-init-info
+          dashboard-insert-items
+          dashboard-insert-newline
+          ;; dashboard-insert-footer
+          ))
 
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
