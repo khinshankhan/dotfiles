@@ -54,6 +54,7 @@
         json
         (graphql +lsp) ; graphql-language-service-cli
         markdown
+        prisma
 
         :misc
         (key-logger +freq +commands)
