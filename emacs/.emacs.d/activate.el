@@ -48,6 +48,7 @@
         (rust +lsp +dap)
         (js +ts +jsx +tsx +vue +lsp +dap)
         (web +emmet +vtl +lsp +dap)
+        (astro +lsp)
         (python +lsp +dap)
         shell
         (yaml +lsp) ; pnpm -g add yaml-language-server
