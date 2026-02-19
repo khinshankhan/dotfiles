@@ -32,7 +32,7 @@
         lsp-keep-workspace-alive nil
         lsp-before-save-edits t
         lsp-enable-indentation t
-        lsp-prefer-capf t
+        lsp-completion-provider :capf
         ;; TODO: should probably look into cases where this is too high
         ;; but the default 1000 is too low
         lsp-file-watch-threshold 500000
