@@ -29,7 +29,7 @@
 
 ;;; Who types a whole `yes' intead of `y' nowadays..?
 ;;; TODO: look into other options which still require full words to be typed
-(defalias 'yes-or-no-p (lambda (&rest _) t))
+(setq use-short-answers t)
 (setq-default confirm-kill-emacs nil)
 (setq save-abbrevs t)
 (setq-default abbrev-mode t)
@@ -146,7 +146,7 @@ abbreviate $HOME -> ~ in filepaths (more portable, more readable, & saves
 space)"
   (if (or (not (file-remote-p file))
           (equal "sudo" (file-remote-p file 'method)))
-      (abbreviate-file-name (file-truename (tramp-file-name-localname tfile)))
+      (abbreviate-file-name (file-truename (tramp-file-name-localname file)))
     file))
 
 (add-to-list 'recentf-filename-handlers #'doom--recentf-file-truename-fn)

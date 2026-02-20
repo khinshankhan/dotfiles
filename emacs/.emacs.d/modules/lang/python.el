@@ -38,8 +38,7 @@
         :init
         (add-hook 'python-mode-hook #'lsp 80)  ;; 80 is the depth, helping making sure it runs after other hook functions
         (require 'lsp-pyright))
-    (warn "Module language/python requires module tools/lsp for feature +lsp to work.")
+    (warn "Module language/python requires module tools/lsp for feature +lsp to work.")))
 
-    (dap!
-      (require 'dap-gdb-lldb)
-      (require 'dap-go))))
+(dap!
+  (require 'dap-python))

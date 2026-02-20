@@ -41,7 +41,7 @@
   (defun go-custom/setup-project-test ()
     "Call per project to get testing generation."
     (interactive)
-    (call-process-shell-command (concat "cd " (vc-root-dir) "go get -u github.com/cweill/gotests/...") nil 0)
+    (call-process-shell-command (concat "cd " (vc-root-dir) "; go get -u github.com/cweill/gotests/...") nil 0)
     (message "Ran 'get gotests'!"))
 
   (defun go-custom/setup-global-test ()

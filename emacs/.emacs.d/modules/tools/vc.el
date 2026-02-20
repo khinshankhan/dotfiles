@@ -75,6 +75,9 @@
   :if (feature-p! +gutter)
   :commands git-gutter:revert-hunk git-gutter:stage-hunk git-gutter:previous-hunk git-gutter:next-hunk
   :init
+  (defvar +vc-gutter-in-remote-files nil
+    "If non-nil, enable git-gutter in remote/tramp buffers.")
+
   (defun +vc-gutter-init-maybe-h ()
     "Enable `git-gutter-mode' in the current buffer.
 If the buffer doesn't represent an existing file, `git-gutter-mode's activation

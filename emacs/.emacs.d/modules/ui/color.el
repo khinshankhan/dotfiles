@@ -100,7 +100,6 @@ or if the current buffer is read-only or not file-visiting."
   :hook (prog-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guides-auto-enabled nil
-        highlight-indent-guides-responsive t
         highlight-indent-guides-method 'character
         highlight-indent-guides-responsive 'stack
         highlight-indent-guides-character ?\┊)

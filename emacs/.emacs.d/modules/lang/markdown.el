@@ -1,7 +1,7 @@
 (require 'core-straight)
 (require 'core-module)
 
-(use-package markdown-mode
+(package! markdown-mode
   :init
   (setq markdown-italic-underscore t
         markdown-asymmetric-header t

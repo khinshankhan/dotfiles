@@ -38,7 +38,7 @@
     (interactive)
     (let ((project-dir
            (ignore-errors
-             (ffip-project-root)
+             (projectile-project-root)
              ))
           (file-name (buffer-file-name))
           (neo-smart-open t))

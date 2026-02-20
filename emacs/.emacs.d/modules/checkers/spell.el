@@ -40,7 +40,7 @@
      (setq-local ispell-extra-args (remove "--run-together" ispell-extra-args)))
    (add-hook 'text-mode-hook #'+spell-remove-run-together-switch-for-aspell-h)
 
-   (defun +spell-init-ispell-extra-args-a (orig-fun &rest args)
+   (defadvice! +spell-init-ispell-extra-args-a (orig-fun &rest args)
      :around '(ispell-word flyspell-auto-correct-word)
      (let ((ispell-extra-args (remove "--run-together" ispell-extra-args)))
        (ispell-kill-ispell t)
@@ -60,7 +60,7 @@
     :ensure nil
     :hook (((text-mode
              org-mode
-             markdown
+             markdown-mode
              TeX-mode
              rst-mode
              mu4e-compose
