@@ -1,9 +1,24 @@
 (require 'core-straight)
 
+(defun go-custom/update-tooling ()
+  "Install or update common Go tooling to latest versions."
+  (interactive)
+  (let ((cmd (mapconcat
+              #'identity
+              '("go install golang.org/x/tools/gopls@latest"
+                "go install github.com/go-delve/delve/cmd/dlv@latest"
+                "go install honnef.co/go/tools/cmd/staticcheck@latest"
+                "go install golang.org/x/tools/cmd/goimports@latest"
+                "go install github.com/fatih/gomodifytags@latest"
+                "go install github.com/cweill/gotests/gotests@latest")
+              " && ")))
+    (async-shell-command cmd "*go-tooling-update*")))
+
 (package! go-mode
   :mode "\\.go\\'"
   :bind (:map go-mode-map
-              ("C-c v" . go-custom/mod-vendor))
+              ("C-c v" . go-custom/mod-vendor)
+              ("C-c t u" . go-custom/update-tooling))
   :config
   (defun go-custom/mod-vendor ()
     "Run 'go mod vendor' at repository root."
