@@ -64,6 +64,13 @@
   :commands gorepl-run-load-current-file)
 
 (lsp! go-mode
+  ;; Some gopls versions reject this setting?
+  (setq lsp-go-complete-function-calls nil)
+  ;; lsp-go registers the key unconditionally for booleans, so also drop it
+  ;; from lsp-mode's settings registry after the client is loaded.
+  (with-eval-after-load 'lsp-go
+    (when (boundp 'lsp-client-settings)
+      (remhash "gopls.completeFunctionCalls" lsp-client-settings)))
   (dap!
     (require 'dap-gdb-lldb)
     (require 'dap-go))
