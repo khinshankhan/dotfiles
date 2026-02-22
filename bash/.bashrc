@@ -9,11 +9,18 @@ fi
 [[ -f /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
 [[ -e /etc/bash/bashrc.d/bash_completion.sh ]] && source /etc/bash/bashrc.d/bash_completion.sh
 
-for file in ~/.bash_{prompt,aliases,functions,exports,local}; do
-    if [ -r "$file" ] && [ -f "$file" ]; then
-        source "$file"
-    fi
-done
+source_files_if_readable() {
+    local file
+    for file in "$@"; do
+        [ -f "$file" ] && [ -r "$file" ] && source "$file"
+    done
+}
+
+# Canonical layout: one root file (~/.bashrc), everything else in ~/.bash/.
+bash_source_files=(
+    "${HOME}/.bash/"{exports,aliases,functions,prompt,logout,local}.sh
+)
+source_files_if_readable "${bash_source_files[@]}"
 
 # Enable colors for ls, etc.
 for file in {"${HOME}/.dir_colors","/etc/DIR_COLORS"}; do
