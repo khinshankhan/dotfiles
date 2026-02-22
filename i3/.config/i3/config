@@ -407,7 +407,7 @@ bindsym XF86AudioPrev exec playerctl previous
 #########################
 
 # start a terminal
-bindsym $mod+Return exec tilix
+bindsym $mod+Return exec wezterm
 bindsym $mod+Shift+Return exec terminal || xfce4-terminal # backup terminal
 
 # kill focused window
