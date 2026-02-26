@@ -91,6 +91,22 @@ gomodvendor() {
 }
 # go end
 
+# Quick reference for starship git status symbols
+legend-git-prompt() {
+    cat <<'EOF'
+  ?  untracked files
+  !  modified files
+  +  staged files
+  »  renamed files
+  ✘  deleted files
+  $  stashes exist
+  =  merge conflicts
+  ⇡  ahead of remote
+  ⇣  behind remote
+  ⇕  diverged from remote
+EOF
+}
+
 # ---
 # Interactive only
 # ---
