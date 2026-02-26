@@ -11,16 +11,24 @@ reload_shell() {
     SHELL_INIT_FORCE=1 . "$HOME/.config/shell/init.sh";
 }
 
+# Prepend a directory to PATH only if it exists and is not already present
+path_prepend_if_dir() {
+    [ -n "${1-}" ] || return 0
+    [ -d "$1" ] || return 0
+    case ":$PATH:" in
+        *":$1:"*) ;;
+        *) PATH="$1:$PATH" ;;
+    esac
+}
+
 # ---
 # PATH setup (login + interactive)
 # ---
 
-case ":$PATH:" in
-  *":$HOME/.local/bin:"*) ;;
-  *) PATH="$HOME/.local/bin:$PATH" ;;
-esac
-
+# custom bin
+path_prepend_if_dir "$HOME/.local/bin"
 export PATH
+#custom bin end
 
 # ---
 # Interactive only
