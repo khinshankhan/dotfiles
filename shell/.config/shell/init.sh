@@ -109,10 +109,18 @@ fi
 
 # Bash setup
 if [ -n "${BASH_VERSION-}" ]; then
-    [ -r "$HOME/.config/bash/prompt" ] && . "$HOME/.config/bash/prompt"
+    if command -v starship >/dev/null 2>&1; then
+        eval "$(starship init bash)"
+    else
+        [ -r "$HOME/.config/bash/prompt" ] && . "$HOME/.config/bash/prompt"
+    fi
 fi
 
 # Zsh setup
 if [ -n "${ZSH_VERSION-}" ]; then
-    [ -r "$HOME/.config/zsh/prompt" ] && . "$HOME/.config/zsh/prompt"
+    if command -v starship >/dev/null 2>&1; then
+        eval "$(starship init zsh)"
+    else
+        [ -r "$HOME/.config/zsh/prompt" ] && . "$HOME/.config/zsh/prompt"
+    fi
 fi
