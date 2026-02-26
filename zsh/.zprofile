@@ -1,1 +1,1 @@
-[ -r "$HOME/.config/shell/init.sh" ] && . "$HOME/.config/shell/init.sh"
+# Login-shell setup is handled by init.sh via .zshrc
