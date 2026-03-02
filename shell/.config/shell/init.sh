@@ -1,14 +1,6 @@
-# Idempotency guard (safe if sourced multiple times)
-if [ -n "${SHELL_INIT_DONE-}" ] && [ "${SHELL_INIT_FORCE-0}" != "1" ]; then
-    return
-fi
-SHELL_INIT_DONE=1
-export SHELL_INIT_DONE
-unset SHELL_INIT_FORCE
-
-# If SHELL_INIT_FORCE=1 is set, re-run even if already done
+# Re-source this file from any shell
 reload_shell() {
-    SHELL_INIT_FORCE=1 . "$HOME/.config/shell/init.sh";
+    . "$HOME/.config/shell/init.sh";
 }
 
 # Prepend a directory to PATH only if it exists and is not already present
