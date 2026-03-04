@@ -84,7 +84,7 @@ gomodvendor() {
 # go end
 
 # Quick reference for starship git status symbols
-legend-git-prompt() {
+legend_git_prompt() {
     cat <<'EOF'
   ?  untracked files
   !  modified files
