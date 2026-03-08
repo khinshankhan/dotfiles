@@ -13,6 +13,19 @@ path_prepend_if_dir() {
     esac
 }
 
+# Resolve an external executable path without matching shell aliases/functions.
+command_path() {
+    [ "$#" -eq 1 ] || return 2
+
+    if [ -n "${BASH_VERSION-}" ]; then
+        type -P -- "$1"
+    elif [ -n "${ZSH_VERSION-}" ]; then
+        whence -p -- "$1"
+    else
+        command -v -- "$1" 2>/dev/null
+    fi
+}
+
 # ---
 # PATH setup (login + interactive)
 # ---
@@ -83,6 +96,95 @@ gomodvendor() {
 }
 # go end
 
+# Reclaim ownership of a path recursively:
+# sudo = run as root
+# chown = change owner/group
+# -c = report only changes
+# -R = recurse into directories
+# $USER = current username
+# $(id -gn "$USER") = current user's primary group
+chown_me() {
+    if [ "$#" -ne 1 ]; then
+        echo "usage: chown_me <path>" >&2
+        return 2
+    fi
+
+    if chown --version >/dev/null 2>&1; then
+        sudo chown -cR "$USER:$(id -gn "$USER")" "$1"
+    else
+        sudo chown -R "$USER:$(id -gn "$USER")" "$1"
+    fi
+}
+
+# Copy stdin to the clipboard using the native macOS tool or a Linux fallback.
+pbcopy() {
+    local copy_cmd
+
+    if copy_cmd="$(command_path pbcopy)"; then
+        "$copy_cmd"
+    elif [ -n "${WAYLAND_DISPLAY-}${WAYLAND_SOCKET-}" ] && copy_cmd="$(command_path wl-copy)"; then
+        "$copy_cmd"
+    elif [ -n "${DISPLAY-}" ] && copy_cmd="$(command_path xclip)"; then
+        "$copy_cmd" -selection clipboard
+    elif [ -n "${DISPLAY-}" ] && copy_cmd="$(command_path xsel)"; then
+        "$copy_cmd" --clipboard --input
+    else
+        echo "no clipboard copy command found (tried pbcopy, wl-copy, xclip, xsel)" >&2
+        return 127
+    fi
+}
+
+# Print clipboard contents using the native macOS tool or a Linux fallback.
+pbpaste() {
+    local paste_cmd
+
+    if paste_cmd="$(command_path pbpaste)"; then
+        "$paste_cmd"
+    elif [ -n "${WAYLAND_DISPLAY-}${WAYLAND_SOCKET-}" ] && paste_cmd="$(command_path wl-paste)"; then
+        "$paste_cmd"
+    elif [ -n "${DISPLAY-}" ] && paste_cmd="$(command_path xclip)"; then
+        "$paste_cmd" -selection clipboard -o
+    elif [ -n "${DISPLAY-}" ] && paste_cmd="$(command_path xsel)"; then
+        "$paste_cmd" --clipboard --output
+    else
+        echo "no clipboard paste command found (tried pbpaste, wl-paste, xclip, xsel)" >&2
+        return 127
+    fi
+}
+
+# Compare two images and write a highlighted diff image.
+img_compare() {
+    if ! command -v compare >/dev/null 2>&1; then
+        echo "ImageMagick 'compare' is not installed" >&2
+        return 127
+    fi
+
+    if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+        echo "usage: img_compare <image1> <image2> [output]" >&2
+        return 2
+    fi
+
+    compare \
+        -metric AE \
+        -highlight-color red \
+        "$1" "$2" "${3:-diff.png}"
+}
+
+# Composite source onto destination by copying source pixels directly.
+img_overlay_src() {
+    if ! command -v composite >/dev/null 2>&1; then
+        echo "ImageMagick 'composite' is not installed" >&2
+        return 127
+    fi
+
+    if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+        echo "usage: img_overlay_src <source> <destination> [output]" >&2
+        return 2
+    fi
+
+    composite -compose src "$1" "$2" "${3:-composite.png}"
+}
+
 # Quick reference for starship git status symbols
 legend_git_prompt() {
     cat <<'EOF'
@@ -114,6 +216,17 @@ if command -v nvm >/dev/null 2>&1; then
     nvm use --silent default >/dev/null 2>&1 || \
         nvm use --silent node >/dev/null 2>&1 || true
 fi
+
+if command ls --color=auto -F >/dev/null 2>&1; then
+    alias ls='ls --color=auto -F'
+    alias la='ls --color=auto -A'
+    alias ll='ls --color=auto -alF'
+elif command ls -G -F >/dev/null 2>&1; then
+    alias ls='ls -G -F'
+    alias la='ls -G -A'
+    alias ll='ls -G -alF'
+fi
+alias cls='clear'
 
 # Bash setup
 if [ -n "${BASH_VERSION-}" ]; then
