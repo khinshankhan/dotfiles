@@ -201,6 +201,15 @@ legend_git_prompt() {
 EOF
 }
 
+# direnv – load .envrc for all shells (including non-interactive)
+if command -v direnv >/dev/null 2>&1; then
+    if [ -n "${BASH_VERSION-}" ]; then
+        eval "$(direnv export bash)"
+    elif [ -n "${ZSH_VERSION-}" ]; then
+        eval "$(direnv export zsh)"
+    fi
+fi
+
 # ---
 # Interactive only
 # ---
@@ -245,3 +254,13 @@ if [ -n "${ZSH_VERSION-}" ]; then
         [ -r "$HOME/.config/zsh/prompt" ] && . "$HOME/.config/zsh/prompt"
     fi
 fi
+
+# direnv – auto-reload .envrc on cd
+if command -v direnv >/dev/null 2>&1; then
+    if [ -n "${BASH_VERSION-}" ]; then
+        eval "$(direnv hook bash)"
+    elif [ -n "${ZSH_VERSION-}" ]; then
+        eval "$(direnv hook zsh)"
+    fi
+fi
+# direnv end
