@@ -2,14 +2,11 @@
 	name = "Khinshan Khan"
 	email = "shan@uptogood.dev"
 
-[init]
-	defaultBranch = main
-
 [core]
 	sshCommand = "ssh -o IdentitiesOnly=yes -F /dev/null -i ~/.ssh/khinshankhan"
 	editor = emacsclient -a '' -c
-
 # 	pager = delta
+
 # [interactive]
 # 	diffFilter = delta --color-only
 # [delta]
@@ -17,12 +14,18 @@
 # [merge]
 # 	conflictStyle = zdiff3
 
+[init]
+	defaultBranch = main
+
 [push]
 	default = simple
 
 [pull]
 	rebase = true
 	ff = only
+
+[rebase]
+	autoStash = true
 
 [filter "lfs"]
 	clean = git-lfs clean -- %f
