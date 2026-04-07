@@ -2,10 +2,26 @@
 	name = "Khinshan Khan"
 	email = "shan@uptogood.dev"
 
+[init]
+	defaultBranch = main
+
+[core]
+	sshCommand = "ssh -o IdentitiesOnly=yes -F /dev/null -i ~/.ssh/khinshankhan"
+	editor = emacsclient -a '' -c
+
+# 	pager = delta
+# [interactive]
+# 	diffFilter = delta --color-only
+# [delta]
+# 	navigate = true
+# [merge]
+# 	conflictStyle = zdiff3
+
 [push]
 	default = simple
 
 [pull]
+	rebase = true
 	ff = only
 
 [filter "lfs"]
@@ -13,13 +29,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-
-[init]
-	defaultBranch = main
-
-[core]
-	sshCommand = "ssh -o IdentitiesOnly=yes -F /dev/null -i ~/.ssh/khinshankhan"
-	editor = emacsclient -a '' -c
 
 [include]
     path = "~/.local.gitconfig" # contains some personal information like email and secondary includes
