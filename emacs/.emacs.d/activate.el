@@ -50,6 +50,7 @@
         (web +emmet +vtl +lsp +dap)
         (astro +lsp)
         (python +lsp +dap)
+        (lua +lsp)
         shell
         (yaml +lsp) ; pnpm -g add yaml-language-server
         json
