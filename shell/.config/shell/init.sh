@@ -13,6 +13,14 @@ path_prepend_if_dir() {
     esac
 }
 
+# Source a file only if it is readable.
+source_if_readable() {
+    [ -n "${1-}" ] || return 0
+    [ -r "$1" ] || return 0
+    # shellcheck disable=SC1090
+    . "$1"
+}
+
 # Resolve an external executable path without matching shell aliases/functions.
 command_path() {
     [ "$#" -eq 1 ] || return 2
@@ -34,6 +42,40 @@ command_path() {
 path_prepend_if_dir "$HOME/.local/bin"
 export PATH
 #custom bin end
+
+# editor
+if command -v emacsclient >/dev/null 2>&1; then
+    export EDITOR="emacsclient -a '' -c"
+elif command -v vi >/dev/null 2>&1; then
+    export EDITOR="vi"
+fi
+# editor end
+
+# cask
+path_prepend_if_dir "$HOME/.cask/bin"
+export PATH
+# cask end
+
+# ruby
+export RBENV_ROOT="${RBENV_ROOT:-$HOME/.rbenv}"
+path_prepend_if_dir "$RBENV_ROOT/bin"
+
+if command -v rbenv >/dev/null 2>&1; then
+    eval "$(rbenv init -)"
+fi
+
+export PATH
+# ruby end
+
+# cargo
+path_prepend_if_dir "$HOME/.cargo/bin"
+export PATH
+# cargo end
+
+# nim
+path_prepend_if_dir "$HOME/.nimble/bin"
+export PATH
+# nim end
 
 # pnpm
 if [ -z "${PNPM_HOME-}" ]; then
@@ -95,6 +137,21 @@ gomodvendor() {
     go mod verify && go mod tidy && go mod vendor
 }
 # go end
+
+# luarocks
+path_prepend_if_dir "$HOME/.luarocks/bin"
+export PATH
+# luarocks end
+
+# coursier
+path_prepend_if_dir "$HOME/.local/share/coursier/bin"
+export PATH
+# coursier end
+
+# nix
+source_if_readable "$HOME/.nix-profile/etc/profile.d/nix.sh"
+export PATH
+# nix end
 
 # Reclaim ownership of a path recursively:
 # sudo = run as root
