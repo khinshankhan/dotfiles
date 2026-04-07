@@ -1,0 +1,3 @@
+# Bash prompt.
+# \u = username, \h = hostname, \W = current directory basename.
+PS1='[\u@\h \W] \$ '
