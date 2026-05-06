@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+_t_dir="$(dirname "${BASH_SOURCE[0]}")"
+
+t() {
+    if [ "$#" -lt 1 ] || [[ "$1" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: t <command> [args...]" >&2
+        echo "" >&2
+        echo "commands:" >&2
+        echo "  a    <session>                Attach to (or create) a session" >&2
+        echo "  rn                            Renumber windows sequentially" >&2
+        echo "  ss   <session-a> <session-b>  Swap all windows between sessions" >&2
+        echo "  sw   <src> <dst>              Swap two windows by index" >&2
+        echo "  mv   <src:win> [dst]          Move window to another session" >&2
+        echo "  cap  <target> [output_file]   Capture pane contents" >&2
+        return 2
+    fi
+
+    local cmd="$1"; shift
+    local script="$_t_dir/t$cmd"
+
+    if [ ! -f "$script" ]; then
+        echo "t: unknown command '$cmd'" >&2
+        echo "run 't help' for usage" >&2
+        return 1
+    fi
+
+    source "$script"
+    "t$cmd" "$@"
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && t "$@"

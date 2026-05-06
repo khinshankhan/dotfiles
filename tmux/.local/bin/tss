@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tss() {
+    if [ "$#" -ne 2 ] || [[ "$1" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: tss <session-a> <session-b>" >&2
+        echo "  Swap all windows between two sessions." >&2
+        return 2
+    fi
+    local a="$1" b="$2"
+
+    tmux has-session -t "=$a" 2>/dev/null || { echo "tss: no such session: $a" >&2; return 1; }
+    tmux has-session -t "=$b" 2>/dev/null || { echo "tss: no such session: $b" >&2; return 1; }
+    [ "$a" = "$b" ] && return 0
+
+    local _tag="_ts$$"
+
+    tmux new-window -d -t "=$a" -n "$_tag"
+    tmux new-window -d -t "=$b" -n "$_tag"
+    tmux new-session -d -s "$_tag" -n "$_tag"
+
+    local idx
+    for idx in $(tmux list-windows -t "=$a" -F '#{window_index} #{window_name}' | awk -v t="$_tag" '$2!=t{print $1}'); do
+        tmux move-window -s "=$a:$idx" -t "=$_tag"
+    done
+    for idx in $(tmux list-windows -t "=$b" -F '#{window_index} #{window_name}' | awk -v t="$_tag" '$2!=t{print $1}'); do
+        tmux move-window -s "=$b:$idx" -t "=$a"
+    done
+    for idx in $(tmux list-windows -t "=$_tag" -F '#{window_index} #{window_name}' | awk -v t="$_tag" '$2!=t{print $1}'); do
+        tmux move-window -s "=$_tag:$idx" -t "=$b"
+    done
+
+    tmux kill-window -t "=$a:$_tag" 2>/dev/null
+    tmux kill-window -t "=$b:$_tag" 2>/dev/null
+    tmux kill-session -t "=$_tag" 2>/dev/null
+
+    tmux rename-session -t "=$a" "$_tag"
+    tmux rename-session -t "=$b" "$a"
+    tmux rename-session -t "=$_tag" "$b"
+
+    tmux move-window -r -t "=$a" 2>/dev/null
+    tmux move-window -r -t "=$b" 2>/dev/null
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && tss "$@"

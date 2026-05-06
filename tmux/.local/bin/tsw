@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tsw() {
+    if [ "$#" -ne 2 ] || [[ "$1" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: tsw <src_window> <dst_window>" >&2
+        echo "  e.g. tsw 3 0" >&2
+        echo "  Swap two windows by index in the current session." >&2
+        return 2
+    fi
+    tmux swap-window -s "$1" -t "$2"
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && tsw "$@"

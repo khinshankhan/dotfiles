@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+trn() {
+    if [[ "${1:-}" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: trn" >&2
+        echo "  Renumber windows sequentially in the current session." >&2
+        return 2
+    fi
+    tmux move-window -r
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && trn "$@"

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ta() {
+    if [ "$#" -ne 1 ] || [[ "$1" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: ta <session-name>" >&2
+        echo "  Attach to (or create) a named tmux session." >&2
+        return 2
+    fi
+    tmux new-session -A -s "$1"
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && ta "$@"

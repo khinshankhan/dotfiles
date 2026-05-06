@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmv() {
+    if [ "$#" -lt 1 ] || [ "$#" -gt 2 ] || [[ "$1" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: tmv <src_session:window> [dst_session]" >&2
+        echo "  e.g. tmv work:3 personal" >&2
+        echo "  Omit dst_session to use the current tmux session." >&2
+        return 2
+    fi
+    local dst="${2:-$(tmux display-message -p '#S' 2>/dev/null)}"
+    if [ -z "$dst" ]; then
+        echo "tmv: not in a tmux session and no dst_session given" >&2
+        return 1
+    fi
+    tmux move-window -s "$1" -t "$dst"
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && tmv "$@"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tcap() {
+    if [ "$#" -lt 1 ] || [[ "$1" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: tcap <session:window.pane> [output_file]" >&2
+        echo "  Capture pane contents. Prints to stdout or writes to output_file." >&2
+        return 1
+    fi
+    local target="$1"
+    local output="${2:-}"
+
+    if [ -n "$output" ]; then
+        tmux capture-pane -t "$target" -S - -E - -p > "$output"
+    else
+        tmux capture-pane -t "$target" -S - -E - -p
+    fi
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && tcap "$@"
