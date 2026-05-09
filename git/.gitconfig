@@ -33,5 +33,13 @@
 	process = git-lfs filter-process
 	required = true
 
+[alias]
+	# fetch, or fetch a branch locally without checkout
+	f = "!f() { if [ -z \"$1\" ]; then git fetch; else git fetch origin $1:$1; fi; }; f"
+	# patch create
+	pc = diff HEAD --
+	# patch apply
+	pa = apply
+
 [include]
     path = "~/.local.gitconfig" # contains some personal information like email and secondary includes

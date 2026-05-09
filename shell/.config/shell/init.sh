@@ -294,6 +294,14 @@ elif command ls -G -F >/dev/null 2>&1; then
 fi
 alias cls='clear'
 
+alias g='git'
+
+alias c='claude'
+alias cc='claude --dangerously-skip-permissions'
+alias x='codex'
+alias xx='codex --approval-mode full-auto'
+alias o='opencode'
+
 # Bash setup
 if [ -n "${BASH_VERSION-}" ]; then
     if command -v starship >/dev/null 2>&1; then
