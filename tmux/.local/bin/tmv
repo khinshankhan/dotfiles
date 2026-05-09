@@ -16,4 +16,4 @@ tmv() {
     tmux move-window -s "$1" -t "$dst"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && tmv "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tmv "$@"; fi

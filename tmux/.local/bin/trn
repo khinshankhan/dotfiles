@@ -10,4 +10,4 @@ trn() {
     tmux move-window -r
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && trn "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then trn "$@"; fi

@@ -10,4 +10,4 @@ ta() {
     tmux new-session -A -s "$1"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && ta "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then ta "$@"; fi

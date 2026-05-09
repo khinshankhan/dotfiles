@@ -17,4 +17,4 @@ tcap() {
     fi
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && tcap "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tcap "$@"; fi

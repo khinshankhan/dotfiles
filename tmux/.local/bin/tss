@@ -42,4 +42,4 @@ tss() {
     tmux move-window -r -t "=$b" 2>/dev/null
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && tss "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tss "$@"; fi

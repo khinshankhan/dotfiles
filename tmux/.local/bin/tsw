@@ -11,4 +11,4 @@ tsw() {
     tmux swap-window -s "$1" -t "$2"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && tsw "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tsw "$@"; fi
