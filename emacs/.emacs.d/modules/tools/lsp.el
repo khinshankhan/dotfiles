@@ -45,7 +45,15 @@
         lsp-print-io nil
         ;; lsp-modeline-diagnostics-enable nil
         ;; I think they actually got rid of this because no one uses flymake...
-        lsp-prefer-flymake nil))
+        lsp-prefer-flymake nil)
+
+  ;; HACK: lsp-mode sends "inlineCompletion": {} unconditionally,
+  ;; which tsgo's strict parser rejects
+  (advice-add 'lsp--client-capabilities :filter-return
+              (lambda (caps)
+                (when-let* ((text-doc (alist-get 'textDocument caps)))
+                  (setf (alist-get 'inlineCompletion text-doc nil 'remove) nil))
+                caps)))
 
 ;; https://emacs.stackexchange.com/a/68951
 (add-hook 'lsp-after-apply-edits-hook

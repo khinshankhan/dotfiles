@@ -11,6 +11,7 @@
         :tools
         auto-ide
         (lsp +dap +ui)
+        (format +apheleia)
         (vc +git +gutter)
         ;; (copilot +complete +chat)
 

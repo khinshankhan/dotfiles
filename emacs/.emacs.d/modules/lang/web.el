@@ -15,15 +15,18 @@
     ((html-mode
       css-mode
       web-mode
-      markdown-mode
-      js-mode
-      js2-mode
-      json-mode
-      rjsx-mode
-      typescript-mode
-      solidity-mode
-      php-mode
       sgml-mode) . emmet-mode)))
+
+;; Node tooling
+(with-module! :lang js
+  (dolist (hook '(html-mode-hook css-mode-hook web-mode-hook))
+    (add-hook hook #'+js-add-node-modules-to-exec-path))
+
+  (with-module-feature! :tools format +apheleia
+    (dolist (hook '(html-mode-hook css-mode-hook web-mode-hook))
+      (add-hook hook #'+js-maybe-use-biome)
+      (add-hook hook #'+format-enable-apheleia)
+      (add-hook hook #'+format-disable-lsp-on-save))))
 
 ;; TODO: I have to seriously go through http://web-mode.org/ some day
 (package! web-mode
