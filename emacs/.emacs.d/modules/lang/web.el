@@ -57,8 +57,7 @@
   (setq-default web-mode-enable-current-element-highlight t)
   ;; NOTE: built in color for most themes dont work well with my eyes
   ;; LightCoral fits nicely with doom-dracula
-  (eval-after-load "web-mode"
-    '(set-face-background 'web-mode-current-element-highlight-face "LightCoral"))
+  (set-face-background 'web-mode-current-element-highlight-face "LightCoral")
 
   ;; Use // instead of /* as the default comment delimited in JS
   (setf (alist-get "javascript" web-mode-comment-formats nil nil #'equal)

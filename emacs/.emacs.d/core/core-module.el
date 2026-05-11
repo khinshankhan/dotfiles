@@ -1,8 +1,23 @@
 ;;; core-module.el --- define interaction for modules dir -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; Heavily inspired by Lgneous/ Doom.
+;;
 ;; Module state is stored on category symbol plists for O(1) lookup:
 ;;   (get :lang 'js) => '(+ts +jsx +tsx +vue +lsp +dap) or nil
+;;   (get :lang 'markdown) => t (module active, no features)
+;;   (get :lang 'svelte) => nil (module not active)
+;;
+;; Loading is two-pass:
+;;   1. Parse the full module list and register all plists
+;;   2. Load module files in declaration order
+;; This ensures modules can reference each other regardless of
+;; declaration order. Without this, js.el's (with-module! :lang web ...)
+;; would silently fail because web.el hasn't loaded yet to register
+;; its plist -- breaking typescript-tsx-mode which derives from web-mode.
+;;
+;; During loading, `modulation--current-category', `modulation--current-module',
+;; and `modulation--current-features' are set so macros like `feature-p!' and
+;; `with-feature!' resolve against the module being loaded.
 ;;; Code:
 
 (require 'core-paths)
@@ -108,8 +123,11 @@ Will also execute any BODY code if lsp is active."
 
 (defun core-module/load (modules)
   "Parse `MODULES' list and load each module.
-Stores module state on category symbol plists for O(1) lookup."
-  (let ((category nil))
+Stores module state on category symbol plists for O(1) lookup.
+All plists are populated first so modules can reference each other."
+  (let ((category nil)
+        (to-load '()))
+    ;; first pass: register all modules on plists
     (dolist (entry modules)
       (cond
        ((keywordp entry)
@@ -117,14 +135,20 @@ Stores module state on category symbol plists for O(1) lookup."
        (t
         (let* ((entry (if (listp entry) entry (list entry)))
                (module (car entry))
-               (features (cdr entry))
-               (cat-str (substring (symbol-name category) 1))
-               (mod-str (symbol-name module)))
+               (features (cdr entry)))
           (put category module (or features t))
-          (setq modulation--current-category category
-                modulation--current-module module
-                modulation--current-features features)
-          (core-module/load-module cat-str mod-str)))))))
+          (push (list category module features) to-load)))))
+    ;; second pass: load module files in order
+    (dolist (item (nreverse to-load))
+      (let ((category (nth 0 item))
+            (module (nth 1 item))
+            (features (nth 2 item)))
+        (setq modulation--current-category category
+              modulation--current-module module
+              modulation--current-features features)
+        (core-module/load-module
+         (substring (symbol-name category) 1)
+         (symbol-name module))))))
 
 (defun core-module/load-config ()
   "Load modules based on `activate.el' in `user-emacs-directory'."

@@ -103,7 +103,12 @@
 (with-feature! +tsx
   (with-module! :lang web
     (define-derived-mode typescript-tsx-mode web-mode "TypeScript-tsx")
-    (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-tsx-mode))
+    ;; typescript-mode registers .tsx? which also matches .tsx
+    ;; ensure our entry comes first by adding after typescript-mode loads
+    (if (featurep 'typescript-mode)
+        (push '("\\.tsx\\'" . typescript-tsx-mode) auto-mode-alist)
+      (with-eval-after-load 'typescript-mode
+        (push '("\\.tsx\\'" . typescript-tsx-mode) auto-mode-alist)))
     (lsp! typescript-tsx-mode
       (auto-ide/add! 'typescript-tsx-mode #'hydra-lsp/body))
     (with-module-feature! :lang web +emmet
