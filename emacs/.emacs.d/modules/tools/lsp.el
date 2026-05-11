@@ -61,6 +61,12 @@
             (when (eq operation 'rename)
               (save-buffer))))
 
+;; HACK: treemacs defines its fringe face via (face-background 'cursor) which
+;; is nil during init. Pre-define with a safe default to suppress the warning.
+(defface treemacs-fringe-indicator-face
+  '((t :foreground "#f8f8f2"))
+  "Face for the fringe indicator.")
+
 ;;; Great for debugging... once you learn how to use a debugger...
 (package! dap-mode
   :if (feature-p! +dap)
