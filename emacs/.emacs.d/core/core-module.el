@@ -1,6 +1,8 @@
 ;;; core-module.el --- define interaction for modules dir -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; Heavily inspired by Lgneous/ Doom.
+;; Module state is stored on category symbol plists for O(1) lookup:
+;;   (get :lang 'js) => '(+ts +jsx +tsx +vue +lsp +dap) or nil
 ;;; Code:
 
 (require 'core-paths)
@@ -8,84 +10,46 @@
 (require 'dash)
 (require 'f)
 
-(defun core-module/add-category-to-elements (lst)
-  "Add a category to each element in `LST'."
-  (--map (list (car lst) (shan/ensure-list it)) (cdr lst)))
+;;; Lookups -- O(1) via symbol plists
 
-(defun core-module/categorize-modules (lst)
-  "Categorize modules in `LST' based on category headers."
-  (->>
-   lst
-   (-partition-before-pred #'keywordp)
-   (-map #'core-module/add-category-to-elements)
-   (apply 'append)))
+(defun core-module/module-p (category module)
+  "Check if `MODULE' is active under `CATEGORY'."
+  (not (null (get category module))))
 
-(defun core-module/get-modules-in-category (categories category)
-  "Get modules in a specific `CATEGORY' from `CATEGORIES' list."
-  (->>
-   categories
-   (--filter (eq (car it) category))))
+(defun core-module/feature-p (category module feature)
+  "Check if `FEATURE' is active for `MODULE' under `CATEGORY'."
+  (let ((features (get category module)))
+    (and (listp features) (memq feature features))))
 
-(defun core-module/get-features-in-module-in-category (categories category module)
-  "Get features of a specific `MODULE' within a `CATEGORY' from `CATEGORIES' list."
-  (->>
-   (core-module/get-modules-in-category categories category)
-   (--filter (eq (caadr it) module))
-   cdadar))
+;;; Current module context -- set during loading
 
-(defun core-module/category-p (categories category)
-  "Check if a `CATEGORY' exists in the `CATEGORIES' list.
+(defvar modulation--current-category nil)
+(defvar modulation--current-module nil)
+(defvar modulation--current-features nil)
 
-It returns t if the category is found, and nil otherwise."
-  (->>
-   categories
-   (--some (eq (car it) category))))
-
-(defun core-module/module-p (categories category module)
-  "Check if a `MODULE' exists within a `CATEGORY' in the `CATEGORIES' list.
-
-It returns t if the module is found in the category, and nil otherwise."
-  (->>
-   (core-module/get-modules-in-category categories category)
-   (--some (eq (caadr it) module))))
-
-(defun core-module/feature-p (categories category module feature)
-  "Check if a `FEATURE' exists within a `MODULE' of a `CATEGORY' in the `CATEGORIES' list.
-
-It returns t if the feature is found in the module of the category,
-and nil otherwise."
-  (->>
-   (core-module/get-features-in-module-in-category categories category module)
-   (--some (eq it feature))))
-
-;; Usable during and in config loading
-;;; variables to make looking up current module info easy and not depend on filename or anything weird
-(defvar modulation--categories)
-(defvar modulation--current-category)
-(defvar modulation--current-module)
-(defvar modulation--current-features)
+;;; Macros -- same interface as before
 
 (defmacro module-p! (category module)
-  "Return nil if the `MODULE' is not activated in the right `CATEGORY', t otherwise."
+  "Return non-nil if `MODULE' is activated in `CATEGORY'."
   (declare (indent defun))
-  `(core-module/module-p modulation--categories ',category ',module))
+  `(core-module/module-p ',category ',module))
 
 (defmacro with-module! (category module &rest body)
-  "Execute BODY if `MODULE' is activated in `CATEGORY'."
+  "Execute `BODY' if `MODULE' is activated in `CATEGORY'."
   (declare (indent defun))
   `(when (module-p! ,category ,module)
      ,@body))
 
 (defmacro without-module! (category module &rest body)
-  "Execute BODY if `MODULE' is activated in `CATEGORY'."
+  "Execute `BODY' if `MODULE' is not activated in `CATEGORY'."
   (declare (indent defun))
   `(unless (module-p! ,category ,module)
      ,@body))
 
 (defmacro feature-p! (feature)
-  "Return nil if the `FEATURE' is not toggled in the current category and module, t otherwise."
+  "Return non-nil if `FEATURE' is toggled for the current module."
   (declare (indent defun))
-  `(core-module/feature-p modulation--categories modulation--current-category modulation--current-module ',feature))
+  `(core-module/feature-p modulation--current-category modulation--current-module ',feature))
 
 (defmacro with-feature! (feature &rest body)
   "Execute `BODY' if `FEATURE' is toggled."
@@ -94,25 +58,19 @@ and nil otherwise."
      ,@body))
 
 (defmacro without-feature! (feature &rest body)
-  "Execute `BODY' if `FEATURE' is toggled."
+  "Execute `BODY' if `FEATURE' is not toggled."
   (declare (indent defun))
   `(unless (feature-p! ,feature)
      ,@body))
 
-(defun feature-substring! (str)
-  "Return all toggled features that are substrings of `'STR'."
-  (->> modulation--categories
-       -flatten
-       (-map #'symbol-name)
-       (--filter (s-contains? str it))))
-
 (defmacro with-module-feature! (category module feature &rest body)
-  "Execute BODY if FEATURE is toggled under MODULE under CATEGORY."
+  "Execute `BODY' if `FEATURE' is toggled under `MODULE' under `CATEGORY'."
   (declare (indent defun))
-  `(when (core-module/feature-p modulation--categories ,category ',module ',feature)
+  `(when (core-module/feature-p ,category ',module ',feature)
      ,@body))
 
-;; lsp go brr
+;;; Convenience macros for common patterns
+
 (defmacro lsp! (mode &rest body)
   "Add lsp to MODE if lsp feature is active for module and in general.
 Will also execute any BODY code if lsp is active."
@@ -135,9 +93,10 @@ Will also execute any BODY code if lsp is active."
   `(with-module! :tools auto-ide
      (auto-ide/add ,mode ,hydra)))
 
-;; Load the config
+;;; Loading
+
 (defun core-module/load-module (category module)
-  "Load `CATEGORY'/`MODULE'/config.el in `shan-modules-dir'."
+  "Load `CATEGORY'/`MODULE' config file from `shan-modules-dir'."
   (interactive)
   (let* ((module-name (if module
                           (f-join shan-modules-dir category module)
@@ -148,22 +107,24 @@ Will also execute any BODY code if lsp is active."
     (load module-path nil 'nomessage)))
 
 (defun core-module/load (modules)
-  "Load the `MODULES'."
-  (setq modulation--categories (core-module/categorize-modules modules))
-  (dolist (lst modulation--categories)
-    (pcase-let ((`(,category (,module . ,features)) lst))
-      (setq modulation--current-category category
-            modulation--current-module module
-            modulation--current-features features)
-
-      (core-module/load-module
-       (-> ; :category -> "category"
-        modulation--current-category
-        symbol-name
-        (substring 1))
-       (-> ; module -> "module"
-        modulation--current-module
-        symbol-name)))))
+  "Parse `MODULES' list and load each module.
+Stores module state on category symbol plists for O(1) lookup."
+  (let ((category nil))
+    (dolist (entry modules)
+      (cond
+       ((keywordp entry)
+        (setq category entry))
+       (t
+        (let* ((entry (if (listp entry) entry (list entry)))
+               (module (car entry))
+               (features (cdr entry))
+               (cat-str (substring (symbol-name category) 1))
+               (mod-str (symbol-name module)))
+          (put category module (or features t))
+          (setq modulation--current-category category
+                modulation--current-module module
+                modulation--current-features features)
+          (core-module/load-module cat-str mod-str)))))))
 
 (defun core-module/load-config ()
   "Load modules based on `activate.el' in `user-emacs-directory'."
