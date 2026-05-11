@@ -66,11 +66,12 @@
 
   ;; NOTE: although we're using rjsx for jsx files, tsx derives from web mode
   ;; and has a web mode content type of `jsx'
-  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+  (defadvice! +web-tweak-jsx-highlight-a (orig-fn &rest args)
+    :around #'web-mode-highlight-part
     (if (equal web-mode-content-type "jsx")
         (let ((web-mode-enable-part-face nil))
-          ad-do-it)
-      ad-do-it))
+          (apply orig-fn args))
+      (apply orig-fn args)))
 
   (setq css-indent-offset 2)
 
