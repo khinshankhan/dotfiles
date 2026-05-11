@@ -39,21 +39,22 @@
     (let ((projectile-project-search-path '(("~/development" . 2))))
       (projectile-discover-projects-in-search-path)))
 
-  (transient-define-prefix shan/projectile-dispatch ()
-    "Projectile commands."
-    [["Find"
-      ("f" "File" projectile-find-file)
-      ("d" "Dir" projectile-find-dir)
-      ("b" "Buffer" projectile-switch-to-buffer)
-      ("r" "Recent" projectile-recentf)]
-     ["Search"
-      ("s" "Grep" projectile-grep)
-      ("S" "Replace" projectile-replace)]
-     ["Project"
-      ("p" "Switch" projectile-switch-project)
-      ("R" "Refresh" shan/projectile-refresh)
-      ("k" "Kill buffers" projectile-kill-buffers)
-      ("i" "Invalidate cache" projectile-invalidate-cache)]]))
+  (with-eval-after-load 'transient
+    (transient-define-prefix shan/projectile-dispatch ()
+      "Projectile commands."
+      [["Find"
+        ("f" "File" projectile-find-file)
+        ("d" "Dir" projectile-find-dir)
+        ("b" "Buffer" projectile-switch-to-buffer)
+        ("r" "Recent" projectile-recentf)]
+       ["Search"
+        ("s" "Grep" projectile-grep)
+        ("S" "Replace" projectile-replace)]
+       ["Project"
+        ("p" "Switch" projectile-switch-project)
+        ("R" "Refresh" shan/projectile-refresh)
+        ("k" "Kill buffers" projectile-kill-buffers)
+        ("i" "Invalidate cache" projectile-invalidate-cache)]])))
 
 (package! editorconfig
   :hook
