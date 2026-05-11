@@ -76,11 +76,7 @@
   (package! flyspell-correct
     :commands flyspell-correct-previous
     :bind
-    ([remap ispell-word] . flyspell-correct-at-point)
-    :config
-    (if (module-p! :completion ivy)
-        (package! flyspell-correct-ivy)
-      (package! flyspell-correct-popup)))
+    ([remap ispell-word] . flyspell-correct-at-point))
 
   (package! flyspell-lazy
     :config

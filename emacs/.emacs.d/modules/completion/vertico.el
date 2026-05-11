@@ -43,4 +43,7 @@
   :init
   (marginalia-mode))
 
-(setq enable-recursive-minibuffers t)
+(setq enable-recursive-minibuffers t
+      completion-ignore-case t
+      read-file-name-completion-ignore-case t
+      read-buffer-completion-ignore-case t)

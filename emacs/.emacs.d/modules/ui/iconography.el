@@ -16,4 +16,7 @@
    0.1
    (when (not (member "Symbols Nerd Font Mono" (font-family-list)))
      (nerd-icons-install-fonts t)
-     (revert-buffer))))
+     ;; revert all buffers so icons render with the newly installed font
+     (dolist (buf (buffer-list))
+       (with-current-buffer buf
+         (revert-buffer t t t))))))

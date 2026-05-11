@@ -22,7 +22,6 @@
         company-auto-complete-chars nil
         company-dabbrev-ignore-case nil
         company-dabbrev-downcase nil
-        ;; TODO: figure out backends nonsense someday
         company-backends '(company-capf))
   (global-company-mode))
 

@@ -30,7 +30,14 @@
         ;;                                  'ivy
         ;;                                'auto)
         projectile-require-project-root t)
-  (projectile-mode t))
+  (projectile-mode t)
+
+  (defun shan/projectile-refresh ()
+    "Remove stale projects and discover new ones under ~/development."
+    (interactive)
+    (projectile-cleanup-known-projects)
+    (let ((projectile-project-search-path '(("~/development" . 2))))
+      (projectile-discover-projects-in-search-path))))
 
 (package! editorconfig
   :hook

@@ -27,7 +27,7 @@
 (when (>= emacs-major-version 26)
   (setq-default confirm-kill-processes nil))
 
-;;; Who types a whole `yes' intead of `y' nowadays..?
+;;; Who types a whole `yes' instead of `y' nowadays..?
 ;;; TODO: look into other options which still require full words to be typed
 (setq use-short-answers t)
 (setq-default confirm-kill-emacs nil)

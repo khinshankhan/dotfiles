@@ -42,7 +42,7 @@ or if the current buffer is read-only or not file-visiting."
                 (bound-and-true-p global-whitespace-mode)
                 (null buffer-file-name))
       (require 'whitespace)
-      (set (make-local-variable 'whitespace-style)
+      (setq-local whitespace-style
            (cl-union (if indent-tabs-mode
                          '(indentation)
                        '(tabs tab-mark))

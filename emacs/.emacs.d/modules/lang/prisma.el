@@ -4,7 +4,7 @@
 ;; The pimeys/emacs-prisma-mode package tries to parse files as JavaScript,
 ;; which fails on valid Prisma syntax like `extensions = [pgstattuple(schema: "public")]`.
 
-;; TODO: migrate logic into a package such that we can just install using straight and other can beenfit too
+;; TODO: migrate logic into a package such that we can just install using straight and others can benefit too
 
 (require 'core-module)
 
