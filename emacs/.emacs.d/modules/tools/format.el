@@ -3,10 +3,6 @@
 
 ;;; Apheleia
 (with-feature! +apheleia
-  (defun +format-prettier-command ()
-    "Return \"prettier\" if found locally in exec-path, otherwise \"apheleia-npx\"."
-    (if (executable-find "prettier") "prettier" "apheleia-npx"))
-
   (package! apheleia
     :config
     (dolist (key '(prettier prettier-css prettier-html prettier-javascript
@@ -17,12 +13,24 @@
               (cl-remove-if (lambda (x)
                               (and (listp x) (eq (car x) 'apheleia-formatters-js-indent)))
                             (if (equal (car cmd) "apheleia-npx")
-                                (cons '(+format-prettier-command) (cdr cmd))
+                                (cons "prettier" (cddr cmd))
                               cmd))))))
 
   (defun +format-enable-apheleia ()
     "Enable apheleia-mode (idempotent, safe for derived mode hooks)."
-    (apheleia-mode 1)))
+    (apheleia-mode 1))
+
+  ;; prettierd formatters — available for per-project .dir-locals.el overrides
+  (with-eval-after-load 'apheleia
+    (dolist (entry '((prettierd-css        . ("prettierd" "--stdin-filepath" filepath "--parser=css"))
+                     (prettierd-html       . ("prettierd" "--stdin-filepath" filepath "--parser=html"))
+                     (prettierd-javascript . ("prettierd" "--stdin-filepath" filepath "--parser=babel-flow"))
+                     (prettierd-json       . ("prettierd" "--stdin-filepath" filepath "--parser=json"))
+                     (prettierd-scss       . ("prettierd" "--stdin-filepath" filepath "--parser=scss"))
+                     (prettierd-svelte     . ("prettierd" "--stdin-filepath" filepath "--parser=svelte"))
+                     (prettierd-typescript . ("prettierd" "--stdin-filepath" filepath "--parser=typescript"))
+                     (prettierd-yaml       . ("prettierd" "--stdin-filepath" filepath "--parser=yaml"))))
+      (setf (alist-get (car entry) apheleia-formatters) (cdr entry)))))
 
 (defun +format-disable-lsp-on-save ()
   "Buffer-locally disable LSP format-on-save where apheleia handles formatting."

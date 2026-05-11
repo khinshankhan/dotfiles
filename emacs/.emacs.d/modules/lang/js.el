@@ -89,24 +89,12 @@
 
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
   (add-to-list 'auto-mode-alist '("components/.+\\.js$" . rjsx-mode))
-  (lsp! rjsx-mode)
-  (add-hook 'rjsx-mode-hook #'+js-lsp-organize-imports-on-save))
-
-(defun +js-lsp-organize-imports ()
-  "Organize imports via LSP, silently skipping if unsupported."
-  (when (and (bound-and-true-p lsp-mode)
-             (lsp-feature? "textDocument/codeAction"))
-    (lsp-organize-imports)))
-
-(defun +js-lsp-organize-imports-on-save ()
-  "Buffer-locally add import organization to before-save-hook."
-  (add-hook 'before-save-hook #'+js-lsp-organize-imports nil t))
+  (lsp! rjsx-mode))
 
 ;; core ts (ts)
 (package! typescript-mode
   :if (feature-p! +ts)
-  :hook ((typescript-mode . rainbow-delimiters-mode)
-         (typescript-mode . +js-lsp-organize-imports-on-save))
+  :hook ((typescript-mode . rainbow-delimiters-mode))
   :config
   (lsp! typescript-mode
     (auto-ide/add! 'typescript-mode #'hydra-lsp/body)))
@@ -118,8 +106,6 @@
     (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-tsx-mode))
     (lsp! typescript-tsx-mode
       (auto-ide/add! 'typescript-tsx-mode #'hydra-lsp/body))
-    (add-hook 'typescript-tsx-mode-hook #'+js-lsp-organize-imports-on-save)
-
     (with-module-feature! :lang web +emmet
       (add-hook 'typescript-tsx-mode-hook #'emmet-mode))
 

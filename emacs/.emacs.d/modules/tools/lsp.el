@@ -47,13 +47,18 @@
         ;; I think they actually got rid of this because no one uses flymake...
         lsp-prefer-flymake nil)
 
-  ;; HACK: lsp-mode sends "inlineCompletion": {} unconditionally,
-  ;; which tsgo's strict parser rejects
+  ;; HACK: tsgo's strict JSON parser rejects null values that
+  ;; lsp-mode sends. Strip inlineCompletion from capabilities
+  ;; and ensure initializationOptions is never null.
   (advice-add 'lsp--client-capabilities :filter-return
               (lambda (caps)
                 (when-let* ((text-doc (alist-get 'textDocument caps)))
                   (setf (alist-get 'inlineCompletion text-doc nil 'remove) nil))
-                caps)))
+                caps))
+
+  (advice-add 'lsp--create-initialization-options :filter-return
+              (lambda (opts)
+                (or opts (ht)))))
 
 ;; https://emacs.stackexchange.com/a/68951
 (add-hook 'lsp-after-apply-edits-hook
