@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+t0() {
+    trn "$@"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then t0 "$@"; fi

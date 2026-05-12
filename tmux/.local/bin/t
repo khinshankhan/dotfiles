@@ -9,7 +9,7 @@ t() {
         echo "" >&2
         echo "commands:" >&2
         echo "  a    <session>                Attach to (or create) a session" >&2
-        echo "  rn                            Renumber windows sequentially" >&2
+        echo "  rn | 0                        Renumber windows sequentially" >&2
         echo "  ss   <session-a> <session-b>  Swap all windows between sessions" >&2
         echo "  sw   <src> <dst>              Swap two windows by index" >&2
         echo "  mv   <src:win> [dst]          Move window to another session" >&2
