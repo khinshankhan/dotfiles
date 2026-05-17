@@ -42,7 +42,8 @@
    ;; ("\\.jsx\\'"         . web-mode)
    ;; ("\\.tsx\\'"         . web-mode)
    ("\\.mustache\\'"    . web-mode)
-   ("\\.djhtml\\'"      . web-mode))
+   ("\\.djhtml\\'"      . web-mode)
+   ("\\.scss\\'"        . web-mode))
   :config
   (setq web-mode-enable-html-entities-fontification t
         web-mode-auto-close-style 1

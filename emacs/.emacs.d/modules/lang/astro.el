@@ -1,3 +1,4 @@
+;; LSP: pnpm -g add @astrojs/language-server
 (require 'core-module)
 
 (with-module! :lang web

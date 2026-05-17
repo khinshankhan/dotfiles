@@ -1,3 +1,4 @@
+;; LSP: lsp-install-server jdtls
 (require 'core-straight)
 
 (package! lsp-java

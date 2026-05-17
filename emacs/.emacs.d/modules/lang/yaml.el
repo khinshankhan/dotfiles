@@ -1,3 +1,4 @@
+;; LSP: pnpm -g add yaml-language-server
 (require 'core-straight)
 
 (package! yaml-mode

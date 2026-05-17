@@ -1,3 +1,4 @@
+;; LSP: rustup component add rust-analyzer
 (require 'core-straight)
 
 (package! rustic

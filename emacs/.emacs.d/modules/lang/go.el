@@ -1,3 +1,4 @@
+;; LSP: go install golang.org/x/tools/gopls@latest
 (require 'core-straight)
 
 (defun go-custom/update-tooling ()
@@ -15,7 +16,11 @@
     (async-shell-command cmd "*go-tooling-update*")))
 
 (package! go-mode
-  :mode "\\.go\\'"
+  :mode
+  (("\\.go\\'"    . go-mode)
+   ("go\\.mod\\'" . go-mode)
+   ("go\\.sum\\'"  . go-mode)
+   ("\\.gotmpl\\'" . go-mode))
   :bind (:map go-mode-map
               ("C-c v" . go-custom/mod-vendor)
               ("C-c t u" . go-custom/update-tooling))

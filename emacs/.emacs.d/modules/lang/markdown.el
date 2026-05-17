@@ -17,7 +17,8 @@
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode)
-         ("\\.mdx\\'" . markdown-mode))
+         ("\\.mdx\\'" . markdown-mode)
+         ("\\.mdc\\'" . markdown-mode))
   :config
   ;; HACK: Prevent mis-fontification of YAML metadata blocks in `markdown-mode'
   ;;   which occurs when the first line contains a colon in it. See
@@ -38,5 +39,6 @@
                   ("go"   . go-mode)
                   ("ini"  . conf-mode)
                   ("py"   . python-mode)
-                  ("md"   . markdown-mode)))
+                  ("md"   . markdown-mode)
+                  ("mermaid" . mermaid-mode)))
     (add-to-list 'markdown-code-lang-modes pair)))

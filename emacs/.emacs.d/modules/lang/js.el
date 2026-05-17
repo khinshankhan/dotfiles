@@ -1,3 +1,4 @@
+;; LSP: pnpm -g add typescript-language-server typescript
 (require 'core-straight)
 (require 'core-module)
 

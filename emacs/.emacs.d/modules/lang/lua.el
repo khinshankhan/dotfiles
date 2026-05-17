@@ -1,3 +1,4 @@
+;; LSP: github.com/LuaLS/lua-language-server
 (require 'core-straight)
 
 (package! lua-mode

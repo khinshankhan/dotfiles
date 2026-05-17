@@ -1,3 +1,4 @@
+;; LSP: pnpm -g add graphql-language-service-cli
 (require 'core-straight)
 
 (package! graphql-mode)
