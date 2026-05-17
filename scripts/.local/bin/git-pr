@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+main() {
+  local cmd="${1:-view}"
+
+  case "$cmd" in
+    view) # inspired by https://github.com/acerom/dotfiles
+      local remote_url
+      remote_url=$(git remote get-url origin 2>/dev/null) || {
+        echo "Error: Not a git repository or no origin remote found" >&2
+        return 1
+      }
+      local repo
+      repo=$(echo "$remote_url" | sed 's|.*github.com[:/]||;s|\.git$||')
+      local branch
+      branch=$(git branch --show-current) || {
+        echo "Error: Could not determine current branch" >&2
+        return 1
+      }
+      local url="https://github.com/${repo}/pull/${branch}"
+      # TODO: replace python dependency with a portable open command
+      python3 -m webbrowser "$url"
+      ;;
+    -h|--help)
+      echo "Usage: $(basename "$0") [command]"
+      echo ""
+      echo "Commands:"
+      echo "  view    Open PR for current branch in browser (default)"
+      echo "  -h      Show this help"
+      ;;
+    *)
+      echo "Unknown command: $cmd" >&2
+      return 1
+      ;;
+  esac
+}
+
+main "$@"
