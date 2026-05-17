@@ -40,6 +40,8 @@
 	pc = diff HEAD --
 	# patch apply
 	pa = apply
+	# prune local branches with merged or closed PRs (via git-prune-merged in ~/.local/bin)
+	tidy = prune-merged
 
 [include]
     path = "~/.local.gitconfig" # contains some personal information like email and secondary includes

@@ -1,0 +1,240 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+main() {
+if [[ -t 1 ]]; then
+  BOLD='\033[1m'
+  DIM='\033[2m'
+  GREEN='\033[32m'
+  YELLOW='\033[33m'
+  CYAN='\033[36m'
+  RED='\033[31m'
+  RESET='\033[0m'
+else
+  BOLD='' DIM='' GREEN='' YELLOW='' CYAN='' RED='' RESET=''
+fi
+
+local delete=false
+local include_closed=false
+local reverse=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -d|--delete) delete=true; shift ;;
+    --include-closed) include_closed=true; shift ;;
+    -r|--reverse) reverse=true; shift ;;
+    -h|--help)
+      echo "Find local branches whose PRs have been merged (or closed) on GitHub."
+      echo ""
+      echo "Usage: $(basename "$0") [options]"
+      echo ""
+      echo "Options:"
+      echo "  -d, --delete      Delete prunable branches (default: dry run)"
+      echo "  --include-closed  Also prune branches with only closed (unmerged) PRs"
+      echo "  -r, --reverse     Sort newest first (default: oldest first)"
+      echo "  -h, --help        Show this help"
+      echo ""
+      echo "Examples:"
+      echo "  $(basename "$0")              # dry run, oldest first"
+      echo "  $(basename "$0") -r           # dry run, newest first"
+      echo "  $(basename "$0") -d           # delete merged branches"
+      echo "  $(basename "$0") -d -r        # delete, newest first"
+      echo "  $(basename "$0") --include-closed -d  # also delete closed"
+      return 0
+      ;;
+    *) echo "Unknown option: $1"; return 1 ;;
+  esac
+done
+
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  if ! gh auth status &>/dev/null; then
+    echo -e "${RED}Error:${RESET} No GitHub auth found. Run 'gh auth login' or set GH_TOKEN." >&2
+    exit 1
+  fi
+fi
+
+local main_branch
+main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+local current_branch
+current_branch=$(git branch --show-current)
+local repo_nwo
+repo_nwo=$(gh repo view --json nameWithOwner --jq .nameWithOwner 2>/dev/null || git remote get-url origin | sed 's|.*github.com[:/]||;s|\.git$||')
+
+local local_branches=()
+while IFS= read -r b; do
+  [[ "$b" == "$main_branch" || "$b" == "$current_branch" ]] && continue
+  local_branches+=("$b")
+done < <(git branch --list | grep -v '^\*' | sed 's/^ *//')
+
+if [[ ${#local_branches[@]} -eq 0 ]]; then
+  echo -e "${DIM}No local branches to check.${RESET}"
+  exit 0
+fi
+
+echo -e "${DIM}Checking ${#local_branches[@]} local branches against GitHub...${RESET}"
+
+local query="query {"
+for i in $(seq 0 $((${#local_branches[@]} - 1))); do
+  local branch="${local_branches[$i]}"
+  local escaped_branch
+  escaped_branch="${branch//\"/\\\"}"
+  query="${query} b${i}: search(query: \"repo:${repo_nwo} is:pr head:${escaped_branch}\", type: ISSUE, first: 10) { nodes { ... on PullRequest { number state mergedAt closedAt headRefName } } }"
+done
+query="${query} }"
+
+local gql_result
+gql_result=$(gh api graphql -f query="$query" 2>/dev/null || echo "{}")
+
+local all_branches=()
+local all_prs=()
+local all_prunable=()
+local deletable_count=0
+
+for i in $(seq 0 $((${#local_branches[@]} - 1))); do
+  local branch="${local_branches[$i]}"
+  all_branches+=("$branch")
+
+  local all_matches
+  all_matches=$(echo "$gql_result" | jq -r --arg b "$branch" \
+    ".data.b${i}.nodes[] | select(.headRefName == \$b) | \"\(.state)\t#\(.number)\t\(if .mergedAt != \"\" and .mergedAt != null then .mergedAt[0:10] elif .closedAt != \"\" and .closedAt != null then .closedAt[0:10] else \"-\" end)\"")
+  if [[ -n "$all_matches" ]]; then
+    all_prs+=("$all_matches")
+    local has_open
+    has_open=$(echo "$all_matches" | grep -c "^OPEN" || true)
+    if [[ "$has_open" != "0" ]]; then
+      all_prunable+=(false)
+    else
+      local has_merged
+      has_merged=$(echo "$all_matches" | grep -c "^MERGED" || true)
+      if [[ "$has_merged" -gt 0 ]] || $include_closed; then
+        all_prunable+=(true)
+        deletable_count=$((deletable_count + 1))
+      else
+        all_prunable+=(false)
+      fi
+    fi
+  else
+    all_prs+=("")
+    all_prunable+=(false)
+  fi
+done
+
+local sort_lines=()
+for i in $(seq 0 $((${#all_branches[@]} - 1))); do
+  local pr_lines="${all_prs[$i]}"
+  local sort_date="9999-99-99"
+  if [[ -n "$pr_lines" ]]; then
+    sort_date=$(echo "$pr_lines" | cut -f3 | grep -v '^-$' | sort -r | head -1)
+    if [[ -z "$sort_date" ]]; then sort_date="9999-99-99"; fi
+  fi
+  sort_lines+=("${sort_date} ${i}")
+done
+
+local sort_flag=""
+if $reverse; then sort_flag="-r"; fi
+local sorted_indices=()
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  sorted_indices+=("${line##* }")
+done < <(printf '%s\n' "${sort_lines[@]}" | sort ${sort_flag:+"$sort_flag"})
+
+pad() {
+  local str="$1" width="$2"
+  local len=${#str}
+  local spaces=$((width - len))
+  if [[ $spaces -gt 0 ]]; then
+    printf '%s%*s' "$str" "$spaces" ""
+  else
+    printf '%s' "$str"
+  fi
+}
+
+local max_branch=6
+for branch in "${all_branches[@]}"; do
+  local len=${#branch}
+  if [[ $len -gt $max_branch ]]; then
+    max_branch=$len
+  fi
+done
+
+local num_count=${#all_branches[@]}
+local num_width=${#num_count}
+
+echo ""
+echo -e "  ${BOLD}$(pad "#" "$num_width")  $(pad "Branch" "$max_branch")  $(pad "PR" 6)  $(pad "Status" 6)  Date${RESET}"
+local sep_num sep_branch
+sep_num=$(printf '%*s' "$num_width" '' | tr ' ' '─')
+sep_branch=$(printf '%*s' "$max_branch" '' | tr ' ' '─')
+echo -e "  ${DIM}${sep_num}  ${sep_branch}  ──────  ──────  ──────────${RESET}"
+
+local row=0
+for idx in "${sorted_indices[@]}"; do
+  row=$((row + 1))
+  local branch="${all_branches[$idx]}"
+  local pr_lines="${all_prs[$idx]}"
+  local prunable="${all_prunable[$idx]}"
+
+  if [[ -z "$pr_lines" ]]; then
+    echo -e "  ${DIM}$(pad "$row" "$num_width")  $(pad "$branch" "$max_branch")  $(pad "-" 6)  no pr   -${RESET}"
+    continue
+  fi
+
+  local first=true
+  while IFS=$'\t' read -r state number pr_date; do
+    local badge
+    if [[ "$state" == "MERGED" ]]; then
+      badge="${GREEN}merged${RESET}"
+    elif [[ "$state" == "CLOSED" ]]; then
+      badge="${YELLOW}closed${RESET}"
+    else
+      badge="${CYAN}open  ${RESET}"
+    fi
+
+    local continuation
+    continuation="↳$(pad '' $((max_branch - 1)))"
+
+    if [[ "$prunable" == "true" ]]; then
+      if $first; then
+        echo -e "  ${CYAN}$(pad "$row" "$num_width")${RESET}  $(pad "$branch" "$max_branch")  $(pad "$number" 6)  ${badge}  ${DIM}${pr_date}${RESET}"
+        first=false
+      else
+        echo -e "  $(pad '' "$num_width")  ${continuation}  $(pad "$number" 6)  ${badge}  ${DIM}${pr_date}${RESET}"
+      fi
+    else
+      local plain_state
+      if [[ "$state" == "MERGED" ]]; then plain_state="merged"
+      elif [[ "$state" == "CLOSED" ]]; then plain_state="closed"
+      else plain_state="open  "
+      fi
+      if $first; then
+        echo -e "  ${DIM}$(pad "$row" "$num_width")  $(pad "$branch" "$max_branch")  $(pad "$number" 6)  $(pad "$plain_state" 6)  ${pr_date}${RESET}"
+        first=false
+      else
+        echo -e "  ${DIM}$(pad '' "$num_width")  ${continuation}  $(pad "$number" 6)  $(pad "$plain_state" 6)  ${pr_date}${RESET}"
+      fi
+    fi
+  done <<< "$pr_lines"
+done
+
+echo ""
+
+if [[ $deletable_count -eq 0 ]]; then
+  echo -e "  ${GREEN}✓${RESET} No branches to prune."
+elif $delete; then
+  for i in $(seq 0 $((${#all_branches[@]} - 1))); do
+    if [[ "${all_prunable[$i]}" == "true" ]]; then
+      local branch="${all_branches[$i]}"
+      local sha
+      sha=$(git rev-parse --short "$branch" 2>/dev/null || echo "?")
+      git branch -D "$branch" >/dev/null 2>&1
+      echo -e "  ${RED}✕${RESET} ${DIM}${branch}${RESET}  ${DIM}(was ${sha})${RESET}"
+    fi
+  done
+  echo ""
+  echo -e "  ${GREEN}✓${RESET} Deleted ${BOLD}${deletable_count}${RESET} branches."
+else
+  echo -e "  ${BOLD}${deletable_count}${RESET} branches ready to prune. Run with ${BOLD}--delete${RESET} to remove them."
+fi
+}
+
+main "$@"
