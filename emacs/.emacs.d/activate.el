@@ -38,7 +38,7 @@
         multiple-cursors          ; why edit one line when you can break twenty?
         (parentheses +rainbow)    ; ((((((rainbow)))))), lisp devs see nothing unusual
         (zoom +text +window)      ; because sometimes you need to squint
-        neotree                   ; exists purely to satisfy a code review
+        ;; neotree                   ; exists purely to satisfy a code review
 
         :ui
         (color                    ; RGB goes brrr
@@ -54,37 +54,43 @@
 
         :lang
         ;;; Systems
-        ;; (asm +mips)               ; talk directly to the metal
-        (cc +lsp)                 ; C > C++ == 1
-        (csharp +lsp)             ; Java, reinvented in Redmond by Pascal
-        (java +lsp +dap)          ; speaking of, the poster child for carpal tunnel syndrome
+        (asm +mips)               ; talk directly to the metal
+        ;; (cc +lsp)                 ; C > C++ == 1
+        ;; (csharp +lsp)             ; Java, reinvented in Redmond by Pascal
+        ;; (java +lsp +dap)          ; speaking of, the poster child for carpal tunnel syndrome
         (go +lsp +dap)            ; the hipster dialect
         (rust +lsp +dap)          ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
         (zig +lsp)                ; C, but simpler
-        (swift +lsp)              ; who asked for emoji variables?
-        (dart +lsp)               ; paint ui and not much else
-        (kotlin +lsp)             ; a better, slicker Java(Script)
-        (scala +lsp)              ; java, but good
+        ;; (swift +lsp)              ; who asked for emoji variables?
+        ;; (dart +lsp)               ; paint ui and not much else
+        ;; (kotlin +lsp)             ; a better, slicker Java(Script)
+        ;; (scala +lsp)              ; java, but good
+        (nim +lsp)                ; python + lisp at the speed of c
+        ;; (solidity +lsp)           ; .sol: sunshine in the name, gas in the contract
+        ;; verilog                   ; hardware you can simulate but not afford
 
         ;;; Functional
-        (haskell +lsp)            ; a language that's lazier than I am
-        (ocaml +lsp)              ; an objective camel
-        (erlang +lsp)             ; an elegant language for a more civilized age
-        (elixir +lsp)             ; erlang done right
-        (clojure +lsp)            ; java with a lisp
+        ;; (elm +lsp)                ; care for a cup of TEA?
+        ;; (haskell +lsp)            ; a language that's lazier than I am
+        ;; (ocaml +lsp)              ; an objective camel
+        ;; (erlang +lsp)             ; an elegant language for a more civilized age
+        ;; (elixir +lsp)             ; erlang done right
+        ;; (clojure +lsp)            ; java with a lisp
         scheme                    ; a fully conniving family of lisps
         common-lisp               ; if you've seen one lisp, you've seen them all
         (racket +lsp)             ; a DSL for DSLs
-        janet                     ; Fun fact: Janet is me!
+        ;; (purescript +lsp)         ; javascript, but functional
+        ;; janet                     ; Fun fact: Janet is me!
 
         ;;; Scripting
+        emacs-lisp                ; plot twist: the config was the program all along
         (python +lsp +dap)        ; beautiful is better than ugly
         (ruby +lsp)               ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
         (perl +lsp)               ; write once, read never
         (lua +lsp)                ; one-based indices? one-based indices
         shell                     ; she sells {ba,z,fi}sh shells on the C xor
-        fish                      ; friendly interactive shell, for real
-        powershell                ; for when you must Windows
+        ;; fish                      ; friendly interactive shell, for real
+        ;; powershell                ; for when you must Windows
 
         ;;; Web
         (js +ts                   ; all(hope(abandon(ye(who(enter(here))))))
@@ -107,10 +113,11 @@
         (graphql +lsp)            ; give queries a REST
         (protobuf +lsp)           ; Google's binary Esperanto
         prisma                    ; ORM, schema, and the envy of ActiveRecord
-        lookml                    ; SQL with extra steps and a Looker subscription
+        ;; lookml                    ; SQL with extra steps and a Looker subscription
         conf                      ; .ini (and anything ending in rc) walked so .yaml could stumble
 
-        ;;; Markup & Diagrams
+        ;;; Markup & Docs
+        latex                     ; writing papers in Emacs has never been so fun
         markdown                  ; writing docs for people to ignore
         mermaid                   ; turns out writing docs leads to drawing diagrams
         plantuml                  ; diagrams for confusing people more
@@ -120,7 +127,7 @@
         ;;; Infrastructure
         (docker +lsp)             ; it works on my machine, so we ship the machine
         (terraform +lsp)          ; infrastructure as code (and code as infrastructure bugs)
-        (jsonnet +lsp)            ; JSON, but with variables
+        ;; (jsonnet +lsp)            ; JSON, but with variables
         (nix +lsp)                ; I hereby declare "nix geht mehr!"
         helm                      ; kubectl apply -f {{ .Values.anxiety }}
         nginx                     ; the little engine("x") that could
@@ -129,8 +136,9 @@
         git-modes                 ; git's own dotfiles
 
         ;;; Proof & Scientific
+        ;; prolog                    ; facts, rules, and existential queries
         lean                      ; for folks with too much to prove
-        coq                       ; proofs-as-programs
+        ;; coq                       ; proofs-as-programs
         (r +lsp)                  ; emacs speaks statistics
         (julia +lsp)              ; a better, faster MATLAB
         jupyter                   ; attempting to tame notebooks with emacs (currently failing)

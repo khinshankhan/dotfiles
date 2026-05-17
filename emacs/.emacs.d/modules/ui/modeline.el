@@ -1,5 +1,9 @@
 (require 'core-straight)
 
+(straight-register-package
+ '(shrink-path :type git :host nil
+               :repo "https://gitlab.com/bennya/shrink-path.el.git"))
+
 (dolist (fn '(line-number-mode column-number-mode))
   (if (fboundp fn)
       (funcall fn t)))
