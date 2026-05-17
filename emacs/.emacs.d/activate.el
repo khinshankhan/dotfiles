@@ -14,6 +14,8 @@
         (lsp +dap +ui)            ; M-x vscode
         (format +apheleia)        ; so you can argue about formatting rules instead
         (vc +git +gutter)         ; version-control and Emacs, sitting in a tree
+        eval                      ; run code, run (also, repls)
+        lookup                    ; define-word: the dictionary you never knew you needed
         ;; (copilot +complete +chat) ; M$ Clippy, but for code
 
         :input
@@ -32,6 +34,7 @@
         :editor
         ;; FIXME: breaks ivy and other tools
         ;; hungry-delete             ; the overzealous backspace
+        ophints                   ; the buffer flinches when you paste
         multiple-cursors          ; why edit one line when you can break twenty?
         (parentheses +rainbow)    ; ((((((rainbow)))))), lisp devs see nothing unusual
         (zoom +text +window)      ; because sometimes you need to squint
