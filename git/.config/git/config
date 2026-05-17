@@ -44,4 +44,5 @@
 	tidy = prune-merged
 
 [include]
-    path = "~/.local.gitconfig" # contains some personal information like email and secondary includes
+	# contains some personal information like email and secondary includes
+	path = "~/.config/git/local.gitconfig"
