@@ -35,6 +35,12 @@ command_path() {
 }
 
 # ---
+# XDG overrides
+# ---
+export INPUTRC="$HOME/.config/readline/inputrc"
+export PYTHONSTARTUP="$HOME/.config/python/pythonrc"
+
+# ---
 # PATH setup (login + interactive)
 # ---
 
