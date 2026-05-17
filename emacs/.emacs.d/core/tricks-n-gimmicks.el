@@ -12,11 +12,27 @@
   (f-mkdir dir))
 
 ;; setup proper paths for *nix machines
-;; https://emacs.stackexchange.com/questions/27918/why-is-exec-path-different-in-emacsclient-emacsserver-than-in-emacs
+;; Async shell PATH loading to avoid blocking startup.
 (with-os! (gnu/linux darwin)
-  (package! exec-path-from-shell
-    :config
-    (exec-path-from-shell-initialize)))
+  (defun shan--async-load-path ()
+    "Load PATH from shell asynchronously."
+    (let ((shell (getenv "SHELL"))
+          (buf (generate-new-buffer " *path-cache*")))
+      (set-process-sentinel
+       (start-process "path-cache" buf shell "-l" "-i" "-c"
+                      "printf '__PATH__\\000%s\\000__PATH__' \"$PATH\"")
+       (lambda (proc _event)
+         (when (eq (process-status proc) 'exit)
+           (with-current-buffer (process-buffer proc)
+             (goto-char (point-min))
+             (when (re-search-forward "__PATH__\0\\(.*?\\)\0__PATH__" nil t)
+               (let ((path (match-string 1)))
+                 (setenv "PATH" path)
+                 (setq exec-path (append (parse-colon-path path)
+                                         (list exec-directory))))))
+           (kill-buffer (process-buffer proc)))))))
+
+  (add-hook 'emacs-startup-hook #'shan--async-load-path))
 
 (setq straight-vc-git-default-protocol 'ssh)
 
