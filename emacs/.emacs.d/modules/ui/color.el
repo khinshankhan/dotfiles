@@ -91,6 +91,12 @@ or if the current buffer is read-only or not file-visiting."
       (remove-overlays (point-min) (point-max) 'ovrainbow t))
     (advice-add #'rainbow-turn-off :after #'my-rainbow-clear-overlays))
 
+  (defun my-rainbow-refresh-on-revert ()
+    (when (bound-and-true-p rainbow-mode)
+      (rainbow-mode -1)
+      (rainbow-mode 1)))
+  (add-hook 'after-revert-hook #'my-rainbow-refresh-on-revert)
+
   (define-globalized-minor-mode global-rainbow-mode rainbow-mode
     (lambda () (rainbow-mode 1)))
   (global-rainbow-mode 1))

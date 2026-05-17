@@ -83,7 +83,7 @@
 ;; this is better than vtl-mode package?
 (with-feature! +vtl
   (define-derived-mode vtl-mode web-mode "vtl")
-  (add-to-list 'lsp-custom--ignore-alist 'vtl-mode)
+  (lsp-custom/ignore-mode 'vtl-mode)
   (add-to-list 'auto-mode-alist '("\\.vtl$" . vtl-mode)))
 
 ;; TODO: maybe it isn't wise to have all of web mode hooked with lsp
