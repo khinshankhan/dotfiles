@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v nix >/dev/null 2>&1; then
+    echo "nix is already installed: $(nix --version)"
+    exit 0
+fi
+
+mode="${1:---multi}"
+installer="https://nixos.org/nix/install"
+
+case "$mode" in
+    --single)
+        sh <(curl --proto '=https' --tlsv1.2 -L "$installer") --no-daemon
+        ;;
+    --multi)
+        sh <(curl --proto '=https' --tlsv1.2 -L "$installer") --daemon
+        ;;
+    *)
+        echo "usage: bs-nix [--single|--multi]" >&2
+        echo "  --multi   multi-user install with daemon (default, needs sudo)" >&2
+        echo "  --single  single-user install, no sudo required" >&2
+        exit 1
+        ;;
+esac
