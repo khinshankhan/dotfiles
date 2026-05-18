@@ -58,7 +58,19 @@
 
   (advice-add 'lsp--create-initialization-options :filter-return
               (lambda (opts)
-                (or opts (ht)))))
+                (or opts (ht))))
+
+  (with-eval-after-load 'lsp-tailwindcss
+    (lsp-register-client
+     (make-lsp-client
+      :new-connection (lsp-stdio-connection '("tailwindcss-language-server" "--stdio"))
+      :activation-fn (lsp-activate-on "html" "css" "javascript" "javascriptreact"
+                                      "typescript" "typescriptreact" "vue" "astro")
+      :server-id 'tailwindcss
+      :priority -1
+      :add-on? t
+      :notification-handlers (ht ("@/tailwindCSS/projectInitialized" #'ignore)
+                                ("@/tailwindCSS/projectsDestroyed" #'ignore))))))
 
 ;; https://emacs.stackexchange.com/a/68951
 (add-hook 'lsp-after-apply-edits-hook
