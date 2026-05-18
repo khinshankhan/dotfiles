@@ -100,6 +100,7 @@ fi
 if [ -n "${PNPM_HOME-}" ] && [ -d "$PNPM_HOME" ]; then
     export PNPM_HOME
     path_prepend_if_dir "$PNPM_HOME"
+    path_prepend_if_dir "$PNPM_HOME/bin"
     export PATH
 fi
 # pnpm end
