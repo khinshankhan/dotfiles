@@ -32,6 +32,12 @@
                                          (list exec-directory))))))
            (kill-buffer (process-buffer proc)))))))
 
+  (defun shan/shell-sync ()
+    "Sync PATH from shell."
+    (interactive)
+    (message "Syncing PATH from shell...")
+    (shan--async-load-path))
+
   (add-hook 'emacs-startup-hook #'shan--async-load-path))
 
 (setq straight-vc-git-default-protocol 'ssh)
