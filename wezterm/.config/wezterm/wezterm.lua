@@ -2,56 +2,42 @@ local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 local is_macos = wezterm.target_triple:find("darwin") ~= nil
 
-local available_fonts
-
-local function load_available_fonts()
-	if available_fonts then
-		return available_fonts
-	end
-
-	local command = is_macos and { "system_profiler", "SPFontsDataType" } or { "fc-list", "--format=%{family}\n" }
-	local success, stdout = wezterm.run_child_process(command)
-	available_fonts = {}
-
-	if not success then
-		return available_fonts
-	end
-
-	if is_macos then
-		for family in stdout:gmatch("Full Name:%s*([^\n]+)") do
-			available_fonts[family] = true
-		end
-	else
-		for line in stdout:gmatch("[^\n]+") do
-			for family in line:gmatch("[^,]+") do
-				available_fonts[family:match("^%s*(.-)%s*$")] = true
+if is_macos then
+	config.font = wezterm.font_with_fallback({
+		"Hack Nerd Font Mono",
+		"JetBrainsMono Nerd Font Mono",
+		"Fira Code",
+		"Source Code Pro",
+	})
+else
+	local function detect_font()
+		local candidates = {
+			"Hack Nerd Font Mono",
+			"JetBrainsMono Nerd Font Mono",
+			"Fira Code",
+			"Source Code Pro",
+		}
+		local ok, stdout = pcall(function()
+			local success, out = wezterm.run_child_process({ "fc-list", "--format=%{family}\n" })
+			return success and out or ""
+		end)
+		if ok and stdout ~= "" then
+			local installed = {}
+			for line in stdout:gmatch("[^\n]+") do
+				for family in line:gmatch("[^,]+") do
+					installed[family:match("^%s*(.-)%s*$")] = true
+				end
+			end
+			for _, family in ipairs(candidates) do
+				if installed[family] then
+					return family
+				end
 			end
 		end
+		return "JetBrains Mono"
 	end
-
-	return available_fonts
+	config.font = wezterm.font(detect_font())
 end
-
-local function has_font(family)
-	return load_available_fonts()[family] == true
-end
-
-local font_candidates = {
-	"Hack Nerd Font Mono",
-	"JetBrainsMono Nerd Font Mono",
-	"Fira Code",
-	"Source Code Pro",
-}
-local font_family = "monospace"
-
-for _, family in ipairs(font_candidates) do
-	if has_font(family) then
-		font_family = family
-		break
-	end
-end
-
-config.font = wezterm.font(font_family)
 config.font_size = 16
 config.line_height = 1.0
 config.cell_width = 1.0
