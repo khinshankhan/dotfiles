@@ -8,12 +8,12 @@ t() {
         echo "usage: t <command> [args...]" >&2
         echo "" >&2
         echo "commands:" >&2
-        echo "  a    <session>                Attach to (or create) a session" >&2
-        echo "  rn | 0                        Renumber windows sequentially" >&2
-        echo "  ss   <session-a> <session-b>  Swap all windows between sessions" >&2
-        echo "  sw   <src> <dst>              Swap two windows by index" >&2
-        echo "  mv   <src:win> [dst]          Move window to another session" >&2
-        echo "  cap  <target> [output_file]   Capture pane contents" >&2
+        echo "  a      <session>[:<window>] [path]   Attach to (or create) a session" >&2
+        echo "  rn | 0                               Renumber windows sequentially" >&2
+        echo "  ss     <session-a> <session-b>       Swap all windows between sessions" >&2
+        echo "  sw     <src> <dst>                   Swap two windows by index" >&2
+        echo "  mv     <src:win> [dst]               Move window to another session" >&2
+        echo "  cap    <target> [output_file]        Capture pane contents" >&2
         return 2
     fi
 
