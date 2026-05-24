@@ -1,0 +1,14 @@
+-- show me what you're made of (column names)
+\pset tuples_only off
+-- columns that actually line up, what a concept
+\pset format aligned
+-- too wide? pivot it. too narrow? table it.
+\x auto
+-- blank output is ambiguous: null? empty string? whitespace?
+\pset null '[NULL]'
+-- how long did that mass update take? oh no.
+\timing on
+-- "what was that query I ran last Tuesday?"
+\set HISTSIZE 10000
+-- you don't need 47 copies of SELECT 1
+\set HISTCONTROL ignoredups

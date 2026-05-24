@@ -1,0 +1,12 @@
+-- show me what you're made of (column names)
+.headers on
+-- columns that actually line up, what a concept
+.mode column
+-- blank output is ambiguous: null? empty string? whitespace?
+.nullvalue [NULL]
+-- one row per line, as nature intended
+.separator ROW "\n"
+-- "DELETE FROM users" and silence? no thanks
+.changes on
+-- how long did that mass update take? oh no.
+.timer on
