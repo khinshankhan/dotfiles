@@ -1,25 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if command -v nix >/dev/null 2>&1; then
-    echo "nix is already installed: $(nix --version)"
-    exit 0
-fi
-
-mode="${1:---multi}"
+mode="${1:-}"
 installer="https://nixos.org/nix/install"
 
 case "$mode" in
+    --status)
+        if ! command -v nix >/dev/null 2>&1; then
+            echo "nix is not installed"
+            exit 1
+        fi
+        echo "$(nix --version)"
+        if [ -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist ] || systemctl is-active nix-daemon >/dev/null 2>&1; then
+            echo "mode: multi-user"
+        else
+            echo "mode: single-user"
+        fi
+        ;;
     --single)
+        if command -v nix >/dev/null 2>&1; then
+            echo "nix is already installed: $(nix --version)"
+            exit 0
+        fi
         sh <(curl --proto '=https' --tlsv1.2 -L "$installer") --no-daemon
         ;;
     --multi)
+        if command -v nix >/dev/null 2>&1; then
+            echo "nix is already installed: $(nix --version)"
+            exit 0
+        fi
         sh <(curl --proto '=https' --tlsv1.2 -L "$installer") --daemon
         ;;
     *)
-        echo "usage: bs-nix [--single|--multi]" >&2
-        echo "  --multi   multi-user install with daemon (default, needs sudo)" >&2
-        echo "  --single  single-user install, no sudo required" >&2
+        echo "usage: bs-nix --single|--multi|--status" >&2
+        echo "  --multi   multi-user install with daemon (needs sudo)" >&2
+        echo "  --single  single-user install, no daemon (needs sudo once for /nix/store)" >&2
+        echo "  --status  check current nix installation" >&2
         exit 1
         ;;
 esac
