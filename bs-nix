@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mode="${1:-}"
+usage() {
+    echo "usage: bs-nix --single|--multi|--rootless|--status" >&2
+    echo "  --multi     multi-user install with daemon (needs sudo)" >&2
+    echo "  --single    single-user install, no daemon (needs sudo once for /nix/store)" >&2
+    echo "  --rootless  rootless install via nix-user-chroot (no sudo, linux only)" >&2
+    echo "  --status    check current nix installation" >&2
+    exit 1
+}
+
+[ "$#" -ne 1 ] && usage
+
 installer="https://nixos.org/nix/install"
 
-case "$mode" in
+case "$1" in
     --status)
         if ! command -v nix >/dev/null 2>&1; then
             echo "nix is not installed"
@@ -13,6 +23,8 @@ case "$mode" in
         echo "$(nix --version)"
         if [ -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist ] || systemctl is-active nix-daemon >/dev/null 2>&1; then
             echo "mode: multi-user"
+        elif [ -d "$HOME/.nix" ]; then
+            echo "mode: rootless (nix-user-chroot)"
         else
             echo "mode: single-user"
         fi
@@ -31,11 +43,32 @@ case "$mode" in
         fi
         sh <(curl --proto '=https' --tlsv1.2 -L "$installer") --daemon
         ;;
+    --rootless)
+        if [ "$(uname -s)" != "Linux" ]; then
+            echo "error: --rootless is only supported on linux" >&2
+            exit 1
+        fi
+        if command -v nix >/dev/null 2>&1; then
+            echo "nix is already installed: $(nix --version)"
+            exit 0
+        fi
+        if ! unshare --user --pid echo YES >/dev/null 2>&1; then
+            echo "error: user namespaces not supported on this system" >&2
+            echo "hint: proot may work but is not automated here" >&2
+            exit 1
+        fi
+        if ! command -v nix-user-chroot >/dev/null 2>&1; then
+            echo "installing nix-user-chroot..."
+            mkdir -p "$HOME/.local/bin"
+            curl -L "https://github.com/nix-community/nix-user-chroot/releases/latest/download/nix-user-chroot-bin-$(uname -m)-unknown-linux-musl" -o "$HOME/.local/bin/nix-user-chroot"
+            chmod +x "$HOME/.local/bin/nix-user-chroot"
+        fi
+        mkdir -p "$HOME/.nix"
+        nix-user-chroot "$HOME/.nix" bash -c "curl --proto '=https' --tlsv1.2 -L '$installer' | sh"
+        echo ""
+        echo "to use nix, enter the chroot: nix-user-chroot ~/.nix bash"
+        ;;
     *)
-        echo "usage: bs-nix --single|--multi|--status" >&2
-        echo "  --multi   multi-user install with daemon (needs sudo)" >&2
-        echo "  --single  single-user install, no daemon (needs sudo once for /nix/store)" >&2
-        echo "  --status  check current nix installation" >&2
-        exit 1
+        usage
         ;;
 esac
