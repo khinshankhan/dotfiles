@@ -1,0 +1,13 @@
+\.git
+\.gitignore
+\.gitmodules
+.*~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING
+
+^/flake\.nix
+^/flake\.lock
+^/modules
+^/hosts

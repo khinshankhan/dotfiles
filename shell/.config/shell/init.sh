@@ -158,6 +158,25 @@ export PATH
 # nix
 source_if_readable "$HOME/.nix-profile/etc/profile.d/nix.sh"
 export PATH
+
+nix-apply() {
+    if [ -z "${1:-}" ]; then
+        echo "usage: nix-apply <host>" >&2
+        echo "available: $(ls -d "$HOME/dotfiles/nix/hosts/"*/ 2>/dev/null | xargs -n1 basename | tr '\n' ' ')" >&2
+        return 1
+    fi
+    local host="$1"
+    if [ ! -d "$HOME/dotfiles/nix/hosts/$host" ]; then
+        echo "unknown host: $host" >&2
+        echo "available: $(ls -d "$HOME/dotfiles/nix/hosts/"*/ 2>/dev/null | xargs -n1 basename | tr '\n' ' ')" >&2
+        return 1
+    fi
+    nix run home-manager -- switch --impure --flake "$HOME/dotfiles/nix#$host"
+}
+
+nix-update() {
+    nix flake update --flake "$HOME/dotfiles/nix"
+}
 # nix end
 
 # Reclaim ownership of a path recursively:
