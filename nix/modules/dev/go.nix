@@ -1,9 +1,9 @@
 { lib, config, pkgs, ... }:
 
 let
-  cfg = config.modules.go;
+  cfg = config.modules.dev.go;
 in {
-  options.modules.go = {
+  options.modules.dev.go = {
     enable = lib.mkEnableOption "go development tools";
   };
 

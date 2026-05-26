@@ -1,15 +1,13 @@
 { lib, config, pkgs, ... }:
 
 let
-  cfg = config.modules.nix-tools;
+  cfg = config.modules.dev.nix;
 in {
-  options.modules.nix-tools = {
+  options.modules.dev.nix = {
     enable = lib.mkEnableOption "nix development tools";
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-      nil
-    ];
+    home.packages = [ pkgs.nil ];
   };
 }

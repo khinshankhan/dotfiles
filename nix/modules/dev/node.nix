@@ -1,9 +1,9 @@
 { lib, config, pkgs, ... }:
 
 let
-  cfg = config.modules.node;
+  cfg = config.modules.dev.node;
 in {
-  options.modules.node = {
+  options.modules.dev.node = {
     enable = lib.mkEnableOption "node development tools";
   };
 

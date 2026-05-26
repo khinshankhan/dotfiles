@@ -1,9 +1,9 @@
 { lib, config, pkgs, ... }:
 
 let
-  cfg = config.modules.zig;
+  cfg = config.modules.dev.zig;
 in {
-  options.modules.zig = {
+  options.modules.dev.zig = {
     enable = lib.mkEnableOption "zig development tools";
   };
 

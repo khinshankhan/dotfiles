@@ -1,9 +1,9 @@
 { lib, config, pkgs, ... }:
 
 let
-  cfg = config.modules.python;
+  cfg = config.modules.dev.python;
 in {
-  options.modules.python = {
+  options.modules.dev.python = {
     enable = lib.mkEnableOption "python development tools";
   };
 
