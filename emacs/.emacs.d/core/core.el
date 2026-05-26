@@ -9,6 +9,12 @@
 (require 'core-paths)
 (add-to-list 'load-path shan-core-dir)
 
+;; Nix-installed binaries must be visible before modules load.
+(when (file-directory-p "~/.nix-profile/bin")
+  (let ((nix-bin (expand-file-name "~/.nix-profile/bin")))
+    (add-to-list 'exec-path nix-bin)
+    (setenv "PATH" (concat nix-bin ":" (getenv "PATH")))))
+
 ;; set up package management
 (require 'core-paths)
 (require 'core-straight)
