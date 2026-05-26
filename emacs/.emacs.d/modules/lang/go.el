@@ -93,5 +93,5 @@
       (remhash "gopls.completeFunctionCalls" lsp-client-settings)))
   (dap!
     (require 'dap-gdb-lldb)
-    (require 'dap-go))
+    (require 'dap-dlv-go))
   (auto-ide/add! 'go-mode #'hydra-lsp/body))

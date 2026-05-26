@@ -91,7 +91,9 @@
 ;; for now
 (lsp! web-mode
   (dap!
-    (require 'dap-chrome)))
+    (require 'dap-js)
+    (when-let ((js-debug-adapter (executable-find "js-debug-adapter")))
+      (setq dap-js-debug-program (list js-debug-adapter)))))
 
 ;; TODO: set company backends
 (with-module! :completion company
