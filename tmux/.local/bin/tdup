@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# h/t hlissner
+tdup() {
+    if [[ "${1:-}" =~ ^--?h(elp)?$ ]]; then
+        echo "usage: tdup [session]" >&2
+        echo "  Start a grouped session (independent window view)." >&2
+        echo "  Defaults to the current session." >&2
+        return 2
+    fi
+    local target="${1:-$(tmux display-message -p '#S')}"
+    tmux new-session -d -t "$target"
+    local dup="$(tmux display-message -t '{last}' -p '#S')"
+    tmux set-option -t "$dup" destroy-unattached on
+    tmux attach-session -t "$dup"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tdup "$@"; fi

@@ -14,6 +14,7 @@ t() {
         echo "  sw     <src> <dst>                   Swap two windows by index" >&2
         echo "  mv     <src:win> [dst]               Move window to another session" >&2
         echo "  cap    <target> [output_file]        Capture pane contents" >&2
+        echo "  dup    [session]                     Grouped session (independent window view)" >&2
         return 2
     fi
 
