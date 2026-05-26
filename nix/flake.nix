@@ -14,7 +14,13 @@
       mkHome = path:
         let host = import path;
         in home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs { system = host.system; };
+          pkgs = import nixpkgs {
+            system = host.system;
+            # symbola is unfree but needed as emacs unicode fallback font
+            config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
+              "symbola"
+            ];
+          };
           modules = [ host.module ];
         };
     in {

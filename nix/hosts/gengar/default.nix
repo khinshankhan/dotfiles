@@ -3,7 +3,12 @@
 
   module = { pkgs, ... }: {
     imports = [
+      ../../modules/cli-tools.nix
+      ../../modules/fonts.nix
+      ../../modules/go.nix
       ../../modules/nix-tools.nix
+      ../../modules/node.nix
+      ../../modules/python.nix
       ../../modules/zig.nix
     ];
 
@@ -13,7 +18,12 @@
 
     programs.home-manager.enable = true;
 
+    modules.cli-tools.enable = true;
+    modules.fonts.enable = true;
+    modules.go.enable = true;
     modules.nix-tools.enable = true;
+    modules.node.enable = true;
+    modules.python.enable = true;
     modules.zig.enable = true;
   };
 }
