@@ -8,6 +8,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ pkgs.aspell ];
+    home.packages = [
+      (pkgs.aspellWithDicts (dicts: with dicts; [
+        en
+      ]))
+    ];
   };
 }
