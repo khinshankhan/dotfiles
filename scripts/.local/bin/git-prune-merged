@@ -162,9 +162,9 @@ local num_width=${#num_count}
 
 echo ""
 echo -e "  ${BOLD}$(pad "#" "$num_width")  $(pad "Branch" "$max_branch")  $(pad "PR" 6)  $(pad "Status" 6)  Date${RESET}"
-local sep_num sep_branch
-sep_num=$(printf '%*s' "$num_width" '' | tr ' ' '─')
-sep_branch=$(printf '%*s' "$max_branch" '' | tr ' ' '─')
+local sep_num="" sep_branch=""
+for ((j=0; j<num_width; j++)); do sep_num+="─"; done
+for ((j=0; j<max_branch; j++)); do sep_branch+="─"; done
 echo -e "  ${DIM}${sep_num}  ${sep_branch}  ──────  ──────  ──────────${RESET}"
 
 local row=0
