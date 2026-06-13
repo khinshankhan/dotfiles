@@ -95,6 +95,7 @@ end
 
 local mod = is_macos and "SUPER" or "CTRL|SHIFT"
 local mod_shift = is_macos and "SUPER|SHIFT" or "CTRL|SHIFT|ALT"
+local tab_mod = is_macos and mod or "ALT"
 
 local act = wezterm.action
 config.keys = {
@@ -109,7 +110,7 @@ config.keys = {
 }
 
 for i = 1, 9 do
-	table.insert(config.keys, { key = tostring(i), mods = mod, action = act.ActivateTab(i - 1) })
+	table.insert(config.keys, { key = tostring(i), mods = tab_mod, action = act.ActivateTab(i - 1) })
 end
 
 return config
