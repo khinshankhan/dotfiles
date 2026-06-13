@@ -63,12 +63,17 @@ config.colors = {
 }
 
 config.window_decorations = "RESIZE"
-config.window_padding = { left = 8, right = 8, top = 8, bottom = 4 }
+config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 
-config.use_fancy_tab_bar = false
-config.tab_bar_at_bottom = true
+config.use_fancy_tab_bar = true
+config.tab_bar_at_bottom = false
 config.hide_tab_bar_if_only_one_tab = false
-config.tab_max_width = 32
+config.tab_max_width = 72
+config.window_frame = {
+  font_size = 14,
+  active_titlebar_bg = '#2c3038',
+  inactive_titlebar_bg = '#2c3038',
+}
 
 config.default_cursor_style = "SteadyBar"
 config.cursor_blink_rate = 0
