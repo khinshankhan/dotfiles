@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Never die silently: report the line and command that failed before exiting.
+trap 'rc=$?; echo "git-prune-merged: failed at line ${LINENO} (exit ${rc}): ${BASH_COMMAND}" >&2' ERR
+
 main() {
 if [[ -t 1 ]]; then
   BOLD='\033[1m'
