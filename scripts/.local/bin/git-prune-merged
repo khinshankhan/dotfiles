@@ -127,7 +127,10 @@ for i in $(seq 0 $((${#all_branches[@]} - 1))); do
   local pr_lines="${all_prs[$i]}"
   local sort_date="9999-99-99"
   if [[ -n "$pr_lines" ]]; then
-    sort_date=$(echo "$pr_lines" | cut -f3 | grep -v '^-$' | sort -r | head -1)
+    # grep exits 1 when a branch's PRs are all open (every date is "-"), which
+    # would abort the script under pipefail. Tolerate no-match; the -z guard
+    # below restores the placeholder date.
+    sort_date=$(echo "$pr_lines" | cut -f3 | { grep -v '^-$' || true; } | sort -r | head -1)
     if [[ -z "$sort_date" ]]; then sort_date="9999-99-99"; fi
   fi
   sort_lines+=("${sort_date} ${i}")
