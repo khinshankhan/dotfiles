@@ -28,6 +28,7 @@
         "watchog" = mkHome ./hosts/watchog;
         "gengar" = mkHome ./hosts/gengar;
         "maushold" = mkHome ./hosts/maushold;
+        "mimikyu" = mkHome ./hosts/mimikyu;
       };
     };
 }
