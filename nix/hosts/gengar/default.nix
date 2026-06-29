@@ -22,10 +22,13 @@
       ../../modules/system/findutils.nix
       ../../modules/tools/delta.nix
       ../../modules/tools/fd.nix
+      ../../modules/tools/frp.nix
       ../../modules/tools/gh.nix
       ../../modules/tools/git-lfs.nix
       ../../modules/tools/gnupg.nix
       ../../modules/tools/ripgrep.nix
+      ../../modules/tools/sox.nix
+      ../../modules/tools/tesseract.nix
       ../../modules/tools/tree.nix
     ];
 
@@ -54,10 +57,13 @@
     modules.system.findutils.enable = true;
     modules.tools.delta.enable = true;
     modules.tools.fd.enable = true;
+    modules.tools.frp.enable = true;
     modules.tools.gh.enable = true;
     modules.tools.git-lfs.enable = true;
     modules.tools.gnupg.enable = true;
     modules.tools.ripgrep.enable = true;
+    modules.tools.sox.enable = true;
+    modules.tools.tesseract.enable = true;
     modules.tools.tree.enable = true;
   };
 }

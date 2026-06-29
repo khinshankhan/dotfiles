@@ -16,9 +16,12 @@
         in home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
             system = host.system;
-            # symbola is unfree but needed as emacs unicode fallback font
+            # explicitly-allowed unfree packages (allowlist, not blanket allowUnfree):
+            #   symbola - emacs unicode fallback font
+            #   ngrok   - tunneling CLI, unfree license
             config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
               "symbola"
+              "ngrok"
             ];
           };
           modules = [ host.module ];

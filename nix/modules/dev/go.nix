@@ -13,7 +13,15 @@ in {
       go
       golangci-lint
       gopls
-      gotools
+      # gotools ships a generic `play` (the Go Playground server) that collides
+      # with sox's `play` in the nix profile. Rename it to `go-play` so both coexist.
+      (gotools.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + ''
+          if [ -e "$out/bin/play" ]; then
+            mv "$out/bin/play" "$out/bin/go-play"
+          fi
+        '';
+      }))
     ];
   };
 }
