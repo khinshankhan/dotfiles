@@ -1,2 +1,0 @@
-# Zsh prompt.
-PROMPT='[%n@%m %1~] %# '

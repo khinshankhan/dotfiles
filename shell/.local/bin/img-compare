@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Compare two images and write a highlighted diff image.
+set -euo pipefail
+
+if ! command -v compare >/dev/null 2>&1; then
+    echo "ImageMagick 'compare' is not installed" >&2
+    exit 127
+fi
+
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "usage: img-compare <image1> <image2> [output]" >&2
+    exit 2
+fi
+
+compare \
+    -metric AE \
+    -highlight-color red \
+    "$1" "$2" "${3:-diff.png}"

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Reclaim ownership of a path recursively for the current user.
+# sudo = run as root; chown = change owner/group; -c = report only changes;
+# -R = recurse; $USER = current user; $(id -gn "$USER") = primary group.
+set -euo pipefail
+
+if [ "$#" -ne 1 ]; then
+    echo "usage: chown-me <path>" >&2
+    exit 2
+fi
+
+if chown --version >/dev/null 2>&1; then
+    sudo chown -cR "$USER:$(id -gn "$USER")" "$1"
+else
+    sudo chown -R "$USER:$(id -gn "$USER")" "$1"
+fi

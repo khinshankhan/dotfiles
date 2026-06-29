@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Update the flake lock.
+set -euo pipefail
+
+exec nix flake update --flake "$HOME/dotfiles/nix"

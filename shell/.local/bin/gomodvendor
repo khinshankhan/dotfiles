@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Vendor go dependencies: verify, tidy, vendor.
+set -euo pipefail
+
+if ! command -v go >/dev/null 2>&1; then
+    echo "go is not installed" >&2
+    exit 127
+fi
+go mod verify && go mod tidy && go mod vendor

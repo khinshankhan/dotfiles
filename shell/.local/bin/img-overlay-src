@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Composite source onto destination by copying source pixels directly.
+set -euo pipefail
+
+if ! command -v composite >/dev/null 2>&1; then
+    echo "ImageMagick 'composite' is not installed" >&2
+    exit 127
+fi
+
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "usage: img-overlay-src <source> <destination> [output]" >&2
+    exit 2
+fi
+
+composite -compose src "$1" "$2" "${3:-composite.png}"

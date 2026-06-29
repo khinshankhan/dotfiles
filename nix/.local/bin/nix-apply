@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Apply a host's home-manager configuration.
+set -euo pipefail
+
+if [ -z "${1:-}" ]; then
+    echo "usage: nix-apply <host>" >&2
+    echo "available: $(ls -d "$HOME/dotfiles/nix/hosts/"*/ 2>/dev/null | xargs -n1 basename | tr '\n' ' ')" >&2
+    exit 1
+fi
+
+host="$1"
+if [ ! -d "$HOME/dotfiles/nix/hosts/$host" ]; then
+    echo "unknown host: $host" >&2
+    echo "available: $(ls -d "$HOME/dotfiles/nix/hosts/"*/ 2>/dev/null | xargs -n1 basename | tr '\n' ' ')" >&2
+    exit 1
+fi
+
+exec nix run home-manager -- switch --impure --flake "$HOME/dotfiles/nix#$host"

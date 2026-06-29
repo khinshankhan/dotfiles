@@ -7,7 +7,7 @@
 # that re-sorts, re-splits, and murders every joke below. To spot drift between
 # this file and what's actually installed (comments/order ignored), run:
 #   brew-drift            # '-' = in here only, '+' = installed only
-# (defined in shell/.config/shell/init.sh)
+# (a script in shell/.local/bin/)
 #
 # Rule 1: Nix first, brew only when Nix can't or won't. Everything below is here
 # because it lost that argument. Grouped by what it's for, not by brew-vs-cask
