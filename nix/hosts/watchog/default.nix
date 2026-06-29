@@ -10,6 +10,7 @@
       ../../modules/dev/lua.nix
       ../../modules/dev/shell.nix
       ../../modules/fonts/hack.nix
+      ../../modules/fonts/jetbrains-mono.nix
       ../../modules/fonts/source-code-pro.nix
       ../../modules/fonts/symbola.nix
       ../../modules/shell/direnv.nix
@@ -40,6 +41,7 @@
     modules.dev.lua.enable = true;
     modules.dev.shell.enable = true;
     modules.fonts.hack.enable = true;
+    modules.fonts.jetbrains-mono.enable = true;
     modules.fonts.source-code-pro.enable = true;
     modules.fonts.symbola.enable = true;
     modules.shell.direnv.enable = true;
