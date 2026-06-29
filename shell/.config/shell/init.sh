@@ -179,6 +179,46 @@ nix-update() {
 }
 # nix end
 
+# brew-drift: compare a host's curated Brewfile against what's actually installed,
+# ignoring comments, grouping, and order. '-' = in Brewfile only, '+' = installed
+# only. Never touches the real Brewfile (dumps actual state to a scratch file).
+brew-drift() {
+    # hosts that actually have a Brewfile (Linux hosts use pacman/apt instead)
+    local hosts
+    hosts=$(ls "$HOME"/dotfiles/packages/*/Brewfile 2>/dev/null \
+        | xargs -n1 dirname | xargs -n1 basename | tr '\n' ' ')
+
+    if [ -z "${1:-}" ]; then
+        echo "usage: brew-drift <host>" >&2
+        echo "available: ${hosts:-<none>}" >&2
+        return 1
+    fi
+    local host="$1"
+    local brewfile="$HOME/dotfiles/packages/$host/Brewfile"
+    if [ ! -f "$brewfile" ]; then
+        echo "not a brew host: $host" >&2
+        echo "available: ${hosts:-<none>}" >&2
+        return 1
+    fi
+
+    local norm
+    norm() {
+        grep -E '^(tap|brew|cask) ' "$1" \
+            | sed -E 's/#.*//' \
+            | sed -E "s/^(tap|brew|cask) +['\"]([^'\"]+)['\"].*/\1 \2/" \
+            | awk '{ if ($1=="brew"||$1=="cask"){ n=split($2,a,"/"); $2=a[n] } print }' \
+            | sort -u
+    }
+
+    local actual="${TMPDIR:-/tmp}/Brewfile.actual.$host"
+    brew bundle dump --force --file="$actual" 2>/dev/null
+    echo "drift for $host  ('-' = in Brewfile only, '+' = installed only):"
+    git diff --no-index --color=always \
+        <(norm "$brewfile") <(norm "$actual") | tail -n +5 \
+        || true
+    unset -f norm
+}
+
 # Reclaim ownership of a path recursively:
 # sudo = run as root
 # chown = change owner/group
@@ -321,6 +361,7 @@ fi
 alias cls='clear'
 
 alias g='git'
+alias y='yui'
 
 alias c='claude'
 alias cc='claude --dangerously-skip-permissions'

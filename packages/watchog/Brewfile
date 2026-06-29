@@ -1,0 +1,65 @@
+# Brewfile --- the stuff Nix wouldn't take -*- mode: ruby -*-
+#
+# Apply on a fresh machine with:
+#   brew bundle --file=packages/watchog/Brewfile
+#
+# This file is hand-curated -- edit it by hand. DO NOT `brew bundle dump` over it;
+# that re-sorts, re-splits, and murders every joke below. To spot drift between
+# this file and what's actually installed (comments/order ignored), run:
+#   brew-drift            # '-' = in here only, '+' = installed only
+# (defined in shell/.config/shell/init.sh)
+#
+# Rule 1: Nix first, brew only when Nix can't or won't. Everything below is here
+# because it lost that argument. Grouped by what it's for, not by brew-vs-cask
+# -- the keyword on each line already tells you that.
+#
+# Rule 2: see Rule 1.
+
+# taps, third-party suppliers of dubious repute
+tap "ozeias/postgresql", trusted: true         # postgis lives in a side alley
+tap "railwaycat/emacsmacport", trusted: true   # the one working Emacs port
+
+# bootstrap, chickens brawling with eggs
+brew 'git'                                     # how this repo got here in the first place
+brew "stow"                                    # how this repo got everywhere else
+
+# editors / os
+brew "railwaycat/emacsmacport/emacs-mac@29"    # a great OS with a decent text editor
+
+# containers, aka shipping your machine to prod
+brew "colima"                                  # docker desktop, minus the desktop (and the EULA)
+brew "docker"                                  # it works on my machine, so we ship the machine
+brew "docker-buildx"                           # the build, now with extra x
+brew "docker-compose"                          # yaml that summons whole stacks
+brew "docker-credential-helper"                # remembers passwords so you don't have to
+
+
+# databases
+brew "redis",                                  # a hash map that bought its own server
+  restart_service: :changed
+brew "ozeias/postgresql/postgis@16"            # teaching postgres where things are
+cask "tableplus"                               # all of the above, now with a mouse
+
+# runtimes / toolchains
+brew "nvm"                                     # because node ships a new major before lunch
+
+# shell / cli utilities
+brew "terminal-notifier"                       # so long-running jobs can finally text you back
+
+# browsers
+cask "google-chrome"                           # the RAM goes where, exactly?
+
+# comms
+cask "slack"                                   # where focus goes to be interrupted
+cask "notion"                                  # docs, wikis, and a database you'll never finish
+cask "zoom"                                    # you're on mute. you're still on mute.
+
+# launcher
+cask "raycast"                                 # spotlight after a glow-up
+
+# terminals
+cask "warp"                                    # a terminal that went to design school
+cask "wezterm"                                 # the terminal that's also a tmux, configured in lua
+
+# design
+cask "paper-design"                            # figma for people with commitment issues
