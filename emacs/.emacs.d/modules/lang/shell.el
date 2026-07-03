@@ -22,4 +22,8 @@
 
 (package! sh-script
   :mode
-  ("\\.env\\'" . sh-mode))
+  ;; Match anything ending in .env, or an env.*.local variant where `env` is a
+  ;; whole segment (env.local, .env.local, env.hello.local, hello.env.local).
+  ;; The trailing .local requirement avoids catching structured files like
+  ;; .env.json, and the segment anchor avoids false hits like prevent.local.
+  ("\\(^\\|[./]\\)env\\(\\.[a-z]+\\)*\\.local\\'\\|\\.env\\'" . sh-mode))
