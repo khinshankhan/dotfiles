@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Stow every package (or the named ones) from this repo into $HOME.
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/dotfiles}"
+cd "$DOTFILES"
+
+# Non-package top-level dirs are listed in the repo-root .stow-local-ignore
+# (one dir name per line, # comments ok). Build a newline-delimited ignore set
+# (avoids bash 4 associative arrays -- macOS ships bash 3.2). .git is always in.
+ignore=$'\n.git\n'
+if [ -f .stow-local-ignore ]; then
+    while IFS= read -r line; do
+        line="${line%%#*}"
+        line="$(printf '%s' "$line" | tr -d '[:space:]')"
+        [ -n "$line" ] && ignore="$ignore$line"$'\n'
+    done < .stow-local-ignore
+fi
+is_ignored() { case "$ignore" in *$'\n'"$1"$'\n'*) return 0 ;; *) return 1 ;; esac; }
+
+# Packages: dirs given as args, or every top-level dir not in the ignore set.
+pkgs=()
+if [ "$#" -gt 0 ]; then
+    pkgs=("$@")
+else
+    for d in */; do
+        # no match -> literal glob, skip
+        [ -d "$d" ] || continue
+        d="${d%/}"
+        is_ignored "$d" && continue
+        pkgs+=("$d")
+    done
+fi
+
+# Never call stow with an empty package list -- that would operate on the cwd and
+# can unstow existing links. Bail clearly instead.
+if [ "${#pkgs[@]}" -eq 0 ]; then
+    echo "dottie install: no packages to stow in $DOTFILES" >&2
+    exit 1
+fi
+
+stow -Rvt ~ "${pkgs[@]}"

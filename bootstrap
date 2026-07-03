@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Bootstrap dotfiles on a fresh machine. Needs only curl/bash to start.
+#
+#   curl -fsSL https://raw.githubusercontent.com/khinshankhan/dotfiles/main/bootstrap | bash
+#
+# Installs git + stow (the only prerequisites), clones the repo over HTTPS, then
+# hands off to dottie's prestow + install. Re-running is safe: an existing clone
+# is pulled instead.
+
+REPO_URL="${DOTFILES_REPO:-https://github.com/khinshankhan/dotfiles.git}"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+
+log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+err() { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; }
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# Install a package using whatever package manager this machine has.
+install_pkg() {
+    local pkg="$1"
+    case "$(uname -s)" in
+        Darwin)
+            if ! have brew; then
+                log "installing Homebrew"
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                # make brew available in this shell for the current session
+                if [ -x /opt/homebrew/bin/brew ]; then
+                    eval "$(/opt/homebrew/bin/brew shellenv)"
+                elif [ -x /usr/local/bin/brew ]; then
+                    eval "$(/usr/local/bin/brew shellenv)"
+                fi
+            fi
+            brew install "$pkg"
+            ;;
+        Linux)
+            if have apt-get; then
+                sudo apt-get update -qq && sudo apt-get install -y "$pkg"
+            elif have dnf; then
+                sudo dnf install -y "$pkg"
+            elif have pacman; then
+                sudo pacman -Sy --noconfirm "$pkg"
+            elif have zypper; then
+                sudo zypper install -y "$pkg"
+            elif have apk; then
+                sudo apk add "$pkg"
+            else
+                err "no supported package manager found; install '$pkg' manually and re-run"
+                exit 1
+            fi
+            ;;
+        *)
+            err "unsupported OS: $(uname -s); install '$pkg' manually and re-run"
+            exit 1
+            ;;
+    esac
+}
+
+ensure() {
+    local cmd="$1" pkg="${2:-$1}"
+    if have "$cmd"; then
+        return
+    fi
+    log "installing $pkg"
+    install_pkg "$pkg"
+}
+
+main() {
+    if ! have curl; then
+        err "curl is required to bootstrap but was not found"
+        exit 1
+    fi
+
+    ensure git
+    ensure stow
+
+    if [ -d "$DOTFILES_DIR/.git" ]; then
+        log "dotfiles already cloned at $DOTFILES_DIR; pulling latest"
+        git -C "$DOTFILES_DIR" pull --ff-only
+    else
+        log "cloning $REPO_URL into $DOTFILES_DIR"
+        git clone "$REPO_URL" "$DOTFILES_DIR"
+    fi
+
+    cd "$DOTFILES_DIR"
+
+    if [ -x ./dottie/.local/libexec/dottie/prestow ]; then
+        log "creating shared directories"
+        ./dottie/.local/libexec/dottie/prestow
+    fi
+
+    log "stowing configs"
+    ./dottie/.local/libexec/dottie/install
+
+    log "done. dotfiles installed to $DOTFILES_DIR"
+    log "next: optionally set up Nix packages -> dottie nix bootstrap --multi"
+}
+
+main "$@"

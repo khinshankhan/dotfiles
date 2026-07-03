@@ -1,0 +1,5 @@
+# Top-level dirs that are not stow packages, so `dottie install` skips them.
+# One dir name per line; blank lines and # comments are ignored.
+.git
+examples
+packages

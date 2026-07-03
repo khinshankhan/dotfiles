@@ -1,0 +1,11 @@
+# Shared dirs pre-created before stow so no single package can own them.
+# Paths are relative to $HOME. Blank lines and # comments are ignored.
+# Each dotfiles root may ship its own NN-name.list here; prestow unions them all.
+.emacs.d
+.config
+.config/git
+.config/shell
+.local/bin
+.local/libexec
+.local/share
+.local/state

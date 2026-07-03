@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# List dotfiles repos on this machine (~/dotfiles* and ~/.dotfiles*).
+set -euo pipefail
+
+# Eligible = any ~/dotfiles* or ~/.dotfiles* directory. The current repo
+# ($DOTFILES, git-detected by the dispatcher) is marked.
+current="${DOTFILES:-}"
+
+shopt -s nullglob
+found=0
+for d in "$HOME"/dotfiles* "$HOME"/.dotfiles*; do
+    [ -d "$d" ] || continue
+    found=1
+    if [ "$d" = "$current" ]; then
+        printf '* %s (current)\n' "$d"
+    else
+        printf '  %s\n' "$d"
+    fi
+done
+
+[ "$found" -eq 1 ] || echo "no dotfiles repos found under $HOME"

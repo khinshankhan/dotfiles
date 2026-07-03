@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# Install the nix binary itself (single/multi/rootless).
 set -euo pipefail
 
 usage() {
-    echo "usage: bs-nix --single|--multi|--rootless|--status" >&2
+    echo "usage: dottie nix bootstrap --single|--multi|--rootless|--status" >&2
     echo "  --multi     multi-user install with daemon (needs sudo)" >&2
     echo "  --single    single-user install, no daemon (needs sudo once for /nix/store)" >&2
     echo "  --rootless  rootless install via nix-user-chroot (no sudo, linux only)" >&2

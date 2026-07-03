@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# dottie -- front door to this dotfiles repo.
+#
+# Dispatches to subcommands in libexec/dottie/. Each file there is a subcommand;
+# its second line (the `# ` comment) is its help text. libexec is used (not bin)
+# because these are invoked by dottie, never directly by the user.
+#
+# usage: dottie <command> [args...]
+#        dottie help
+set -euo pipefail
+
+# dottie operates on a single dotfiles root: the dotfiles repo you're standing
+# in. Walk up from $PWD to the nearest dir directly under $HOME whose name matches
+# dotfiles* / .dotfiles* (git-initialized or not). Fall back to $DOTFILES, then
+# ~/dotfiles, when run from outside any dotfiles repo.
+find_root() {
+    local d="$PWD" base
+    while [ "$d" != "/" ] && [ "$d" != "$HOME" ]; do
+        if [ "$(dirname "$d")" = "$HOME" ]; then
+            base="$(basename "$d")"
+            case "$base" in
+                dotfiles* | .dotfiles*) printf '%s\n' "$d"; return 0 ;;
+            esac
+        fi
+        d="$(dirname "$d")"
+    done
+    printf '%s\n' "${DOTFILES:-$HOME/dotfiles}"
+}
+DOTFILES="$(find_root)"
+export DOTFILES
+
+# Subcommands are dottie's own machinery -- one installed tool, the same commands
+# regardless of which repo you're in -- so resolve them from the global libexec
+# first. Fall back to the current repo's copy only if the global one is missing
+# (fresh box mid-bootstrap, or it was removed). $DOTFILES (the repo you're in) is
+# what commands *operate on*, not where they live.
+find_libexec() {
+    local global="$HOME/.local/libexec/dottie"
+    local repo="$DOTFILES/dottie/.local/libexec/dottie"
+    local d="$repo"
+    [ -d "$global" ] && d="$global"
+    # normalize (resolve ..); empty if missing
+    (cd "$d" >/dev/null 2>&1 && pwd)
+}
+libexecdir="$(find_libexec)"
+
+# Resolve the running dottie executable to its real path (follow the PATH stow
+# symlink), so `help` can show which dottie is executing.
+self_path() {
+    local src="${BASH_SOURCE[0]}" dir
+    while [ -L "$src" ]; do
+        dir="$(cd -P "$(dirname "$src")" >/dev/null 2>&1 && pwd)"
+        src="$(readlink "$src")"
+        [ "${src#/}" = "$src" ] && src="$dir/$src"
+    done
+    printf '%s\n' "$(cd -P "$(dirname "$src")" >/dev/null 2>&1 && pwd)/$(basename "$src")"
+}
+selfpath="$(self_path)"
+
+# Widest "indent + name" over the whole tree, so descriptions align at one
+# column regardless of nesting depth. $2 = current indent width.
+tree_width() {
+    local d="$1" iw="${2:-2}" f name w
+    for f in "$d"/*; do
+        [ -e "$f" ] || continue
+        name="$(basename "$f")"
+        w=$((iw + ${#name}))
+        [ "$w" -gt "$COLW" ] && COLW="$w"
+        [ -d "$f" ] && tree_width "$f" $((iw + 2))
+    done
+    return 0
+}
+
+# List the commands in a dir as a tree. Leaves show their description aligned to
+# column COLW; group dirs are headers with their contents indented beneath.
+list_group() {
+    local d="$1" indent="${2:-  }" f name desc pad
+    for f in "$d"/*; do
+        [ -e "$f" ] || continue
+        name="$(basename "$f")"
+        if [ -d "$f" ]; then
+            printf '%s%s\n' "$indent" "$name"
+            list_group "$f" "$indent  "
+        elif [ -f "$f" ]; then
+            desc="$(sed -n '2s/^# //p' "$f")"
+            pad=$((COLW - ${#indent} - ${#name})) || true
+            printf '%s%s%*s  %s\n' "$indent" "$name" "$pad" "" "$desc"
+        fi
+    done
+}
+
+# Top-level help / group listing. $1 = dir to list, $2 = command prefix.
+usage() {
+    local d="${1:-$libexecdir}" prefix="${2:-}"
+    echo "usage: dottie ${prefix}<command> [args...]"
+    echo
+    if [ -z "$prefix" ]; then
+        echo "source:  $selfpath"
+        echo "libexec: $libexecdir"
+        echo "repo:    $DOTFILES"
+        echo
+    fi
+    echo "commands:"
+    COLW=0
+    tree_width "$d" 2
+    list_group "$d"
+}
+
+# Handle top-level help before descending.
+case "${1:-help}" in
+    help | -h | --help) usage; exit 0 ;;
+esac
+
+# Resolve the command chain: descend through group dirs until we hit a leaf.
+node="$libexecdir"
+prefix=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        help | -h | --help) usage "$node" "$prefix"; exit 0 ;;
+    esac
+    next="$node/$1"
+    if [ -d "$next" ]; then
+        node="$next"; prefix="$prefix$1 "; shift; continue
+    elif [ -x "$next" ]; then
+        shift; exec "$next" "$@"
+    else
+        echo "dottie: unknown command '${prefix}$1'" >&2
+        echo >&2
+        usage "$node" "$prefix" >&2
+        exit 1
+    fi
+done
+
+# Ran out of args landing on a group dir -> list it.
+usage "$node" "$prefix"

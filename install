@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-CMD=$(find . -mindepth 1 -maxdepth 1 -path ./.git -prune -o -type d -print | sed 's|^\./||')
-CMD=${*:-$CMD}
-stow -Rvt ~ $CMD

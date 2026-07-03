@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Pre-create shared dirs so stow links into them instead of owning them.
+set -euo pipefail
+
+# Run before stowing. If a shared parent dir doesn't exist, stow folds the whole
+# tree into a symlink owned by the first package to claim it, blocking every other
+# package from stowing into that path. Pre-creating the dir forces stow to link
+# into it instead.
+#
+# The dir list lives in dottie/.config/dottie/dirs.d/*.list (read from the repo by
+# path, so this works cold, before anything is stowed). Paths are relative to
+# $HOME; blank lines and # comments are ignored.
+
+DOTFILES="${DOTFILES:-$HOME/dotfiles}"
+
+for f in "$DOTFILES"/dottie/.config/dottie/dirs.d/*.list; do
+    [ -f "$f" ] || continue
+    while IFS= read -r line; do
+        # strip trailing comment
+        line="${line%%#*}"
+        line="$(printf '%s' "$line" | tr -d '[:space:]')"
+        [ -n "$line" ] || continue
+        mkdir -p "$HOME/$line"
+        touch "$HOME/$line/.keep"
+    done < "$f"
+done

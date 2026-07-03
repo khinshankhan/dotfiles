@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Collect garbage, deleting old profile generations.
+set -euo pipefail
+
+exec nix-collect-garbage -d

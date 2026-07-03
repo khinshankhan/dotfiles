@@ -4,23 +4,20 @@ My dotfiles. They may help you, but they mostly help me :thinking:
 
 ## Install
 
-Requires [GNU Stow](https://www.gnu.org/software/stow/).
+On a fresh machine, `bootstrap` installs the prerequisites (git + stow), clones
+the repository, and stows everything. It needs only curl to start:
 
 ```bash
-git clone https://github.com/khinshankhan/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+curl -fsSL https://raw.githubusercontent.com/khinshankhan/dotfiles/main/bootstrap | bash
 ```
 
-Install all configs:
+Already cloned? Manage packages with [`dottie`](./dottie) (requires [GNU
+Stow](https://www.gnu.org/software/stow/)):
 
 ```bash
-./install
-```
-
-Install program specific configs:
-
-```bash
-./install emacs git tmux
+dottie prestow              # set up directories to avoid symlink ownership conflicts
+dottie install              # stow all packages
+dottie install emacs git    # stow specific packages
 ```
 
 ## Contributing
