@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# huh --- the command for when you've forgotten, again.
+#
+# Cheatsheets live as plain text files in a tree under ~/.config/huh/, dropped
+# there by whichever stow package owns the topic (starship ships its sheets,
+# etc.). Args are a path into the tree:
+#
+#   huh                      # list top-level topics
+#   huh starship             # a topic -> show its _index (if any), then list sheets
+#   huh starship symbols     # a sheet -> show it
+#
+# Mostly one rule: a file is shown, a directory is listed. The one convention: a
+# file named `_index` in a topic dir is that topic's overview -- shown when you
+# land on the topic, and never listed as a selectable sheet. Adding a sheet is
+# "write a text file"; grouping is "put it in a subdir".
+set -euo pipefail
+
+root="${XDG_CONFIG_HOME:-$HOME/.config}/huh"
+
+if [ ! -d "$root" ]; then
+    echo "huh: nothing to remember yet ($root doesn't exist)" >&2
+    exit 1
+fi
+
+# List a directory's entries (one indented per line, subtrees marked with /),
+# skipping the reserved `_index` overview. Returns 1 if nothing was listed.
+list_dir() {
+    local d="$1" e found=1
+    for e in "$d"/*; do
+        [ -e "$e" ] || continue
+        [ "$(basename "$e")" = _index ] && continue
+        found=0
+        if [ -d "$e" ]; then
+            echo "  $(basename "$e")/"
+        else
+            echo "  $(basename "$e")"
+        fi
+    done
+    return $found
+}
+
+# Show a sheet, paging only if it's a TTY and won't fit on screen.
+show_sheet() {
+    local f="$1"
+    if [ -t 1 ] && [ "$(wc -l < "$f")" -gt "$(tput lines 2>/dev/null || echo 9999)" ]; then
+        "${PAGER:-less}" "$f"
+    else
+        cat "$f"
+    fi
+}
+
+# Walk the args as a path into the tree.
+target="$root"
+walked=""   # topics consumed so far, for error messages
+for arg in "$@"; do
+    next="$target/$arg"
+    if [ ! -e "$next" ]; then
+        if [ -z "$walked" ]; then
+            echo "huh: no topic '$arg'. you've got:" >&2
+        else
+            echo "huh: no '$arg' under '$walked'. there's:" >&2
+        fi
+        list_dir "$target" >&2
+        exit 1
+    fi
+    target="$next"
+    walked="${walked:+$walked }$arg"
+done
+
+if [ -f "$target" ]; then
+    # named a sheet: show it
+    show_sheet "$target"
+elif [ "$#" -gt 0 ] && [ -f "$target/_index" ]; then
+    # named a topic with an overview: show it, then point at its sheets
+    show_sheet "$target/_index"
+    if rest="$(list_dir "$target")"; then
+        printf '\nmore: huh %s <sheet>\n%s\n' "$*" "$rest"
+    fi
+else
+    # a topic with no overview, or bare huh at the root: just list
+    if [ "$#" -eq 0 ]; then
+        echo "huh what? pick one:"
+    else
+        echo "$*:"
+    fi
+    list_dir "$target" || echo "  (nothing here)"
+fi

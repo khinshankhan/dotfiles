@@ -1,0 +1,12 @@
+git status symbols, as starship renders them in the prompt
+
+  ?  untracked files
+  !  modified files
+  +  staged files
+  »  renamed files
+  ✘  deleted files
+  $  stashes exist
+  =  merge conflicts
+  ⇡  ahead of remote
+  ⇣  behind remote
+  ⇕  diverged from remote

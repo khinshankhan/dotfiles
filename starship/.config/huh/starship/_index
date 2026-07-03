@@ -1,0 +1,13 @@
+starship --- the prompt thingie. that stuff drawn next to your cursor.
+
+  what    a cross-shell prompt: dir, git branch, status symbols, exit code,
+          language versions, etc. -- the line before where you type.
+  why     same prompt in bash/zsh/fish, fast, configured in one toml instead
+          of a pile of escape codes nobody can read.
+
+where it lives in these dotfiles
+
+  install   nix --- nix/modules/shell/starship.nix
+  init      shell pkg --- conf.d/99-interactive.sh runs `starship init`
+  config    starship/.config/starship.toml (empty == stock defaults for now)
+  docs      https://starship.rs/config/

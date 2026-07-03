@@ -4,6 +4,7 @@
 .emacs.d
 .config
 .config/git
+.config/huh
 .config/shell
 .local/bin
 .local/libexec

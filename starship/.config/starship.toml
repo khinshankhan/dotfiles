@@ -1,0 +1,9 @@
+# starship.toml --- prompt config. https://starship.rs/config/
+#
+# Empty on purpose: running stock starship defaults for now. starship is
+# installed via nix (nix/modules/shell/starship.nix) and init'd in the shell
+# package (conf.d/99-interactive.sh). This file exists so the package has a home
+# for config when you want to customize -- until then, defaults apply.
+#
+# The default git status symbols are documented in this package's huh sheet:
+#   huh starship symbols
