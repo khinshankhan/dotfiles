@@ -20,13 +20,21 @@ ta() {
     [ -n "$dir" ] && new_args+=(-c "$dir")
     [ -n "$window" ] && new_args+=(-n "$window")
 
-    if [ -n "$window" ] && tmux has-session -t "$session" 2>/dev/null; then
-        if ! tmux select-window -t "$session:$window" 2>/dev/null; then
-            tmux new-window -t "$session" -n "$window"
+    if tmux has-session -t "$session" 2>/dev/null; then
+        # Session exists, so `new-session -A -c` would ignore -c. Persist the
+        # dir as a session option; the new-window/split bindings in tmux.conf
+        # read @ta_dir so windows created later open there regardless of which
+        # pane #{pane_current_path} points at.
+        [ -n "$dir" ] && tmux set-option -t "$session" @ta_dir "$dir"
+        if [ -n "$window" ]; then
+            if ! tmux select-window -t "$session:$window" 2>/dev/null; then
+                tmux new-window -t "$session" -n "$window" ${dir:+-c "$dir"}
+            fi
         fi
         tmux attach-session -t "$session"
     else
         tmux new-session "${new_args[@]}"
+        [ -n "$dir" ] && tmux set-option -t "$session" @ta_dir "$dir"
     fi
 }
 
