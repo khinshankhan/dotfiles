@@ -44,6 +44,7 @@ cask "tableplus"                               # all of the above, now with a mo
 brew "nvm"                                     # because node ships a new major before lunch
 
 # shell / cli utilities
+brew "gnupg"                                    # signs, encrypts, and anchors the postgis/poppler deps
 brew "terminal-notifier"                       # so long-running jobs can finally text you back
 
 # browsers
