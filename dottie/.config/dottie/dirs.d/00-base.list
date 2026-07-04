@@ -6,6 +6,7 @@
 .config/git
 .config/huh
 .config/shell
+.config/shell/conf.d
 .local/bin
 .local/libexec
 .local/share
