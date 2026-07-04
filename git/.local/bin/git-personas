@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# regenerate ~/.config/git/local.gitconfig from the persona dirs in ~/.config/git
+set -e
+
+cd ~/.config/git
+
+{
+    echo '[core]'
+    echo '	sshCommand = "ssh -o IdentitiesOnly=yes -F /dev/null -i ~/.ssh/khinshankhan"'
+
+    # nullglob so no personas -> the loop just doesn't run (base identity only)
+    shopt -s nullglob
+    # .*/ so dot-prefixed personas count too; skip the . and .. it also matches
+    for d in */ .*/; do
+        name=${d%/}
+        case $name in . | ..) continue ;; esac
+        # a persona is any dir with its own local.gitconfig
+        [ -f "$name/local.gitconfig" ] || continue
+        # one includeIf per place the repo might live
+        # shellcheck disable=SC2088  # ~ is meant to stay literal; git expands it
+        for root in '~' '~/development'; do
+            echo
+            echo "[includeIf \"gitdir:$root/$name/\"]"
+            echo "	path = \"~/.config/git/$name/local.gitconfig\""
+        done
+    done
+} > local.gitconfig
