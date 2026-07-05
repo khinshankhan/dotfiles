@@ -5,6 +5,7 @@
 .config
 .config/dottie
 .config/dottie/dirs.d
+.config/dottie/links.d
 .config/git
 .config/huh
 .config/shell

@@ -7,13 +7,15 @@ set -euo pipefail
 # package from stowing into that path. Pre-creating the dir forces stow to link
 # into it instead.
 #
-# Each package may ship its own list at <pkg>/.config/dottie/dirs.d/*.list (read
-# from the repo by path, so this works cold, before anything is stowed). This
-# includes the dottie package's own dirs.d/00-base.list. Paths are relative to
-# $HOME; blank lines and # comments are ignored.
+# Each package may ship its own lists (read from the repo by path, so this works
+# cold, before anything is stowed):
+#   dirs.d/*.list   - shared dirs to pre-create (one path per line)
+#   links.d/*.list  - bridge symlinks (one "link -> target" per line)
+# Paths are relative to $HOME; blank lines and # comments are ignored.
 
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 
+# shared dirs: <pkg>/.config/dottie/dirs.d/*.list, one path per line
 for f in "$DOTFILES"/*/.config/dottie/dirs.d/*.list; do
     [ -f "$f" ] || continue
     while IFS= read -r line; do
@@ -23,5 +25,27 @@ for f in "$DOTFILES"/*/.config/dottie/dirs.d/*.list; do
         [ -n "$line" ] || continue
         mkdir -p "$HOME/$line"
         touch "$HOME/$line/.keep"
+    done < "$f"
+done
+
+# bridge symlinks: <pkg>/.config/dottie/links.d/*.list, "link -> target" per
+# line (both relative to $HOME). Lets a tool that expects one path pick up a
+# canonical dir maintained under another -- eg
+# ```
+# .foo/config -> ../.shared/config
+# ```
+# Idempotent: a correct link is left alone; a wrong/absent one is (re)created.
+for f in "$DOTFILES"/*/.config/dottie/links.d/*.list; do
+    [ -f "$f" ] || continue
+    while IFS= read -r line; do
+        line="${line%%#*}"
+        [ -n "$(printf '%s' "$line" | tr -d '[:space:]')" ] || continue
+        link="$(printf '%s' "${line%%->*}" | tr -d '[:space:]')"
+        target="$(printf '%s' "${line##*->}" | tr -d '[:space:]')"
+        [ -n "$link" ] && [ -n "$target" ] || continue
+        # skip if the link already points where we want
+        [ "$(readlink "$HOME/$link" 2>/dev/null)" = "$target" ] && continue
+        mkdir -p "$(dirname "$HOME/$link")"
+        ln -sfn "$target" "$HOME/$link"
     done < "$f"
 done
