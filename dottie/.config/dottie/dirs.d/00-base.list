@@ -3,6 +3,8 @@
 # Each dotfiles root may ship its own NN-name.list here; prestow unions them all.
 .emacs.d
 .config
+.config/dottie
+.config/dottie/dirs.d
 .config/git
 .config/huh
 .config/shell

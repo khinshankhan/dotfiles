@@ -7,13 +7,14 @@ set -euo pipefail
 # package from stowing into that path. Pre-creating the dir forces stow to link
 # into it instead.
 #
-# The dir list lives in dottie/.config/dottie/dirs.d/*.list (read from the repo by
-# path, so this works cold, before anything is stowed). Paths are relative to
+# Each package may ship its own list at <pkg>/.config/dottie/dirs.d/*.list (read
+# from the repo by path, so this works cold, before anything is stowed). This
+# includes the dottie package's own dirs.d/00-base.list. Paths are relative to
 # $HOME; blank lines and # comments are ignored.
 
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 
-for f in "$DOTFILES"/dottie/.config/dottie/dirs.d/*.list; do
+for f in "$DOTFILES"/*/.config/dottie/dirs.d/*.list; do
     [ -f "$f" ] || continue
     while IFS= read -r line; do
         # strip trailing comment
