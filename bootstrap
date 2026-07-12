@@ -72,6 +72,16 @@ main() {
         exit 1
     fi
 
+    # macOS: the Command Line Tools (clang, headers) must exist before Homebrew
+    # or Nix can build anything. xcode-select --install pops a GUI dialog and
+    # returns immediately, so we bail and ask the user to re-run once it's done.
+    if [ "$(uname -s)" = Darwin ] && ! xcode-select -p >/dev/null 2>&1; then
+        log "installing Xcode Command Line Tools"
+        xcode-select --install || true
+        err "finish the Command Line Tools install dialog, then re-run this script"
+        exit 1
+    fi
+
     ensure git
     ensure stow
 
