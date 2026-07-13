@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# postinstall --- gengar (x86_64-linux, Arch)
+#
+# Run AFTER the package manifests are applied:
+#   sudo pacman -S --needed - < packages/gengar/pkglist.pacman
+#   yay        -S --needed - < packages/gengar/pkglist.aur
+#   packages/gengar/postinstall          # <- you are here
+#
+# Home for the steps a package list can't express: initializing data dirs,
+# enabling services, one-time system config. A pkglist installs bytes; this
+# makes them run.
+#
+# Idempotent by construction -- every step checks before it acts, so re-running
+# is safe and boring. Add steps as guarded blocks, not bare commands.
+set -euo pipefail
+
+log() {
+    printf '\033[1;34m==>\033[0m %s\n' "$*";
+}
+skip() {
+    printf '\033[1;30m--\033[0m %s\n' "$*";
+}
+have() {
+    command -v "$1" >/dev/null 2>&1;
+}
+
+# postgresql: init the data dir, then enable the service
+# The package ships the binaries but not a database cluster; Arch leaves initdb
+# to you. Without this, `systemctl start postgresql` fails on an empty data dir.
+if have postgres; then
+    PGDATA=/var/lib/postgres/data
+    if [ ! -s "$PGDATA/PG_VERSION" ]; then
+        log "postgresql: initializing cluster at $PGDATA"
+        sudo -u postgres initdb --locale=C.UTF-8 --encoding=UTF8 -D "$PGDATA"
+    else
+        skip "postgresql: cluster already initialized"
+    fi
+
+    if ! systemctl is-enabled --quiet postgresql 2>/dev/null; then
+        log "postgresql: enabling + starting service"
+        sudo systemctl enable --now postgresql
+    else
+        skip "postgresql: service already enabled"
+    fi
+else
+    skip "postgresql: not installed, nothing to init"
+fi

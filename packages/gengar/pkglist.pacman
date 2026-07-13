@@ -1,0 +1,54 @@
+# pkglist.pacman --- the stuff Nix wouldn't take -*- mode: conf -*-
+#
+# Apply on a fresh machine with:
+#   sudo pacman -S --needed - < packages/gengar/pkglist.pacman
+#
+# This file is hand-curated -- edit it by hand. DO NOT `pacman -Qqe >` over it;
+# that re-sorts, drops the comments, and murders every joke below. To spot drift
+# between this file and what's actually installed (comments/order ignored), run:
+#   pacman-drift            # '-' = in here only, '+' = installed only
+# (a script in shell/.local/bin/)
+#
+# Rule 1: Nix first, pacman only when Nix can't or won't. Everything below is here
+# because it lost that argument. Grouped by what it's for, not by repo-vs-AUR
+# -- the section marker below already tells you that.
+#
+# Rule 2: see Rule 1.
+
+# bootstrap, chickens brawling with eggs
+git                                            # how this repo got here in the first place
+stow                                           # how this repo got everywhere else
+
+# editors / os
+emacs                                          # a great OS with a decent text editor
+
+# containers, aka shipping your machine to prod
+docker                                         # it works on my machine, so we ship the machine
+docker-compose                                 # yaml that summons whole stacks
+
+# databases
+postgresql                                     # the database that does everything eventually
+postgis                                        # teaching postgres where things are
+
+# browsers
+chromium                                       # the RAM goes where, exactly? (the un-Googled one)
+
+# terminals
+wezterm                                        # the terminal that's also a tmux, configured in lua
+
+# window manager, the i3 stack
+i3-wm                                          # tiling, because floating is chaos
+i3blocks                                       # the status bar's little workers
+i3status                                       # what i3blocks reports to
+i3lock                                         # the screen, now with a password
+picom                                          # shadows and fades, so it doesn't look like 1995
+polybar                                        # a status bar that went to design school
+rofi                                           # spotlight after a glow-up
+dmenu                                          # rofi's minimalist ancestor
+dunst                                          # notifications that don't nag
+feh                                            # sets wallpaper, views images, asks nothing
+flameshot                                      # screenshots with an annotation habit
+arandr                                         # xrandr for people who like buttons
+
+# design
+gcolor3                                        # eyedropper for hex you'll paste once

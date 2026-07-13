@@ -1,0 +1,35 @@
+# pkglist.aur --- the stuff even the repos wouldn't take -*- mode: conf -*-
+#
+# Apply on a fresh machine with:
+#   yay -S --needed - < packages/gengar/pkglist.aur
+#
+# This file is hand-curated -- edit it by hand. DO NOT `pacman -Qqem >` over it;
+# that re-sorts, drops the comments, and murders every joke below. To spot drift
+# between this file and what's actually installed (comments/order ignored), run:
+#   yay-drift               # '-' = in here only, '+' = installed only
+# (a script in shell/.local/bin/)
+#
+# Rule 1: repos first, AUR only when the repos can't or won't. Everything below
+# is here because it lost that argument -- an AUR helper (yay/paru) builds these
+# from source, so keep them out of the pacman list or its apply will choke.
+#
+# Rule 2: see Rule 1.
+
+# browsers
+google-chrome                                  # the RAM goes where, exactly?
+
+# editors / IDEs
+visual-studio-code-bin                         # the electron app that ate the world
+
+# terminals
+tilix                                          # tiling terminal, gtk flavored
+
+# desktop bits
+nitrogen                                       # feh with a mouse for the wallpaper
+simplescreenrecorder                           # captures the screen, name says the rest
+
+# gaming
+heroic-games-launcher-bin                      # epic + gog, minus the epic launcher
+
+# shell / cli utilities
+gnu-netcat                                     # reads and writes sockets (openbsd-netcat if you need v6)
