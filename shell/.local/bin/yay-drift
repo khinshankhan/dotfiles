@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# yay-drift: compare a host's curated pkglist.aur against what's actually
+# installed from the AUR, ignoring comments, grouping, and order. '-' = in
+# pkglist only, '+' = installed only. The AUR sibling of brew-drift/pacman-drift;
+# a thin wrapper over `pacman-drift <host> --aur` (AUR pkgs are `pacman -Qqem`).
+set -euo pipefail
+
+if [ -z "${1:-}" ]; then
+    hosts=$(ls "$HOME"/dotfiles/packages/*/pkglist.aur 2>/dev/null \
+        | xargs -n1 dirname | xargs -n1 basename | tr '\n' ' ')
+    echo "usage: yay-drift <host>" >&2
+    echo "available: ${hosts:-<none>}" >&2
+    exit 1
+fi
+
+exec pacman-drift "$1" --aur

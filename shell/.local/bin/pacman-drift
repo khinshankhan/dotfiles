@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# pacman-drift: compare a host's curated package list against what's actually
+# installed explicitly, ignoring comments, grouping, and order. '-' = in pkglist
+# only, '+' = installed only. Never touches the real pkglist (reads live state
+# from pacman).
+#
+#   pacman-drift <host>          repo packages:  pkglist.pacman vs `pacman -Qqe`
+#   pacman-drift <host> --aur    AUR  packages:  pkglist.aur    vs `pacman -Qqem`
+set -euo pipefail
+
+# hosts that actually have a pkglist.pacman (macOS hosts use a Brewfile instead)
+hosts=$(ls "$HOME"/dotfiles/packages/*/pkglist.pacman 2>/dev/null \
+    | xargs -n1 dirname | xargs -n1 basename | tr '\n' ' ')
+
+if [ -z "${1:-}" ]; then
+    echo "usage: pacman-drift <host> [--aur]" >&2
+    echo "available: ${hosts:-<none>}" >&2
+    exit 1
+fi
+host="$1"
+
+# --aur switches to the AUR list (pkglist.aur) and foreign-package query (-Qqem)
+if [ "${2:-}" = "--aur" ]; then
+    pkglist="$HOME/dotfiles/packages/$host/pkglist.aur"
+    query=(pacman -Qqem)
+    kind="aur"
+else
+    pkglist="$HOME/dotfiles/packages/$host/pkglist.pacman"
+    query=(pacman -Qqe)
+    kind="repo"
+fi
+
+if [ ! -f "$pkglist" ]; then
+    echo "no $kind list for host: $host  ($pkglist)" >&2
+    echo "available: ${hosts:-<none>}" >&2
+    exit 1
+fi
+
+if ! command -v pacman >/dev/null 2>&1; then
+    echo "pacman not found -- run this on the Arch host ($host)" >&2
+    exit 1
+fi
+
+# strip comments and blank lines, one package per line, sorted unique
+norm() {
+    sed -E 's/#.*//' "$1" \
+        | awk 'NF { print $1 }' \
+        | sort -u
+}
+
+actual="${TMPDIR:-/tmp}/pkglist.actual.$host.$kind"
+"${query[@]}" | sort -u > "$actual"
+echo "drift for $host ($kind)  ('-' = in pkglist only, '+' = installed only):"
+git diff --no-index --color=always \
+    <(norm "$pkglist") "$actual" | tail -n +5 \
+    || true
