@@ -3,11 +3,12 @@
 set -euo pipefail
 
 usage() {
-    echo "usage: dottie nix bootstrap --single|--multi|--rootless|--status" >&2
+    echo "usage: dottie nix bootstrap --single|--multi|--rootless|--status|--repair" >&2
     echo "  --multi     multi-user install with daemon (needs sudo)" >&2
     echo "  --single    single-user install, no daemon (needs sudo once for /nix/store)" >&2
     echo "  --rootless  rootless install via nix-user-chroot (no sudo, linux only)" >&2
     echo "  --status    check current nix installation" >&2
+    echo "  --repair    re-add the nix shell hook to /etc/{zshrc,bashrc} (needs sudo)" >&2
     exit 1
 }
 
@@ -29,6 +30,28 @@ case "$1" in
         else
             echo "mode: single-user"
         fi
+        ;;
+    --repair)
+        # macOS updates rewrite /etc/{zshrc,bashrc} and drop nix's source line,
+        # leaving nix intact on /nix but off PATH. Re-add the hook idempotently.
+        hook='/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+        if [ ! -e "$hook" ]; then
+            echo "error: nix hook not found at $hook" >&2
+            echo "hint: nix may genuinely be uninstalled; try --multi" >&2
+            exit 1
+        fi
+        changed=0
+        for rc in /etc/zshrc /etc/bashrc; do
+            [ -e "$rc" ] || continue
+            if grep -qF "$hook" "$rc"; then
+                echo "$rc: already has nix hook"
+                continue
+            fi
+            printf '\n# Nix\nif [ -e '\''%s'\'' ]; then\n  . '\''%s'\''\nfi\n# End Nix\n' "$hook" "$hook" | sudo tee -a "$rc" >/dev/null
+            echo "$rc: nix hook restored"
+            changed=1
+        done
+        [ "$changed" -eq 1 ] && echo "open a new shell (or 'exec \$SHELL') to load nix"
         ;;
     --single)
         if command -v nix >/dev/null 2>&1; then
