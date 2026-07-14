@@ -36,12 +36,60 @@ if have postgres; then
         skip "postgresql: cluster already initialized"
     fi
 
-    if ! systemctl is-enabled --quiet postgresql 2>/dev/null; then
+    if systemctl is-enabled --quiet postgresql 2>/dev/null \
+        && systemctl is-active --quiet postgresql; then
+        skip "postgresql: service already enabled + running"
+    else
         log "postgresql: enabling + starting service"
         sudo systemctl enable --now postgresql
-    else
-        skip "postgresql: service already enabled"
     fi
 else
     skip "postgresql: not installed, nothing to init"
+fi
+
+# postgis: enable the extension where it's wanted
+# The package only drops files into /usr/lib/postgresql; every database opts in
+# with CREATE EXTENSION. Enable it in template1 so future `createdb`s inherit
+# it, and in postgres so scratch queries work out of the box.
+# NB: after pacman upgrades postgis, run `SELECT postgis_extensions_upgrade();`
+# per database -- that's maintenance, not install, so it doesn't live here.
+if have postgres && systemctl is-active --quiet postgresql; then
+    if sudo -u postgres psql -tAc \
+        "SELECT 1 FROM pg_available_extensions WHERE name = 'postgis'" | grep -q 1; then
+        for db in template1 postgres; do
+            if sudo -u postgres psql -d "$db" -tAc \
+                "SELECT 1 FROM pg_extension WHERE extname = 'postgis'" | grep -q 1; then
+                skip "postgis: extension already enabled in $db"
+            else
+                log "postgis: CREATE EXTENSION postgis in $db"
+                sudo -u postgres psql -d "$db" -c "CREATE EXTENSION IF NOT EXISTS postgis"
+            fi
+        done
+    else
+        skip "postgis: extension not available, nothing to enable"
+    fi
+else
+    skip "postgis: postgresql not running, can't enable extension"
+fi
+
+# docker: enable the daemon, let $USER talk to it without sudo
+# The socket is root-owned; membership in the docker group is the standard way
+# in (and is root-equivalent -- known tradeoff on a single-user machine).
+if have docker; then
+    if systemctl is-enabled --quiet docker 2>/dev/null \
+        && systemctl is-active --quiet docker; then
+        skip "docker: service already enabled + running"
+    else
+        log "docker: enabling + starting service"
+        sudo systemctl enable --now docker
+    fi
+
+    if id -nG "$USER" | grep -qw docker; then
+        skip "docker: $USER already in docker group"
+    else
+        log "docker: adding $USER to docker group (takes effect next login)"
+        sudo usermod -aG docker "$USER"
+    fi
+else
+    skip "docker: not installed, nothing to enable"
 fi
