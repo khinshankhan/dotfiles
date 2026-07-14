@@ -12,6 +12,13 @@
 #
 # Idempotent by construction -- every step checks before it acts, so re-running
 # is safe and boring. Add steps as guarded blocks, not bare commands.
+
+# Execute, don't source: this script flips shell options, opens fd 9 for the
+# lock, and names variables (PGDATA) that must not land in a live shell.
+if (return 0 2>/dev/null); then
+    echo "postinstall must be executed, not sourced" >&2
+    return 1
+fi
 set -euo pipefail
 
 log() {
@@ -23,6 +30,17 @@ skip() {
 have() {
     command -v "$1" >/dev/null 2>&1;
 }
+
+# Serialize overlapping runs. Every step is idempotent, but the guards are
+# check-then-act, so two simultaneous runs could race (worst case: dueling
+# initdb on a virgin data dir). Late runs wait their turn, then skip through.
+# flock ships in util-linux, part of base -- not a dep worth declaring.
+LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/gengar-postinstall.lock"
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+    log "another run holds $LOCKFILE; waiting for it to finish"
+    flock 9
+fi
 
 # postgresql: init the data dir, then enable the service
 # The package ships the binaries but not a database cluster; Arch leaves initdb
