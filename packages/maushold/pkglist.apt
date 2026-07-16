@@ -1,0 +1,21 @@
+# pkglist.apt --- the stuff Nix wouldn't take -*- mode: conf -*-
+#
+# Apply on a fresh machine with:
+#   grep -vE '^\s*(#|$)' packages/maushold/pkglist.apt | xargs sudo apt-get install -y
+#
+# This file is hand-curated -- edit it by hand. DO NOT `apt-mark showmanual >` over it;
+# that re-sorts, drops the comments, and murders every joke below. To spot drift
+# between this file and what's actually installed (comments/order ignored), run:
+#   apt-drift               # '-' = in here only, '+' = installed only
+# (a script in shell/.local/bin/)
+#
+# Rule 1: Nix first, apt only when Nix can't or won't. Everything below is here
+# because it lost that argument. Grouped by what it's for.
+#
+# Rule 2: see Rule 1.
+
+# bootstrap, chickens brawling with eggs
+git                                            # how this repo got here in the first place
+stow                                           # how this repo got everywhere else
+
+# (populate the rest from `apt-mark showmanual` on the machine, pruning anything Nix manages)

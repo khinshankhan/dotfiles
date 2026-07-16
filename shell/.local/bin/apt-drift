@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# apt-drift: compare a host's curated pkglist.apt against what's actually
+# installed manually (`apt-mark showmanual`), ignoring comments, grouping, and
+# order. '-' = in pkglist only, '+' = installed only. The Debian sibling of
+# brew-drift/pacman-drift; never touches the real pkglist (reads live state
+# from apt-mark).
+set -euo pipefail
+
+# hosts that actually have a pkglist.apt (other hosts use brew/pacman instead)
+hosts=$(ls "$HOME"/dotfiles/packages/*/pkglist.apt 2>/dev/null \
+    | xargs -n1 dirname | xargs -n1 basename | tr '\n' ' ')
+
+if [ -z "${1:-}" ]; then
+    echo "usage: apt-drift <host>" >&2
+    echo "available: ${hosts:-<none>}" >&2
+    exit 1
+fi
+host="$1"
+pkglist="$HOME/dotfiles/packages/$host/pkglist.apt"
+if [ ! -f "$pkglist" ]; then
+    echo "not an apt host: $host" >&2
+    echo "available: ${hosts:-<none>}" >&2
+    exit 1
+fi
+
+if ! command -v apt-mark >/dev/null 2>&1; then
+    echo "apt-mark not found -- run this on the Ubuntu host ($host)" >&2
+    exit 1
+fi
+
+# strip comments and blank lines, one package per line, sorted unique
+norm() {
+    sed -E 's/#.*//' "$1" \
+        | awk 'NF { print $1 }' \
+        | sort -u
+}
+
+actual="${TMPDIR:-/tmp}/pkglist.actual.$host.apt"
+apt-mark showmanual | sort -u > "$actual"
+echo "drift for $host (apt)  ('-' = in pkglist only, '+' = installed only):"
+git diff --no-index --color=always \
+    <(norm "$pkglist") "$actual" | tail -n +5 \
+    || true
