@@ -59,6 +59,7 @@ cask "zoom"                                    # you're on mute. you're still on
 cask "raycast"                                 # spotlight after a glow-up
 
 # terminals
+cask "ghostty"                                 # the terminal that just wants to be fast
 cask "warp"                                    # a terminal that went to design school
 cask "wezterm"                                 # the terminal that's also a tmux, configured in lua
 
