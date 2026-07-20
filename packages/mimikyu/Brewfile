@@ -1,0 +1,39 @@
+# Brewfile --- the stuff Nix wouldn't take -*- mode: ruby -*-
+#
+# Apply on a fresh machine with:
+#   brew bundle --file=packages/mimikyu/Brewfile
+#
+# This file is hand-curated -- edit it by hand. DO NOT `brew bundle dump` over it;
+# that re-sorts, re-splits, and murders every joke below. To spot drift between
+# this file and what's actually installed (comments/order ignored), run:
+#   brew-drift            # '-' = in here only, '+' = installed only
+# (a script in shell/.local/bin/)
+#
+# Rule 1: Nix first, brew only when Nix can't or won't. Everything below is here
+# because it lost that argument. Grouped by what it's for, not by brew-vs-cask
+# -- the keyword on each line already tells you that.
+#
+# Rule 2: see Rule 1.
+
+# defaults are for other people
+cask_args appdir: '~/Applications',           # GUI apps go in ~, not /Applications
+  require_sha: true                           # and only if they show a checksum
+
+# taps, third-party suppliers of dubious repute
+tap "railwaycat/emacsmacport", trusted: true  # the one working Emacs port
+
+# bootstrap, chickens brawling with eggs
+brew 'git'                                    # how this repo got here in the first place
+brew "stow"                                   # how this repo got everywhere else
+
+# editors / os
+brew "railwaycat/emacsmacport/emacs-mac@29"   # a great OS with a decent text editor
+
+# runtimes / toolchains
+brew "nvm"                                    # because node ships a new major before lunch
+
+# browsers
+cask "google-chrome"                          # the RAM goes where, exactly?
+
+# terminals
+cask "ghostty"                                # the terminal that just wants to be fast
