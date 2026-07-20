@@ -26,6 +26,13 @@ alias cls='clear'
 alias g='git'
 alias y='yui'
 
+# caffeinate - keep the mac awake (macOS only)
+if command -v caffeinate >/dev/null 2>&1; then
+    alias cf='caffeinate -dimsu &'
+    alias ck='pkill caffeinate'
+    alias ci='pgrep -l caffeinate'
+fi
+
 alias c='claude'
 alias cc='claude --dangerously-skip-permissions'
 alias x='codex'
