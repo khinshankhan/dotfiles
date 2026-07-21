@@ -26,11 +26,33 @@ alias cls='clear'
 alias g='git'
 alias y='yui'
 
-# caffeinate - keep the mac awake (macOS only)
+# caffeinate wrapper - `caf help` for usage. macOS only.
 if command -v caffeinate >/dev/null 2>&1; then
-    alias cf='caffeinate -dimsu &'
-    alias ck='pkill caffeinate'
-    alias ci='pgrep -l caffeinate'
+    caf() {
+        case "$1" in
+            off)       pkill caffeinate ;;
+            ls|status) pgrep -l caffeinate ;;
+            help|-h|--help)
+                cat <<'EOF'
+caf - keep the mac awake (wraps caffeinate -dimsu, backgrounded)
+
+  caf              stay awake until stopped
+  caf -t <secs>    stay awake for a duration       (e.g. caf -t 3600)
+  caf -w <pid>     stay awake until a PID exits
+  caf off          stop (kill all caffeinate procs)
+  caf ls           list running caffeinate procs
+  caf help         show this
+
+Start-mode flags pass through to caffeinate. To scope it instead, wrap a
+command: `caffeinate -dimsu make build` cleans up when the command exits.
+EOF
+                ;;
+            # -dimsu: display, idle, disk, system (AC only), user-activity.
+            # Lid-close sleep is the OS clamshell policy (set via pmset), not
+            # something these assertions override.
+            *)         caffeinate -dimsu "$@" & ;;
+        esac
+    }
 fi
 
 alias c='claude'
