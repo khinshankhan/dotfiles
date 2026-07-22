@@ -33,7 +33,9 @@ brew "railwaycat/emacsmacport/emacs-mac@29"   # a great OS with a decent text ed
 brew "nvm"                                    # because node ships a new major before lunch
 
 # browsers
-cask "google-chrome"                          # the RAM goes where, exactly?
+cask_args appdir: '~/Applications', require_sha: false do
+  cask "google-chrome"                        # the RAM goes where, exactly?
+end
 
 # terminals
 cask "ghostty"                                # the terminal that just wants to be fast
