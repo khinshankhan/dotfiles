@@ -50,16 +50,35 @@ fi
 # nvm
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-    # shellcheck disable=SC1090
-    . "$NVM_DIR/nvm.sh"
-fi
+# The git install keeps nvm.sh in NVM_DIR; `brew install nvm` keeps it under
+# the brew prefix and never creates NVM_DIR at all.
+for _nvm_prefix in "$NVM_DIR" /opt/homebrew/opt/nvm /usr/local/opt/nvm; do
+    [ -s "$_nvm_prefix/nvm.sh" ] || continue
 
-# Bash-only completion
-if [ -n "${BASH_VERSION-}" ] && [ -s "$NVM_DIR/bash_completion" ]; then
+    # nvm installs versions here, so it has to exist before we source.
+    [ -d "$NVM_DIR" ] || mkdir -p "$NVM_DIR"
+
     # shellcheck disable=SC1090
-    . "$NVM_DIR/bash_completion"
-fi
+    . "$_nvm_prefix/nvm.sh"
+
+    # Bash-only completion
+    if [ -n "${BASH_VERSION-}" ]; then
+        for _nvm_completion in "$_nvm_prefix/bash_completion" \
+                               "$_nvm_prefix/etc/bash_completion.d/nvm"; do
+            if [ -s "$_nvm_completion" ]; then
+                # shellcheck disable=SC1090
+                . "$_nvm_completion"
+                break
+            fi
+        done
+
+        unset _nvm_completion
+    fi
+
+    break
+done
+
+unset _nvm_prefix
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
