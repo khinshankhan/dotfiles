@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+main() {
+  case "${1:-}" in
+    -h|--help)
+      echo "Usage: $(basename "$0") [remote]"
+      echo ""
+      echo "Convert a GitHub remote's URL (default: origin) from HTTPS to SSH."
+      return 0
+      ;;
+  esac
+
+  local remote="${1:-origin}"
+
+  local current
+  current=$(git remote get-url "$remote" 2>/dev/null) || {
+    echo "Error: remote '$remote' not found" >&2
+    return 1
+  }
+
+  local ssh_url
+  ssh_url=$(gh-ssh-url "$current") || return 1
+
+  if [[ "$current" == "$ssh_url" ]]; then
+    echo "Remote '$remote' is already SSH: $current"
+    return 0
+  fi
+
+  git remote set-url "$remote" "$ssh_url"
+  echo "Set $remote: $current -> $ssh_url"
+}
+
+main "$@"
