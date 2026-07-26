@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# postinstall --- mimikyu (macOS)
+#
+# Run AFTER the Brewfile is applied:
+#   brew bundle --file=packages/mimikyu/Brewfile
+#   packages/mimikyu/postinstall          # <- you are here
+#
+# Home for the steps a Brewfile can't express: linking app bundles Homebrew
+# drops outside /Applications, one-time system config. A Brewfile installs
+# bytes; this makes them visible.
+#
+# Idempotent by construction -- every step checks before it acts, so re-running
+# is safe and boring. Add steps as guarded blocks, not bare commands.
+
+set -euo pipefail
+
+log() {
+    printf '\033[1;34m==>\033[0m %s\n' "$*";
+}
+skip() {
+    printf '\033[1;30m--\033[0m %s\n' "$*";
+}
+
+# emacs-mac: formula builds Emacs.app into the Cellar, but Spotlight/Launchpad
+# only index /Applications and ~/Applications -- neither formula nor `brew
+# bundle` puts it there. Symlink it into ~/Applications so it actually shows up.
+EMACS_APP="$(brew --prefix emacs-mac@29 2>/dev/null)/Emacs.app"
+EMACS_LINK="$HOME/Applications/Emacs.app"
+if [ -d "$EMACS_APP" ]; then
+    if [ -L "$EMACS_LINK" ] && [ "$(readlink "$EMACS_LINK")" = "$EMACS_APP" ]; then
+        skip "emacs-mac: ~/Applications/Emacs.app already linked"
+    else
+        log "emacs-mac: linking Emacs.app into ~/Applications"
+        mkdir -p "$HOME/Applications"
+        ln -sf "$EMACS_APP" "$EMACS_LINK"
+    fi
+else
+    skip "emacs-mac: not installed, nothing to link"
+fi
