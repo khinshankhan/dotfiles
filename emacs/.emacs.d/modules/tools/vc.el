@@ -12,6 +12,89 @@
 (package! vc-annotate
   :straight (:type built-in))
 
+;; Permalinks to the forge, for the current line or region.
+(defun shan--git-output (&rest args)
+  "Run git with ARGS, returning trimmed stdout, or nil if it failed."
+  (with-temp-buffer
+    (when (zerop (apply #'process-file "git" nil t nil args))
+      (let ((out (string-trim (buffer-string))))
+        (unless (string-empty-p out) out)))))
+
+(defun shan--git-remote-url-to-https (url)
+  "Normalize a git remote URL into a browsable https URL.
+Handles scp-style (git@host:org/repo.git), ssh:// and git:// remotes."
+  (let ((url (replace-regexp-in-string "\\.git\\'" "" (string-trim url))))
+    (cond
+     ;; git@github.com:org/repo -> https://github.com/org/repo
+     ((string-match "\\`[^/@]+@\\([^:]+\\):\\(.+\\)\\'" url)
+      (format "https://%s/%s" (match-string 1 url) (match-string 2 url)))
+     ;; ssh://git@github.com/org/repo, git://github.com/org/repo
+     ((string-match "\\`\\(?:ssh\\|git\\)://\\(?:[^/@]+@\\)?\\([^/]+\\)/\\(.+\\)\\'" url)
+      (format "https://%s/%s" (match-string 1 url) (match-string 2 url)))
+     (t url))))
+
+(defun shan--git-permalink-fragment (host start end)
+  "Build the line-anchor fragment for HOST, spanning START to END."
+  (let ((multi (and end (/= start end))))
+    (cond
+     ((string-match-p "bitbucket" host)
+      (if multi (format "#lines-%d:%d" start end) (format "#lines-%d" start)))
+     ;; github, gitlab, gitea, sourcehut and friends all agree on #Lx-Ly.
+     (multi (format "#L%d-L%d" start end))
+     (t (format "#L%d" start)))))
+
+(defun shan/git-permalink (&optional beg end)
+  "Copy a forge permalink to the current line to the kill ring.
+When a region is active, link the whole span of lines instead.
+
+The link pins the commit SHA rather than a branch so it does not rot,
+and prefers the upstream remote of the current branch, falling back to
+\\='origin\\='. With a prefix argument, the URL is also opened in a browser."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
+  (let ((file (buffer-file-name (buffer-base-buffer))))
+    (unless file
+      (user-error "Buffer is not visiting a file"))
+    (when (file-remote-p file)
+      (user-error "Cannot build a permalink for a remote file"))
+    (let* ((default-directory (file-name-directory file))
+           (root (or (shan--git-output "rev-parse" "--show-toplevel")
+                     (user-error "Not inside a git repository")))
+           (sha (or (shan--git-output "rev-parse" "HEAD")
+                    (user-error "Repository has no commits to link to")))
+           ;; Prefer wherever this branch actually tracks, else origin.
+           (remote (or (car (split-string
+                             (or (shan--git-output
+                                  "rev-parse" "--abbrev-ref" "--symbolic-full-name" "@{upstream}")
+                                 "")
+                             "/" t))
+                       "origin"))
+           (url (shan--git-remote-url-to-https
+                 (or (shan--git-output "remote" "get-url" remote)
+                     (user-error "Remote %S has no URL" remote))))
+           (relative (file-relative-name file (file-name-as-directory root)))
+           (start (line-number-at-pos (or beg (point)) t))
+           ;; A region ending at column 0 visually stops on the previous line.
+           (finish (when end
+                     (line-number-at-pos
+                      (if (and (> end beg) (= (save-excursion (goto-char end) (current-column)) 0))
+                          (1- end)
+                        end)
+                      t)))
+           (link (concat url "/blob/" sha "/"
+                         (mapconcat #'url-hexify-string
+                                    (split-string relative "/")
+                                    "/")
+                         (shan--git-permalink-fragment url start finish))))
+      (kill-new link)
+      (when current-prefix-arg
+        (browse-url link))
+      (message "%s" link)
+      link)))
+
+(global-set-key (kbd "C-c g") #'shan/git-permalink)
+
 (package! smerge-mode
   :straight (:type built-in))
 
