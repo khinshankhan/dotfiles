@@ -1,5 +1,6 @@
 (require 'core-straight)
 (require 'core-paths)
+(require 'url-parse)
 
 (package! vc
   :straight (:type built-in)
@@ -33,9 +34,12 @@ Handles scp-style (git@host:org/repo.git), ssh:// and git:// remotes."
       (format "https://%s/%s" (match-string 1 url) (match-string 2 url)))
      (t url))))
 
-(defun shan--git-permalink-fragment (host start end)
-  "Build the line-anchor fragment for HOST, spanning START to END."
-  (let ((multi (and end (/= start end))))
+(defun shan--git-permalink-fragment (url start end)
+  "Build the line-anchor fragment for URL, spanning START to END.
+Only the host is inspected: an org or repo named e.g. \"bitbucket-migration\"
+must not be mistaken for a Bitbucket forge."
+  (let ((multi (and end (/= start end)))
+        (host (or (url-host (url-generic-parse-url url)) "")))
     (cond
      ((string-match-p "bitbucket" host)
       (if multi (format "#lines-%d:%d" start end) (format "#lines-%d" start)))
