@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 's)
+(require 'cl-lib)
 
 (defmacro k-time! (&rest body)
   "Measure and return the time it takes evaluating BODY."
@@ -214,6 +215,114 @@ This is a wrapper around `eval-after-load' that:
   "Copy the current file path to kill ring."
   (interactive)
   (kill-new (buffer-name)))
+
+(defun shan--parse-file-ref (ref)
+  "Parse REF of the form \"path\", \"path:line\", \"path:line:col\" or \"path:line-end\".
+Return a plist of :path, :line and :col.  Line and column are nil when absent.
+The path is returned verbatim; resolving it is `shan--resolve-file-ref's job."
+  (let ((ref (s-trim ref)))
+    ;; Strip a trailing colon so "path:32:" parses like "path:32".
+    (setq ref (replace-regexp-in-string ":\\'" "" ref))
+    (if (string-match
+         ;; Anchor the suffix so drive letters (C:/…) and "path:12" both work:
+         ;; only trailing digit groups count as line/column.
+         "\\`\\(.*?\\):\\([0-9]+\\)\\(?::\\([0-9]+\\)\\|-[0-9]+\\)?\\'" ref)
+        (list :path (match-string 1 ref)
+              :line (string-to-number (match-string 2 ref))
+              :col  (when (match-string 3 ref)
+                      (string-to-number (match-string 3 ref))))
+      (list :path ref :line nil :col nil))))
+
+(defun shan--resolve-file-ref (path)
+  "Return PATH as an absolute path if it names an existing file, else nil."
+  (let ((path (ignore-errors
+                (expand-file-name (substitute-in-file-name path)))))
+    (when (and path (file-exists-p path) (not (file-directory-p path)))
+      path)))
+
+(defun shan--file-ref-candidates ()
+  "Return the directories a relative file reference should be resolved against.
+Ordered nearest-first: the current directory, the visited file's directory,
+then the project and git roots."
+  (delq nil
+        (list default-directory
+              (when buffer-file-name
+                (file-name-directory buffer-file-name))
+              (when (fboundp 'projectile-project-root)
+                (projectile-project-root))
+              (locate-dominating-file default-directory ".git"))))
+
+(defun shan--file-ref-at-point ()
+  "Return a likely file reference near point, or from the clipboard.
+Checks the region, then the text around point, then the kill ring and system
+clipboard, preferring the first that contains a path-like token."
+  (let ((candidates
+         (delq nil
+               (list (when (use-region-p)
+                       (buffer-substring-no-properties
+                        (region-beginning) (region-end)))
+                     (thing-at-point 'filename t)
+                     (ignore-errors (current-kill 0 t))
+                     (ignore-errors (gui-get-selection 'CLIPBOARD 'STRING))))))
+    (or (cl-find-if (lambda (s)
+                      (and (stringp s)
+                           (string-match-p "\\`[^\n]*[/.][^\n]*\\'" (s-trim s))))
+                    candidates)
+        "")))
+
+(defun shan/find-file-at-ref (ref)
+  "Visit the file named by REF, jumping to any line and column it carries.
+REF is a string like \"emacs/.emacs.d/activate.el:32\" as printed by grep,
+compilers and code review tools.  Forms \"path:line\", \"path:line:col\" and
+\"path:line-end\" are all understood, as is a bare path.
+
+Interactively, the default is taken from the region, the symbol at point, or
+the clipboard - whichever first looks like a file reference - so a pasted ref
+usually just needs \\<minibuffer-local-map>\\[next-history-element] then RET."
+  (interactive
+   (list (read-string "Open ref: " (shan--file-ref-at-point))))
+  (let* ((parsed (shan--parse-file-ref ref))
+         (raw (plist-get parsed :path))
+         (line (plist-get parsed :line))
+         (col (plist-get parsed :col))
+         (file (or (shan--resolve-file-ref raw)
+                   ;; Retry the bare path against each candidate root.
+                   (cl-loop for dir in (shan--file-ref-candidates)
+                            for try = (shan--resolve-file-ref
+                                       (expand-file-name raw dir))
+                            when try return try))))
+    (unless file
+      (user-error "No such file: %s" raw))
+    (find-file file)
+    (when line
+      ;; Widen first: a narrowed buffer would otherwise clamp the jump.
+      (widen)
+      (goto-char (point-min))
+      (forward-line (1- line))
+      (when col
+        (forward-char (min (1- col)
+                           (- (line-end-position) (point))))))
+    file))
+
+(defun shan/copy-file-ref ()
+  "Copy the current file and line as \"path:line\", relative to the project.
+The inverse of `shan/find-file-at-ref' - what you paste elsewhere."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Buffer is not visiting a file"))
+  (let* ((root (or (when (fboundp 'projectile-project-root)
+                     (projectile-project-root))
+                   (locate-dominating-file buffer-file-name ".git")))
+         (path (if root
+                   (file-relative-name buffer-file-name root)
+                 buffer-file-name))
+         (ref (format "%s:%d" path (line-number-at-pos nil t))))
+    (kill-new ref)
+    (message "%s" ref)
+    ref))
+
+(global-set-key (kbd "C-c f") #'shan/find-file-at-ref)
+(global-set-key (kbd "C-c F") #'shan/copy-file-ref)
 
 (defun shan/copy-hooks-to (from-hook to-hook)
   "Copy one list of hooks to another, from FROM-HOOK into TO-HOOK.
