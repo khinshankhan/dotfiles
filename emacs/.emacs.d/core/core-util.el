@@ -321,8 +321,8 @@ The inverse of `shan/find-file-at-ref' - what you paste elsewhere."
     (message "%s" ref)
     ref))
 
-(global-set-key (kbd "C-c f") #'shan/find-file-at-ref)
-(global-set-key (kbd "C-c F") #'shan/copy-file-ref)
+(global-set-key (kbd "C-c l") #'shan/find-file-at-ref)
+(global-set-key (kbd "C-c L") #'shan/copy-file-ref)
 
 (defun shan/copy-hooks-to (from-hook to-hook)
   "Copy one list of hooks to another, from FROM-HOOK into TO-HOOK.
