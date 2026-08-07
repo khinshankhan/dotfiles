@@ -54,6 +54,7 @@ cask "google-chrome"                           # the RAM goes where, exactly?
 cask "slack"                                   # where focus goes to be interrupted
 cask "notion"                                  # docs, wikis, and a database you'll never finish
 cask "zoom"                                    # you're on mute. you're still on mute.
+cask "granola"                                 # takes the notes you were never going to take
 
 # launcher
 cask "raycast"                                 # spotlight after a glow-up
