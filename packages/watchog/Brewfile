@@ -51,6 +51,9 @@ brew "terminal-notifier"                       # so long-running jobs can finall
 brew "ffmpeg"                                  # converts anything into anything, eventually
 brew "libtiff"                                 # the image format that refuses to retire
 
+# networking
+brew "tailscale"                               # wireguard, minus the config file
+
 # browsers
 cask "google-chrome"                           # the RAM goes where, exactly?
 
