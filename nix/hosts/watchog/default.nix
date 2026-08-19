@@ -29,6 +29,7 @@
       ../../modules/tools/gh.nix
       ../../modules/tools/git-lfs.nix
       ../../modules/tools/glow.nix
+      ../../modules/tools/herdr.nix
       ../../modules/tools/ngrok.nix
       ../../modules/tools/ripgrep.nix
       ../../modules/tools/sox.nix
@@ -69,6 +70,7 @@
     modules.tools.gh.enable = true;
     modules.tools.git-lfs.enable = true;
     modules.tools.glow.enable = true;
+    modules.tools.herdr.enable = true;
     modules.tools.ngrok.enable = true;
     modules.tools.ripgrep.enable = true;
     modules.tools.sox.enable = true;
