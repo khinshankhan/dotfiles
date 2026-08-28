@@ -67,6 +67,9 @@ cask "wispr-flow"                              # higher wpm than the keyboard, a
 # launcher
 cask "raycast"                                 # spotlight after a glow-up
 
+# automation
+cask "hammerspoon"                             # applescript, minus the applescript
+
 # terminals
 cask "ghostty"                                 # the terminal that just wants to be fast
 cask "warp"                                    # a terminal that went to design school
