@@ -1,0 +1,4 @@
+# Send Alt/Meta instead of composing macOS special characters, so terminal
+# apps can bind Option+key. Without this, Option+o types "ø" and Option+[
+# types a curly quote, and tmux never sees a keypress at all.
+macos-option-as-alt = true
