@@ -61,6 +61,26 @@ alias x='codex'
 alias xx='codex --approval-mode full-auto'
 alias o='opencode'
 
+# Reload the Hammerspoon config.
+hsr() {
+    local hs_cli=/opt/homebrew/bin/hs
+    if [ ! -x "$hs_cli" ]; then
+        # Falls back to the URL handler, which works without hs.ipc but
+        # cannot report whether the config actually loaded.
+        open -g "hammerspoon://reload" 2>/dev/null &&
+            echo "hsr: reload requested (hs CLI not installed)" && return 0
+        echo "hsr: hammerspoon cli not found at $hs_cli" >&2
+        return 1
+    fi
+    "$hs_cli" -c "hs.reload()" >/dev/null 2>&1
+    # The reload tears down the IPC socket mid-call, so a nonzero exit
+    # here is expected and says nothing about success. Ask afterwards.
+    sleep 0.5
+    "$hs_cli" -c "print('ok')" >/dev/null 2>&1 &&
+        echo "hsr: reloaded" ||
+        { echo "hsr: config failed to load -- check the Hammerspoon console" >&2; return 1; }
+}
+
 # Prompt: starship if installed, else a plain built-in fallback. The fallback
 # only matters on a fresh machine before nix installs starship.
 if [ -n "${BASH_VERSION-}" ]; then
