@@ -13,7 +13,7 @@ tmv() {
         echo "tmv: not in a tmux session and no dst_session given" >&2
         return 1
     fi
-    tmux move-window -s "$1" -t "$dst"
+    tmux move-window -a -s "$1" -t "=$dst:$"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tmv "$@"; fi
