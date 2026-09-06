@@ -12,6 +12,8 @@
       ../../modules/fonts/hack.nix
       ../../modules/fonts/jetbrains-mono.nix
       ../../modules/fonts/source-code-pro.nix
+      ../../modules/fonts/emoji-fontconfig.nix
+      ../../modules/fonts/noto-color-emoji.nix
       ../../modules/fonts/symbola.nix
       ../../modules/shell/direnv.nix
       ../../modules/shell/starship.nix
@@ -46,6 +48,8 @@
     modules.fonts.hack.enable = true;
     modules.fonts.jetbrains-mono.enable = true;
     modules.fonts.source-code-pro.enable = true;
+    modules.fonts.emoji-fontconfig.enable = true;
+    modules.fonts.noto-color-emoji.enable = true;
     modules.fonts.symbola.enable = true;
     modules.shell.direnv.enable = true;
     modules.shell.starship.enable = true;
