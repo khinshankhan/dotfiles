@@ -22,9 +22,9 @@ if [ ! -f "$brewfile" ]; then
 fi
 
 norm() {
-    grep -E '^(tap|brew|cask) ' "$1" \
+    grep -E '^[[:space:]]*(tap|brew|cask) ' "$1" \
         | sed -E 's/#.*//' \
-        | sed -E "s/^(tap|brew|cask) +['\"]([^'\"]+)['\"].*/\1 \2/" \
+        | sed -E "s/^[[:space:]]*(tap|brew|cask) +['\"]([^'\"]+)['\"].*/\1 \2/" \
         | awk '{ if ($1=="brew"||$1=="cask"){ n=split($2,a,"/"); $2=a[n] } print }' \
         | sort -u
 }
