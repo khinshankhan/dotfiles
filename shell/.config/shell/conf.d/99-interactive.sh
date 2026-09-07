@@ -109,3 +109,12 @@ if command -v direnv >/dev/null 2>&1; then
         eval "$(direnv hook zsh)"
     fi
 fi
+
+# mise – re-resolve tool versions on cd
+if command -v mise >/dev/null 2>&1; then
+    if [ -n "${BASH_VERSION-}" ]; then
+        eval "$(mise activate bash)"
+    elif [ -n "${ZSH_VERSION-}" ]; then
+        eval "$(mise activate zsh)"
+    fi
+fi

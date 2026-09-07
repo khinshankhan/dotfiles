@@ -80,6 +80,19 @@ done
 
 unset _nvm_prefix
 
+# mise
+# Resolves per-project tool versions (bun, node, python, terraform, go, ...) from
+# a repo's mise.toml. Shims here so non-interactive shells get them too; the
+# interactive `mise activate` hook lives in 99-interactive.sh.
+if command -v mise >/dev/null 2>&1; then
+    if [ -n "${BASH_VERSION-}" ]; then
+        eval "$(mise activate bash --shims)"
+    elif [ -n "${ZSH_VERSION-}" ]; then
+        eval "$(mise activate zsh --shims)"
+    fi
+    export PATH
+fi
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 path_prepend_if_dir "$BUN_INSTALL/bin"

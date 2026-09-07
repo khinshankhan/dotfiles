@@ -8,6 +8,7 @@
       ../../modules/dev/node.nix
       ../../modules/dev/python.nix
       ../../modules/dev/lua.nix
+      ../../modules/dev/mise.nix
       ../../modules/dev/shell.nix
       ../../modules/fonts/hack.nix
       ../../modules/fonts/jetbrains-mono.nix
@@ -51,6 +52,7 @@
     modules.dev.node.enable = true;
     modules.dev.python.enable = true;
     modules.dev.lua.enable = true;
+    modules.dev.mise.enable = true;
     modules.dev.shell.enable = true;
     modules.fonts.hack.enable = true;
     modules.fonts.jetbrains-mono.enable = true;
