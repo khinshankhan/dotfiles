@@ -81,6 +81,27 @@ hsr() {
         { echo "hsr: config failed to load -- check the Hammerspoon console" >&2; return 1; }
 }
 
+# validate the ghostty config before reloading it with ctrl+shift+,
+# a broken config fails quietly -- ghostty keeps the last good values and only
+# logs the error, so a typo just looks like the reload didn't take
+if command -v ghostty >/dev/null 2>&1; then
+    ghostty-validate() {
+        local cfg="${1:-$HOME/dotfiles/ghostty/.config/ghostty/config}"
+        if [ ! -f "$cfg" ]; then
+            echo "ghostty-validate: no config at $cfg" >&2
+            return 1
+        fi
+        # the =path form is required. with a space, ghostty 1.3.1 ignores the
+        # path and exits 0 on anything, so a broken file looks fine
+        if ghostty +validate-config --config-file="$cfg" 2>&1; then
+            echo "ghostty-validate: ok -- $cfg"
+        else
+            echo "ghostty-validate: invalid -- $cfg" >&2
+            return 1
+        fi
+    }
+fi
+
 # Prompt: starship if installed, else a plain built-in fallback. The fallback
 # only matters on a fresh machine before nix installs starship.
 if [ -n "${BASH_VERSION-}" ]; then

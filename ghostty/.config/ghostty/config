@@ -1,4 +1,110 @@
-# Send Alt/Meta instead of composing macOS special characters, so terminal
-# apps can bind Option+key. Without this, Option+o types "ø" and Option+[
-# types a curly quote, and tmux never sees a keypress at all.
+# ported from the wezterm and warp configs in this repo, so all three
+# terminals look and behave the same. only settings that differ from the
+# defaults are here -- `ghostty +show-config --default --docs` has the rest.
+
+# same fallback chain as wezterm.lua. ghostty falls through the list per
+# glyph, so the nerd font first means icons resolve without a patched fallback
+font-family = Hack Nerd Font Mono
+font-family = JetBrainsMono Nerd Font Mono
+font-family = Fira Code
+font-family = Source Code Pro
+font-size = 16
+
+# no ligatures, matching warp. keeps != and -> from fusing
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
+
+# one dark-ish palette, carried over from wezterm.lua
+background = #272a30
+foreground = #d4d4d4
+cursor-color = #d4d4d4
+cursor-text = #272a30
+selection-background = #3d4148
+
+palette = 0=#1e2127
+palette = 1=#e06c75
+palette = 2=#98c379
+palette = 3=#e5c07b
+palette = 4=#61afef
+palette = 5=#c678dd
+palette = 6=#56b6c2
+palette = 7=#abb2bf
+palette = 8=#5c6370
+palette = 9=#e06c75
+palette = 10=#98c379
+palette = 11=#e5c07b
+palette = 12=#61afef
+palette = 13=#c678dd
+palette = 14=#56b6c2
+palette = 15=#ffffff
+
+# warp only bumped contrast on named colors. ghostty applies this everywhere,
+# so keep it low or it washes out the palette above
+minimum-contrast = 1.1
+
+# i3 draws the border, so no titlebar and no padding
+window-padding-x = 0
+window-padding-y = 0
+window-padding-balance = true
+window-decoration = none
+window-theme = ghostty
+window-titlebar-background = #2c3038
+window-titlebar-foreground = #d4d4d4
+
+# auto hides the tab bar at one tab. use `always` to pin it like wezterm did
+window-show-tab-bar = auto
+gtk-tabs-location = top
+gtk-wide-tabs = false
+gtk-titlebar = false
+
+# new tabs and splits open next to the current one and keep the cwd
+window-new-tab-position = current
+window-inherit-working-directory = true
+window-inherit-font-size = true
+split-inherit-working-directory = true
+split-divider-color = #21242a
+unfocused-split-opacity = 1.0
+
+# steady bar, no blink. wezterm and warp both agreed on this
+cursor-style = bar
+cursor-style-blink = false
+
+# NOTE: this is a byte budget per surface, not a line count like wezterm's
+# scrollback_lines. 64mb is roughly warp's 50k-line grid
+scrollback-limit = 67108864
+scrollbar = never
+scroll-to-bottom = keystroke,no-output
+mouse-scroll-multiplier = discrete:3
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+confirm-close-surface = true
+window-save-state = always
+quit-after-last-window-closed = false
+
+# silence the bell
+bell-features = no-audio
+
+# tell me when something long finishes while i'm in another window
+notify-on-command-finish = unfocused
+notify-on-command-finish-after = 30s
+
+# send alt/meta instead of composing macos special characters, so terminal
+# apps can bind option+key. without this, option+o types "ø" and option+[
+# types a curly quote, and tmux never sees a keypress at all. inert on linux
 macos-option-as-alt = true
+
+# splits and panes, using wezterm's ctrl+shift mod. alt+1..8 for tabs and
+# ctrl+alt+arrows for splits are already ghostty defaults, so they're not here
+keybind = ctrl+shift+d=new_split:right
+keybind = ctrl+shift+alt+d=new_split:down
+keybind = ctrl+shift+w=close_surface
+keybind = ctrl+shift+bracket_left=goto_split:previous
+keybind = ctrl+shift+bracket_right=goto_split:next
+keybind = ctrl+shift+alt+z=toggle_split_zoom
+keybind = ctrl+shift+alt+e=equalize_splits
+keybind = ctrl+shift+f=toggle_fullscreen
+keybind = ctrl+shift+k=clear_screen
+# ghostty's defaults stop at 8
+keybind = alt+9=goto_tab:9
+keybind = ctrl+shift+p=toggle_command_palette
