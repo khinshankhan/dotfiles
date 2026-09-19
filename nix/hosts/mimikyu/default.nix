@@ -46,6 +46,7 @@
       ../../modules/tools/gh.nix
       ../../modules/tools/git-lfs.nix
       ../../modules/tools/gnupg.nix
+      ../../modules/tools/imagemagick.nix
       ../../modules/tools/ripgrep.nix
       ../../modules/tools/sox.nix
       ../../modules/tools/tesseract.nix
@@ -85,6 +86,7 @@
     modules.tools.gh.enable = true;
     modules.tools.git-lfs.enable = true;
     modules.tools.gnupg.enable = true;
+    modules.tools.imagemagick.enable = true;
     modules.tools.ripgrep.enable = true;
     modules.tools.sox.enable = true;
     modules.tools.tesseract.enable = true;
