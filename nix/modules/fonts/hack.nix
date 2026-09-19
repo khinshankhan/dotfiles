@@ -1,3 +1,4 @@
+# hack --- the font, not the verb
 { lib, config, pkgs, ... }:
 
 let

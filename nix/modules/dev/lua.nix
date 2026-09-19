@@ -1,3 +1,4 @@
+# lua --- one-based indices? one-based indices
 { lib, config, pkgs, ... }:
 
 let
@@ -9,8 +10,8 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      lua
-      stylua
+      lua               # one-based indices? one-based indices
+      stylua            # formats lua, arguments not accepted
     ];
   };
 }

@@ -1,3 +1,4 @@
+# node --- the runtime stays with nvm; nix only gets the accessories
 { lib, config, pkgs, ... }:
 
 let
@@ -9,8 +10,8 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      pnpm
-      vscode-js-debug
+      pnpm              # npm, but node_modules is hardlinks and the disk thanks you
+      vscode-js-debug   # vscode's debugger, liberated for dap
     ];
   };
 }

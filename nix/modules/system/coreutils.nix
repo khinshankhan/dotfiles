@@ -1,3 +1,4 @@
+# coreutils --- the same ls on every machine, flags included
 { lib, config, pkgs, ... }:
 
 let

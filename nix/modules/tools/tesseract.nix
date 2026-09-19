@@ -1,3 +1,4 @@
+# tesseract --- reads the screenshot you should have copy-pasted
 { lib, config, pkgs, ... }:
 
 let

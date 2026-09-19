@@ -1,3 +1,4 @@
+# tree --- ls, drawn as a family tree
 { lib, config, pkgs, ... }:
 
 let

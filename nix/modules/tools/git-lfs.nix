@@ -1,3 +1,4 @@
+# git-lfs --- for the files git was never meant to hold
 { lib, config, pkgs, ... }:
 
 let

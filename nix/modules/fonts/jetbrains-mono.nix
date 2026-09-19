@@ -1,3 +1,4 @@
+# jetbrains-mono --- ligatures from the people who bill for the ide
 { lib, config, pkgs, ... }:
 
 let

@@ -1,3 +1,4 @@
+# fd --- find, minus the man page
 { lib, config, pkgs, ... }:
 
 let

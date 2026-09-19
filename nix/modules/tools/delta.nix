@@ -1,3 +1,4 @@
+# delta --- diffs you can read without squinting at the red
 { lib, config, pkgs, ... }:
 
 let

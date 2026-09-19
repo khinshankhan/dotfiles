@@ -1,3 +1,4 @@
+# ngrok --- localhost, but your coworker can see it
 { lib, config, pkgs, ... }:
 
 let

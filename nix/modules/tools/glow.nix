@@ -1,3 +1,4 @@
+# glow --- renders the docs people wrote for others to ignore
 { lib, config, pkgs, ... }:
 
 let

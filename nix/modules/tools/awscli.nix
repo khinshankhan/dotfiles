@@ -1,3 +1,4 @@
+# awscli --- three-letter services, subcommands all the way down
 { lib, config, pkgs, ... }:
 
 let

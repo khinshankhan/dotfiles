@@ -1,3 +1,4 @@
+# herdr --- a shepherd for agents that wander off
 { lib, config, pkgs, ... }:
 
 let

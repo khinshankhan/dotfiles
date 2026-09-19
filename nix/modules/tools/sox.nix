@@ -1,3 +1,4 @@
+# sox --- the swiss army knife of sound, and why go-play is called that
 { lib, config, pkgs, ... }:
 
 let

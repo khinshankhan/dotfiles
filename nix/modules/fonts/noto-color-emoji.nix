@@ -1,3 +1,4 @@
+# noto-color-emoji --- so the emoji come in color (emoji-fontconfig makes sure)
 { lib, config, pkgs, ... }:
 
 let

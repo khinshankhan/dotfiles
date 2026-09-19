@@ -1,3 +1,4 @@
+# zig --- C, but simpler
 { lib, config, pkgs, ... }:
 
 let
@@ -9,8 +10,8 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      zig
-      zls
+      zig               # C, but simpler
+      zls               # the language server, written in zig, naturally
     ];
   };
 }

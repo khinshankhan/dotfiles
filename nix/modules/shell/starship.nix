@@ -1,3 +1,4 @@
+# starship --- a prompt that knows the branch before you do
 { lib, config, pkgs, ... }:
 
 let

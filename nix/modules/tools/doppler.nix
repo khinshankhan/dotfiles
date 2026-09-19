@@ -1,3 +1,4 @@
+# doppler --- secrets injected at runtime, never exported, never hardcoded
 { lib, config, pkgs, ... }:
 
 let

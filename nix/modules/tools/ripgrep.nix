@@ -1,3 +1,4 @@
+# ripgrep --- grep, but it read the .gitignore first
 { lib, config, pkgs, ... }:
 
 let

@@ -1,3 +1,4 @@
+# emoji-fontconfig --- the referee between noto and symbola
 { lib, config, ... }:
 
 let

@@ -1,3 +1,4 @@
+# direnv --- cd in, come out with a different environment
 { lib, config, pkgs, ... }:
 
 let

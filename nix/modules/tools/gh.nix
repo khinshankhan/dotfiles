@@ -1,3 +1,4 @@
+# gh --- github without the browser tab
 { lib, config, pkgs, ... }:
 
 let

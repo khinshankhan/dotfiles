@@ -1,3 +1,4 @@
+# findutils --- gnu find, because bsd find argues about argument order
 { lib, config, pkgs, ... }:
 
 let

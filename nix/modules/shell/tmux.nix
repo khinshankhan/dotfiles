@@ -1,3 +1,4 @@
+# tmux --- the terminal that outlives the terminal
 { lib, config, pkgs, ... }:
 
 let

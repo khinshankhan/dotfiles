@@ -1,3 +1,4 @@
+# shell --- she sells {ba,z,fi}sh shells on the C xor
 { lib, config, pkgs, ... }:
 
 let
@@ -9,8 +10,8 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      bash
-      shellcheck
+      bash              # macos ships 3.2 from 2007 out of spite; this one is from this decade
+      shellcheck        # tells you why the quotes matter, every single time
     ];
   };
 }

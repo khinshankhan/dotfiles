@@ -1,8 +1,17 @@
+# watchog --- work mac (aarch64-darwin)
+#
+# The lookout pokemon. Never blinks, always on call. Fitting.
+#
+# Rule 1: Nix first. Everything below won that argument; the losers are in
+# packages/watchog/Brewfile, mostly because they have a window.
+#
+# Rule 2: see Rule 1.
 {
   system = "aarch64-darwin";
 
   module = { pkgs, ... }: {
     imports = [
+      # dev, languages and their entourage
       ../../modules/dev/go.nix
       ../../modules/dev/nix.nix
       ../../modules/dev/node.nix
@@ -10,18 +19,26 @@
       ../../modules/dev/lua.nix
       ../../modules/dev/mise.nix
       ../../modules/dev/shell.nix
+
+      # fonts, because the terminal has to look at something
       ../../modules/fonts/hack.nix
       ../../modules/fonts/jetbrains-mono.nix
       ../../modules/fonts/source-code-pro.nix
       ../../modules/fonts/emoji-fontconfig.nix
       ../../modules/fonts/noto-color-emoji.nix
       ../../modules/fonts/symbola.nix
+
+      # shell, the parts of the prompt that aren't the prompt
       ../../modules/shell/direnv.nix
       ../../modules/shell/starship.nix
       ../../modules/shell/tmux.nix
-      ../../modules/tools/aspell.nix
+
+      # system, gnu replacements so flags mean the same thing everywhere
       ../../modules/system/coreutils.nix
       ../../modules/system/findutils.nix
+
+      # tools, standalone and unaffiliated
+      ../../modules/tools/aspell.nix
       ../../modules/tools/awscli.nix
       ../../modules/tools/delta.nix
       ../../modules/tools/doppler.nix
@@ -47,6 +64,8 @@
 
     programs.home-manager.enable = true;
 
+    # importing a module says it exists. enabling it says it's on. yes, both.
+    # yes, every time. the readme calls this flexibility.
     modules.dev.go.enable = true;
     modules.dev.nix.enable = true;
     modules.dev.node.enable = true;

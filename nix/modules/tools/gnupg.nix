@@ -1,3 +1,4 @@
+# gnupg --- signs, encrypts, and asks for the passphrase again
 { lib, config, pkgs, ... }:
 
 let

@@ -1,3 +1,4 @@
+# duckdb --- sqlite for people with a csv problem
 { lib, config, pkgs, ... }:
 
 let

@@ -1,3 +1,4 @@
+# aspell --- tasing you for misspelling mispelling
 { lib, config, pkgs, ... }:
 
 let
@@ -10,7 +11,7 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = [
       (pkgs.aspellWithDicts (dicts: with dicts; [
-        en
+        en                # the only language it gets to tase me in
       ]))
     ];
   };

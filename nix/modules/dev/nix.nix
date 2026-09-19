@@ -1,3 +1,4 @@
+# nix --- an lsp for the language that installs the lsps
 { lib, config, pkgs, ... }:
 
 let

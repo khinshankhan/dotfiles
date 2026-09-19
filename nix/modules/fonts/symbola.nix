@@ -1,3 +1,4 @@
+# symbola --- every codepoint, one color
 { lib, config, pkgs, ... }:
 
 let

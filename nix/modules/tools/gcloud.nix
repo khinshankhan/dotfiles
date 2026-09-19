@@ -1,3 +1,4 @@
+# gcloud --- aws, but the docs are a search box
 { lib, config, pkgs, ... }:
 
 let
