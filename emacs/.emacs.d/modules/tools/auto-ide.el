@@ -1,3 +1,4 @@
+;;; auto-ide.el --- -*- lexical-binding: t; -*-
 (require 'core-paths)
 
 ;; Add an hydra to a list, based on a mode, which then gets resolved by `auto-ide/resolve'.

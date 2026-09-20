@@ -1,3 +1,4 @@
+;;; erlang.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/erlang-ls/erlang_ls
 (require 'core-straight)
 

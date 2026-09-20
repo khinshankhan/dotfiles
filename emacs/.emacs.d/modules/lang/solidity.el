@@ -1,3 +1,4 @@
+;;; solidity.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add solidity-language-server
 (require 'core-straight)
 

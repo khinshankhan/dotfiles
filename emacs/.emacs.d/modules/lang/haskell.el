@@ -1,3 +1,4 @@
+;;; haskell.el --- -*- lexical-binding: t; -*-
 ;; LSP: ghcup install hls
 (require 'core-straight)
 

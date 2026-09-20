@@ -1,3 +1,4 @@
+;;; cc.el --- -*- lexical-binding: t; -*-
 ;; LSP: clangd (usually bundled with llvm/clang)
 (require 'core-straight)
 

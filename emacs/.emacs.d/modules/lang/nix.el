@@ -1,3 +1,4 @@
+;;; nix.el --- -*- lexical-binding: t; -*-
 ;; LSP: nix profile install nixpkgs#nil
 (require 'core-straight)
 

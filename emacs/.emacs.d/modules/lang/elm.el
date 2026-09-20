@@ -1,3 +1,4 @@
+;;; elm.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add @elm-tooling/elm-language-server
 (require 'core-straight)
 

@@ -1,3 +1,4 @@
+;;; ocaml.el --- -*- lexical-binding: t; -*-
 ;; LSP: opam install ocaml-lsp-server
 (require 'core-straight)
 

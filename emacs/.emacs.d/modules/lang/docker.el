@@ -1,3 +1,4 @@
+;;; docker.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add dockerfile-language-server-nodejs
 (require 'core-straight)
 

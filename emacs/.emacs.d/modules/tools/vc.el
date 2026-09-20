@@ -1,3 +1,4 @@
+;;; vc.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 (require 'core-paths)
 (require 'url-parse)

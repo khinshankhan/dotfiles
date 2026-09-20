@@ -1,3 +1,4 @@
+;;; dart.el --- -*- lexical-binding: t; -*-
 ;; LSP: dart language-server (bundled with Dart SDK)
 (require 'core-straight)
 

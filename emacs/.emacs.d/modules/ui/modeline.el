@@ -1,3 +1,4 @@
+;;; modeline.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (straight-register-package

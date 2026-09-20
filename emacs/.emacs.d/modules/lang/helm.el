@@ -1,3 +1,4 @@
+;;; helm.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (with-module! :lang web

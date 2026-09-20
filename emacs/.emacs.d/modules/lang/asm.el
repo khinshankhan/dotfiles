@@ -1,3 +1,4 @@
+;;; asm.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! asm-mode

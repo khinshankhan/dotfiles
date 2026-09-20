@@ -1,3 +1,4 @@
+;;; lua.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/LuaLS/lua-language-server
 (require 'core-straight)
 

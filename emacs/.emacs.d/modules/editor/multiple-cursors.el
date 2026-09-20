@@ -1,3 +1,4 @@
+;;; multiple-cursors.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! multiple-cursors

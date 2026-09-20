@@ -1,3 +1,4 @@
+;;; git-modes.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (lsp-custom/ignore-mode 'gitattributes-mode)

@@ -1,3 +1,4 @@
+;;; copilot.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 ;; https://github.com/zerolfx/copilot.el

@@ -1,3 +1,4 @@
+;;; purescript.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add purescript-language-server
 (require 'core-straight)
 

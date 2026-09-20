@@ -1,3 +1,4 @@
+;;; auto-ide.el --- -*- lexical-binding: t; -*-
 (require 'pretty-hydra)
 
   (pretty-hydra-define+ hydra-leader ()

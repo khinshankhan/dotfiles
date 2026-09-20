@@ -1,3 +1,4 @@
+;;; perl.el --- -*- lexical-binding: t; -*-
 ;; LSP: cpanm Perl::LanguageServer
 (require 'core-straight)
 

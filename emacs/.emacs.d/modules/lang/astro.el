@@ -1,3 +1,4 @@
+;;; astro.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add @astrojs/language-server
 (require 'core-module)
 

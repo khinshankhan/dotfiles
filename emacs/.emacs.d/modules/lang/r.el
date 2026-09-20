@@ -1,3 +1,4 @@
+;;; r.el --- -*- lexical-binding: t; -*-
 ;; LSP: install.packages("languageserver") from R
 (require 'core-straight)
 

@@ -1,3 +1,4 @@
+;;; ruby.el --- -*- lexical-binding: t; -*-
 ;; LSP: gem install solargraph
 (require 'core-straight)
 

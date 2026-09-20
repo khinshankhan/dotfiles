@@ -1,3 +1,4 @@
+;;; shell.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 ;; The builtin sh-script library works great for the usual sh, zsh, rc files,

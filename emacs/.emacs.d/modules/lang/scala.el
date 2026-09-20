@@ -1,3 +1,4 @@
+;;; scala.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/scalameta/metals
 (require 'core-straight)
 

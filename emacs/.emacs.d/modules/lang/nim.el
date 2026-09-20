@@ -1,3 +1,4 @@
+;;; nim.el --- -*- lexical-binding: t; -*-
 ;; LSP: nimble install nimlangserver
 (require 'core-straight)
 

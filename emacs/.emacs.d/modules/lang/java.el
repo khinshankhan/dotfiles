@@ -1,3 +1,4 @@
+;;; java.el --- -*- lexical-binding: t; -*-
 ;; LSP: lsp-install-server jdtls
 (require 'core-straight)
 

@@ -1,3 +1,4 @@
+;;; lookup.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! define-word

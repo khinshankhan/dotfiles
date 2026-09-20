@@ -1,3 +1,4 @@
+;;; theme.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (setq frame-background-mode 'dark)

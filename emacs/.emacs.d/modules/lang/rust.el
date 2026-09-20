@@ -1,3 +1,4 @@
+;;; rust.el --- -*- lexical-binding: t; -*-
 ;; LSP: rustup component add rust-analyzer
 (require 'core-straight)
 

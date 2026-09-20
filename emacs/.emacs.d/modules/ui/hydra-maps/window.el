@@ -1,3 +1,4 @@
+;;; window.el --- -*- lexical-binding: t; -*-
 (require 'pretty-hydra)
 (require 'core-fboundp)
 

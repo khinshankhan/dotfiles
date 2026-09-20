@@ -1,3 +1,4 @@
+;;; terraform.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/hashicorp/terraform-ls
 (require 'core-straight)
 

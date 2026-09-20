@@ -1,3 +1,4 @@
+;;; python.el --- -*- lexical-binding: t; -*-
 ;; LSP: pip install python-lsp-server
 (require 'core-straight)
 (require 'core-module)

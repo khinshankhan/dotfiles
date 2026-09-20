@@ -1,3 +1,4 @@
+;;; git.el --- -*- lexical-binding: t; -*-
 (require 'pretty-hydra)
 (require 'magit)
 

@@ -1,3 +1,4 @@
+;;; latex.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! auctex

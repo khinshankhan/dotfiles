@@ -1,3 +1,4 @@
+;;; verilog.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! verilog-mode

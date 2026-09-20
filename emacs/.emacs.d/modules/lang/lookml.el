@@ -1,3 +1,4 @@
+;;; lookml.el --- -*- lexical-binding: t; -*-
 (defvar lookml-mode-syntax-table
   (let ((st (make-syntax-table prog-mode-syntax-table)))
     (modify-syntax-entry ?# "<" st)

@@ -1,3 +1,4 @@
+;;; julia.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/julia-vscode/LanguageServer.jl
 (require 'core-straight)
 

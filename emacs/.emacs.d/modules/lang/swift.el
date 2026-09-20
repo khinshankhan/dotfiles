@@ -1,3 +1,4 @@
+;;; swift.el --- -*- lexical-binding: t; -*-
 ;; LSP: sourcekit-lsp (bundled with Xcode)
 (require 'core-straight)
 

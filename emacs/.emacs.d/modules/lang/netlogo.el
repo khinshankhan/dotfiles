@@ -1,3 +1,4 @@
+;;; netlogo.el --- -*- lexical-binding: t; -*-
 (defun netlogo--grey-out-gui-section ()
   "Dim everything after the first @#$#@#$#@ separator."
   (remove-overlays (point-min) (point-max) 'netlogo-gui t)

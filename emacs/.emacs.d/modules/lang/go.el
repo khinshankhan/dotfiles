@@ -1,3 +1,4 @@
+;;; go.el --- -*- lexical-binding: t; -*-
 ;; LSP: go install golang.org/x/tools/gopls@latest
 (require 'core-straight)
 

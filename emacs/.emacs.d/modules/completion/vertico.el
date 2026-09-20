@@ -1,3 +1,4 @@
+;;; vertico.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! orderless

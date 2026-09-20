@@ -1,3 +1,4 @@
+;;; jsonnet.el --- -*- lexical-binding: t; -*-
 ;; LSP: go install github.com/grafana/jsonnet-language-server@latest
 (require 'core-straight)
 

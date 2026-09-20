@@ -1,3 +1,4 @@
+;;; graphql.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add graphql-language-service-cli
 (require 'core-straight)
 

@@ -1,3 +1,4 @@
+;;; zig.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/zigtools/zls
 (require 'core-straight)
 

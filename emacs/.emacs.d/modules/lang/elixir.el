@@ -1,3 +1,4 @@
+;;; elixir.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/elixir-lsp/elixir-ls
 (require 'core-straight)
 

@@ -1,3 +1,4 @@
+;;; protobuf.el --- -*- lexical-binding: t; -*-
 ;; LSP: go install github.com/bufbuild/buf-language-server/cmd/bufls@latest
 (require 'core-straight)
 

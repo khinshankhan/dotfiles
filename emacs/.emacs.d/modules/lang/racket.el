@@ -1,3 +1,4 @@
+;;; racket.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/jeapostrophe/racket-langserver
 (require 'core-straight)
 

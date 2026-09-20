@@ -1,3 +1,4 @@
+;;; kotlin.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/fwcd/kotlin-language-server
 (require 'core-straight)
 

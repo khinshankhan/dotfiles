@@ -1,3 +1,4 @@
+;;; lsp.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 (require 'core-paths)
 

@@ -1,3 +1,4 @@
+;;; hydra.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 (require 'f)
 (require 'core-module)

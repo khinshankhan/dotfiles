@@ -1,3 +1,4 @@
+;;; json.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! json-mode

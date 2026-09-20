@@ -1,3 +1,4 @@
+;;; neotree.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 ;; I dont usually use gui, but this seemed fun. Used Ladicle's config https://github.com/Ladicle as inspiration

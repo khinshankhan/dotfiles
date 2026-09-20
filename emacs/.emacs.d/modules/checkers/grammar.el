@@ -1,3 +1,4 @@
+;;; grammar.el --- -*- lexical-binding: t; -*-
 ;; LSP: requires node 16 and pnpm -g add @emacs-grammarly/grammarly-languageserver
 (require 'core-straight)
 (require 'core-module)

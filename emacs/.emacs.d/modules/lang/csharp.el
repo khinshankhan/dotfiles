@@ -1,3 +1,4 @@
+;;; csharp.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/OmniSharp/omnisharp-roslyn
 
 (lsp! csharp-mode

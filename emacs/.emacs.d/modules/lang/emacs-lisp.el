@@ -1,3 +1,4 @@
+;;; emacs-lisp.el --- -*- lexical-binding: t; -*-
 (require 'core-straight)
 
 (package! elisp-demos

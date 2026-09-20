@@ -1,3 +1,4 @@
+;;; yaml.el --- -*- lexical-binding: t; -*-
 ;; LSP: pnpm -g add yaml-language-server
 (require 'core-straight)
 

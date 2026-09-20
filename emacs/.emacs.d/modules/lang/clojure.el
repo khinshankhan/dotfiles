@@ -1,3 +1,4 @@
+;;; clojure.el --- -*- lexical-binding: t; -*-
 ;; LSP: github.com/clojure-lsp/clojure-lsp
 (require 'core-straight)
 

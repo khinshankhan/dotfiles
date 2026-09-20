@@ -1,3 +1,4 @@
+;;; sql.el --- -*- lexical-binding: t; -*-
 ;; LSP: go install github.com/sqls-server/sqls@latest
 (require 'core-straight)
 
