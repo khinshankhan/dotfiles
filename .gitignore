@@ -6,3 +6,7 @@ emacs/.emacs
 # general emacs
 elpa
 *.elc
+
+# straight.el: ignore clones and build artifacts, but keep the lockfile
+emacs/.emacs.d/straight/*
+!emacs/.emacs.d/straight/versions/
