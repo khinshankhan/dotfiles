@@ -123,6 +123,42 @@ else
     skip "docker: not installed, nothing to enable"
 fi
 
+# paper-design: build it ourselves, since the AUR doesn't carry it
+# Paper ships an official AppImage but nothing for Arch, and a pkglist has no
+# concept of remotes (no `tap` line to point elsewhere), so this can't be a
+# pkglist entry at all.
+#
+# DELIBERATELY NOT in pkglist.aur: that file is piped to `yay -S`, and the AUR
+# has no name reservation. Listing a name we don't own means the day someone
+# uploads a `paper-design`, yay resolves it and runs a stranger's PKGBUILD as
+# us. yay-drift compares names only, so it would stay quiet either way. The
+# name is unclaimed today -- that's not a guarantee, it's a race. Building from
+# our own repo below is the only version that says which code we mean.
+#
+# The cost: `pacman -Qqem` reports paper-design as foreign, so yay-drift will
+# always show it as '+' (installed, unlisted). That's the honest trade -- an
+# extra drift line beats an unowned name in an installer's input.
+
+# Wanted for its MCP server: the desktop app serves 127.0.0.1:29979 while a
+# file is open, which is loopback-only -- an agent can only reach a Paper
+# running on the same box, so it has to be installed locally.
+PKGBUILDS_DIR="$PROJECTS_DIR/pkgbuilds"
+if pacman -Qq paper-design >/dev/null 2>&1; then
+    skip "paper-design: already installed"
+elif ! have git || ! have makepkg; then
+    skip "paper-design: git/makepkg missing, can't build"
+else
+    if [ -d "$PKGBUILDS_DIR/.git" ]; then
+        skip "paper-design: pkgbuilds repo already cloned"
+    else
+        log "paper-design: cloning pkgbuilds repo"
+        git clone https://github.com/khinshankhan/pkgbuilds.git "$PKGBUILDS_DIR"
+    fi
+
+    log "paper-design: building + installing (~143M download)"
+    (cd "$PKGBUILDS_DIR/paper-design" && makepkg -si --needed --noconfirm)
+fi
+
 # yui: our own CLI, built from source and linked onto PATH
 # Go project; `make build` drops binaries in bin/, which is gitignored -- so a
 # fresh clone has nothing to link until we build. Only yui goes on PATH; the
