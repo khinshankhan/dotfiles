@@ -166,8 +166,8 @@ fi
 # go comes from nix (modules.dev.go), so run `dottie nix apply` before this.
 # SSH remote to match the existing checkout, so this needs keys loaded.
 YUI_DIR="$PROJECTS_DIR/yui"
-if ! have git || ! have go; then
-    skip "yui: git/go missing, can't build"
+if ! have git || ! have go || ! have make; then
+    skip "yui: git/go/make missing, can't build"
 else
     if [ -d "$YUI_DIR/.git" ]; then
         skip "yui: repo already cloned"

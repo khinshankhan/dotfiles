@@ -37,7 +37,9 @@ BIN_DIR="$HOME/.local/bin"
 # bundle` puts it there. Symlink it into ~/Applications so it actually shows up.
 EMACS_APP="$(brew --prefix emacs-mac@29 2>/dev/null)/Emacs.app"
 EMACS_LINK="$HOME/Applications/Emacs.app"
-if [ -d "$EMACS_APP" ]; then
+if ! have brew; then
+    skip "emacs-mac: brew missing, nothing to link"
+elif [ -d "$EMACS_APP" ]; then
     if [ -L "$EMACS_LINK" ] && [ "$(readlink "$EMACS_LINK")" = "$EMACS_APP" ]; then
         skip "emacs-mac: ~/Applications/Emacs.app already linked"
     else
@@ -56,8 +58,8 @@ fi
 # go comes from nix (modules.dev.go), so run `dottie nix apply` before this.
 # SSH remote to match the existing checkout, so this needs keys loaded.
 YUI_DIR="$PROJECTS_DIR/yui"
-if ! have git || ! have go; then
-    skip "yui: git/go missing, can't build"
+if ! have git || ! have go || ! have make; then
+    skip "yui: git/go/make missing, can't build"
 else
     if [ -d "$YUI_DIR/.git" ]; then
         skip "yui: repo already cloned"
