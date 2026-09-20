@@ -443,7 +443,8 @@ bindsym $mod+Shift+s --release exec flameshot gui
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # set wallpaper
-exec --no-startup-id sleep 2 && nitrogen --restore && sleep 1 && picom -b
+exec --no-startup-id nitrogen --restore
+exec --no-startup-id picom -b
 
 # launch Polybar
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
