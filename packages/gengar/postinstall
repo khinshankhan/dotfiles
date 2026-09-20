@@ -31,6 +31,17 @@ have() {
     command -v "$1" >/dev/null 2>&1;
 }
 
+# Where our own repos live. Steps that need a checkout clone under here.
+# git clone would create this chain on its own, but don't make every future
+# step depend on that -- some will want to write here without cloning first.
+PROJECTS_DIR="$HOME/development/khinshankhan"
+[ -d "$PROJECTS_DIR" ] || mkdir -p "$PROJECTS_DIR"
+
+# Where steps drop symlinks to things they build. Stow usually gets here first,
+# but postinstall can run before it.
+BIN_DIR="$HOME/.local/bin"
+[ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
+
 # Serialize overlapping runs. Every step is idempotent, but the guards are
 # check-then-act, so two simultaneous runs could race (worst case: dueling
 # initdb on a virgin data dir). Late runs wait their turn, then skip through.
@@ -110,4 +121,36 @@ if have docker; then
     fi
 else
     skip "docker: not installed, nothing to enable"
+fi
+
+# yui: our own CLI, built from source and linked onto PATH
+# Go project; `make build` drops binaries in bin/, which is gitignored -- so a
+# fresh clone has nothing to link until we build. Only yui goes on PATH; the
+# other services it builds (case, clip, color, net) stay in the repo.
+# go comes from nix (modules.dev.go), so run `dottie nix apply` before this.
+# SSH remote to match the existing checkout, so this needs keys loaded.
+YUI_DIR="$PROJECTS_DIR/yui"
+if ! have git || ! have go; then
+    skip "yui: git/go missing, can't build"
+else
+    if [ -d "$YUI_DIR/.git" ]; then
+        skip "yui: repo already cloned"
+    else
+        log "yui: cloning repo"
+        git clone git@github.com:khinshankhan/yui.git "$YUI_DIR"
+    fi
+
+    if [ -x "$YUI_DIR/bin/yui" ]; then
+        skip "yui: already built"
+    else
+        log "yui: building"
+        make -C "$YUI_DIR" build
+    fi
+
+    if [ -L "$BIN_DIR/yui" ]; then
+        skip "yui: already linked into $BIN_DIR"
+    else
+        log "yui: linking into $BIN_DIR"
+        ln -s "$YUI_DIR/bin/yui" "$BIN_DIR/yui"
+    fi
 fi
