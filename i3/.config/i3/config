@@ -407,8 +407,9 @@ bindsym XF86AudioPrev exec playerctl previous
 #########################
 
 # start a terminal
-bindsym $mod+Return exec wezterm
-bindsym $mod+Shift+Return exec terminal || xfce4-terminal # backup terminal
+bindsym $mod+Return exec --no-startup-id "command -v ghostty >/dev/null && exec ghostty || exec wezterm"
+# backup terminal
+bindsym $mod+Shift+Return exec --no-startup-id "command -v terminal >/dev/null && exec terminal || exec xfce4-terminal"
 
 # kill focused window
 bindsym $mod+Shift+q kill
