@@ -458,8 +458,6 @@ bindsym $mod+Ctrl+m exec terminal -e 'alsamixer'
 
 # some nice additions to polybar menu
 exec --no-startup-id nm-applet
-exec --no-startup-id xfce4-power-manager
-exec --no-startup-id pamac-tray
 # exec --no-startup-id clipit || xfce4-clipman
 exec --no-startup-id blueman-applet
 
