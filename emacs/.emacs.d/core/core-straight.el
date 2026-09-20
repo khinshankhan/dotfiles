@@ -54,5 +54,11 @@ NAME and ARGS are as in `use-package'."
   `(use-package ,name
      ,@args))
 
+;; straight saves its build cache on post-command-hook, which never fires if
+;; init dies before I touch the keyboard -- then it rebuilds everything again
+;; next launch. Save on the way out too.
+(with-eval-after-load 'straight
+  (add-hook 'kill-emacs-hook #'straight--save-build-cache))
+
 (provide 'core-straight)
 ;;; core-straight.el ends here
