@@ -1,0 +1,6 @@
+#!/bin/sh
+# steam's bin_steam.sh calls dirname, and nix's dirname is linked against nix's
+# glibc -- against the system libc it dies with
+#   symbol lookup error: undefined symbol: __pointer_chk_guard, GLIBC_PRIVATE
+# so launch steam with nix off the PATH entirely
+PATH=/usr/bin:/bin:/usr/local/bin /usr/bin/steam "$@"
