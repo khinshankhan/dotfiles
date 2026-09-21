@@ -23,7 +23,7 @@
 
         :checkers
         (syntax +flycheck)        ; tasing you for every semicolon you forget
-        (spell +flyspell +aspell) ; tasing you for misspelling mispelling
+        (spell +flyspell)         ; tasing you for misspelling mispelling
         (grammar +lsp)            ; tasing grammar mistake every you make
 
         :completion

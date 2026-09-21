@@ -46,6 +46,11 @@
 (defvar shan--preferred-logo 'logo
   "Preferred logo for dashboard startup.  If not found, use default.")
 
+(defvar shan--preferred-spell-checker nil
+  "Preferred spell checker: `aspell', `hunspell', `enchant', or nil.
+If nil, the spell module uses whichever binary it finds on the PATH.
+Set this in `personal/settings.el'.")
+
 (defconst shan--settings-path
   (expand-file-name "settings.el"
                     (expand-file-name "personal" user-emacs-directory))

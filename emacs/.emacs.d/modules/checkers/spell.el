@@ -11,13 +11,10 @@
           '("#\\+BEGIN_EXAMPLE" . "#\\+END_EXAMPLE"))
 
 ;; Enable either aspell, hunspell or enchant.
-;;   If no module flags are given, enable either aspell, hunspell or enchant
-;;     if their binary is found.
-;;   If one of the flags `+aspell', `+hunspell' or `+enchant' is given,
-;;     only enable that spell checker.
-(pcase (cond ((feature-p! +aspell)   'aspell)
-             ((feature-p! +hunspell) 'hunspell)
-             ((feature-p! +enchant)  'enchant)
+;;   If `shan--preferred-spell-checker' is set, use it. Set it in
+;;     `personal/settings.el' to pin a checker per-machine.
+;;   Otherwise use whichever binary is found first.
+(pcase (cond (shan--preferred-spell-checker)
              ((executable-find "aspell")    'aspell)
              ((executable-find "hunspell")  'hunspell)
              ((executable-find "enchant-2") 'enchant))
