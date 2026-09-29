@@ -8,6 +8,9 @@
 #   pane     pane label, else its position in the tab
 #   panes    number of panes in the tab
 #   agent    coding agent herdr detected in the pane
+#   title    terminal title of the pane
+#   autoname "yes" while the tab label is still herdr's default number
+#   rename <name>  set the tab label
 
 # Executable only: sourcing would leak its functions/variables into your
 # shell and its `exit` would close it.
@@ -50,6 +53,18 @@ case "${1:-}" in
   agent)
     herdr pane get "$HERDR_PANE_ID" 2>/dev/null \
       | jq -r '.result.pane.agent // empty'
+    ;;
+  title)
+    herdr pane get "$HERDR_PANE_ID" 2>/dev/null \
+      | jq -r '.result.pane.terminal_title_stripped // empty'
+    ;;
+  autoname)
+    herdr tab get "$HERDR_TAB_ID" 2>/dev/null \
+      | jq -r '.result.tab.label // empty | select(test("^[0-9]+$")) | "yes"'
+    ;;
+  rename)
+    [ -n "${2:-}" ] || exit 1
+    herdr tab rename "$HERDR_TAB_ID" "$2" >/dev/null
     ;;
   *) exit 1 ;;
 esac

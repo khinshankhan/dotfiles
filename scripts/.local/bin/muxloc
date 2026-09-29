@@ -8,11 +8,15 @@
 #   pane     pane label or position within the tab/window
 #   panes    how many panes share this tab/window
 #   where    session:window, plus .pane when the tab/window is split
+#   title    terminal title of this pane (as set by the app, eg Claude)
+#   autoname "yes" while the tab/window still has the multiplexer's
+#            default name, ie nobody has renamed it
+#   rename <name>  rename this tab/window
 #   help     this text (also -h, --help)
 #
 # The lookups live in per-multiplexer backends on PATH, named muxloc-<mux>
 # (muxloc-herdr, muxloc-tmux, ...). Each answers `active` plus the fields
-# above. The first active backend wins: $order first, then any other
+# above and the rename action. The first active backend wins: $order first, then any other
 # muxloc-* on PATH. tmux goes before herdr so a tmux session started inside
 # a herdr pane (eg the temporal scripts) reports the tmux location.
 #
@@ -44,7 +48,7 @@ backends() {
     | awk '!seen[$0]++'
 }
 
-get() { "muxloc-$mux" "$1" 2>/dev/null; }
+get() { "muxloc-$mux" "$@" 2>/dev/null; }
 
 # session:window, plus .pane when the tab/window is split.
 where() {
@@ -68,7 +72,12 @@ done
 case "${1:-where}" in
   mux) out="$mux" ;;
   where) out="$(where)" ;;
-  session | window | pane | panes) out="$(get "$1")" ;;
+  session | window | pane | panes | title | autoname) out="$(get "$1")" ;;
+  rename)
+    [ -n "${2:-}" ] || exit 1
+    get rename "$2"
+    exit
+    ;;
   *) exit 1 ;;
 esac
 

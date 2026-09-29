@@ -7,6 +7,10 @@
 #   window   window index
 #   pane     pane index
 #   panes    number of panes in the window
+#   title    pane title (set by the app via the terminal title escape)
+#   autoname "yes" while tmux still names the window automatically, ie
+#            nobody has run rename-window on it
+#   rename <name>  rename the window
 
 # Executable only: sourcing would leak its functions/variables into your
 # shell and its `exit` would close it.
@@ -32,5 +36,11 @@ case "${1:-}" in
   window) show window_index ;;
   pane) show pane_index ;;
   panes) show window_panes ;;
+  title) show pane_title ;;
+  autoname) [ "$(show automatic-rename)" = 1 ] && echo yes ;;
+  rename)
+    [ -n "${2:-}" ] || exit 1
+    tmux rename-window -t "$TMUX_PANE" "$2"
+    ;;
   *) exit 1 ;;
 esac
