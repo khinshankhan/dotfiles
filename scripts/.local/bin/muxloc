@@ -9,6 +9,7 @@
 #   panes    how many panes share this tab/window
 #   agent    coding agent detected in this pane, if the backend knows
 #   where    session:window, plus .pane when the tab/window is split
+#   help     this text (also -h, --help)
 #
 # The lookups live in per-multiplexer backends on PATH, named muxloc-<mux>
 # (muxloc-herdr, muxloc-tmux, ...). Each answers `active` plus the fields
@@ -25,6 +26,14 @@ if (return 0 2>/dev/null); then
   echo "muxloc: run it, don't source it" >&2
   return 1
 fi
+
+# Help is the header comment above, minus the leading "# ".
+case "${1:-}" in
+  -h | --help | help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+esac
 
 order="tmux herdr"
 
