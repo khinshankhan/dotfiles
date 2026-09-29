@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# muxloc -- where is this terminal? One answer across multiplexers.
+#
+# Usage: muxloc [field]          (default: where)
+#   mux      which multiplexer is active, eg herdr or tmux
+#   session  herdr workspace / tmux session
+#   window   herdr tab / tmux window
+#   pane     pane label or position within the tab/window
+#   panes    how many panes share this tab/window
+#   agent    coding agent detected in this pane, if the backend knows
+#   where    session:window, plus .pane when the tab/window is split
+#
+# The lookups live in per-multiplexer backends on PATH, named muxloc-<mux>
+# (muxloc-herdr, muxloc-tmux, ...). Each answers `active` plus the fields
+# above. The first active backend wins: $order first, then any other
+# muxloc-* on PATH. tmux goes before herdr so a tmux session started inside
+# a herdr pane (eg the temporal scripts) reports the tmux location.
+#
+# Prints the value and exits 0; prints nothing and exits 1 when no backend
+# is active or the field is unknown there.
+
+# Executable only: sourcing would leak its functions/variables into your
+# shell and its `exit` would close it.
+if (return 0 2>/dev/null); then
+  echo "muxloc: run it, don't source it" >&2
+  return 1
+fi
+
+order="tmux herdr"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# Backend names, preferred ones first, each listed once.
+backends() {
+  { printf '%s\n' $order; compgen -c muxloc- | sed 's/^muxloc-//'; } \
+    | awk '!seen[$0]++'
+}
+
+get() { "muxloc-$mux" "$1" 2>/dev/null; }
+
+# session:window, plus .pane when the tab/window is split.
+where() {
+  local s w p
+  s="$(get session)" w="$(get window)"
+  [ -n "$s" ] && [ -n "$w" ] || return
+  if [ "$(get panes)" -gt 1 ] 2>/dev/null && p="$(get pane)" && [ -n "$p" ]
+  then
+    echo "$s:$w.$p"
+  else
+    echo "$s:$w"
+  fi
+}
+
+mux=""
+for m in $(backends); do
+  have "muxloc-$m" && "muxloc-$m" active && mux="$m" && break
+done
+[ -n "$mux" ] || exit 1
+
+case "${1:-where}" in
+  mux) out="$mux" ;;
+  where) out="$(where)" ;;
+  *) out="$(get "$1")" ;;
+esac
+
+[ -n "$out" ] || exit 1
+printf '%s\n' "$out"

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# muxloc-tmux -- tmux backend for muxloc.
+#
+# Usage: muxloc-tmux <active|session|window|pane|panes>
+#   active   exit 0 when running inside a tmux pane
+#   session  session name
+#   window   window index
+#   pane     pane index
+#   panes    number of panes in the window
+
+# Executable only: sourcing would leak its functions/variables into your
+# shell and its `exit` would close it.
+if (return 0 2>/dev/null); then
+  echo "muxloc-tmux: run it, don't source it" >&2
+  return 1
+fi
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+active() {
+  [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ] && have tmux
+}
+
+# Print one tmux format variable for this pane.
+show() { tmux display-message -p -t "$TMUX_PANE" "#{$1}" 2>/dev/null; }
+
+active || exit 1
+
+case "${1:-}" in
+  active) exit 0 ;;
+  session) show session_name ;;
+  window) show window_index ;;
+  pane) show pane_index ;;
+  panes) show window_panes ;;
+  *) exit 1 ;;
+esac
