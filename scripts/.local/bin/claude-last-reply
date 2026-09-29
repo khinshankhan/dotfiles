@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# claude-last-reply -- what did Claude last say in a session transcript?
+#
+# Usage: claude-last-reply <transcript.jsonl | -> [text|question|gist]
+#   text      the last reply, as written (default)
+#   question  the question the reply ends on, when it is asking you
+#             something; prints nothing and exits 1 otherwise
+#   gist      the reply's opening sentence, markdown stripped
+#   help      this text (also -h, --help)
+#
+# Transcripts live in ~/.claude/projects/<project>/<session-id>.jsonl. With
+# "-" the reply text itself comes on stdin instead: a Stop hook should pass
+# its .last_assistant_message that way, because the transcript may not have
+# the final reply written yet when the hook fires.
+
+# Executable only: sourcing would leak its functions/variables into your
+# shell and its `exit` would close it.
+if (return 0 2>/dev/null); then
+  echo "claude-last-reply: run it, don't source it" >&2
+  return 1
+fi
+
+case "${1:-}" in
+  "" | -h | --help | help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+esac
+
+transcript="$1"
+[ "$transcript" = - ] || [ -f "$transcript" ] || exit 1
+
+# The last reply is the last assistant entry with text in it. Replies are
+# near the end, so skip parsing the rest of a long transcript.
+text() {
+  tail -n 400 "$transcript" | jq -rs '
+    map(select(.type == "assistant")
+      | [.message.content[]? | select(.type == "text") | .text] | join("\n")
+      | select(length > 0))
+    | last // empty'
+}
+
+# Markdown out, whitespace squeezed: fit for a one-line summary.
+plain() {
+  jq -Rrs 'gsub("```[\\s\\S]*?```"; "") | gsub("\\*\\*|`|^#+ "; "")
+    | gsub("\\s+"; " ") | ltrimstr(" ") | rtrimstr(" ")'
+}
+
+if [ "$transcript" = - ]; then reply="$(cat)"; else reply="$(text)"; fi
+[ -n "$reply" ] || exit 1
+
+case "${2:-text}" in
+  text) printf '%s\n' "$reply" ;;
+  gist)
+    # First paragraph, cut at the end of its first sentence.
+    printf '%s' "$reply" | awk -v RS= 'NR == 1' | plain \
+      | sed -E 's/([.!?:])( |$).*/\1/'
+    ;;
+  question)
+    # A reply asks you something when its last paragraph ends in "?".
+    # The question is that paragraph's last sentence.
+    q="$(printf '%s' "$reply" | awk -v RS= '{ p = $0 } END { print p }' | plain)"
+    case "$q" in *\?) ;; *) exit 1 ;; esac
+    printf '%s\n' "$q" | sed -E 's/.*[.!:] ([^.!:]*\?)$/\1/'
+    ;;
+  *) exit 1 ;;
+esac
