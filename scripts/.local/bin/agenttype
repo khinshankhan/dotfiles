@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# agenttype -- what kind of coding agent is this terminal running under?
+#
+# Usage: agenttype            print the agent, eg claude or codex
+#        agenttype help       this text (also -h, --help)
+#
+# Checks, first answer wins:
+#   1. multiplexer     the active muxloc backend's own detection (herdr
+#                      tracks agents per pane; tmux doesn't)
+#   2. $CLAUDECODE     set by Claude Code for everything it runs
+#   3. process tree    the nearest parent whose name is a known agent
+#
+# Prints the agent and exits 0; prints nothing and exits 1 when none found.
+
+# Executable only: sourcing would leak its functions/variables into your
+# shell and its `exit` would close it.
+if (return 0 2>/dev/null); then
+  echo "agenttype: run it, don't source it" >&2
+  return 1
+fi
+
+# Help is the header comment above, minus the leading "# ".
+case "${1:-}" in
+  -h | --help | help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+esac
+
+agents="claude codex gemini cursor-agent opencode amp pi droid kimi"
+
+mux="$(muxloc mux 2>/dev/null)" && "muxloc-$mux" agent 2>/dev/null && exit 0
+[ -n "${CLAUDECODE:-}" ] && echo claude && exit 0
+
+pid=$PPID
+for _ in 1 2 3 4 5 6 7 8; do
+  [ "${pid:-0}" -gt 1 ] 2>/dev/null || break
+  name="$(basename "$(ps -o comm= -p "$pid" 2>/dev/null)")"
+  case " $agents " in *" $name "*) echo "$name"; exit 0 ;; esac
+  pid="$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')"
+done
+exit 1

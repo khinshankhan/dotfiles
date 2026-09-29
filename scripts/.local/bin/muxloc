@@ -7,7 +7,6 @@
 #   window   herdr tab / tmux window
 #   pane     pane label or position within the tab/window
 #   panes    how many panes share this tab/window
-#   agent    coding agent detected in this pane, if the backend knows
 #   where    session:window, plus .pane when the tab/window is split
 #   help     this text (also -h, --help)
 #
@@ -69,7 +68,8 @@ done
 case "${1:-where}" in
   mux) out="$mux" ;;
   where) out="$(where)" ;;
-  *) out="$(get "$1")" ;;
+  session | window | pane | panes) out="$(get "$1")" ;;
+  *) exit 1 ;;
 esac
 
 [ -n "$out" ] || exit 1
