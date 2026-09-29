@@ -28,43 +28,50 @@ active() {
 
 active || exit 1
 
+# Ask herdr which pane this is. The HERDR_* ids are fixed when the pane
+# starts and go stale once its tab is moved to another workspace.
+read -r ws tab pane < <(herdr pane current 2>/dev/null \
+  | jq -r '.result.pane | "\(.workspace_id) \(.tab_id) \(.pane_id)"')
+[ -n "${pane:-}" ] && [ "$pane" != null ] \
+  || { ws=$HERDR_WORKSPACE_ID tab=$HERDR_TAB_ID pane=$HERDR_PANE_ID; }
+
 case "${1:-}" in
   active) exit 0 ;;
   session)
-    herdr workspace get "$HERDR_WORKSPACE_ID" 2>/dev/null \
+    herdr workspace get "$ws" 2>/dev/null \
       | jq -r '.result.workspace.label // empty'
     ;;
   window)
-    herdr tab get "$HERDR_TAB_ID" 2>/dev/null \
+    herdr tab get "$tab" 2>/dev/null \
       | jq -r '.result.tab.label // .result.tab.number // empty'
     ;;
   panes)
-    herdr tab get "$HERDR_TAB_ID" 2>/dev/null \
+    herdr tab get "$tab" 2>/dev/null \
       | jq -r '.result.tab.pane_count // empty'
     ;;
   pane)
-    herdr pane list --workspace "$HERDR_WORKSPACE_ID" 2>/dev/null \
-      | jq -r --arg t "$HERDR_TAB_ID" --arg p "$HERDR_PANE_ID" '
+    herdr pane list --workspace "$ws" 2>/dev/null \
+      | jq -r --arg t "$tab" --arg p "$pane" '
           [.result.panes[] | select(.tab_id == $t)] as $ps
           | ($ps | map(.pane_id) | index($p)) as $i
           | if $i == null then empty
             else ($ps[$i].label // ($i + 1 | tostring)) end'
     ;;
   agent)
-    herdr pane get "$HERDR_PANE_ID" 2>/dev/null \
+    herdr pane get "$pane" 2>/dev/null \
       | jq -r '.result.pane.agent // empty'
     ;;
   title)
-    herdr pane get "$HERDR_PANE_ID" 2>/dev/null \
+    herdr pane get "$pane" 2>/dev/null \
       | jq -r '.result.pane.terminal_title_stripped // empty'
     ;;
   autoname)
-    herdr tab get "$HERDR_TAB_ID" 2>/dev/null \
+    herdr tab get "$tab" 2>/dev/null \
       | jq -r '.result.tab.label // empty | select(test("^[0-9]+$")) | "yes"'
     ;;
   rename)
     [ -n "${2:-}" ] || exit 1
-    herdr tab rename "$HERDR_TAB_ID" "$2" >/dev/null
+    herdr tab rename "$tab" "$2" >/dev/null
     ;;
   *) exit 1 ;;
 esac
