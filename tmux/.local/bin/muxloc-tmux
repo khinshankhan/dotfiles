@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 # muxloc-tmux -- tmux backend for muxloc.
 #
-# Usage: muxloc-tmux <active|session|window|pane|panes>
-#   active   exit 0 when running inside a tmux pane
-#   session  session name
-#   window   window index
-#   pane     pane index
-#   panes    number of panes in the window
-#   title    pane title (set by the app via the terminal title escape)
-#   autoname "yes" while tmux still names the window automatically, ie
-#            nobody has run rename-window on it
+# Usage: muxloc-tmux <field>
+#        muxloc-tmux <action> [arg]
+#
+# Fields:
+#   active         exit 0 when running inside a tmux pane
+#   session        session name
+#   window         window index
+#   pane           pane index
+#   panes          number of panes in the window
+#   title          pane title, set by the app via the terminal title escape
+#   autoname       "yes" while tmux still names the window automatically, ie
+#                  nobody has run rename-window on it
+#   id             pane id plus server socket, eg %12@/tmp/tmux-501/default
+#
+# Actions:
 #   rename <name>  rename the window
+#   reset-name     hand the name back to tmux (automatic-rename on)
+#   focus <id>     switch to that pane; works outside tmux too
 
 # Executable only: sourcing would leak its functions/variables into your
 # shell and its `exit` would close it.
@@ -28,6 +36,17 @@ active() {
 # Print one tmux format variable for this pane.
 show() { tmux display-message -p -t "$TMUX_PANE" "#{$1}" 2>/dev/null; }
 
+# focus needs no pane of our own: it runs from anywhere, eg a notification
+# click with no $TMUX, so the id carries the server socket. switch-client
+# picks the most recently used client when run outside tmux.
+if [ "${1:-}" = focus ]; then
+  target="${2%%@*}" socket="${2#*@}"
+  [ -n "$target" ] && [ -n "$socket" ] && [ "$socket" != "${2:-}" ] && have tmux || exit 1
+  tmux -S "$socket" switch-client -t "$target" 2>/dev/null
+  tmux -S "$socket" select-window -t "$target" \; select-pane -t "$target"
+  exit
+fi
+
 active || exit 1
 
 case "${1:-}" in
@@ -42,5 +61,7 @@ case "${1:-}" in
     [ -n "${2:-}" ] || exit 1
     tmux rename-window -t "$TMUX_PANE" "$2"
     ;;
+  id) echo "$TMUX_PANE@$(show socket_path)" ;;
+  reset-name) tmux set-option -w -t "$TMUX_PANE" automatic-rename on ;;
   *) exit 1 ;;
 esac

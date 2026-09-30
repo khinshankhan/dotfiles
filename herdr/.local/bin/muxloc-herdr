@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 # muxloc-herdr -- herdr backend for muxloc.
 #
-# Usage: muxloc-herdr <active|session|window|pane|panes|agent>
-#   active   exit 0 when running inside a herdr pane
-#   session  workspace label
-#   window   tab label, else tab number
-#   pane     pane label, else its position in the tab
-#   panes    number of panes in the tab
-#   agent    coding agent herdr detected in the pane
-#   title    terminal title of the pane
-#   autoname "yes" while the tab label is still herdr's default number
+# Usage: muxloc-herdr <field>
+#        muxloc-herdr <action> [arg]
+#
+# Fields:
+#   active         exit 0 inside a herdr pane or a herdr key binding
+#   session        workspace label
+#   window         tab label, else tab number
+#   pane           pane label, else its position in the tab
+#   panes          number of panes in the tab
+#   agent          coding agent herdr detected in the pane
+#   title          terminal title of the pane
+#   autoname       "yes" while the tab label is still herdr's default number
+#   id             the pane id, eg wB:pG
+#
+# Actions:
 #   rename <name>  set the tab label
+#   reset-name     label the tab with its position again, herdr's default
+#   focus <id>     jump to that pane; works outside herdr too
 
 # Executable only: sourcing would leak its functions/variables into your
 # shell and its `exit` would close it.
@@ -21,19 +29,37 @@ fi
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+# Inside a pane herdr sets HERDR_PANE_ID and friends. A herdr key binding
+# (`type = "shell"`) runs detached with none of those, only
+# HERDR_ACTIVE_PANE_ID, the pane the key was pressed from; that one wins.
+source_pane="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
+
 active() {
-  [ -n "${HERDR_PANE_ID:-}" ] && [ -n "${HERDR_TAB_ID:-}" ] \
-    && [ -n "${HERDR_WORKSPACE_ID:-}" ] && have herdr && have jq
+  [ -n "$source_pane" ] && have herdr && have jq
 }
+
+# focus needs no pane of our own: it runs from anywhere, eg a notification
+# click. `agent focus` lands on the exact pane but only takes agent panes;
+# any other pane gets its workspace and tab focused instead.
+if [ "${1:-}" = focus ]; then
+  [ -n "${2:-}" ] && have herdr && have jq || exit 1
+  herdr agent focus "$2" >/dev/null 2>&1 && exit 0
+  read -r ws tab < <(herdr pane get "$2" 2>/dev/null \
+    | jq -r '.result.pane | "\(.workspace_id) \(.tab_id)"')
+  [ -n "${tab:-}" ] && [ "$tab" != null ] || exit 1
+  herdr workspace focus "$ws" >/dev/null && herdr tab focus "$tab" >/dev/null
+  exit
+fi
 
 active || exit 1
 
-# Ask herdr which pane this is. The HERDR_* ids are fixed when the pane
-# starts and go stale once its tab is moved to another workspace.
-read -r ws tab pane < <(herdr pane current 2>/dev/null \
+# Ask herdr about that pane. The HERDR_* ids are fixed when a pane starts and
+# go stale once its tab is moved to another workspace; herdr still resolves
+# an old pane id to the current one.
+read -r ws tab pane < <(herdr pane get "$source_pane" 2>/dev/null \
   | jq -r '.result.pane | "\(.workspace_id) \(.tab_id) \(.pane_id)"')
 [ -n "${pane:-}" ] && [ "$pane" != null ] \
-  || { ws=$HERDR_WORKSPACE_ID tab=$HERDR_TAB_ID pane=$HERDR_PANE_ID; }
+  || { ws=${HERDR_WORKSPACE_ID:-} tab=${HERDR_TAB_ID:-} pane=$source_pane; }
 
 case "${1:-}" in
   active) exit 0 ;;
@@ -72,6 +98,15 @@ case "${1:-}" in
   rename)
     [ -n "${2:-}" ] || exit 1
     herdr tab rename "$tab" "$2" >/dev/null
+    ;;
+  id) echo "$pane" ;;
+  reset-name)
+    # herdr can't clear a label (an empty rename just blanks it), and a new
+    # tab's default label is its 1-based position in the workspace.
+    pos=$(herdr tab list --workspace "$ws" 2>/dev/null \
+      | jq -r --arg t "$tab" '.result.tabs | map(.tab_id) | index($t) // empty | . + 1')
+    [ -n "$pos" ] || exit 1
+    herdr tab rename "$tab" "$pos" >/dev/null
     ;;
   *) exit 1 ;;
 esac

@@ -1,27 +1,36 @@
 #!/usr/bin/env bash
 # muxloc -- where is this terminal? One answer across multiplexers.
 #
-# Usage: muxloc [field]          (default: where)
-#   mux      which multiplexer is active, eg herdr or tmux
-#   session  herdr workspace / tmux session
-#   window   herdr tab / tmux window
-#   pane     pane label or position within the tab/window
-#   panes    how many panes share this tab/window
-#   where    session:window, plus .pane when the tab/window is split
-#   title    terminal title of this pane (as set by the app, eg Claude)
-#   autoname "yes" while the tab/window still has the multiplexer's
-#            default name, ie nobody has renamed it
+# Usage: muxloc [field]           print a field (default: where)
+#        muxloc <action> [arg]    change this tab/window
+#
+# Fields:
+#   mux            which multiplexer is active, eg herdr or tmux
+#   session        herdr workspace / tmux session
+#   window         herdr tab / tmux window
+#   pane           pane label or position within the tab/window
+#   panes          how many panes share this tab/window
+#   where          session:window, plus .pane when the tab/window is split
+#   title          terminal title of this pane, as set by the app (eg Claude)
+#   autoname       "yes" while the tab/window still has its default name
+#   id             stable handle for this pane, eg herdr:wB:pG, for focus
+#
+# Actions:
 #   rename <name>  rename this tab/window
-#   help     this text (also -h, --help)
+#   reset-name     restore the default name, so autoname says "yes" again
+#   focus <id>     jump to the pane an earlier `muxloc id` named. Works from
+#                  anywhere, eg a notification click outside any multiplexer
 #
-# The lookups live in per-multiplexer backends on PATH, named muxloc-<mux>
-# (muxloc-herdr, muxloc-tmux, ...). Each answers `active` plus the fields
-# above and the rename action. The first active backend wins: $order first, then any other
-# muxloc-* on PATH. tmux goes before herdr so a tmux session started inside
-# a herdr pane (eg the temporal scripts) reports the tmux location.
+#   help           this text (also -h, --help)
 #
-# Prints the value and exits 0; prints nothing and exits 1 when no backend
-# is active or the field is unknown there.
+# Backends are muxloc-<mux> scripts on PATH (muxloc-herdr, muxloc-tmux, ...),
+# each answering `active` plus the fields and actions above. The first active
+# one wins: $order first, then any other muxloc-* on PATH. tmux goes before
+# herdr, so a tmux session started inside a herdr pane (eg the temporal
+# scripts) reports the tmux location.
+#
+# A field prints its value and exits 0, or prints nothing and exits 1 when no
+# backend is active or the field is unknown there.
 
 # Executable only: sourcing would leak its functions/variables into your
 # shell and its `exit` would close it.
@@ -50,6 +59,14 @@ backends() {
 
 get() { "muxloc-$mux" "$@" 2>/dev/null; }
 
+# focus runs from anywhere, so it can't detect a backend from the
+# environment; the id names its multiplexer instead ("<mux>:<backend id>").
+if [ "${1:-}" = focus ]; then
+  id="${2:-}" m="${2%%:*}"
+  [ -n "$id" ] && [ "$m" != "$id" ] && have "muxloc-$m" || exit 1
+  exec "muxloc-$m" focus "${id#*:}"
+fi
+
 # session:window, plus .pane when the tab/window is split.
 where() {
   local s w p
@@ -73,9 +90,14 @@ case "${1:-where}" in
   mux) out="$mux" ;;
   where) out="$(where)" ;;
   session | window | pane | panes | title | autoname) out="$(get "$1")" ;;
+  id) out="$(get id)" && out="$mux:$out" ;;
   rename)
     [ -n "${2:-}" ] || exit 1
     get rename "$2"
+    exit
+    ;;
+  reset-name)
+    get reset-name
     exit
     ;;
   *) exit 1 ;;
