@@ -1,6 +1,11 @@
 # ported from the wezterm and warp configs in this repo, so all three
 # terminals look and behave the same. only settings that differ from the
 # defaults are here -- `ghostty +show-config --default --docs` has the rest.
+#
+# one file for both platforms. ghostty has no os conditionals, but macos-*
+# keys are ignored on linux and gtk-* keys are ignored on macos, so each
+# platform only sees its own half. keybinds that differ per platform are
+# listed with both modifiers.
 
 # same fallback chain as wezterm.lua. ghostty falls through the list per
 # glyph, so the nerd font first means icons resolve without a patched fallback
@@ -21,6 +26,7 @@ foreground = #d4d4d4
 cursor-color = #d4d4d4
 cursor-text = #272a30
 selection-background = #3d4148
+split-divider-color = #21242a
 
 palette = 0=#1e2127
 palette = 1=#e06c75
@@ -43,28 +49,24 @@ palette = 15=#ffffff
 # so keep it low or it washes out the palette above
 minimum-contrast = 1.1
 
-# i3 draws the border, so no titlebar and no padding
+# no padding, and as little window chrome as tabs allow on each platform.
+# `window-decoration = none` is deliberately not used: on macos it disables
+# tabs outright, and `macos-titlebar-style = hidden` does the same
 window-padding-x = 0
 window-padding-y = 0
 window-padding-balance = true
-window-decoration = none
-window-theme = ghostty
-window-titlebar-background = #2c3038
-window-titlebar-foreground = #d4d4d4
 
-# auto hides the tab bar at one tab. use `always` to pin it like wezterm did
-window-show-tab-bar = auto
-gtk-tabs-location = top
-gtk-wide-tabs = false
+# linux: i3 draws the border, gtk keeps its header bar out of the way and
+# colors the tab bar from the palette above
 gtk-titlebar = false
+gtk-wide-tabs = false
+window-theme = ghostty
 
-# new tabs and splits open next to the current one and keep the cwd
-window-new-tab-position = current
-window-inherit-working-directory = true
-window-inherit-font-size = true
-split-inherit-working-directory = true
-split-divider-color = #21242a
-unfocused-split-opacity = 1.0
+# macos: tabs live in the titlebar, so keep a titlebar but make it a tab strip
+# painted in the terminal background, with no traffic lights
+macos-titlebar-style = tabs
+macos-window-buttons = hidden
+window-save-state = always
 
 # steady bar, no blink. wezterm and warp both agreed on this
 cursor-style = bar
@@ -74,16 +76,11 @@ cursor-style-blink = false
 # scrollback_lines. 64mb is roughly warp's 50k-line grid
 scrollback-limit = 67108864
 scrollbar = never
-scroll-to-bottom = keystroke,no-output
-mouse-scroll-multiplier = discrete:3
 mouse-hide-while-typing = true
-copy-on-select = clipboard
-confirm-close-surface = true
-window-save-state = always
-quit-after-last-window-closed = false
+unfocused-split-opacity = 1.0
 
-# silence the bell
-bell-features = no-audio
+# system clipboard on select, not just the x11 primary selection
+copy-on-select = clipboard
 
 # tell me when something long finishes while i'm in another window
 notify-on-command-finish = unfocused
@@ -94,17 +91,33 @@ notify-on-command-finish-after = 30s
 # types a curly quote, and tmux never sees a keypress at all. inert on linux
 macos-option-as-alt = true
 
-# splits and panes, using wezterm's ctrl+shift mod. alt+1..8 for tabs and
-# ctrl+alt+arrows for splits are already ghostty defaults, so they're not here
+# keybinds. wezterm used cmd on macos and ctrl+shift on linux. ghostty's macos
+# defaults already match the cmd set (cmd+d / cmd+shift+d splits, cmd+[ and
+# cmd+] between splits, cmd+w close, cmd+t tab, cmd+1..8 tabs, cmd+9 last
+# tab, cmd+k clear, cmd+ctrl+f fullscreen), so only the linux side needs
+# help. ctrl+shift+w, ctrl+shift+t, ctrl+shift+p and alt+1..9 are already
+# linux defaults and are not repeated here
 keybind = ctrl+shift+d=new_split:right
 keybind = ctrl+shift+alt+d=new_split:down
-keybind = ctrl+shift+w=close_surface
 keybind = ctrl+shift+bracket_left=goto_split:previous
 keybind = ctrl+shift+bracket_right=goto_split:next
+# directional split moves. `performable:` sends the key through to the shell
+# when there is no split that way, so emacs and tmux still see ctrl+shift+arrow
+# in a lone pane. this shadows ghostty's linux default of ctrl+shift+left and
+# ctrl+shift+right for previous and next tab -- ctrl+page up/down and alt+1..9
+# still switch tabs
+keybind = performable:ctrl+shift+arrow_up=goto_split:up
+keybind = performable:ctrl+shift+arrow_down=goto_split:down
+keybind = performable:ctrl+shift+arrow_left=goto_split:left
+keybind = performable:ctrl+shift+arrow_right=goto_split:right
 keybind = ctrl+shift+alt+z=toggle_split_zoom
 keybind = ctrl+shift+alt+e=equalize_splits
 keybind = ctrl+shift+f=toggle_fullscreen
 keybind = ctrl+shift+k=clear_screen
-# ghostty's defaults stop at 8
-keybind = alt+9=goto_tab:9
-keybind = ctrl+shift+p=toggle_command_palette
+
+# cmd+s (pressed with right cmd) is the herdr prefix: send what ctrl+enter
+# sends (CSI 13;5u), herdr's configured prefix, so either chord works.
+# ghostty can't tell left cmd from right; the right-hand habit keeps a
+# reflexive left cmd+s "save" from landing in herdr. cmd+s is unbound in
+# ghostty, so nothing is lost.
+keybind = super+s=csi:13;5u

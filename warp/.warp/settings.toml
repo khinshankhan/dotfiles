@@ -68,7 +68,7 @@ app_icon = "default"
 open_windows_at_custom_size = false
 override_opacity = 100
 override_blur = 1
-zoom_level = 100
+zoom_level = 125
 
 [appearance.input]
 input_mode = "pinned_to_bottom"
