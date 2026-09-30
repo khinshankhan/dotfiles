@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# herdrctl -- shortcuts herdr has no keybinding for.
+#
+# Dispatches to subcommands in libexec/herdrctl/, the way dottie does: each
+# file there is a subcommand, and its second line (the `# ` comment) is its
+# description in `herdrctl help`. A symlink there is an alias (ls -> ws) and
+# is left out of the listing.
+#
+# usage: herdrctl <command> [args...]
+#        herdrctl help [command]
+set -euo pipefail
+
+# libexec sits beside bin in the same stow package, so find it from this
+# script's real path (following the ~/.local/bin symlink); prefer the stowed
+# ~/.local/libexec copy when it exists.
+self_dir() {
+  local src="${BASH_SOURCE[0]}" dir
+  while [ -L "$src" ]; do
+    dir="$(cd -P "$(dirname "$src")" >/dev/null 2>&1 && pwd)"
+    src="$(readlink "$src")"
+    [ "${src#/}" = "$src" ] && src="$dir/$src"
+  done
+  cd -P "$(dirname "$src")" >/dev/null 2>&1 && pwd
+}
+libexecdir="$HOME/.local/libexec/herdrctl"
+[ -d "$libexecdir" ] || libexecdir="$(self_dir)/../libexec/herdrctl"
+
+usage() {
+  local f name desc width=0
+  echo "usage: herdrctl <command> [args...]"
+  echo "       herdrctl help [command]"
+  echo
+  echo "commands:"
+  for f in "$libexecdir"/*; do
+    [ -f "$f" ] && [ ! -L "$f" ] || continue
+    name="$(basename "$f")"
+    [ ${#name} -gt $width ] && width=${#name}
+  done
+  for f in "$libexecdir"/*; do
+    [ -f "$f" ] && [ ! -L "$f" ] || continue
+    name="$(basename "$f")"
+    desc="$(sed -n '2s/^# //p' "$f")"
+    printf '  %-*s  %s\n' "$width" "$name" "$desc"
+  done
+}
+
+cmd="${1:-help}"
+case "$cmd" in
+  help | -h | --help)
+    [ -n "${2:-}" ] || { usage; exit 0; }
+    cmd="$2"
+    set -- "$cmd" --help
+    ;;
+esac
+
+if [ -x "$libexecdir/$cmd" ] && [ -f "$libexecdir/$cmd" ]; then
+  shift
+  exec "$libexecdir/$cmd" "$@"
+fi
+echo "herdrctl: unknown command '$cmd'" >&2
+echo >&2
+usage >&2
+exit 1

@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+# Move a pane to another workspace as a new tab, and focus it.
+set -euo pipefail
+
+die() { echo "herdrctl: $*" >&2; exit 1; }
+
+command -v herdr >/dev/null 2>&1 || die "herdr not found"
+command -v jq >/dev/null 2>&1 || die "jq not found"
+
+help_mv() {
+  cat <<'EOF'
+Usage: herdrctl mv [workspace] [--pane ID]
+
+Move a pane to another workspace, as a new tab, and focus it.
+
+  workspace   a number (4), workspace id (wE), label (shopify), or "new".
+              Omit it to choose from a menu.
+  --pane ID   the pane to move (default: the one you are in; inside a
+              keys.command popup, the pane the popup was opened from).
+
+A tab you gave a name keeps it. An unnamed tab gets herdr's default. When
+the pane is one split of a tab, only that pane moves and the tab stays.
+
+Menu keys:
+  up/down, j/k   move
+  enter          choose the highlighted row
+  1-9, n         choose that workspace, or a new one
+  esc, q         cancel
+
+Examples:
+  herdrctl mv                   # choose from the menu
+  herdrctl mv 4                 # to workspace 4
+  herdrctl mv new               # to a new workspace
+  herdrctl mv shopify --pane wD:pK
+EOF
+}
+
+# Bad invocation: this command's help on stderr, exit 2.
+usage() {
+  help_mv >&2
+  exit 2
+}
+
+# "<id>\t<number>\t<label>\t<focused>" per workspace.
+workspaces() {
+  herdr workspace list \
+    | jq -r '.result.workspaces[] | [.workspace_id, .number, .label, .focused] | @tsv'
+}
+
+# Resolve a number, id, or label to one workspace id.
+resolve_workspace() {
+  local want="$1" matches
+  matches="$(workspaces | awk -F'\t' -v w="$want" '$1 == w || $2 == w || $3 == w { print $1 }')"
+  case "$(printf '%s' "$matches" | grep -c .)" in
+    0) die "no workspace matches '$want' (see: herdrctl ws)" ;;
+    1) printf '%s\n' "$matches" ;;
+    *) die "'$want' matches several workspaces; use its number (see: herdrctl ws)" ;;
+  esac
+}
+
+# One keypress from the tty. Arrow keys come back as "up"/"down", a lone
+# escape as "esc". Uses stty+dd because macOS bash 3.2 `read -t` can't wait
+# less than a second to tell escape apart from an arrow sequence.
+read_key() {
+  local k rest
+  stty min 1 time 0 </dev/tty
+  k="$(dd bs=1 count=1 2>/dev/null </dev/tty)"
+  if [ "$k" = $'\e' ]; then
+    stty min 0 time 1 </dev/tty
+    rest="$(dd bs=2 count=1 2>/dev/null </dev/tty)"
+    case "$rest" in
+      '[A'|'OA') k=up ;;
+      '[B'|'OB') k=down ;;
+      '') k=esc ;;
+      *) k=other ;;
+    esac
+  fi
+  printf '%s' "$k"
+}
+
+# Full-screen menu on the tty; prints the chosen value, exits 130 when
+# cancelled. Reads "<value><TAB><key><TAB><label>" lines on stdin, where
+# <key> is an optional character that chooses its row directly. Heading $1,
+# dimmed subheading $2. Run it in a subshell (a pipe or $(...)): it sets an
+# EXIT trap and exits.
+#   up/down, j/k  move    enter  choose    <key>  choose that row
+#   esc, q        cancel
+pick() {
+  local heading="${1:-}" subheading="${2:-}" line rest saved sel=0 last key i
+  local -a values=() keys=() labels=()
+
+  # Split by hand: `IFS=$'\t' read` merges adjacent tabs, which would shift
+  # the label into the key field whenever the key is empty.
+  while IFS= read -r line; do
+    rest="${line#*$'\t'}"
+    values+=("${line%%$'\t'*}"); keys+=("${rest%%$'\t'*}"); labels+=("${rest#*$'\t'}")
+  done
+  [ "${#values[@]}" -gt 0 ] || exit 1
+  last=$((${#values[@]} - 1))
+
+  saved="$(stty -g </dev/tty)"
+  exec 3>/dev/tty
+  # Expanded now: the trap fires after pick returns and its locals are gone.
+  # shellcheck disable=SC2064
+  trap "stty '$saved' </dev/tty; printf '\\e[?25h\\e[H\\e[2J' >&3" EXIT
+  stty -icanon -echo </dev/tty
+  printf '\e[?25l' >&3
+
+  while :; do
+    {
+      printf '\e[H\e[2J\n'
+      [ -z "$heading" ] || printf '  \e[1m%s\e[0m\n' "$heading"
+      [ -z "$subheading" ] || printf '  \e[2m%s\e[0m\n' "$subheading"
+      [ -z "$heading$subheading" ] || printf '\n'
+      for i in "${!values[@]}"; do
+        if [ "$i" -eq "$sel" ]; then
+          printf '  \e[7m %1s  %-28s\e[0m\n' "${keys[$i]}" "${labels[$i]}"
+        else
+          printf '   \e[2m%1s\e[0m  %s\n' "${keys[$i]}" "${labels[$i]}"
+        fi
+      done
+      printf '\n  \e[2mj/k move  enter choose  esc cancel\e[0m'
+    } >&3
+
+    key="$(read_key)"
+    case "$key" in
+      up|k) [ "$sel" -gt 0 ] && sel=$((sel - 1)) ;;
+      down|j) [ "$sel" -lt "$last" ] && sel=$((sel + 1)) ;;
+      '') printf '%s\n' "${values[$sel]}"; exit 0 ;;
+      esc|q) exit 130 ;;
+      *)
+        for i in "${!keys[@]}"; do
+          [ -n "${keys[$i]}" ] && [ "${keys[$i]}" = "$key" ] \
+            && { printf '%s\n' "${values[$i]}"; exit 0; }
+        done
+        ;;
+    esac
+  done
+}
+
+# Menu over every workspace except $1, plus "new", with
+# heading $2 and subheading $3. Prints the chosen id; exits 130 when
+# cancelled. A workspace's number (1-9) or n chooses it directly.
+pick_workspace() {
+  local exclude="$1"
+  {
+    workspaces | awk -F'\t' -v x="$exclude" \
+      '$1 != x { printf "%s\t%s\t%s\n", $1, ($2 ~ /^[1-9]$/ ? $2 : ""), $3 }'
+    printf 'new\tn\tnew workspace\n'
+  } | pick "$2" "$3"
+}
+
+# Print the name you gave a tab (tab JSON from `herdr tab get`), or nothing
+# if it was never renamed. The API labels an unnamed tab with its position
+# at creation, so the real signal is custom_name in the session file, keyed
+# by workspace id and the tab's public number. The server saves that file
+# lazily; a tab too new to be in it counts as unnamed when its label is its
+# position.
+tab_custom_name() {
+  local tab="$1" session
+  session="$(dirname "${HERDR_CONFIG_PATH:-$HOME/.config/herdr/config.toml}")/session.json"
+  if [ -z "${HERDR_SESSION:-}" ] && [ -r "$session" ] && jq -e --argjson t "$tab" '
+      .workspaces[] | select(.id == $t.workspace_id)
+      | .public_tab_numbers | index($t.number) != null' "$session" >/dev/null 2>&1; then
+    jq -r --argjson t "$tab" '
+      .workspaces[] | select(.id == $t.workspace_id)
+      | .tabs[.public_tab_numbers | index($t.number)].custom_name // empty' "$session"
+    return
+  fi
+  herdr tab list --workspace "$(jq -r '.workspace_id' <<<"$tab")" \
+    | jq -r --argjson t "$tab" '
+        (.result.tabs | map(.tab_id) | index($t.tab_id) + 1 | tostring) as $pos
+        | select($t.label != null and $t.label != $pos) | $t.label'
+}
+
+cmd_mv() {
+  local target="" pane="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --pane) pane="${2:?--pane needs an id}"; shift 2 ;;
+      -h|--help) help_mv; exit 0 ;;
+      -*) usage ;;
+      *) [ -z "$target" ] || usage; target="$1"; shift ;;
+    esac
+  done
+  # With no target this is the keys.command popup, which closes as soon as
+  # the script exits: hold a failure on screen until a key is pressed.
+  if [ -z "$target" ] && [ -t 0 ]; then
+    trap 'rc=$?; if [ "$rc" -ne 0 ] && [ "$rc" -ne 130 ]; then
+      printf "\nherdrctl mv failed (exit %s), press any key" "$rc" >&2
+      read -rsn1 </dev/tty; fi' EXIT
+  fi
+  [ -n "$pane" ] || die "not inside a herdr pane; pass --pane ID"
+
+  local info current
+  info="$(herdr pane get "$pane")"
+  current="$(jq -r '.result.pane.workspace_id' <<<"$info")"
+
+  # The name you gave the tab, if any. The move creates a new tab, so it is
+  # carried over, but only when the pane is the whole tab (a split pane
+  # leaves its tab behind).
+  local tab tab_name tab_label=""
+  tab="$(herdr tab get "$(jq -r '.result.pane.tab_id' <<<"$info")" | jq -c '.result.tab')"
+  tab_name="$(tab_custom_name "$tab")"
+  if [ "$(jq -r '.pane_count' <<<"$tab")" = "1" ]; then
+    tab_label="$tab_name"
+  fi
+
+  local dest
+  if [ -z "$target" ]; then
+    local pane_title ws_label
+    pane_title="$(jq -r --arg home "$HOME" '.result.pane
+      | .label
+        // (.terminal_title_stripped // "" | sub("^[^\\x00-\\x7F] "; "") | select(. != ""))
+        // (.cwd // "" | if startswith($home) then "~" + .[($home | length):] else . end | select(. != ""))
+        // .pane_id' <<<"$info")"
+    ws_label="$(herdr workspace get "$current" | jq -r '.result.workspace.label // .result.workspace.workspace_id')"
+    dest="$(pick_workspace "$current" "Move ${tab_name:-unnamed tab}" "$pane_title - in $ws_label")"
+  elif [ "$target" = "new" ]; then dest="new"
+  else dest="$(resolve_workspace "$target")"
+  fi
+
+  if [ "$dest" = "new" ]; then
+    herdr pane move "$pane" --new-workspace --focus \
+      ${tab_label:+--tab-label "$tab_label"} >/dev/null
+  else
+    [ "$dest" != "$current" ] || die "pane $pane is already in $dest"
+    herdr pane move "$pane" --workspace "$dest" --new-tab --focus \
+      ${tab_label:+--label "$tab_label"} >/dev/null
+  fi
+}
+
+cmd_mv "$@"

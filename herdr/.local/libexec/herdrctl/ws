@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# List workspaces: current marker, number, label, id (alias: ls).
+set -euo pipefail
+
+die() { echo "herdrctl: $*" >&2; exit 1; }
+
+command -v herdr >/dev/null 2>&1 || die "herdr not found"
+command -v jq >/dev/null 2>&1 || die "jq not found"
+
+help_ws() {
+  cat <<'EOF'
+Usage: herdrctl ws
+
+List workspaces as: current marker (*), number, label, workspace id.
+EOF
+}
+
+# Bad invocation: this command's help on stderr, exit 2.
+usage() {
+  help_ws >&2
+  exit 2
+}
+
+# "<id>\t<number>\t<label>\t<focused>" per workspace.
+workspaces() {
+  herdr workspace list \
+    | jq -r '.result.workspaces[] | [.workspace_id, .number, .label, .focused] | @tsv'
+}
+
+cmd_ws() {
+  case "${1:-}" in
+    '') ;;
+    -h|--help) help_ws; exit 0 ;;
+    *) usage ;;
+  esac
+  workspaces | awk -F'\t' '{ printf "%s %-4s %s%s\n", ($4 == "true" ? "*" : " "), $2, $3, "  (" $1 ")" }'
+}
+
+cmd_ws "$@"

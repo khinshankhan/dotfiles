@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
-# herdr-agent-new-tab -- new herdr tab running the same coding agent, with
-# the same flags, as the pane you pressed from.
+# New tab running the same agent, with the same flags, as this pane.
 #
 # Usage:
-#   herdr-agent-new-tab        mirror the agent in the active pane (or its tab)
-#   herdr-agent-new-tab codex  force a kind (any `herdr agent start --kind`)
+#   herdrctl new-agent-tab        mirror the agent in the active pane (or its tab)
+#   herdrctl new-agent-tab codex  force a kind (any `herdr agent start --kind`)
 #
 # With no agent to mirror it opens a plain shell tab, so the key always leaves
 # you with a usable tab. The new tab keeps herdr's default number, so
-# agent-tab-name names it after its first real task.
+# agent-tab-rename names it after its first real task.
 #
 # Meant to be bound as a herdr `type = "shell"` command, which the server
 # spawns detached: no login $PATH, no tty for errors, and possibly /bin/bash
 # 3.2. Hence the explicit PATH, bash-3.2-only syntax, and a log instead of
-# stderr (~/.local/state/herdr-agent-new-tab.log).
+# stderr (~/.local/state/herdrctl-new-agent-tab.log).
 #
 # Based on Miguel's version; the changes:
 #   - nix profiles on PATH (herdr is often installed there, not in homebrew)
@@ -31,10 +30,17 @@ export HERDR_SOCKET_PATH="${HERDR_SOCKET_PATH:-$HOME/.config/herdr/herdr.sock}"
 
 # Fixed path, not $TMPDIR: that is per login session on macOS, so the server's
 # spawn and a run by hand would log to different files.
-LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr-agent-new-tab.log"
+LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdrctl-new-agent-tab.log"
 mkdir -p "$(dirname "$LOG_FILE")"
 log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LOG_FILE"; }
 die() { log "error: $*"; exit 1; }
+
+case "${1:-}" in
+  -h | --help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+esac
 
 command -v herdr >/dev/null || die "herdr not on PATH ($PATH)"
 command -v jq >/dev/null || die "jq not on PATH"

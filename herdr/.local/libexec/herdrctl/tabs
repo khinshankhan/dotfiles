@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# herdr-tabs -- every herdr tab at a glance: what it is, whether it needs you.
+# Every tab at a glance: what it is, and whether it needs you.
 #
-# Usage: herdr-tabs [options]
+# Usage: herdrctl tabs [options]
 #   (none)           list every tab across all workspaces, the ones waiting
 #                    on you first
 #   --stale          only tabs idle for a while that aren't waiting on you
@@ -34,16 +34,16 @@ while [[ $# -gt 0 ]]; do
       sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
       exit 0
       ;;
-    *) echo "herdr-tabs: unknown option: $1" >&2; exit 1 ;;
+    *) echo "herdrctl tabs: unknown option: $1" >&2; exit 1 ;;
   esac
 done
 if $delete && ! $stale; then
-  echo "herdr-tabs: -d only works with --stale" >&2
+  echo "herdrctl tabs: -d only works with --stale" >&2
   exit 1
 fi
 
 for tool in herdr jq claude-last-reply; do
-  command -v "$tool" >/dev/null || { echo "herdr-tabs: needs $tool" >&2; exit 1; }
+  command -v "$tool" >/dev/null || { echo "herdrctl tabs: needs $tool" >&2; exit 1; }
 done
 
 # One row per tab: tab_id, workspace:label, herdr state, claude session id.
@@ -142,7 +142,7 @@ done
 if $stale; then
   if ! $delete; then
     echo
-    echo "${DIM}Dry run. Close these ${#table[@]} tabs with: herdr-tabs --stale -d${RESET}"
+    echo "${DIM}Dry run. Close these ${#table[@]} tabs with: herdrctl tabs --stale -d${RESET}"
     exit 0
   fi
   for row in "${table[@]}"; do

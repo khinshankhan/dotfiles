@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# herdr-next-needs-you -- jump to the next agent waiting on you, in any space.
+# Jump to the next agent waiting on you, in any workspace.
 #
 # Usage:
-#   herdr-next-needs-you       focus the next one; press again to rotate
-#   herdr-next-needs-you -n    print the queue and the target, focus nothing
+#   herdrctl next       focus the next one; press again to rotate
+#   herdrctl next -n    print the queue and the target, focus nothing
 #
 # Waiting, most urgent first:
 #   blocked    herdr sees a permission prompt or question dialog
@@ -19,7 +19,7 @@
 #
 # Meant for a herdr `type = "shell"` binding (prefix+a): spawned detached with
 # no login $PATH or tty, maybe under /bin/bash 3.2. Hence the explicit PATH,
-# bash-3.2 syntax, and ~/.local/state/herdr-next-needs-you.log for errors.
+# bash-3.2 syntax, and ~/.local/state/herdrctl-next.log for errors.
 set -uo pipefail
 
 PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin"
@@ -27,16 +27,23 @@ PATH="$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
 PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 export HERDR_SOCKET_PATH="${HERDR_SOCKET_PATH:-$HOME/.config/herdr/herdr.sock}"
 
-LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr-next-needs-you.log"
+LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdrctl-next.log"
 mkdir -p "$(dirname "$LOG_FILE")"
 log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LOG_FILE"; }
 die() { log "error: $*"; exit 1; }
+
+case "${1:-}" in
+  -h | --help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+esac
 
 dry_run=false
 case "${1:-}" in
   -n | --dry-run) dry_run=true ;;
   "") ;;
-  *) die "usage: herdr-next-needs-you [-n]" ;;
+  *) die "usage: herdrctl next [-n]" ;;
 esac
 
 for tool in herdr jq claude-last-reply; do
