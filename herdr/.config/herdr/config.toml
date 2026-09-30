@@ -1,0 +1,57 @@
+onboarding = false
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[ui]
+agent_panel_sort = "priority"
+
+[keys]
+# Prefix mode key. herdr requires a real key after the modifiers --
+# a modifiers-only chord (eg "ctrl+alt") fails validation and silently
+# falls back to ctrl+b. Option is spelled "alt", not "opt".
+prefix = "ctrl+enter"
+
+# t renames the tab by hand; shift+t (below) resets it for agent-tab-rename.
+rename_tab = "prefix+t"
+
+# Plain letter renames, shift is the other action: w renames the workspace,
+# shift+w opens the workspace picker (swapped from herdr's defaults).
+rename_workspace = "prefix+w"
+workspace_picker = "prefix+shift+w"
+
+# Flip between the two panes used most recently, even across workspaces:
+# alt-tab for bouncing between two agents. Unbound by default.
+last_pane = "prefix+space"
+
+# Move the current pane to another workspace (herdr has no built-in action).
+[[keys.command]]
+key = "prefix+m"
+description = "move pane to another workspace"
+type = "popup"
+command = "$HOME/.local/bin/herdrctl mv"
+width = "50%"
+height = "40%"
+
+# New tab running the same agent, with the same flags, as the current pane.
+[[keys.command]]
+key = "prefix+="
+description = "new tab with the same agent and flags"
+type = "shell"
+command = "$HOME/.local/bin/herdrctl new-agent-tab"
+
+# Jump to the next agent waiting on me (blocked, asking, or unseen), any space.
+[[keys.command]]
+key = "prefix+a"
+description = "jump to the next agent waiting on you"
+type = "shell"
+command = "$HOME/.local/bin/herdrctl next"
+
+# Give the tab back its default name; agent-tab-rename renames it from what
+# its Claude session is doing on the next reply.
+[[keys.command]]
+key = "prefix+shift+t"
+description = "reset tab name (renamed on the agent's next reply)"
+type = "shell"
+command = "$HOME/.local/bin/muxloc reset-name"
