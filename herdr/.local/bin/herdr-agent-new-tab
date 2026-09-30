@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# herdr-agent-new-tab -- new herdr tab running the same coding agent, with
+# the same flags, as the pane you pressed from.
+#
+# Usage:
+#   herdr-agent-new-tab        mirror the agent in the active pane (or its tab)
+#   herdr-agent-new-tab codex  force a kind (any `herdr agent start --kind`)
+#
+# With no agent to mirror it opens a plain shell tab, so the key always leaves
+# you with a usable tab. The new tab keeps herdr's default number, so
+# agent-tab-name names it after its first real task.
+#
+# Meant to be bound as a herdr `type = "shell"` command, which the server
+# spawns detached: no login $PATH, no tty for errors, and possibly /bin/bash
+# 3.2. Hence the explicit PATH, bash-3.2-only syntax, and a log instead of
+# stderr (~/.local/state/herdr-agent-new-tab.log).
+#
+# Based on Miguel's version; the changes:
+#   - nix profiles on PATH (herdr is often installed there, not in homebrew)
+#   - the source pane is resolved through herdr, so a pane whose tab was moved
+#     to another workspace (stale HERDR_PANE_ID) still works
+#   - which flags take a value comes from the agent's own --help, so a flag's
+#     value is kept but a bare prompt after a boolean flag is not
+#     (`claude --verbose "fix it"` mirrors as `claude --verbose`)
+set -uo pipefail
+
+PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin"
+PATH="$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export HERDR_SOCKET_PATH="${HERDR_SOCKET_PATH:-$HOME/.config/herdr/herdr.sock}"
+
+# Fixed path, not $TMPDIR: that is per login session on macOS, so the server's
+# spawn and a run by hand would log to different files.
+LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr-agent-new-tab.log"
+mkdir -p "$(dirname "$LOG_FILE")"
+log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LOG_FILE"; }
+die() { log "error: $*"; exit 1; }
+
+command -v herdr >/dev/null || die "herdr not on PATH ($PATH)"
+command -v jq >/dev/null || die "jq not on PATH"
+
+# The pane the key was pressed from: herdr hands custom commands
+# HERDR_ACTIVE_PANE_ID; HERDR_PANE_ID covers running this by hand; else the
+# focused pane. `pane get` maps an id from before a tab move to the current one.
+panes_json="$(herdr pane list)" || die "pane list failed"
+source_pane="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
+if [ -n "$source_pane" ]; then
+  source_pane="$(herdr pane get "$source_pane" 2>/dev/null | jq -r '.result.pane.pane_id // empty')"
+fi
+if [ -z "$source_pane" ]; then
+  source_pane="$(jq -r 'first(.result.panes[] | select(.focused) | .pane_id) // empty' <<<"$panes_json")"
+fi
+[ -n "$source_pane" ] || die "no source pane"
+
+IFS=$'\t' read -r workspace tab cwd detected < <(jq -r --arg id "$source_pane" '
+  .result.panes[] | select(.pane_id == $id)
+  | [.workspace_id, .tab_id, (.foreground_cwd // .cwd // env.HOME), (.agent // "")]
+  | @tsv' <<<"$panes_json")
+[ -n "${workspace:-}" ] || die "pane $source_pane not found"
+
+# Which agent: the argument, else the pane's own, else any agent in the same tab
+# (focus may sit on a shell pane of a split). model_pane is where the agent
+# actually runs, so its flags are read from the right process.
+kind="${1:-$detected}"
+model_pane="$source_pane"
+if [ -z "$kind" ]; then
+  IFS=$'\t' read -r kind model_pane < <(jq -r --arg tab "$tab" '
+    first(.result.panes[] | select(.tab_id == $tab and .agent != null))
+    | [.agent, .pane_id] | @tsv' <<<"$panes_json")
+  kind="${kind:-}" model_pane="${model_pane:-$source_pane}"
+fi
+
+tab_json="$(herdr tab create --workspace "$workspace" --cwd "$cwd" --focus)" ||
+  die "tab create failed in $workspace"
+new_pane="$(jq -r '.result.root_pane.pane_id // empty' <<<"$tab_json")"
+[ -n "$new_pane" ] || die "tab create returned no root pane"
+
+if [ -z "$kind" ]; then
+  log "plain tab $new_pane (no agent on $source_pane)"
+  exit 0
+fi
+
+# Flags that would clone the source conversation or make the new agent exit
+# at once. Letters differ per agent (claude -p is --print, codex -p --profile).
+case "$kind" in
+  claude) drop=" --resume -r --session-id --continue -c --fork-session --print -p " ;;
+  codex) drop=" resume --last " ;;
+  *) drop=" " ;;
+esac
+
+# " --model --add-dir -c ... ": flags whose --help entry shows a required
+# <value>. Optional [value]s count as boolean; they only arrive as --flag=value.
+value_flags=" $("$kind" --help 2>/dev/null \
+  | grep -oE '^ {1,8}(-[A-Za-z], )?--[A-Za-z0-9-]+ <' \
+  | sed -E 's/^ +//; s/ <$//; s/, / /' | tr '\n' ' ') "
+
+# The running agent's argv, minus argv[0].
+raw=()
+while IFS= read -r token; do raw+=("$token"); done < <(
+  herdr pane process-info --pane "$model_pane" 2>/dev/null | jq -r --arg kind "$kind" '
+    first(.result.process_info.foreground_processes[]
+      | select((.argv[0]? // .argv0 // "") | split("/") | last == $kind)
+      | .argv) // [] | .[1:][]')
+
+# Keep flags (with their value when they take one), drop positionals and the
+# drop list. "skip" swallows the value of a dropped flag.
+args=()
+next=""
+for token in ${raw[@]+"${raw[@]}"}; do
+  case "$next" in
+    keep) args+=("$token"); next=""; continue ;;
+    skip) next=""; continue ;;
+  esac
+  flag="${token%%=*}"
+  takes_value=no
+  [[ "$token" != *=* && "$value_flags" == *" $flag "* ]] && takes_value=yes
+  if [[ "$drop" == *" $flag "* ]]; then
+    [ $takes_value = yes ] && next=skip
+    continue
+  fi
+  case "$token" in
+    -*) args+=("$token"); [ $takes_value = yes ] && next=keep ;;
+  esac
+done
+
+# agent start names must match [a-z][a-z0-9_-]{0,31}; pane ids are unique and
+# uppercase, so lowercasing them keeps the name unique.
+name="$kind-$(printf '%s' "$new_pane" | tr 'A-Z:' 'a-z-')"
+cmd=(herdr agent start "$name" --kind "$kind" --pane "$new_pane")
+[ ${#args[@]} -gt 0 ] && cmd+=(-- "${args[@]}")
+
+# A new pane drops input until its shell finishes loading rc files; until then
+# `agent start` fails fast with agent_pane_busy. Retry only that, for up to 10s.
+# Any other failure (eg readiness timing out on an agent that did come up) is
+# left alone rather than risking a second agent in the pane.
+deadline=$(($(date +%s) + 10))
+while ! err="$("${cmd[@]}" 2>&1 >/dev/null)"; do
+  case "$err" in
+    *agent_pane_busy*) ;;
+    *) die "agent start $kind in $new_pane: $err" ;;
+  esac
+  [ "$(date +%s)" -lt "$deadline" ] || die "$new_pane never reached a shell prompt"
+  sleep 0.2
+done
+log "started $kind in $new_pane as $name: ${args[*]:-(no flags)}"
