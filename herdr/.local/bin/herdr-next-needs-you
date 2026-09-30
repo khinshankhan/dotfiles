@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# herdr-next-needs-you -- jump to the next agent waiting on you, in any space.
+#
+# Usage:
+#   herdr-next-needs-you       focus the next one; press again to rotate
+#   herdr-next-needs-you -n    print the queue and the target, focus nothing
+#
+# Waiting, most urgent first:
+#   blocked    herdr sees a permission prompt or question dialog
+#   needs you  Claude's last reply asks you something (claude-last-reply)
+#   done       finished work herdr says you haven't looked at yet
+# Within a rank, sidebar order. The target is the candidate after the pane the
+# key was pressed from, so repeated presses walk the whole queue. Nothing
+# waiting shows a herdr notification rather than silently doing nothing.
+#
+# Inspired by AceroM's herdr-agent-attention, plus the "needs you" rank, which
+# herdr's own states can't see: an agent that ended on a question just looks
+# idle to herdr.
+#
+# Meant for a herdr `type = "shell"` binding (prefix+a): spawned detached with
+# no login $PATH or tty, maybe under /bin/bash 3.2. Hence the explicit PATH,
+# bash-3.2 syntax, and ~/.local/state/herdr-next-needs-you.log for errors.
+set -uo pipefail
+
+PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin"
+PATH="$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export HERDR_SOCKET_PATH="${HERDR_SOCKET_PATH:-$HOME/.config/herdr/herdr.sock}"
+
+LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr-next-needs-you.log"
+mkdir -p "$(dirname "$LOG_FILE")"
+log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LOG_FILE"; }
+die() { log "error: $*"; exit 1; }
+
+dry_run=false
+case "${1:-}" in
+  -n | --dry-run) dry_run=true ;;
+  "") ;;
+  *) die "usage: herdr-next-needs-you [-n]" ;;
+esac
+
+for tool in herdr jq claude-last-reply; do
+  command -v "$tool" >/dev/null || die "$tool not on PATH"
+done
+
+# The pane the key came from (resolved through herdr, so an id from before a
+# tab move still works); unknown is fine, the rotation just starts at the top.
+here="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
+[ -n "$here" ] && here="$(herdr pane get "$here" 2>/dev/null | jq -r '.result.pane.pane_id // empty')"
+
+# Every Claude pane in sidebar order (workspace, then tab):
+# pane, tab, herdr state, session id, "workspace:tab" label.
+panes="$(jq -rn \
+  --argjson ws "$(herdr workspace list)" \
+  --argjson tabs "$(herdr tab list)" \
+  --argjson panes "$(herdr pane list)" '
+  ($ws.result.workspaces | to_entries | map({(.value.workspace_id): .key}) | add) as $wo
+  | ($ws.result.workspaces | map({(.workspace_id): .label}) | add) as $wl
+  | ($tabs.result.tabs | map({(.tab_id): .}) | add) as $t
+  | $panes.result.panes
+  | map(select(.agent == "claude"))
+  | sort_by($wo[.workspace_id], $t[.tab_id].number)
+  | .[]
+  | [.pane_id, .tab_id, (.agent_status // "unknown"), (.agent_session.value // "-"),
+     "\($wl[.workspace_id]):\($t[.tab_id].label)"]
+  | @tsv')" || die "reading herdr state failed"
+
+# The question check reads a transcript per pane, so run those in parallel.
+# Only idle/done panes need it: blocked already ranks first and a working
+# agent isn't waiting on anyone.
+check() { # pane tab state session label
+  local rank="" t
+  case "$3" in
+    blocked) rank=0 ;;
+    idle | done)
+      t="$(ls "$HOME"/.claude/projects/*/"$4".jsonl 2>/dev/null | head -1)"
+      if [ -n "$t" ] && claude-last-reply "$t" question >/dev/null 2>&1; then
+        rank=1
+      elif [ "$3" = "done" ]; then
+        rank=2
+      fi
+      ;;
+  esac
+  [ -n "$rank" ] && printf '%s\t%s\t%s\t%s\n' "$rank" "$1" "$2" "$5"
+}
+export -f check
+
+queue="$(printf '%s\n' "$panes" | awk -F'\t' 'NF { print NR "\t" $0 }' \
+  | xargs -P 8 -L 1 bash -c 'n=$1; shift; check "$@" | sed "s/^/$n\t/"' _ \
+  | sort -t$'\t' -k2,2n -k1,1n | cut -f2-)"
+
+if $dry_run; then
+  printf '%s\n' "${queue:-(nothing waiting)}" \
+    | awk -F'\t' '{ split("blocked needs-you done", r, " "); print ($1 == "" ? $0 : r[$1 + 1] "\t" $4 "\t" $2) }'
+fi
+
+if [ -z "$queue" ]; then
+  log "nothing waiting"
+  $dry_run || herdr notification show "Nothing needs you" \
+    --body "No agent is blocked, asking, or unseen." >/dev/null 2>&1
+  exit 0
+fi
+
+# The candidate after the one we're on, wrapping; the first when we're on none.
+IFS=$'\t' read -r _ target _ label < <(printf '%s\n' "$queue" | awk -F'\t' -v here="$here" '
+  { row[NR] = $0; if ($2 == here) at = NR }
+  END { print row[at ? at % NR + 1 : 1] }')
+
+if [ "$target" = "$here" ]; then
+  log "only $label is waiting, already here"
+  exit 0
+fi
+if $dry_run; then
+  echo "-> $label ($target)"
+  exit 0
+fi
+
+herdr agent focus "$target" >/dev/null 2>&1 || die "agent focus $target failed"
+log "focused $label ($target)"
