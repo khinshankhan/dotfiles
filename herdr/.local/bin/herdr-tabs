@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# herdr-tabs -- every herdr tab at a glance: what it is, whether it needs you.
+#
+# Usage: herdr-tabs [options]
+#   (none)           list every tab across all workspaces, the ones waiting
+#                    on you first
+#   --stale          only tabs idle for a while that aren't waiting on you
+#   --hours N        how long "a while" is for --stale (default 24)
+#   -d, --delete     with --stale: close those tabs (default: dry run)
+#   -h, --help       this text
+#
+# Columns: workspace:tab, state, time since the last reply, and either the
+# question Claude is waiting on or the gist of what it last said (both from
+# the session transcript via claude-last-reply). States: "needs you" when the last
+# reply asks you something, "blocked" on a permission prompt, else herdr's
+# own (working, idle, done). The current tab is marked * and never closed.
+
+set -uo pipefail
+
+if [[ -t 1 ]]; then
+  BOLD=$'\033[1m' DIM=$'\033[2m' RED=$'\033[31m' YELLOW=$'\033[33m'
+  GREEN=$'\033[32m' CYAN=$'\033[36m' RESET=$'\033[0m'
+else
+  BOLD='' DIM='' RED='' YELLOW='' GREEN='' CYAN='' RESET=''
+fi
+
+stale=false delete=false hours=24
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --stale) stale=true; shift ;;
+    --hours) hours="${2:?--hours needs a number}"; shift 2 ;;
+    -d | --delete) delete=true; shift ;;
+    -h | --help)
+      sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+      exit 0
+      ;;
+    *) echo "herdr-tabs: unknown option: $1" >&2; exit 1 ;;
+  esac
+done
+if $delete && ! $stale; then
+  echo "herdr-tabs: -d only works with --stale" >&2
+  exit 1
+fi
+
+for tool in herdr jq claude-last-reply; do
+  command -v "$tool" >/dev/null || { echo "herdr-tabs: needs $tool" >&2; exit 1; }
+done
+
+# One row per tab: tab_id, workspace:label, herdr state, claude session id.
+# A tab split into several panes is represented by its first Claude pane.
+rows() {
+  jq -rn \
+    --argjson ws "$(herdr workspace list)" \
+    --argjson tabs "$(herdr tab list)" \
+    --argjson panes "$(herdr pane list)" '
+    ($ws.result.workspaces | map({(.workspace_id): .label}) | add) as $wl
+    | ($panes.result.panes | group_by(.tab_id)
+        | map({(.[0].tab_id): (map(select(.agent == "claude")) + .)[0]}) | add) as $tp
+    | $tabs.result.tabs[]
+    | $tp[.tab_id] as $p
+    | [.tab_id, "\($wl[.workspace_id]):\(.label)", ($p.agent_status // "unknown"),
+       ($p.agent_session.value // "")]
+    | @tsv'
+}
+
+transcript_for() {
+  [ -n "$1" ] || return 0
+  ls ~/.claude/projects/*/"$1".jsonl 2>/dev/null | head -1
+}
+
+mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1"; }
+
+human_age() {
+  local s=$1
+  if ((s < 3600)); then echo "$((s / 60))m"
+  elif ((s < 86400)); then echo "$((s / 3600))h"
+  else echo "$((s / 86400))d"; fi
+}
+
+# This tab, asked of herdr: $HERDR_TAB_ID goes stale once a tab is moved to
+# another workspace.
+me=$(herdr pane current 2>/dev/null | jq -r '.result.pane.tab_id // empty')
+
+now=$(date +%s)
+table=()
+while IFS=$'\t' read -r tab where state session; do
+  t=$(transcript_for "$session")
+  age=-1 note=""
+  if [ -n "$t" ]; then
+    age=$((now - $(mtime "$t")))
+    if q=$(claude-last-reply "$t" question); then
+      [ "$state" = working ] || state="needs you"
+      note="$q"
+    else
+      note=$(claude-last-reply "$t" gist)
+    fi
+  elif [ -z "$session" ]; then
+    state="no agent"
+  fi
+  case "$state" in
+    "needs you") rank=0 ;; blocked) rank=1 ;; working) rank=2 ;; *) rank=3 ;;
+  esac
+  table+=("$rank"$'\t'"$age"$'\t'"$tab"$'\t'"$where"$'\t'"$state"$'\t'"$note")
+done < <(rows)
+
+# Replace the table with the output of a filter over it (bash 3.2 has no mapfile).
+refilter() {
+  local out=() line
+  while IFS= read -r line; do out+=("$line"); done < <(printf '%s\n' "${table[@]}" | "$@")
+  table=(${out[@]+"${out[@]}"})
+}
+
+if $stale; then
+  refilter awk -F'\t' -v c="$((hours * 3600))" -v me="$me" \
+    '$1 == 3 && $2 >= c && $3 != me && $5 != "no agent"'
+  refilter sort -t$'\t' -k2,2nr
+  if [ ${#table[@]} -eq 0 ]; then
+    echo "${DIM}No tabs idle for ${hours}h+.${RESET}"
+    exit 0
+  fi
+else
+  refilter sort -t$'\t' -k1,1n -k2,2n
+fi
+
+if [[ -t 1 ]]; then width=$(tput cols); else width=${COLUMNS:-200}; fi
+wcol=$(printf '%s\n' "${table[@]}" | awk -F'\t' '{ if (length($4) > m) m = length($4) } END { print m + 2 }')
+
+for row in "${table[@]}"; do
+  IFS=$'\t' read -r _ age tab where state note <<<"$row"
+  case "$state" in
+    "needs you") color=$RED ;; blocked) color=$YELLOW ;; working) color=$GREEN ;;
+    "no agent") color=$DIM ;; *) color=$CYAN ;;
+  esac
+  mark=" "; [ "$tab" = "$me" ] && mark="*"
+  a=""; ((age >= 0)) && a=$(human_age "$age")
+  room=$((width - wcol - 21))
+  ((room > 10)) && [ ${#note} -gt $room ] && note="${note:0:room-1}…"
+  printf "%s ${BOLD}%-${wcol}s${RESET}${color}%-10s${RESET} ${DIM}%4s${RESET}  %s\n" \
+    "$mark" "$where" "$state" "$a" "$note"
+done
+
+if $stale; then
+  if ! $delete; then
+    echo
+    echo "${DIM}Dry run. Close these ${#table[@]} tabs with: herdr-tabs --stale -d${RESET}"
+    exit 0
+  fi
+  for row in "${table[@]}"; do
+    IFS=$'\t' read -r _ _ tab where _ <<<"$row"
+    herdr tab close "$tab" >/dev/null && echo "${DIM}closed${RESET} $where"
+  done
+fi
