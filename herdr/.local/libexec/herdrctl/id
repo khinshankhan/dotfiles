@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Print this pane's id (eg wB:pG); -c copies it to the clipboard instead.
+#
+# Usage: herdrctl id [-c|--copy]
+#
+# The pane is the one you're in, or, from a key binding, the pane the key was
+# pressed in (muxloc handles both, and ids from before a tab move). With -c
+# the id goes to the clipboard (pbcopy, wl-copy or xclip) and a herdr
+# notification confirms it, since a key binding has nowhere to print.
+set -uo pipefail
+
+PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin"
+PATH="$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+
+copy=false
+case "${1:-}" in
+  -c | --copy) copy=true ;;
+  -h | --help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+  "") ;;
+  *) echo "herdrctl id: unknown option: $1" >&2; exit 2 ;;
+esac
+
+[ "$(muxloc mux 2>/dev/null)" = herdr ] || { echo "herdrctl id: not in a herdr pane" >&2; exit 1; }
+id="$(muxloc id)" && id="${id#herdr:}"
+[ -n "$id" ] || { echo "herdrctl id: no pane id" >&2; exit 1; }
+
+if ! $copy; then
+  printf '%s\n' "$id"
+  exit 0
+fi
+
+if command -v pbcopy >/dev/null; then printf '%s' "$id" | pbcopy
+elif command -v wl-copy >/dev/null; then printf '%s' "$id" | wl-copy
+elif command -v xclip >/dev/null; then printf '%s' "$id" | xclip -selection clipboard
+else echo "herdrctl id: no clipboard tool" >&2; exit 1
+fi
+herdr notification show "Copied pane id" --body "$id" >/dev/null 2>&1
+exit 0

@@ -55,3 +55,10 @@ key = "prefix+shift+t"
 description = "reset tab name (renamed on the agent's next reply)"
 type = "shell"
 command = "$HOME/.local/bin/muxloc reset-name"
+
+# Copy the current pane's id (eg wB:pG) for herdr commands; i for id.
+[[keys.command]]
+key = "prefix+i"
+description = "copy this pane's id"
+type = "shell"
+command = "$HOME/.local/bin/herdrctl id --copy"
