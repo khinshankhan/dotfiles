@@ -1,0 +1,29 @@
+# AI agent shared dirs, pre-created so no single stow package owns them.
+# Paths are relative to $HOME.
+#
+# Only the dirs this repo's packages link into. Other dotfiles repos list the
+# dirs they need themselves (eg ~/.agents/skills, ~/.claude/rules). Each agent
+# keeps its own state (auth, history, sessions, caches) in its home dir, so
+# those must stay real dirs rather than symlinks into a dotfiles repo; the
+# agent packages only link files into them.
+
+# ~/.agents: the agentsstandard.com dir. This repo adds hooks/; other repos
+# add AGENTS.md and skills.
+.agents
+
+# Claude Code.
+.claude
+
+# Codex. The codex package links hooks.json into it.
+.codex
+
+# pi. extensions/ is shared with herdr's pi integration, which installs its
+# own file there.
+.pi
+.pi/agent
+.pi/agent/extensions
+
+# opencode. plugins/ is shared with herdr's opencode integration, which
+# installs its own file there.
+.config/opencode
+.config/opencode/plugins

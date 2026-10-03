@@ -1,0 +1,53 @@
+{
+  "description": "Agent hooks shared with Claude and pi, via ~/.agents/hooks/agent-event.sh. Commands go through sh -c so $HOME expands: Codex may not run hook commands in a shell. SessionStart is herdr's (herdr integration install codex).",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "sh -c '$HOME/.agents/hooks/agent-event.sh codex blocked chime'",
+            "type": "command"
+          },
+          {
+            "async": true,
+            "command": "sh -c '$HOME/.agents/hooks/agent-event.sh codex blocked toast'",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "sh -c 'bash \"$HOME/.codex/herdr-agent-state.sh\" session'",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "sh -c '$HOME/.agents/hooks/agent-event.sh codex done chime'",
+            "type": "command"
+          },
+          {
+            "async": true,
+            "command": "sh -c '$HOME/.agents/hooks/agent-event.sh codex done toast'",
+            "type": "command"
+          },
+          {
+            "async": true,
+            "command": "sh -c '$HOME/.agents/hooks/agent-event.sh codex done tab-rename'",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}
