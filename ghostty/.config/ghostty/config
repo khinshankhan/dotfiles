@@ -121,3 +121,7 @@ keybind = ctrl+shift+k=clear_screen
 # reflexive left cmd+s "save" from landing in herdr. cmd+s is unbound in
 # ghostty, so nothing is lost.
 keybind = super+s=csi:13;5u
+# ctrl+s does the same for linux, where i3 owns super+s. ghostty has no per-os
+# keybinds, so it's the prefix on macos too, and ctrl+s never reaches the
+# shell or emacs -nw (readline forward-search, isearch).
+keybind = ctrl+s=csi:13;5u

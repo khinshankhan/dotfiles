@@ -8,7 +8,8 @@ auto_switch = false
 agent_panel_sort = "priority"
 
 [keys]
-# Pressed as right cmd+s: Ghostty sends ctrl+enter for it. herdr needs a real
+# Pressed as right cmd+s, or ctrl+s (for Linux, where i3 owns super+s): Ghostty
+# sends ctrl+enter for both, since herdr takes only one prefix. herdr needs a real
 # key after the modifiers (a bare "ctrl+alt" silently falls back to ctrl+b).
 prefix = "ctrl+enter"
 
