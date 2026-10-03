@@ -15,6 +15,38 @@ set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 
+# A shared dir stowed before it was listed here is already a folded symlink into
+# some dotfiles repo. mkdir -p would walk straight through it and write into the
+# repo, and no other package could link into it. Unfold each such component:
+# replace the dir link with a real dir holding one link per child -- the same
+# layout stow produces when it unfolds a tree itself.
+unfold() {
+    local rel="$1" acc="" part target real child name
+    local IFS=/
+    for part in $rel; do
+        acc="${acc:+$acc/}$part"
+        [ -L "$HOME/$acc" ] && [ -d "$HOME/$acc" ] || continue
+        real="$(cd -P "$HOME/$acc" && pwd)"
+        case "$real" in
+            "$HOME"/dotfiles* | "$HOME"/.dotfiles*) ;;
+            # not a stow fold (eg a deliberate link elsewhere) -- leave it
+            *) return 0 ;;
+        esac
+        target="$(readlink "$HOME/$acc")"
+        rm "$HOME/$acc"
+        mkdir "$HOME/$acc"
+        for child in "$real"/* "$real"/.[!.]* "$real"/..?*; do
+            [ -e "$child" ] || [ -L "$child" ] || continue
+            name="$(basename "$child")"
+            case "$target" in
+                /*) ln -s "$target/$name" "$HOME/$acc/$name" ;;
+                *) ln -s "../$target/$name" "$HOME/$acc/$name" ;;
+            esac
+        done
+        echo "dottie prestow: unfolded ~/$acc (was -> $target)"
+    done
+}
+
 # shared dirs: <pkg>/.config/dottie/dirs.d/*.list, one path per line
 for f in "$DOTFILES"/*/.config/dottie/dirs.d/*.list; do
     [ -f "$f" ] || continue
@@ -23,6 +55,7 @@ for f in "$DOTFILES"/*/.config/dottie/dirs.d/*.list; do
         line="${line%%#*}"
         line="$(printf '%s' "$line" | tr -d '[:space:]')"
         [ -n "$line" ] || continue
+        unfold "$line"
         mkdir -p "$HOME/$line"
         touch "$HOME/$line/.keep"
     done < "$f"
@@ -45,6 +78,12 @@ for f in "$DOTFILES"/*/.config/dottie/links.d/*.list; do
         [ -n "$link" ] && [ -n "$target" ] || continue
         # skip if the link already points where we want
         [ "$(readlink "$HOME/$link" 2>/dev/null)" = "$target" ] && continue
+        # a real file/dir in the way: ln -sfn would nest the link inside a dir
+        # (or clobber a file), so leave it for the user to move aside
+        if [ -e "$HOME/$link" ] && [ ! -L "$HOME/$link" ]; then
+            echo "dottie prestow: skipping ~/$link -> $target: ~/$link exists and is not a symlink; move it aside (eg merge its contents into the target) and rerun" >&2
+            continue
+        fi
         mkdir -p "$(dirname "$HOME/$link")"
         ln -sfn "$target" "$HOME/$link"
     done < "$f"
