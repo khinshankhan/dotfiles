@@ -75,3 +75,9 @@ key = "prefix+i"
 description = "copy this pane's id"
 type = "shell"
 command = "$HOME/.local/bin/herdrctl id --copy"
+
+[[keys.command]]
+key = "prefix+y"
+description = "copy the agent's session id (claude, codex, pi, opencode)"
+type = "shell"
+command = "$HOME/.local/bin/herdrctl session --copy"

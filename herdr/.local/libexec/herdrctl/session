@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Print this pane's agent session id; -c copies it to the clipboard instead.
+#
+# Usage: herdrctl session [-c|--copy]
+#
+# The session is the one herdr has linked to the pane's agent (claude, codex,
+# pi, opencode, ...), as reported by its integration: usually an id to resume
+# with (eg claude --resume <id>), or a session file path for agents that
+# resume by path. The pane is found the way `herdrctl id` finds it. With -c
+# the session goes to the clipboard (pbcopy, wl-copy or xclip) and a herdr
+# notification confirms it, since a key binding has nowhere to print.
+set -uo pipefail
+
+PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin"
+PATH="$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+
+copy=false
+case "${1:-}" in
+  -c | --copy) copy=true ;;
+  -h | --help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+  "") ;;
+  *) echo "herdrctl session: unknown option: $1" >&2; exit 2 ;;
+esac
+
+fail() {
+  echo "herdrctl session: $1" >&2
+  $copy && herdr notification show "No session to copy" --body "$1" >/dev/null 2>&1
+  exit 1
+}
+
+[ "$(muxloc mux 2>/dev/null)" = herdr ] || fail "not in a herdr pane"
+pane="$(muxloc id)" && pane="${pane#herdr:}"
+[ -n "$pane" ] || fail "no pane id"
+
+IFS=$'\t' read -r agent session < <(herdr pane list 2>/dev/null | jq -r --arg id "$pane" '
+  .result.panes[] | select(.pane_id == $id) | .agent_session
+  | select(. != null and .value != null) | "\(.agent)\t\(.value)"')
+[ -n "${session:-}" ] || fail "no agent session in pane $pane"
+
+if ! $copy; then
+  printf '%s\n' "$session"
+  exit 0
+fi
+
+if command -v pbcopy >/dev/null; then printf '%s' "$session" | pbcopy
+elif command -v wl-copy >/dev/null; then printf '%s' "$session" | wl-copy
+elif command -v xclip >/dev/null; then printf '%s' "$session" | xclip -selection clipboard
+else fail "no clipboard tool"
+fi
+herdr notification show "Copied $agent session" --body "$session" >/dev/null 2>&1
+exit 0
