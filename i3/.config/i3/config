@@ -377,8 +377,8 @@ set_from_resource $term_color15    color15
 # bindsym XF86MonBrightnessUp exec xbacklight +10; exec notify-send 'backlight up'
 # bindsym XF86MonBrightnessDown exec xbacklight -10; exec notify-send 'backlight down'
 
-bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5% && notify-send --hint=string:x-dunst-stack-tag:test volume: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
-bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%- && notify-send --hint=string:x-dunst-stack-tag:test volume: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
+bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5% && notify-send --hint=string:x-dunst-stack-tag:brightness brightness: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
+bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%- && notify-send --hint=string:x-dunst-stack-tag:brightness brightness: "$($HOME/.config/i3/scripts/get-current-brightnessctl)"
 
 # Pulse Audio controls
 
