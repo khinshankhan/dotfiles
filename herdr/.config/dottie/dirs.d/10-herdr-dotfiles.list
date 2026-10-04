@@ -1,0 +1,4 @@
+# herdr keeps its own state (sockets, session.json, logs) in ~/.config/herdr,
+# so it must stay a real dir; the herdr package only links config.toml into
+# it. Paths are relative to $HOME.
+.config/herdr
