@@ -57,7 +57,18 @@ elif have notify-send; then
   opts=()
   [ -n "$urgency" ] && opts+=(--urgency="$urgency")
   [ -n "$app" ] && opts+=(--app-name="$app")
-  notify-send "${opts[@]}" "$title" "${subtitle:+$subtitle
-}$body"
+  # Tagged so a server can style toasts apart from other apps: dunstrc's
+  # [toastie] rule sets the title in medium weight, under the bold subtitle.
+  opts+=(--category=x-toastie)
+  # Servers like dunst read the text as Pango markup, so escape it (a stray <
+  # or & in an agent's reply would otherwise garble the banner) and bold the
+  # subtitle, the line that says what happened.
+  esc() {
+    local s="${1//&/\&amp;}"
+    s="${s//</\&lt;}"
+    printf '%s' "${s//>/\&gt;}"
+  }
+  notify-send "${opts[@]}" "$(esc "$title")" "${subtitle:+<b>$(esc "$subtitle")</b>
+}$(esc "$body")"
 fi
 exit 0
