@@ -48,6 +48,7 @@
       ../../modules/tools/gnupg.nix
       ../../modules/tools/herdr.nix
       ../../modules/tools/imagemagick.nix
+      ../../modules/tools/jq.nix
       ../../modules/tools/ripgrep.nix
       ../../modules/tools/sox.nix
       ../../modules/tools/tesseract.nix
@@ -90,6 +91,7 @@
     modules.tools.gnupg.enable = true;
     modules.tools.herdr.enable = true;
     modules.tools.imagemagick.enable = true;
+    modules.tools.jq.enable = true;
     modules.tools.ripgrep.enable = true;
     modules.tools.sox.enable = true;
     modules.tools.tesseract.enable = true;
