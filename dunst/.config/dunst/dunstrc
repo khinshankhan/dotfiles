@@ -24,16 +24,17 @@
     # dynamic width from 0 to 300
     # width = (0, 300)
     # constant width of 300
-    width = 300
+    width = 450
 
     # The maximum height of a single notification, excluding the frame.
-    height = 300
+    height = 450
 
     # Position the notification in the top right corner
-    origin = bottom-right
+    origin = top-right
 
-    # Offset from the origin
-    offset = 30x30
+    # Offset from the origin: 30px in from the right, and 30px below polybar
+    # (30px tall) so popups clear the bar
+    offset = 30x60
 
     # Scale factor. It is auto-detected if value is 0.
     scale = 0
@@ -49,7 +50,7 @@
 
     # Set the progress bar height. This includes the frame, so make sure
     # it's at least twice as big as the frame width.
-    progress_bar_height = 10
+    progress_bar_height = 14
 
     # Set the frame width of the progress bar
     progress_bar_frame_width = 1
@@ -58,7 +59,7 @@
     progress_bar_min_width = 150
 
     # Set the maximum width for the progress bar
-    progress_bar_max_width = 300
+    progress_bar_max_width = 450
 
 
     # Show how many messages are currently hidden (because of
@@ -68,7 +69,7 @@
     # The transparency of the window.  Range: [0; 100].
     # This option will only work if a compositing window manager is
     # present (e.g. xcompmgr, compiz, etc.). (X11 only)
-    transparency = 16
+    transparency = 8
 
     # Draw a line of "separator_height" pixel height between two
     # notifications.
@@ -76,10 +77,10 @@
     separator_height = 2
 
     # Padding between text and separator.
-    padding = 8
+    padding = 12
 
     # Horizontal padding.
-    horizontal_padding = 8
+    horizontal_padding = 14
 
     # Padding between text and icon.
     text_icon_padding = 0
@@ -89,7 +90,7 @@
     frame_width = 1
 
     # Defines color of the frame around the notification window.
-    frame_color = "#7f3fbf"
+    frame_color = "#5a5d63"
 
     # Define a color for the separator.
     # possible values are:
@@ -111,7 +112,7 @@
 
     ### Text ###
 
-    font = Noto Sans Regular 9
+    font = Noto Sans Regular 14
 
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
@@ -229,7 +230,7 @@
     # corners.
     # The radius will be automatically lowered if it exceeds half of the
     # notification height to avoid clipping text and/or icons.
-    corner_radius = 7
+    corner_radius = 18
 
     # Ignore the dbus closeNotification message.
     # Useful to enforce the timeout set by dunst configuration. Without this
@@ -292,19 +293,22 @@
 [urgency_low]
     # IMPORTANT: colors have to be defined in quotation marks.
     # Otherwise the "#" and following would be interpreted as a comment.
-    background = "#28143c"
-    foreground = "#ffffff"
+    background = "#2c2e33"
+    foreground = "#f2f2f7"
+    highlight = "#0a84ff"
     timeout = 5
 
 [urgency_normal]
-    background = "#28143c"
-    foreground = "#ffffff"
+    background = "#2c2e33"
+    foreground = "#f2f2f7"
+    highlight = "#0a84ff"
     timeout = 5
 
 [urgency_critical]
-    background = "#28143c"
-    foreground = "#ffffff"
-    frame_color = "#ff7f7f"
+    background = "#2c2e33"
+    foreground = "#f2f2f7"
+    highlight = "#0a84ff"
+    frame_color = "#ff6961"
     timeout = 120
 
 # Every section that isn't one of the above is interpreted as a rules to
@@ -423,5 +427,10 @@
 #    summary = *twitter.com*
 #    urgency = normal
 #
+# toasts from toastie (eg agent banners): the title (where) in medium
+# weight, so the bold subtitle (what happened) leads
+[toastie]
+    category = x-toastie
+    format = "<span weight='medium'>%s</span>\n%b"
 #
 # vim: ft=cfg
