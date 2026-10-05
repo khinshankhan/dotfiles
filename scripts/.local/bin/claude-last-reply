@@ -52,9 +52,19 @@ if [ "$transcript" = - ]; then reply="$(cat)"; else reply="$(text)"; fi
 case "${2:-text}" in
   text) printf '%s\n' "$reply" ;;
   gist)
-    # First paragraph, cut at the end of its first sentence.
-    printf '%s' "$reply" | awk -v RS= 'NR == 1' | plain \
-      | sed -E 's/([.!?:])( |$).*/\1/'
+    # The opening sentence. A lead-in ending in ":" ("Here's my call:") says
+    # nothing alone, so the sentence after it -- in the same paragraph or the
+    # next, minus any list marker -- comes along.
+    flat="$(printf '%s' "$reply" | awk -v RS= 'NR <= 2' | plain)"
+    first="$(printf '%s' "$flat" | sed -E 's/([.!?:])( |$).*/\1/')"
+    case "$first" in
+      *:)
+        next="$(printf '%s' "${flat#"$first"}" \
+          | sed -E 's/^ +//; s/^([-*]|[0-9]+\.) +//; s/([.!?])( |$).*/\1/')"
+        [ -n "$next" ] && first="$first $next"
+        ;;
+    esac
+    printf '%s\n' "$first"
     ;;
   question)
     # A reply asks you something when its last paragraph ends in "?".
