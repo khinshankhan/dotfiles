@@ -6,7 +6,7 @@ set -euo pipefail
 #   curl -fsSL https://raw.githubusercontent.com/khinshankhan/dotfiles/main/bootstrap | bash
 #
 # Installs git + stow (the only prerequisites), clones the repo over HTTPS, then
-# hands off to dottie's prestow + install. Re-running is safe: an existing clone
+# installs only the dottie command. Re-running is safe: an existing clone
 # is pulled instead.
 
 REPO_URL="${DOTFILES_REPO:-https://github.com/khinshankhan/dotfiles.git}"
@@ -95,16 +95,11 @@ main() {
 
     cd "$DOTFILES_DIR"
 
-    if [ -x ./dottie/.local/libexec/dottie/prestow ]; then
-        log "creating shared directories"
-        ./dottie/.local/libexec/dottie/prestow
-    fi
-
-    log "stowing configs"
-    ./dottie/.local/libexec/dottie/install
+    log "stowing the dottie command"
+    DOTFILES="$DOTFILES_DIR" ./dottie/.local/libexec/dottie/install dottie
 
     log "done. dotfiles installed to $DOTFILES_DIR"
-    log "next: optionally set up Nix packages -> dottie nix bootstrap --multi"
+    log "next: dottie prestow, then dottie install <package>... or dottie install --machine <name>"
 }
 
 main "$@"

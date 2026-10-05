@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stow every package (or the named ones) from this repo into $HOME.
+# Stow explicitly named packages or a machine list into $HOME.
 set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
@@ -18,48 +18,102 @@ if [ -f .stow-local-ignore ]; then
 fi
 is_ignored() { case "$ignore" in *$'\n'"$1"$'\n'*) return 0 ;; *) return 1 ;; esac; }
 
-# In a git repo, only top-level dirs with tracked files count as packages, so
-# scratch dirs (notes/, a half-made package) never leak into $HOME by default.
-tracked=""
-if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    tracked=$'\n'"$(git ls-files | cut -d/ -f1 | sort -u)"$'\n'
-fi
-is_untracked() {
-    [ -n "$tracked" ] || return 1
-    case "$tracked" in *$'\n'"$1"$'\n'*) return 1 ;; *) return 0 ;; esac
+usage() {
+    echo "usage: dottie install [--dry-run] <package> [package...]"
+    echo "       dottie install --machine <name> [--dry-run|--apply]"
+    echo "machine lists: $DOTFILES/packages/<name>/dotfiles.list"
+    cat <<'EOF'
+
+Named packages apply by default; add --dry-run to preview.
+Machine lists preview by default; add --apply to install.
+Flags may appear before or after package names. Do not combine --dry-run
+and --apply, or mix named packages with --machine.
+
+Machine lists contain one package name per line, with optional # comments
+and blank lines. Missing, empty, or invalid lists fail without changing links.
+Packages omitted from a list are not uninstalled.
+
+examples:
+  dottie install git tmux --dry-run
+  dottie install git tmux
+  dottie install --machine gengar
+  dottie install --machine gengar --apply
+
+Run dottie prestow before installation to prepare shared directories.
+EOF
 }
 
-# Packages: dirs given as args, or every tracked top-level dir not in the ignore
-# set. Named packages are taken as given (untracked ones included) but must exist.
 pkgs=()
-if [ "$#" -gt 0 ]; then
-    for d in "$@"; do
-        d="${d%/}"
-        if [ ! -d "$d" ]; then
-            echo "dottie install: no package '$d' in $DOTFILES" >&2
-            exit 1
-        fi
-        pkgs+=("$d")
-    done
-else
-    for d in */; do
-        # no match -> literal glob, skip
-        [ -d "$d" ] || continue
-        d="${d%/}"
-        is_ignored "$d" && continue
-        if is_untracked "$d"; then
-            echo "dottie install: skipping untracked dir '$d' (name it to stow anyway)" >&2
-            continue
-        fi
-        pkgs+=("$d")
-    done
-fi
+machine=""
+mode=""
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -h|--help) usage; exit 0 ;;
+        --dry-run|--apply)
+            if [ -n "$mode" ] && [ "$mode" != "$1" ]; then
+                echo "dottie install: --dry-run and --apply cannot be combined" >&2
+                exit 1
+            fi
+            mode="$1"
+            shift ;;
+        --machine)
+            if [ "$#" -lt 2 ] || [ -n "$machine" ]; then
+                usage >&2
+                exit 1
+            fi
+            case "$2" in
+                ""|.*|*[!a-zA-Z0-9_-]*)
+                    echo "dottie install: invalid machine name '$2'" >&2
+                    exit 1 ;;
+            esac
+            machine="$2"
+            shift 2 ;;
+        -*) echo "dottie install: unknown option '$1'" >&2; exit 1 ;;
+        *) pkgs+=("$1"); shift ;;
+    esac
+done
 
-# Never call stow with an empty package list -- that would operate on the cwd and
-# can unstow existing links. Bail clearly instead.
+if [ -n "$machine" ]; then
+    if [ "${#pkgs[@]}" -gt 0 ]; then
+        echo "dottie install: choose packages or --machine, not both" >&2
+        exit 1
+    fi
+    mode="${mode:---dry-run}"
+    manifest="$DOTFILES/packages/$machine/dotfiles.list"
+    if [ ! -f "$manifest" ]; then
+        echo "dottie install: no machine list at $manifest" >&2
+        exit 1
+    fi
+    while IFS= read -r line || [ -n "$line" ]; do
+        line="${line%%#*}"
+        line="$(printf '%s' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$line" ] && pkgs+=("$line")
+    done < "$manifest"
+fi
+mode="${mode:---apply}"
+
+# Validate the entire selection before Stow can change any links. Accept only
+# top-level package names, never paths or Stow options.
 if [ "${#pkgs[@]}" -eq 0 ]; then
-    echo "dottie install: no packages to stow in $DOTFILES" >&2
+    echo "dottie install: no packages selected" >&2
+    usage >&2
     exit 1
 fi
+for d in "${pkgs[@]}"; do
+    case "$d" in
+        .*|-*|*/*|*[!a-zA-Z0-9_.-]*)
+            echo "dottie install: invalid package name '$d'" >&2
+            exit 1 ;;
+    esac
+    if is_ignored "$d" || [ ! -d "$d" ]; then
+        echo "dottie install: no package '$d' in $DOTFILES" >&2
+        exit 1
+    fi
+done
 
-stow -Rvt ~ "${pkgs[@]}"
+stow_flags=(-Rvt)
+if [ "$mode" = --dry-run ]; then
+    stow_flags=(-nRvt)
+    echo "dottie install: preview only; no links will be changed"
+fi
+stow "${stow_flags[@]}" "$HOME" "${pkgs[@]}"

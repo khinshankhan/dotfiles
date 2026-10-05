@@ -1,0 +1,10 @@
+# Basic shell and terminal setup for gengar.
+dottie
+shell
+readline
+git
+tmux
+starship
+ghostty
+scripts
+nix

@@ -12,7 +12,7 @@ set -uo pipefail
 #   shared dirs  a dirs.d dir is missing, or is a symlink (folded) so it
 #                writes into one repo and blocks the others
 #   bridges      a links.d link is missing, wrong, or blocked by a real file
-#   untracked    top-level dirs `dottie install` skips (info only)
+#   untracked    untracked top-level dirs (info only)
 # Exits 1 when anything but untracked dirs needs fixing.
 
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -76,7 +76,7 @@ dirs="" # parent dirs of every target, scanned for broken links below
 for repo in "${repos[@]}"; do
     git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
 
-    # packages: what `dottie install` would stow (tracked, not ignored)
+    # Inspect tracked packages, whether or not selected for this machine.
     ignore=$'\n.git\n'
     if [ -f "$repo/.stow-local-ignore" ]; then
         while IFS= read -r line; do
@@ -175,12 +175,12 @@ section() { # title hint body
 printf 'dottie doctor: %s\n' "$(for r in "${repos[@]}"; do tilde "$r"; printf ' '; done)"
 printf '  %d packages, %d files linked\n' "$pkgcount" "$linked"
 
-section "conflicts" "move each aside (or merge it into the repo), then dottie install" "$conflicts"
-section "not stowed" "run dottie install in that repo" "$unstowed"
+section "conflicts" "move each aside (or merge it into the repo), then dottie install <package>" "$conflicts"
+section "not stowed" "if wanted, run dottie install <package> in that repo" "$unstowed"
 section "broken links" "rm each; its target is gone" "$broken"
 section "shared dirs" "run dottie prestow in any repo" "$shared"
 section "bridge links" "run dottie prestow; move real files aside first" "$bridges"
-section "untracked (info)" "skipped by dottie install; commit or ignore them" "$untracked"
+section "untracked (info)" "not inspected; commit or ignore them" "$untracked"
 
 if [ -n "$conflicts$unstowed$broken$shared$bridges" ]; then
     exit 1

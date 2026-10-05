@@ -104,6 +104,23 @@ usage() {
     COLW=0
     tree_width "$d" 2
     list_group "$d"
+    if [ -z "$prefix" ]; then
+        cat <<'EOF'
+
+quick guide:
+  dottie doctor                         Check links and conflicts
+  dottie prestow                        Prepare shared directories
+  dottie install git tmux --dry-run      Preview named packages
+  dottie install git tmux                Install named packages
+  dottie install --machine gengar        Preview a machine list
+  dottie install --machine gengar --apply Install a machine list
+
+Machine lists: <repo>/packages/<name>/dotfiles.list
+One package per line; blank lines and # comments are allowed.
+Bare install changes nothing. Machine installs preview by default.
+Use dottie install --help for details.
+EOF
+    fi
 }
 
 # Handle top-level help before descending.
