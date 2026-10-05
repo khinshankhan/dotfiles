@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+# Check every dotfiles repo's links in $HOME and say what needs fixing.
+set -uo pipefail
+
+# Read-only. Covers every repo on the machine (~/dotfiles*, ~/.dotfiles*), since
+# their packages share $HOME:
+#   conflicts    a real file sits where a package wants a link; stow refuses
+#                to install anything until it is moved aside
+#   not stowed   a package's files have no link yet
+#   broken       a link points into a repo at something that's gone (eg a
+#                file deleted or moved upstream)
+#   shared dirs  a dirs.d dir is missing, or is a symlink (folded) so it
+#                writes into one repo and blocks the others
+#   bridges      a links.d link is missing, wrong, or blocked by a real file
+#   untracked    top-level dirs `dottie install` skips (info only)
+# Exits 1 when anything but untracked dirs needs fixing.
+
+have() { command -v "$1" >/dev/null 2>&1; }
+tilde() { printf '%s' "${1/#"$HOME"/\~}"; }
+
+# stow's own default ignore list, used when a package has no
+# .stow-local-ignore of its own.
+default_ignore='RCS
+.+,v
+CVS
+\.\#.+
+\.cvsignore
+\.svn
+_darcs
+\.hg
+\.git
+\.gitignore
+\.gitmodules
+.+~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING'
+
+# Paths (relative to a package) on stdin, minus the ones stow would ignore.
+# Like stow, a pattern with a "/" matches a path from the package root (and
+# so skips that whole subtree); any other pattern matches a single name.
+stowable() { # ignore-patterns
+    perl -e '
+        my @pats = grep { length } map { s/^\s+|\s+$//gr } split /\n/, $ARGV[0];
+        LINE: while (my $p = <STDIN>) {
+            chomp $p;
+            next LINE if $p eq ".stow-local-ignore"; # stow never links it
+            my @parts = split m{/}, $p;
+            for my $i (0 .. $#parts) {
+                my $sub = "/" . join("/", @parts[0 .. $i]);
+                for my $re (@pats) {
+                    next LINE if $re =~ m{/} ? $sub =~ /^(?:$re)$/ : $parts[$i] =~ /^(?:$re)$/;
+                }
+            }
+            print "$p\n";
+        }' "$1"
+}
+
+# Results, one line each, printed by section at the end.
+conflicts="" unstowed="" broken="" shared="" bridges="" untracked=""
+add() { # section line
+    eval "$1=\"\${$1}\$2\"\$'\n'"
+}
+
+repos=()
+for d in "$HOME"/dotfiles* "$HOME"/.dotfiles*; do
+    [ -d "$d" ] && repos+=("$d")
+done
+[ "${#repos[@]}" -gt 0 ] || { echo "dottie doctor: no dotfiles repos under $HOME" >&2; exit 1; }
+have perl || { echo "dottie doctor: needs perl" >&2; exit 1; }
+
+linked=0 pkgcount=0
+dirs="" # parent dirs of every target, scanned for broken links below
+
+for repo in "${repos[@]}"; do
+    git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+
+    # packages: what `dottie install` would stow (tracked, not ignored)
+    ignore=$'\n.git\n'
+    if [ -f "$repo/.stow-local-ignore" ]; then
+        while IFS= read -r line; do
+            line="${line%%#*}"
+            line="$(printf '%s' "$line" | tr -d '[:space:]')"
+            [ -n "$line" ] && ignore="$ignore$line"$'\n'
+        done < "$repo/.stow-local-ignore"
+    fi
+    tracked=$'\n'"$(git -C "$repo" ls-files | cut -d/ -f1 | sort -u)"$'\n'
+    for d in "$repo"/*/; do
+        [ -d "$d" ] || continue
+        pkg="$(basename "$d")"
+        case "$ignore" in *$'\n'"$pkg"$'\n'*) continue ;; esac
+        case "$tracked" in
+            *$'\n'"$pkg"$'\n'*) ;;
+            *) add untracked "$(tilde "$repo")/$pkg"; continue ;;
+        esac
+        pkgcount=$((pkgcount + 1))
+
+        pats="$default_ignore"
+        [ -f "$d/.stow-local-ignore" ] && pats="$(cat "$d/.stow-local-ignore")"
+        missing=0
+        while IFS= read -r rel; do
+            [ -n "$rel" ] || continue
+            src="$repo/$pkg/$rel" target="$HOME/$rel"
+            dirs="$dirs$(dirname "$target")"$'\n'
+            if [ "$target" -ef "$src" ]; then
+                linked=$((linked + 1))
+            elif [ -L "$target" ] && [ ! -e "$target" ]; then
+                : # broken; the scan below reports it
+            elif [ -e "$target" ] || [ -L "$target" ]; then
+                add conflicts "$(tilde "$target")  ($pkg, $(tilde "$repo"))"
+            else
+                missing=$((missing + 1))
+            fi
+        done < <(git -C "$repo/$pkg" ls-files | stowable "$pats")
+        [ "$missing" -gt 0 ] && add unstowed "$pkg in $(tilde "$repo"): $missing file(s) not linked"
+    done
+
+    # shared dirs and bridge links, from this repo's dirs.d / links.d lists
+    for f in "$repo"/*/.config/dottie/dirs.d/*.list; do
+        [ -f "$f" ] || continue
+        while IFS= read -r line; do
+            line="${line%%#*}"
+            line="$(printf '%s' "$line" | tr -d '[:space:]')"
+            [ -n "$line" ] || continue
+            dirs="$dirs$HOME/$line"$'\n'
+            if [ -L "$HOME/$line" ]; then
+                add shared "$(tilde "$HOME/$line") is a symlink (folded) -> $(readlink "$HOME/$line")"
+            elif [ ! -d "$HOME/$line" ]; then
+                add shared "$(tilde "$HOME/$line") is missing"
+            fi
+        done < "$f"
+    done
+    for f in "$repo"/*/.config/dottie/links.d/*.list; do
+        [ -f "$f" ] || continue
+        while IFS= read -r line; do
+            line="${line%%#*}"
+            [ -n "$(printf '%s' "$line" | tr -d '[:space:]')" ] || continue
+            link="$(printf '%s' "${line%%->*}" | tr -d '[:space:]')"
+            target="$(printf '%s' "${line##*->}" | tr -d '[:space:]')"
+            [ -n "$link" ] && [ -n "$target" ] || continue
+            dirs="$dirs$(dirname "$HOME/$link")"$'\n'
+            if [ "$(readlink "$HOME/$link" 2>/dev/null)" = "$target" ]; then
+                :
+            elif [ -L "$HOME/$link" ]; then
+                add bridges "$(tilde "$HOME/$link") -> $(readlink "$HOME/$link"), want -> $target"
+            elif [ -e "$HOME/$link" ]; then
+                add bridges "$(tilde "$HOME/$link") is a real file/dir, want a link -> $target"
+            else
+                add bridges "$(tilde "$HOME/$link") is missing, want -> $target"
+            fi
+        done < "$f"
+    done
+done
+
+# broken links into any repo, in the dirs packages link into
+while IFS= read -r d; do
+    [ -d "$d" ] || continue
+    for l in "$d"/* "$d"/.[!.]* "$d"/..?*; do
+        [ -L "$l" ] && [ ! -e "$l" ] || continue
+        case "$(readlink "$l")" in
+            *dotfiles*) add broken "$(tilde "$l") -> $(readlink "$l")" ;;
+        esac
+    done
+done < <(printf '%s' "$dirs" | sort -u)
+broken="$(printf '%s' "$broken" | sort -u)"
+[ -n "$broken" ] && broken="$broken"$'\n'
+
+section() { # title hint body
+    [ -n "$3" ] || return 0
+    printf '\n%s -- %s\n' "$1" "$2"
+    printf '%s' "$3" | sed 's/^/  /'
+}
+
+printf 'dottie doctor: %s\n' "$(for r in "${repos[@]}"; do tilde "$r"; printf ' '; done)"
+printf '  %d packages, %d files linked\n' "$pkgcount" "$linked"
+
+section "conflicts" "move each aside (or merge it into the repo), then dottie install" "$conflicts"
+section "not stowed" "run dottie install in that repo" "$unstowed"
+section "broken links" "rm each; its target is gone" "$broken"
+section "shared dirs" "run dottie prestow in any repo" "$shared"
+section "bridge links" "run dottie prestow; move real files aside first" "$bridges"
+section "untracked (info)" "skipped by dottie install; commit or ignore them" "$untracked"
+
+if [ -n "$conflicts$unstowed$broken$shared$bridges" ]; then
+    exit 1
+fi
+printf '\nall good\n'
