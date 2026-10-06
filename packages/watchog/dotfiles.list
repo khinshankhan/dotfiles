@@ -1,0 +1,29 @@
+# watchog: work mac (aarch64-darwin).
+dottie
+nix
+
+# shell and terminal
+shell
+readline
+starship
+tmux
+ghostty
+wezterm
+warp
+scripts
+
+# tools
+git
+emacs
+psql
+sqlite
+python
+hammerspoon
+
+# agents
+herdr
+agents
+claude
+codex
+pi
+opencode
