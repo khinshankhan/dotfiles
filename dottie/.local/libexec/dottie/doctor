@@ -13,9 +13,40 @@ set -uo pipefail
 #                writes into one repo and blocks the others
 #   bridges      a links.d link is missing, wrong, or blocked by a real file
 #   untracked    untracked top-level dirs (info only)
-# Exits 1 when anything but untracked dirs needs fixing.
+# Exits 1 when anything but the info sections needs fixing.
+#
+# Usage: dottie doctor [--machine <name>]
+#
+# Which packages a repo should have installed:
+#   - with a machine list (<repo>/packages/<machine>/dotfiles.list), exactly
+#     the listed ones. Unlisted packages are left out on purpose and never
+#     reported; a listed name with no package is an error.
+#   - otherwise, any package with at least one file linked: a partial install
+#     is a problem, an untouched package is just listed as not installed.
+# The machine is --machine, else $DOTTIE_MACHINE, else the one the last
+# `dottie install --machine <name> --apply` recorded. The hostname isn't used:
+# machine names (eg gengar) needn't match it.
 
 have() { command -v "$1" >/dev/null 2>&1; }
+
+machine="${DOTTIE_MACHINE:-}"
+state="${XDG_STATE_HOME:-$HOME/.local/state}/dottie/machine"
+[ -z "$machine" ] && [ -f "$state" ] && machine="$(tr -d '[:space:]' < "$state")"
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --machine)
+            [ "$#" -ge 2 ] || { echo "dottie doctor: --machine needs a name" >&2; exit 1; }
+            machine="$2"
+            shift 2 ;;
+        -h | --help)
+            sed -n '2,/^set /{/^set /d; s/^# \{0,1\}//; p;}' "$0"
+            exit 0 ;;
+        *) echo "dottie doctor: unknown argument '$1'" >&2; exit 1 ;;
+    esac
+done
+case "$machine" in
+    *[!a-zA-Z0-9_-]* | .*) echo "dottie doctor: invalid machine name '$machine'" >&2; exit 1 ;;
+esac
 tilde() { printf '%s' "${1/#"$HOME"/\~}"; }
 
 # stow's own default ignore list, used when a package has no
@@ -59,6 +90,7 @@ stowable() { # ignore-patterns
 
 # Results, one line each, printed by section at the end.
 conflicts="" unstowed="" broken="" shared="" bridges="" untracked=""
+listerr="" notinstalled="" omitted=""
 add() { # section line
     eval "$1=\"\${$1}\$2\"\$'\n'"
 }
@@ -76,7 +108,19 @@ dirs="" # parent dirs of every target, scanned for broken links below
 for repo in "${repos[@]}"; do
     git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
 
-    # Inspect tracked packages, whether or not selected for this machine.
+    # This repo's list for the machine, if it has one: "\n"-delimited names.
+    list="" listfile=""
+    if [ -n "$machine" ] && [ -f "$repo/packages/$machine/dotfiles.list" ]; then
+        listfile="$repo/packages/$machine/dotfiles.list"
+        list=$'\n'
+        while IFS= read -r line || [ -n "$line" ]; do
+            line="${line%%#*}"
+            line="$(printf '%s' "$line" | tr -d '[:space:]')"
+            [ -n "$line" ] && list="$list$line"$'\n'
+        done < "$listfile"
+    fi
+    listed() { case "$list" in *$'\n'"$1"$'\n'*) return 0 ;; *) return 1 ;; esac; }
+
     ignore=$'\n.git\n'
     if [ -f "$repo/.stow-local-ignore" ]; then
         while IFS= read -r line; do
@@ -98,23 +142,44 @@ for repo in "${repos[@]}"; do
 
         pats="$default_ignore"
         [ -f "$d/.stow-local-ignore" ] && pats="$(cat "$d/.stow-local-ignore")"
-        missing=0
+        missing=0 here=0 clash=""
         while IFS= read -r rel; do
             [ -n "$rel" ] || continue
             src="$repo/$pkg/$rel" target="$HOME/$rel"
+            # always collected: broken links into any package still matter
             dirs="$dirs$(dirname "$target")"$'\n'
             if [ "$target" -ef "$src" ]; then
-                linked=$((linked + 1))
+                here=$((here + 1))
             elif [ -L "$target" ] && [ ! -e "$target" ]; then
                 : # broken; the scan below reports it
             elif [ -e "$target" ] || [ -L "$target" ]; then
-                add conflicts "$(tilde "$target")  ($pkg, $(tilde "$repo"))"
+                clash="$clash$(tilde "$target")  ($pkg, $(tilde "$repo"))"$'\n'
             else
                 missing=$((missing + 1))
             fi
         done < <(git -C "$repo/$pkg" ls-files | stowable "$pats")
+        linked=$((linked + here))
+
+        # Is this package wanted here? Listed, or (with no list) partly linked.
+        if [ -n "$listfile" ]; then
+            listed "$pkg" || { add omitted "$pkg"; continue; }
+        elif [ "$here" -eq 0 ]; then
+            add notinstalled "$pkg in $(tilde "$repo")"
+            continue
+        fi
+        [ -n "$clash" ] && conflicts="$conflicts$clash"
         [ "$missing" -gt 0 ] && add unstowed "$pkg in $(tilde "$repo"): $missing file(s) not linked"
     done
+
+    # every listed name must be a package
+    if [ -n "$listfile" ]; then
+        while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            if [ ! -d "$repo/$name" ] || ! case "$tracked" in *$'\n'"$name"$'\n'*) true ;; *) false ;; esac; then
+                add listerr "$name in $(tilde "$listfile") is not a package"
+            fi
+        done < <(printf '%s' "$list")
+    fi
 
     # shared dirs and bridge links, from this repo's dirs.d / links.d lists
     for f in "$repo"/*/.config/dottie/dirs.d/*.list; do
@@ -173,16 +238,23 @@ section() { # title hint body
 }
 
 printf 'dottie doctor: %s\n' "$(for r in "${repos[@]}"; do tilde "$r"; printf ' '; done)"
+printf '  machine: %s\n' "${machine:-none (packages count as wanted once partly linked; pass --machine <name>)}"
 printf '  %d packages, %d files linked\n' "$pkgcount" "$linked"
 
+section "machine list" "fix the list, or add the package" "$listerr"
 section "conflicts" "move each aside (or merge it into the repo), then dottie install <package>" "$conflicts"
 section "not stowed" "if wanted, run dottie install <package> in that repo" "$unstowed"
 section "broken links" "rm each; its target is gone" "$broken"
 section "shared dirs" "run dottie prestow in any repo" "$shared"
 section "bridge links" "run dottie prestow; move real files aside first" "$bridges"
 section "untracked (info)" "not inspected; commit or ignore them" "$untracked"
+section "not installed (info)" "nothing linked yet; dottie install <package> if wanted" "$notinstalled"
+if [ -n "$omitted" ]; then
+    printf '\nnot in the %s list (info) -- left out on purpose, not checked\n  %s\n' \
+        "$machine" "$(printf '%s' "$omitted" | tr '\n' ' ')"
+fi
 
-if [ -n "$conflicts$unstowed$broken$shared$bridges" ]; then
+if [ -n "$listerr$conflicts$unstowed$broken$shared$bridges" ]; then
     exit 1
 fi
 printf '\nall good\n'

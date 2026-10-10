@@ -117,3 +117,10 @@ if [ "$mode" = --dry-run ]; then
     echo "dottie install: preview only; no links will be changed"
 fi
 stow "${stow_flags[@]}" "$HOME" "${pkgs[@]}"
+
+# Remember the machine an applied list was for, so `dottie doctor` can check
+# against it without being told (machine names needn't match the hostname).
+if [ -n "$machine" ] && [ "$mode" = --apply ]; then
+    state="${XDG_STATE_HOME:-$HOME/.local/state}/dottie"
+    mkdir -p "$state" && printf '%s\n' "$machine" > "$state/machine"
+fi
