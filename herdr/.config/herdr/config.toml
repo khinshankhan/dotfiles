@@ -18,7 +18,8 @@ rename_tab = "prefix+t"
 rename_workspace = "prefix+w"
 workspace_picker = "prefix+shift+w"
 help = ["prefix+?", "prefix+/"]
-split_horizontal = "prefix+h"
+split_horizontal = "prefix+v"
+split_vertical = "prefix+h"
 last_pane = "prefix+space"
 
 # Only the basics and our own keys stay bound.
