@@ -21,6 +21,7 @@ help = ["prefix+?", "prefix+/"]
 split_horizontal = "prefix+v"
 split_vertical = "prefix+h"
 last_pane = "prefix+space"
+zoom = "prefix+z"
 
 # Only the basics and our own keys stay bound.
 settings = ""
@@ -39,7 +40,6 @@ focus_pane_right = ""
 cycle_pane_next = ""
 cycle_pane_previous = ""
 close_pane = ""
-zoom = ""
 resize_mode = ""
 
 # herdrctl and muxloc live in ~/.local/bin; full paths because herdr runs
