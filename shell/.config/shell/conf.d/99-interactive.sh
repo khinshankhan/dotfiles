@@ -24,6 +24,7 @@ fi
 alias cls='clear'
 
 alias g='git'
+alias gl='git lanes'
 alias y='yui'
 
 # caffeinate wrapper - `caf help` for usage. macOS only.

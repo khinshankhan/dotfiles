@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Never die silently: report the line and command that failed before exiting.
+trap 'rc=$?; echo "git-lanes: failed at line ${LINENO} (exit ${rc}): ${BASH_COMMAND}" >&2' ERR
+
+main() {
+if [[ -t 1 ]]; then
+  BOLD='\033[1m'
+  DIM='\033[2m'
+  GREEN='\033[32m'
+  YELLOW='\033[33m'
+  RESET='\033[0m'
+else
+  BOLD='' DIM='' GREEN='' YELLOW='' RESET=''
+fi
+
+local root="${LANES_ROOT:-$HOME/den}"
+root="${root%/}"
+local dir=""
+local all=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      echo "One row per lane: branch, commits ahead/behind the default branch, uncommitted files, last commit, remote."
+      echo ""
+      echo "Usage: $(basename "$0") [-a] [dir]    (git lanes -h; git turns --help into a man lookup)"
+      echo ""
+      echo "Lanes are folders named lane.N under \$LANES_ROOT/<org>/<project>/"
+      echo "(default root ~/den). With no dir it follows where you are: inside a"
+      echo "lane, just that lane; inside a project, its lanes; inside an org, its"
+      echo "lanes; at the root or anywhere else, every lane."
+      echo ""
+      echo "Options:"
+      echo "  -a, --all   Every lane under the root, wherever you are"
+      echo "  -h, --help  Show this help"
+      echo ""
+      echo "Examples:"
+      echo "  $(basename "$0")                         # lanes for where you are"
+      echo "  $(basename "$0") -a                      # every lane"
+      echo "  $(basename "$0") ~/den/<org>/<project>    # one project"
+      return 0
+      ;;
+    -a|--all) all=true; shift ;;
+    -*) echo "Unknown option: $1" >&2; return 1 ;;
+    *) dir="$1"; shift ;;
+  esac
+done
+
+# Scope: an explicit dir wins; otherwise the org or project folder the
+# current directory is in, if it's under the root; otherwise the root.
+if [[ -z "$dir" ]] && ! $all; then
+  local here rel org project
+  here="$(pwd -P)"
+  local real_root
+  real_root="$(cd "$root" 2>/dev/null && pwd -P || echo "$root")"
+  if [[ "$here" == "$real_root"/* ]]; then
+    rel="${here#"$real_root"/}"
+    local parts=()
+    IFS=/ read -r -a parts <<< "$rel"
+    org="${parts[0]}"
+    project="${parts[1]:-}"
+    local lane="${parts[2]:-}"
+    if [[ -n "$lane" && "$lane" == lane.* ]]; then
+      dir="$real_root/$org/$project/$lane"
+    elif [[ -n "$project" ]]; then
+      dir="$real_root/$org/$project"
+    else
+      dir="$real_root/$org"
+    fi
+  fi
+fi
+local scope="${dir:-$root}"
+scope="${scope%/}"
+if [[ ! -d "$scope" ]]; then
+  echo "git-lanes: no such directory: $scope" >&2
+  return 1
+fi
+
+local lanes=()
+if [[ "$(basename "$scope")" == lane.* ]]; then
+  lanes=("$scope")
+else
+  while IFS= read -r l; do
+    lanes+=("$l")
+  done < <(find "$scope" -maxdepth 3 -type d -name 'lane.*' -not -path '*/.git/*' 2>/dev/null | sort)
+fi
+
+if [[ ${#lanes[@]} -eq 0 ]]; then
+  echo -e "${DIM}No lanes under ${scope}.${RESET}"
+  return 0
+fi
+
+local fmt="%-26s %-7s %-22s %9s %5s  %-10s  %s\n"
+echo -e "${BOLD}$(printf "$fmt" PROJECT LANE BRANCH +/-BASE DIRTY LAST REMOTE)${RESET}"
+
+local l project lane branch base ab dirty last remote color
+for l in "${lanes[@]}"; do
+  git -C "$l" rev-parse --git-dir >/dev/null 2>&1 || continue
+  project="${l%/lane.*}"
+  if [[ "$project" == "$root"/* ]]; then project="${project#"$root"/}"
+  else project="$(basename "$project")"
+  fi
+  lane="$(basename "$l")"
+
+  branch="$(git -C "$l" branch --show-current)"
+  branch="${branch:-(detached)}"
+
+  base="$(git -C "$l" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' || true)"
+  if [[ -z "$base" ]]; then
+    if git -C "$l" rev-parse --quiet --verify main >/dev/null; then base=main
+    elif git -C "$l" rev-parse --quiet --verify master >/dev/null; then base=master
+    fi
+  fi
+  ab="-"
+  if [[ -n "$base" ]]; then
+    ab="$(git -C "$l" rev-list --left-right --count "${base}...HEAD" 2>/dev/null | awk '{print "+"$2"/-"$1}' || echo "-")"
+  fi
+
+  dirty="$(git -C "$l" status --short | wc -l | tr -d ' ')"
+  last="$(git -C "$l" log -1 --format=%cs 2>/dev/null || echo "-")"
+  remote="$(git -C "$l" remote get-url origin 2>/dev/null | sed -E 's#.*[:/]([^/]+/[^/]+)$#\1#; s#\.git$##' || true)"
+
+  color=""
+  if [[ "$dirty" != "0" ]]; then color="$YELLOW"
+  elif [[ "$ab" != "+0/-0" && "$ab" != "-" && "$ab" != +0/* ]]; then color="$GREEN"
+  fi
+  echo -e "${color}$(printf "$fmt" "$project" "$lane" "$branch" "$ab" "$dirty" "$last" "${remote:-none}")${RESET}"
+done
+}
+
+main "$@"
