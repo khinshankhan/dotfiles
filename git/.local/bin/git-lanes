@@ -25,6 +25,7 @@ usage() {
   echo "Usage:"
   echo "  $(basename "$0") [-a] [dir]          list lanes (git lanes -h; git turns --help into a man lookup)"
   echo "  $(basename "$0") new [branch] [opts] start a lane in the current project"
+  echo "  $(basename "$0") rm [lane] [opts]    free a lane (N, lane.N or a path; default: the one you're in)"
   echo ""
   echo "List: with no dir it follows where you are -- inside a lane, just that"
   echo "lane; inside a project, its lanes; inside an org, its lanes; at the root"
@@ -41,11 +42,21 @@ usage() {
   echo "  --from <ref>      Start a new branch from <ref> instead"
   echo "  -n, --dry-run     Show what would happen, change nothing"
   echo ""
+  echo "Rm: removes a worktree lane safely. Refuses lane.0, separate clones,"
+  echo "lanes with uncommitted changes, and lanes something is still running"
+  echo "in. Lists git-ignored files (build output, caches) before deleting them,"
+  echo "and asks. Deletes the branch only if it's fully merged; otherwise keeps"
+  echo "it, so no commit is ever lost."
+  echo "  -n, --dry-run     Show what would happen, change nothing"
+  echo "  -y, --yes         Don't ask about ignored files"
+  echo ""
   echo "Examples:"
   echo "  $(basename "$0")                     # lanes for where you are"
   echo "  $(basename "$0") -a                  # every lane"
   echo "  $(basename "$0") new fix/tokens      # new lane on a new branch"
   echo "  $(basename "$0") new burn/cli        # new lane on an existing branch"
+  echo "  $(basename "$0") rm 2 -n             # what removing lane.2 would do"
+  echo "  $(basename "$0") rm                  # remove the lane you're in"
 }
 
 # The repo's default branch: origin/HEAD, else main, else master.
@@ -268,9 +279,175 @@ cmd_new() {
   echo -e "${GREEN}Ready.${RESET} cd ${path}"
 }
 
+# Processes whose working directory is inside $1, other than this script,
+# anything it started (same process group) and the shells above it.
+# Linux only; prints nothing where /proc is absent.
+busy_in() {
+  local dir="$1" ancestors=" " p pid cwd stat fields mypgid
+  [[ -d /proc ]] || return 0
+  pid=$BASHPID
+  while [[ -n "$pid" && "$pid" -gt 1 ]]; do
+    ancestors+="$pid "
+    pid="$(awk '/^PPid:/{print $2}' "/proc/$pid/status" 2>/dev/null || true)"
+  done
+  stat="$(cat /proc/$$/stat)"
+  read -r -a fields <<< "${stat##*) }"
+  mypgid="${fields[2]}"
+  for p in /proc/[0-9]*; do
+    pid="${p#/proc/}"
+    [[ "$ancestors" == *" $pid "* ]] && continue
+    stat="$(cat "$p/stat" 2>/dev/null || true)"
+    [[ -n "$stat" ]] || continue
+    read -r -a fields <<< "${stat##*) }"
+    [[ "${fields[2]}" == "$mypgid" ]] && continue
+    cwd="$(readlink "$p/cwd" 2>/dev/null || true)"
+    [[ "$cwd" == "$dir" || "$cwd" == "$dir"/* ]] || continue
+    echo "$pid $(cat "$p/comm" 2>/dev/null)"
+  done
+}
+
+cmd_rm() {
+  local target="" dry=false yes=false
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) usage; return 0 ;;
+      -n|--dry-run) dry=true; shift ;;
+      -y|--yes) yes=true; shift ;;
+      -*) echo "Unknown option: $1" >&2; return 1 ;;
+      *) [[ -z "$target" ]] || { echo "One lane at a time" >&2; return 1; }; target="$1"; shift ;;
+    esac
+  done
+
+  # Find the project (the folder holding lane.0) at or above here.
+  local here project
+  here="$(pwd -P)"
+  project="$here"
+  while [[ "$project" != "/" && ! -d "$project/lane.0" ]]; do
+    project="$(dirname "$project")"
+  done
+
+  # The lane: an argument (N, lane.N or a path), else the lane we're in.
+  local lane=""
+  if [[ -n "$target" ]]; then
+    if [[ -d "$target" ]]; then lane="$(cd "$target" && pwd -P)"
+    elif [[ "$target" =~ ^[0-9]+$ ]]; then lane="$project/lane.$target"
+    else lane="$project/${target##*/}"
+    fi
+  elif [[ "$here" == "$project"/lane.* || "$here" == "$project"/lane.*/* ]]; then
+    lane="${here#"$project"/}"
+    lane="$project/${lane%%/*}"
+  fi
+  if [[ -z "$lane" ]]; then
+    echo -e "${RED}Error:${RESET} name a lane (eg gl rm 2), or run it from inside one." >&2
+    return 1
+  fi
+  if [[ ! -d "$lane" ]]; then
+    echo -e "${RED}Error:${RESET} no such lane: $lane" >&2
+    return 1
+  fi
+  project="$(dirname "$lane")"
+  if [[ ! -d "$project/lane.0" || "$(basename "$lane")" != lane.* ]]; then
+    echo -e "${RED}Error:${RESET} $lane isn't a lane (a lane.N folder beside a lane.0)." >&2
+    return 1
+  fi
+  local lane0="$project/lane.0" name
+  name="$(basename "$lane")"
+
+  if [[ "$name" == "lane.0" ]]; then
+    echo -e "${RED}Error:${RESET} lane.0 is the clean clone every other lane hangs off; it isn't removed." >&2
+    return 1
+  fi
+  local common common0
+  common="$(cd "$lane" && cd "$(git rev-parse --git-common-dir)" && pwd -P)"
+  common0="$(cd "$lane0" && cd "$(git rev-parse --git-common-dir)" && pwd -P)"
+  if [[ "$common" != "$common0" ]]; then
+    echo -e "${RED}Error:${RESET} $name is a separate clone, not a worktree of lane.0; deleting it would delete its own history. Remove it by hand if you mean it." >&2
+    return 1
+  fi
+
+  local branch base dirty unmerged merged=false
+  branch="$(git -C "$lane" branch --show-current)"
+  base="$(default_branch "$lane0")"
+  dirty="$(git -C "$lane" status --short | wc -l | tr -d ' ')"
+  if [[ -n "$branch" && -n "$base" ]]; then
+    unmerged="$(git -C "$lane" rev-list --count "$branch" --not "$base" 2>/dev/null || echo "?")"
+    [[ "$unmerged" == "0" ]] && merged=true
+  else
+    unmerged="?"
+  fi
+
+  echo -e "${BOLD}${name}${RESET}  ${lane}"
+  echo -e "  branch    ${branch:-(detached)}"
+  if [[ -z "$branch" ]]; then
+    echo -e "  commits   ${DIM}detached HEAD; nothing to keep${RESET}"
+  elif $merged; then
+    echo -e "  commits   ${GREEN}all in ${base}${RESET}; branch will be deleted"
+  else
+    echo -e "  commits   ${YELLOW}${unmerged} not in ${base}${RESET}; branch is kept, so nothing is lost"
+  fi
+
+  local blocked=false
+  if [[ "$dirty" != "0" ]]; then
+    blocked=true
+    echo -e "  ${RED}uncommitted ${dirty} file(s)${RESET} -- commit, stash (shared with every lane) or discard them first:"
+    git -C "$lane" status --short | head -10 | sed 's/^/      /'
+  fi
+
+  local busy
+  busy="$(busy_in "$lane")"
+  if [[ -n "$busy" ]]; then
+    blocked=true
+    echo -e "  ${RED}in use${RESET} -- close these first (an editor saving into a removed lane recreates files):"
+    echo "$busy" | head -10 | sed 's/^/      /'
+  fi
+
+  local ignored ignored_count=0
+  ignored="$(git -C "$lane" status --short --ignored | awk '/^!!/{print substr($0,4)}')"
+  if [[ -n "$ignored" ]]; then
+    ignored_count="$(echo "$ignored" | wc -l | tr -d ' ')"
+    local size
+    size="$(cd "$lane" && echo "$ignored" | tr '\n' '\0' | xargs -0 du -sch 2>/dev/null | tail -1 | cut -f1 || echo "?")"
+    echo -e "  ${YELLOW}ignored   ${ignored_count} path(s), ${size}${RESET} -- deleted with the lane, not recoverable:"
+    echo "$ignored" | head -10 | sed 's/^/      /'
+    [[ "$ignored_count" -gt 10 ]] && echo "      ..."
+  fi
+
+  if $blocked; then
+    echo -e "${RED}Not removed.${RESET}"
+    return 1
+  fi
+  if $dry; then
+    echo -e "${DIM}Dry run: nothing changed.${RESET}"
+    return 0
+  fi
+
+  if [[ "$ignored_count" -gt 0 ]] && ! $yes; then
+    if [[ -t 0 ]]; then
+      local reply
+      read -r -p "Delete ${name} and its ignored files? [y/N] " reply
+      [[ "$reply" == [yY] || "$reply" == [yY][eE][sS] ]] || { echo "Not removed."; return 1; }
+    else
+      echo -e "${RED}Not removed:${RESET} it has ignored files; rerun with --yes to delete them." >&2
+      return 1
+    fi
+  fi
+
+  git -C "$lane0" worktree remove "$lane"
+  if [[ -n "$branch" ]] && $merged && [[ "$branch" != "$base" ]]; then
+    git -C "$lane0" branch -d --quiet "$branch"
+    echo -e "${GREEN}Removed${RESET} ${name} and merged branch ${branch}."
+  else
+    echo -e "${GREEN}Removed${RESET} ${name}.${branch:+ Branch ${branch} kept.}"
+  fi
+  if [[ "$here" == "$lane" || "$here" == "$lane"/* ]]; then
+    echo -e "${DIM}You were inside it: cd ${project}${RESET}"
+  fi
+}
+
 main() {
   case "${1:-}" in
     new) shift; cmd_new "$@" ;;
+    rm) shift; cmd_rm "$@" ;;
     *) cmd_list "$@" ;;
   esac
 }
