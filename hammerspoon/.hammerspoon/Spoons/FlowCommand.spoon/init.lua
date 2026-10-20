@@ -4,15 +4,16 @@
 ---
 --- Wispr Flow writes each finished transcription to a local SQLite
 --- database. This Spoon polls it; a row opening with a registered name
---- ("hey jarvis ...") hands the rest of the sentence to that name's
---- action. Names are independent, so one can start a coding session and
---- another open a calendar.
+--- ("hey jarvis ...") passes the rest of the text as one final argument
+--- to the command configured for that name in init.lua.
 ---
 --- Usage:
 ---     hs.loadSpoon("FlowCommand")
 ---     spoon.FlowCommand:addCommand({
 ---       name   = "jarvis",
----       action = spoon.FlowCommand.actions.tmux({ command = "claude" }),
+---       command = {
+---         "muxloc", "launch", "--backend", "herdr", "--command", "claude", "--", "--",
+---       },
 ---     })
 ---     spoon.FlowCommand:start()
 
@@ -98,57 +99,6 @@ obj.pollInterval = 0.4
 --- How long poll() keeps looking.
 obj.pollTimeout = 8
 
---- FlowCommand.tmuxBin (string)
---- Absolute path; a GUI process does not inherit the nix profile.
-obj.tmuxBin = os.getenv("HOME") .. "/.nix-profile/bin/tmux"
-
---- FlowCommand.session (string)
---- Default tmux session for the tmux action.
-obj.session = "flow"
-
---- FlowCommand.keeperWindow (string or nil)
---- Idle window that keeps the session alive. tmux destroys a session
---- when its last window exits, which would otherwise take the
---- scrollback of every finished command with it. Defaults to the
---- session's own name.
-obj.keeperWindow = nil
-
---- FlowCommand.attach (string)
---- "switch" moves an attached terminal to the new window, "window"
---- opens another, "none" leaves it alone.
----
---- Prefer "switch": tmux sizes a window for the smallest client
---- viewing it, so a freshly opened terminal shrinks the pane.
-obj.attach = "switch"
-
---- FlowCommand.workingDir (string or function)
---- Where commands run. A function is called at launch and returns the
---- path; see FlowCommand.dirs.
-obj.workingDir = os.getenv("HOME")
-
-obj.dirs = {}
-
---- FlowCommand.dirs.attachedOr(fallback) -> function
---- Function
---- The attached tmux client's current path, else fallback.
-function obj.dirs.attachedOr(fallback)
-  return function(self)
-    local out, ok = hs.execute(string.format(
-      "%s display-message -p '#{pane_current_path}' 2>/dev/null",
-      self:_shellQuote(self.tmuxBin)))
-    if ok and out then
-      local path = out:gsub("%s+$", "")
-      -- A detached server answers with a blank line rather than failing.
-      if path ~= "" and hs.fs.attributes(path, "mode") == "directory" then
-        return path
-      end
-    end
-    return fallback
-  end
-end
-
-obj.dirs.attached = obj.dirs.attachedOr(os.getenv("HOME"))
-
 obj._lastId    = nil
 obj._timer     = nil
 obj._deadline  = 0
@@ -165,16 +115,27 @@ local FIELD_SEP = "@@|@@"
 
 --- FlowCommand:addCommand(spec) -> self
 --- Method
---- Register a name and what it runs. Fields: name, action, and
+--- Register a name and what it runs. Fields: name, command, and
 --- optionally variants (other spellings the recogniser produces) and
 --- label (shown in the alert).
+--- command is a list of strings: executable followed by its arguments.
+--- Processed dictation is appended as one literal final argument.
 ---
 --- Use a name of two syllables or more. A single letter does not
 --- survive dictation: "hey C" came back as "Casey", and "C list the
 --- files" as "CVList".
 function obj:addCommand(spec)
-  if type(spec) ~= "table" or not spec.name or not spec.action then
-    error("FlowCommand:addCommand needs { name = ..., action = ... }", 2)
+  if type(spec) ~= "table" or type(spec.name) ~= "string" or spec.name == "" then
+    error("FlowCommand:addCommand needs { name = ..., command = { executable, args... } }", 2)
+  end
+  local argv = spec.command
+  if type(argv) ~= "table" or type(argv[1]) ~= "string" or argv[1] == "" then
+    error("FlowCommand:addCommand needs command = { executable, args... }", 2)
+  end
+  for _, arg in ipairs(argv) do
+    if type(arg) ~= "string" then
+      error("FlowCommand command arguments must be strings", 2)
+    end
   end
 
   local spellings = { spec.name:lower() }
@@ -193,7 +154,7 @@ function obj:addCommand(spec)
   table.insert(self.commands, {
     name    = spec.name,
     label   = spec.label or spec.name,
-    action  = spec.action,
+    argv    = argv,
     phrases = phrases,
   })
   return self
@@ -245,71 +206,15 @@ function obj:stripWake(text)
   return prompt
 end
 
---- FlowCommand.actions (table)
---- Factories for addCommand's `action`.
-obj.actions = {}
-
---- FlowCommand.actions.tmux(opts) -> function
---- Function
---- Run a program in a new tmux window with the dictation as its last
---- argument. opts: command (required), args, session, keeper, dir,
---- attach. Anything omitted falls back to the Spoon-level setting.
-function obj.actions.tmux(opts)
-  opts = opts or {}
-  if not opts.command then
-    error("FlowCommand.actions.tmux needs { command = ... }", 2)
+function obj:_runCommand(argv, prompt)
+  local words = {}
+  for _, arg in ipairs(argv) do
+    table.insert(words, self:_shellQuote(arg))
   end
-  return function(prompt, self)
-    self:_launchTmux(prompt, opts)
+  table.insert(words, self:_shellQuote(prompt))
+  if self:_run("exec " .. table.concat(words, " "), "command") then
+    self.logger:i("launched: " .. prompt)
   end
-end
-
---- FlowCommand.actions.shell(opts) -> function
---- Function
---- Run a program in the background. The dictation is $FLOW_PROMPT, and
---- is appended as an argument unless `args` already mentions it.
-function obj.actions.shell(opts)
-  opts = opts or {}
-  if not opts.command then
-    error("FlowCommand.actions.shell needs { command = ... }", 2)
-  end
-  return function(prompt, self)
-    local q = function(s) return self:_shellQuote(s) end
-    local line = q(opts.command) .. " " .. (opts.args or "")
-    if not (opts.args or ""):find("FLOW_PROMPT", 1, true) then
-      line = line .. ' "$FLOW_PROMPT"'
-    end
-    self:_run("export FLOW_PROMPT=" .. q(prompt) .. "\n" ..
-      line .. " >/dev/null 2>&1 &", "shell action")
-  end
-end
-
---- FlowCommand.actions.url(template) -> function
---- Function
---- Open a URL, replacing ${prompt} with the encoded dictation.
-function obj.actions.url(template)
-  return function(prompt, self)
-    local url = template:gsub("%${prompt}", function()
-      return hs.http.encodeForQuery(prompt)
-    end)
-    hs.urlevent.openURL(url)
-  end
-end
-
---- FlowCommand:resolveDir([override]) -> string
---- Method
-function obj:resolveDir(override)
-  local dir = override or self.workingDir
-  if type(dir) == "function" then return dir(self) end
-  return dir
-end
-
---- FlowCommand:windowName(prompt) -> string
---- Method
-function obj:windowName(prompt)
-  local name = prompt:sub(1, 24):gsub("[^%w%s-]", ""):gsub("%s+", "-")
-  name = name:gsub("^-+", ""):gsub("-+$", "")
-  return name ~= "" and name or "cmd"
 end
 
 --- FlowCommand:_shellQuote(s) -> string
@@ -318,63 +223,6 @@ end
 --- that a shell reads literally, so it cannot be used for this.
 function obj:_shellQuote(s)
   return "'" .. tostring(s):gsub("'", "'\\''") .. "'"
-end
-
-function obj:_launchTmux(prompt, opts)
-  opts = opts or {}
-  local shell   = os.getenv("SHELL") or "/bin/zsh"
-  local command = opts.command
-  local args    = opts.args or ""
-  local session = opts.session or self.session
-  local keeper  = opts.keeper  or self.keeperWindow or session
-  local attach  = opts.attach  or self.attach
-
-  local q = function(s) return self:_shellQuote(s) end
-  local dir = self:resolveDir(opts.dir)
-
-  -- The prompt travels as FLOW_PROMPT because tmux re-parses a
-  -- new-window command through a shell: quoting it inline would have
-  -- to survive Lua, this script, and tmux in turn, and the window dies
-  -- silently when it does not.
-  local inner = string.format('exec %s %s "$FLOW_PROMPT"', q(command), args)
-
-  local script = table.concat({
-    "set -e",
-    "TMUX_BIN=" .. q(self.tmuxBin),
-    "export FLOW_PROMPT=" .. q(prompt),
-    '"$TMUX_BIN" has-session -t ' .. q(session) .. " 2>/dev/null ||",
-    '  "$TMUX_BIN" new-session -d -s ' .. q(session) ..
-      " -n " .. q(keeper) .. " -c " .. q(dir),
-    -- `session:` with the colon, since bare `-t session` means window 0
-    -- and tmux refuses with "index 0 in use". Shell, flag and command
-    -- stay separate words so tmux takes them as argv.
-    '"$TMUX_BIN" new-window -t ' .. q(session .. ":") ..
-      " -n " .. q(self:windowName(prompt)) ..
-      " -c " .. q(dir) ..
-      ' -e FLOW_PROMPT="$FLOW_PROMPT" ' ..
-      q(shell) .. " -lc " .. q(inner),
-  }, "\n")
-
-  local openTerminal = "/usr/bin/open -na Ghostty.app --args -e " ..
-    q(shell) .. " -lc " ..
-    q(string.format("exec %s attach-session -t %s", q(self.tmuxBin), q(session)))
-
-  if attach == "switch" then
-    script = script .. "\n" .. table.concat({
-      'if [ -n "$("$TMUX_BIN" list-clients -F ok 2>/dev/null)" ]; then',
-      '  "$TMUX_BIN" switch-client -t ' .. q(session .. ":") ..
-        " >/dev/null 2>&1 || true",
-      "  /usr/bin/open -a Ghostty.app",
-      "else",
-      "  " .. openTerminal,
-      "fi",
-    }, "\n")
-  elseif attach == "window" then
-    script = script .. "\n" .. openTerminal
-  end
-
-  self:_run(script, "launch")
-  self.logger:i("launched: " .. prompt)
 end
 
 -- Written to a file and run by path: hs.execute passes its argument as
@@ -475,16 +323,24 @@ function obj:check()
     return false
   end
 
-  local command, prompt = self:match(row.text)
+  return self:process(row.text)
+end
+
+--- FlowCommand:process(text) -> boolean
+--- Method
+--- Match a wake name, strip it, and pass the remaining text to the
+--- configured command. True when a name matched and was handled.
+function obj:process(text)
+  local command, prompt = self:match(text)
   if not command then return false end
 
-  -- Before the action, while the app Wispr typed into is still front.
+  -- Before launching, while the app Wispr typed into is still front.
   self:clearPastedText()
 
   hs.alert.closeAll()
   hs.alert.show(string.format("🤖  %s: %s", command.label, prompt), 1.2)
 
-  local ok, err = pcall(command.action, prompt, self)
+  local ok, err = pcall(self._runCommand, self, command.argv, prompt)
   if not ok then
     self.logger:e(string.format("command '%s' failed: %s",
       command.name, tostring(err)))
