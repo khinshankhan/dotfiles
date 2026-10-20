@@ -75,3 +75,118 @@ hsr() {
         echo "hsr: reloaded" ||
         { echo "hsr: config failed to load -- check the Hammerspoon console" >&2; return 1; }
 }
+
+# Memory helpers use subshells to keep shell options and traps local.
+am() (
+    set -euo pipefail
+
+    if [ "$#" -gt 0 ]; then
+        if [ "$#" -eq 1 ]; then
+            case "$1" in
+                help | -h | --help)
+                    cat <<'EOF'
+am -- show the processes using the most memory on macOS.
+
+Usage: am             show up to 10 processes, sorted by memory
+       am help        this text (also -h, --help)
+
+Uses macOS top. Columns: NAME, PID, MEM_GB, THREADS, PORTS, USER.
+Memory is shown in GB. Run without arguments for a single snapshot.
+EOF
+                    exit 0
+                    ;;
+            esac
+        fi
+        echo "am: unexpected arguments (see am --help)" >&2
+        exit 2
+    fi
+
+    printf "%-30s %-8s %-8s %-8s %-8s %-15s\n" "NAME" "PID" "MEM_GB" "THREADS" "PORTS" "USER"
+    top -l 1 -o mem |
+      awk 'BEGIN{start=0}
+    /^PID[[:space:]]+COMMAND/{start=1; next}
+    start && NF>0 {
+      name=$2; pid=$1; th=$5; ports=$7; mem=$8; user=$NF;
+      if (mem ~ /G$/) gb=substr(mem,1,length(mem)-1)+0;
+      else if (mem ~ /M$/) gb=(substr(mem,1,length(mem)-1)+0)/1024;
+      else if (mem ~ /K$/) gb=(substr(mem,1,length(mem)-1)+0)/1024/1024;
+      else next;
+      printf "%-30s %-8s %-8.2f %-8s %-8s %-15s\n", name, pid, gb, th, ports, user
+    }' | head -10
+)
+
+appmem() (
+    set +e            # footprint can fail on processes we cannot inspect
+    set -uo pipefail
+
+    if [ "$#" -gt 0 ]; then
+        if [ "$#" -eq 1 ]; then
+            case "$1" in
+                help | -h | --help)
+                    cat <<'EOF'
+appmem -- show memory grouped by app or process tree on macOS.
+
+Usage: appmem             show up to 15 groups, sorted by memory
+       appmem help        this text (also -h, --help)
+
+Groups app helpers by their outermost .app bundle. Other processes group
+under their highest non-launchd ancestor and are labeled "(tree)".
+
+Sums phys_footprint from macOS footprint, not RSS, and prints totals in GB.
+Only includes processes footprint can inspect without root. Run without
+arguments for a single snapshot; inspecting each process can take a while.
+EOF
+                    exit 0
+                    ;;
+            esac
+        fi
+        echo "appmem: unexpected arguments (see appmem --help)" >&2
+        exit 2
+    fi
+
+    tmp=$(mktemp)
+    trap 'rm -f "$tmp"' EXIT
+
+    # Map each PID to a group. Apps group by their outermost .app bundle; everything
+    # else groups under the name of its top-level ancestor, which is what catches
+    # a tmux server full of shells (the Force Quit panel credits those to the
+    # terminal via a private "responsible process" API this cannot see).
+    ps -eo pid=,ppid=,command= | awk '
+    {
+        pid = $1; ppid[$1] = $2
+        cmd = substr($0, index($0, $3))
+        line[pid] = cmd
+        n = split(cmd, w, " ")
+        split(w[1], path, "/")
+        name[pid] = path[length(path)]
+    }
+    END {
+        for (p in line) {
+            i = index(line[p], ".app/")
+            if (i > 0) {
+                head = substr(line[p], 1, i - 1)
+                n = split(head, parts, "/")
+                if (parts[n] != "") { print p "\t" parts[n]; continue }
+            }
+            # Walk to the highest non-launchd ancestor and group under its name.
+            cur = p
+            while (ppid[cur] != "" && ppid[cur] > 1 && cur != ppid[cur]) cur = ppid[cur]
+            if (cur != p || ppid[p] <= 1) print p "\t" name[cur] " (tree)"
+            else print p "\t" name[cur] " (tree)"
+        }
+    }' > "$tmp"
+
+    # One footprint(1) per pid, so this takes a second or two.
+    while IFS=$'\t' read -r pid app; do
+        footprint -p "$pid" 2>/dev/null | awk -v app="$app" '
+            /phys_footprint:/ {
+                v = $2
+                if ($3 == "GB")      v *= 1024
+                else if ($3 == "KB") v /= 1024
+                print v "\t" app
+            }'
+    done < "$tmp" | awk -F'\t' '
+        { total[$2] += $1 }
+        END { for (a in total) printf "%9.2f GB  %s\n", total[a]/1024, a }
+    ' | sort -rn | head -15
+)

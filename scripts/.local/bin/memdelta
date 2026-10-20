@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# memdelta -- show a RAM and swap snapshot on macOS or Linux.
+#
+# Usage: memdelta             show current memory usage
+#        memdelta help        this text (also -h, --help)
+#
+# Prints used and free swap and RAM in GB. "nearly out" means reported free
+# swap is below 2 GB, including systems with no swap configured.
+#
+# On macOS, swap comes from sysctl; RAM used is the sum of process RSS and
+# RAM free is total RAM minus that estimate. This is not memory pressure.
+# On Linux, reads /proc/meminfo; RAM free uses MemAvailable and RAM used is
+# MemTotal minus MemAvailable. Run without arguments for a single snapshot.
+
+set -euo pipefail
+
+if [ "$#" -gt 0 ]; then
+    if [ "$#" -eq 1 ]; then
+        case "$1" in
+            help | -h | --help)
+                sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+                exit 0
+                ;;
+        esac
+    fi
+    echo "memdelta: unexpected arguments (see memdelta --help)" >&2
+    exit 2
+fi
+
+if [ "$(uname -s)" = "Darwin" ]; then
+    swap=$(sysctl -n vm.swapusage)
+    used=$(echo "$swap" | sed -n 's/.*used = \([0-9.]*\)M.*/\1/p')
+    free=$(echo "$swap" | sed -n 's/.*free = \([0-9.]*\)M.*/\1/p')
+    ram=$(( $(sysctl -n hw.memsize) / 1048576 ))
+    rss=$(ps -eo rss= | awk '{s+=$1} END {print s/1024}')
+else
+    # /proc/meminfo is in kB; MemAvailable is the honest "free".
+    eval "$(awk -F'[: ]+' '
+        $1=="MemTotal"     {printf "ram=%.0f\n",   $2/1024}
+        $1=="MemAvailable" {printf "avail=%.0f\n", $2/1024}
+        $1=="SwapTotal"    {printf "stot=%.0f\n",  $2/1024}
+        $1=="SwapFree"     {printf "free=%.0f\n",  $2/1024}
+    ' /proc/meminfo)"
+    used=$((stot - free))
+    rss=$((ram - avail))
+fi
+
+awk -v u="$used" -v f="$free" -v rss="$rss" -v ram="$ram" 'BEGIN {
+    printf "swap  %5.1f used / %5.1f free GB   %s\n", u/1024, f/1024, \
+        (f < 2048 ? "<-- nearly out" : "")
+    printf "RAM   %5.1f used / %5.1f free GB\n", rss/1024, (ram - rss)/1024
+}'
