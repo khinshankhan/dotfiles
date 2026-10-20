@@ -9,12 +9,12 @@
 #   10-  env + PATH/tool setup
 #   20-  topic helpers (nix, brew, ...)
 #   30-  misc utilities
-#   40-  non-interactive setup that must precede the interactive guard
+#   40-  non-interactive setup
+#   98-  macOS interactive-only helpers
 #   99-  interactive-only setup (bails early on non-interactive shells)
 #
-# Note: 99-interactive.sh runs `return` for non-interactive shells, which
-# returns out of this file — anything that must run unconditionally belongs in a
-# lower-numbered file.
+# Each interactive-only file guards itself; `return` skips that sourced file
+# and the loop continues with the next one.
 
 # Re-source this file from any shell
 reload_shell() {
