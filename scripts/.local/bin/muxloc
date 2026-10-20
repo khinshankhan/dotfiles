@@ -3,6 +3,7 @@
 #
 # Usage: muxloc [field]           print a field (default: where)
 #        muxloc <action> [arg]    change this tab/window
+#        muxloc launch --backend <mux> --command <exe> [options] [-- args...]
 #
 # Fields:
 #   mux            which multiplexer is active, eg herdr or tmux
@@ -20,6 +21,7 @@
 #   reset-name     restore the default name, so autoname says "yes" again
 #   focus <id>     jump to the pane an earlier `muxloc id` named. Works from
 #                  anywhere, eg a notification click outside any multiplexer
+#   launch         run a command in a new tab/window; see muxloc launch --help
 #
 #   help           this text (also -h, --help)
 #
@@ -46,6 +48,18 @@ case "${1:-}" in
     exit 0
     ;;
 esac
+
+# Launch has an explicit backend and works without an active pane.
+if [ "${1:-}" = launch ]; then
+  shift
+  muxloc_source="${BASH_SOURCE[0]}"
+  while [ -L "$muxloc_source" ]; do
+    muxloc_dir="$(cd -P "$(dirname "$muxloc_source")" && pwd)"
+    muxloc_source="$(readlink "$muxloc_source")"
+    [ "${muxloc_source#/}" = "$muxloc_source" ] && muxloc_source="$muxloc_dir/$muxloc_source"
+  done
+  exec "$(dirname "$muxloc_source")/../libexec/muxloc/launch" "$@"
+fi
 
 order="tmux herdr"
 

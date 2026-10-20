@@ -15,6 +15,7 @@ t() {
         echo "  mv     <src:win> [dst]               Move window to another session" >&2
         echo "  cap    <target> [output_file]        Capture pane contents" >&2
         echo "  dup    [session]                     Grouped session (independent window view)" >&2
+        echo "  launch --command <exe> [-- args...]  Run a command in a new window" >&2
         return 2
     fi
 

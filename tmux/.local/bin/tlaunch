@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Launch a command in a tmux window; see t launch --help.
+
+tlaunch() (
+  set -euo pipefail
+  backend=tmux
+  # shellcheck source=scripts/.local/libexec/muxloc/launch-common.sh
+  source "$HOME/.local/libexec/muxloc/launch-common.sh"
+  parse_launch_options "$@"
+  [ "$backend" = tmux ] || usage_error "this command launches tmux"
+  command -v tmux >/dev/null || die "tmux not found"
+  resolve_command
+
+  workspace="${workspace:-flow}"
+  keeper="${keeper:-$workspace}"
+  if [ -z "$dir" ]; then
+    dir="$(tmux display-message -p '#{pane_current_path}' 2>/dev/null)" || dir=""
+  fi
+  resolve_dir
+
+  tmux_bin="$(type -P tmux)"
+  tmux has-session -t "=$workspace" 2>/dev/null ||
+    tmux new-session -d -s "$workspace" -n "$keeper" -c "$dir"
+  window_args=(new-window -t "=$workspace:" -c "$dir")
+  if [ -n "$label" ]; then window_args+=(-n "$label"); fi
+  if [ "$attach" = none ]; then window_args+=(-d); fi
+  # Multiple command arguments make tmux use argv directly. The login shell
+  # then forwards them with "$@", preserving spaces, quotes, and newlines.
+  tmux "${window_args[@]}" \
+    "$launch_shell" -lc 'exec "$@"' muxloc "$command_bin" ${command_args[@]+"${command_args[@]}"}
+  terminal_command="exec $(quote "$tmux_bin") attach-session -t $(quote "=$workspace")"
+  case "$attach" in
+    switch)
+      if [ -n "$(tmux list-clients -F ok 2>/dev/null)" ]; then
+        tmux switch-client -t "=$workspace:" >/dev/null 2>&1 || true
+        focus_terminal
+      else
+        open_terminal "$terminal_command"
+      fi
+      ;;
+    window) open_terminal "$terminal_command" ;;
+  esac
+)
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then tlaunch "$@"; fi

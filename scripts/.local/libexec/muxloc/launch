@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Route launches to the selected multiplexer command.
+set -euo pipefail
+
+# shellcheck source=scripts/.local/libexec/muxloc/launch-common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/launch-common.sh"
+backend=""
+parse_launch_options "$@"
+case "$backend" in
+  tmux) exec t launch "$@" ;;
+  herdr) exec herdrctl launch "$@" ;;
+esac

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Run a command in a new tab, optionally reusing or creating a workspace.
+set -euo pipefail
+backend=herdr
+# shellcheck source=scripts/.local/libexec/muxloc/launch-common.sh
+source "$HOME/.local/libexec/muxloc/launch-common.sh"
+parse_launch_options "$@"
+[ "$backend" = herdr ] || usage_error "this command launches herdr"
+command -v herdr >/dev/null || die "herdr not found"
+resolve_command
+
+[ -z "$keeper" ] || usage_error "--keeper is for tmux"
+command -v jq >/dev/null || die "jq not found"
+if [ -z "$dir" ]; then
+  dir="$(herdr pane current 2>/dev/null | jq -er '.result.pane | .foreground_cwd // .cwd // empty')" || dir=""
+fi
+resolve_dir
+
+herdr_bin="$(type -P herdr)"
+terminal_command="exec $(quote "$herdr_bin")"
+opened=false
+if ! workspace_json="$(herdr workspace list 2>/dev/null)"; then
+  [ "$attach" != none ] || die "Herdr is not running"
+  open_terminal "$terminal_command"
+  opened=true
+  deadline=$((SECONDS + 10))
+  until workspace_json="$(herdr workspace list 2>/dev/null)"; do
+    [ "$SECONDS" -lt "$deadline" ] || die "Herdr did not start"
+    sleep 0.2
+  done
+fi
+if [ "$attach" = none ]; then focus=--no-focus; else focus=--focus; fi
+command_line="exec $(quote "$command_bin")"
+for arg in ${command_args[@]+"${command_args[@]}"}; do
+  command_line="$command_line $(quote "$arg")"
+done
+# Hand the command to shell startup instead of racing the terminal's input
+# buffer. The per-pane environment keeps this out of other tabs and shells.
+launch_dir="$(mktemp -d "${TMPDIR:-/tmp}/muxloc-launch.XXXXXXXX")"
+trap 'rm -f "$launch_dir/command" "$launch_dir/started"; rmdir "$launch_dir"' EXIT
+printf '%s\n' ": > $(quote "$launch_dir/started")" "$command_line" > "$launch_dir/command"
+launch_env="HERDR_LAUNCH_FILE=$launch_dir/command"
+workspace_id=""
+if [ -n "$workspace" ]; then
+  workspace_id="$(printf '%s' "$workspace_json" | jq -er --arg name "$workspace" '
+    .result.workspaces
+    | (map(select(.workspace_id == $name)) | first) as $by_id
+    | if $by_id then $by_id.workspace_id
+      else map(select(.label == $name))
+        | if length > 1 then error("ambiguous workspace name; use its ID")
+          else .[0].workspace_id // "" end
+      end')"
+fi
+if [ -n "$workspace" ] && [ -z "$workspace_id" ]; then
+  # A new workspace already has a tab and pane; launch there.
+  tab_json="$(herdr workspace create --cwd "$dir" --label "$workspace" --env "$launch_env" "$focus")"
+  if [ -n "$label" ]; then
+    tab="$(printf '%s' "$tab_json" | jq -er '.result.tab.tab_id')"
+    herdr tab rename "$tab" "$label" >/dev/null
+  fi
+else
+  tab_args=(tab create --cwd "$dir" --env "$launch_env" "$focus")
+  if [ -n "$workspace_id" ]; then tab_args+=(--workspace "$workspace_id"); fi
+  if [ -n "$label" ]; then tab_args+=(--label "$label"); fi
+  tab_json="$(herdr "${tab_args[@]}")"
+fi
+deadline=$((SECONDS + 10))
+until [ -f "$launch_dir/started" ]; do
+  [ "$SECONDS" -lt "$deadline" ] ||
+    die "shell did not pick up the command; install the herdr shell hook with dottie"
+  sleep 0.2
+done
+case "$attach" in
+  switch) focus_terminal ;;
+  window) if ! "$opened"; then open_terminal "$terminal_command"; fi ;;
+esac
