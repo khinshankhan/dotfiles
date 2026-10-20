@@ -67,11 +67,13 @@ hsr() {
         echo "hsr: hammerspoon cli not found at $hs_cli" >&2
         return 1
     fi
-    "$hs_cli" -c "hs.reload()" >/dev/null 2>&1
+    # Without -A, a stopped app triggers a confirmation prompt that our
+    # redirected output hides. Never let the CLI wait for terminal input.
+    "$hs_cli" -A -c "hs.reload()" </dev/null >/dev/null 2>&1 || :
     # The reload tears down the IPC socket mid-call, so a nonzero exit
     # here is expected and says nothing about success. Ask afterwards.
     sleep 0.5
-    "$hs_cli" -c "print('ok')" >/dev/null 2>&1 &&
+    "$hs_cli" -a -c "print('ok')" </dev/null >/dev/null 2>&1 &&
         echo "hsr: reloaded" ||
         { echo "hsr: config failed to load -- check the Hammerspoon console" >&2; return 1; }
 }
