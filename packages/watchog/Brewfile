@@ -67,7 +67,6 @@ end
 cask "slack"                                   # where focus goes to be interrupted
 cask "notion"                                  # docs, wikis, and a database you'll never finish
 cask "zoom"                                    # you're on mute. you're still on mute.
-cask "granola"                                 # takes the notes you were never going to take
 cask "wispr-flow"                              # higher wpm than the keyboard, annoyingly
 
 # launcher
