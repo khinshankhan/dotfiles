@@ -44,7 +44,6 @@
       ../../modules/tools/doppler.nix
       ../../modules/tools/duckdb.nix
       ../../modules/tools/fd.nix
-      ../../modules/tools/frp.nix
       ../../modules/tools/gcloud.nix
       ../../modules/tools/gh.nix
       ../../modules/tools/git-lfs.nix
@@ -92,7 +91,6 @@
     modules.tools.doppler.enable = true;
     modules.tools.duckdb.enable = true;
     modules.tools.fd.enable = true;
-    modules.tools.frp.enable = true;
     modules.tools.gcloud.enable = true;
     modules.tools.gh.enable = true;
     modules.tools.git-lfs.enable = true;

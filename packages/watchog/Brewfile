@@ -57,6 +57,7 @@ brew "libtiff"                                 # the image format that refuses t
 
 # networking
 brew "tailscale"                               # wireguard, minus the config file
+brew "frpc"                                    # ngrok, if you brought your own server
 
 # browsers
 cask_args require_sha: false do
