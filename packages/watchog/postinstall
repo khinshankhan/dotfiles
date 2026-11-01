@@ -25,7 +25,7 @@ have() {
 }
 
 # Where our own repos live. Steps that need a checkout clone under here.
-PROJECTS_DIR="$HOME/development/khinshankhan"
+PROJECTS_DIR="$HOME/den/khinshankhan"
 [ -d "$PROJECTS_DIR" ] || mkdir -p "$PROJECTS_DIR"
 
 # Where steps drop symlinks to things they build.
@@ -57,7 +57,7 @@ fi
 # other services it builds (case, clip, color, net) stay in the repo.
 # go comes from nix (modules.dev.go), so run `dottie nix apply` before this.
 # SSH remote to match the existing checkout, so this needs keys loaded.
-YUI_DIR="$PROJECTS_DIR/yui"
+YUI_DIR="$PROJECTS_DIR/yui/lane.0"
 if ! have git || ! have go || ! have make; then
     skip "yui: git/go/make missing, can't build"
 else

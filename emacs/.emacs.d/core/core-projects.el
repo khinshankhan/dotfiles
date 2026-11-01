@@ -33,10 +33,10 @@
   (projectile-mode t)
 
   (defun shan/projectile-refresh ()
-    "Remove stale projects and discover new ones under ~/development."
+    "Remove stale projects and discover new ones under ~/development or ~/den (<org>/<project>/lane.N)."
     (interactive)
     (projectile-cleanup-known-projects)
-    (let ((projectile-project-search-path '(("~/development" . 2))))
+    (let ((projectile-project-search-path '(("~/development" . 2) ("~/den" . 3))))
       (projectile-discover-projects-in-search-path)))
 
   (with-eval-after-load 'transient

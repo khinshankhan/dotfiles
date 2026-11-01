@@ -18,7 +18,7 @@ cd ~/.config/git
         [ -f "$name/local.gitconfig" ] || continue
         # one includeIf per place the repo might live
         # shellcheck disable=SC2088  # ~ is meant to stay literal; git expands it
-        for root in '~' '~/development'; do
+        for root in '~' '~/development' '~/den'; do
             echo
             echo "[includeIf \"gitdir:$root/$name/\"]"
             echo "	path = \"~/.config/git/$name/local.gitconfig\""

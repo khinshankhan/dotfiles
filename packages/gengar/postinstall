@@ -34,7 +34,7 @@ have() {
 # Where our own repos live. Steps that need a checkout clone under here.
 # git clone would create this chain on its own, but don't make every future
 # step depend on that -- some will want to write here without cloning first.
-PROJECTS_DIR="$HOME/development/khinshankhan"
+PROJECTS_DIR="$HOME/den/khinshankhan"
 [ -d "$PROJECTS_DIR" ] || mkdir -p "$PROJECTS_DIR"
 
 # Where steps drop symlinks to things they build. Stow usually gets here first,
@@ -142,7 +142,7 @@ fi
 # Wanted for its MCP server: the desktop app serves 127.0.0.1:29979 while a
 # file is open, which is loopback-only -- an agent can only reach a Paper
 # running on the same box, so it has to be installed locally.
-PKGBUILDS_DIR="$PROJECTS_DIR/pkgbuilds"
+PKGBUILDS_DIR="$PROJECTS_DIR/pkgbuilds/lane.0"
 if pacman -Qq paper-design >/dev/null 2>&1; then
     skip "paper-design: already installed"
 elif ! have git || ! have makepkg; then
@@ -165,7 +165,7 @@ fi
 # other services it builds (case, clip, color, net) stay in the repo.
 # go comes from nix (modules.dev.go), so run `dottie nix apply` before this.
 # SSH remote to match the existing checkout, so this needs keys loaded.
-YUI_DIR="$PROJECTS_DIR/yui"
+YUI_DIR="$PROJECTS_DIR/yui/lane.0"
 if ! have git || ! have go || ! have make; then
     skip "yui: git/go/make missing, can't build"
 else
