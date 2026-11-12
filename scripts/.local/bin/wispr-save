@@ -1,0 +1,291 @@
+#!/usr/bin/env bash
+# wispr-save --- copy Wispr Flow meetings somewhere the app won't clean up.
+#
+# Wispr Flow keeps a meeting's audio on disk for only ~14 days after the meeting
+# (transcripts and summaries it keeps). This copies a meeting out of the app's
+# data dir before that happens:
+#
+#   wispr-save                          # list recent meetings and when their audio goes
+#   wispr-save --page 2                 # older meetings, 25 per page
+#   wispr-save <id|share-url|title>     # save one meeting (title is a substring match)
+#   wispr-save <match> <dest-dir>       # same, into an explicit dir
+#   wispr-save --all                    # save every meeting that still has audio
+#
+# Each meeting lands in $WISPR_SAVE_DIR/<date>-<title-slug>/ (default
+# ~/den/notes/recordings) as:
+#
+#   recording.ogg       the audio (Ogg Opus: VLC, IINA, ffplay or a browser play it)
+#   transcript.md       speaker-labelled transcript
+#   transcript.ndjson   the transcript as Wispr Flow stores it
+#   summary.md          title, date, participants, share link and Flow Summary
+#
+# --json (anywhere in the args) makes stdout machine-readable, for scripts and
+# agents:
+#
+#   list      one object: {page, pages, total, meetings: [meeting...]}
+#   save      one object: meeting + {dest, files: {recording, transcript,
+#             transcript_ndjson, summary}, warnings: [...]}; a file is null if
+#             it wasn't saved. --all prints one such object per line.
+#   meeting   {id, date, title, ended, has_audio, audio_deleted_around, share_url}
+#
+# Exit codes: 0 ok, 1 error (message on stderr), 2 the match was ambiguous
+# (stdout lists the candidates: as text, or with --json as
+# {error: "ambiguous", query, matches: [meeting...]}); retry with an id.
+#
+# Re-running is safe: files are overwritten in place and unchanged audio isn't
+# re-copied. The app's data is only ever read. Needs sqlite3 (3.38+ for JSON).
+# Set WISPR_FLOW_DIR if the app's data isn't in the platform default location.
+set -euo pipefail
+
+case "$(uname -s)" in
+    Darwin) default_flow_dir="$HOME/Library/Application Support/Wispr Flow" ;;
+    *) default_flow_dir="${XDG_CONFIG_HOME:-$HOME/.config}/Wispr Flow" ;;
+esac
+flow_dir="${WISPR_FLOW_DIR:-$default_flow_dir}"
+save_root="${WISPR_SAVE_DIR:-$HOME/den/notes/recordings}"
+db="$flow_dir/flow.sqlite"
+tab=$'\t'
+json=0
+warnings=()
+
+die() { echo "wispr-save: $*" >&2; exit 1; }
+warn() { echo "wispr-save: $*" >&2; warnings+=("$*"); }
+
+command -v sqlite3 >/dev/null 2>&1 || die "sqlite3 not found"
+[ -f "$db" ] || die "no Wispr Flow database at $db (set WISPR_FLOW_DIR?)"
+
+# -init /dev/null skips ~/.sqliterc so output mode is ours, not the user's.
+sql() { sqlite3 -init /dev/null -batch -readonly -noheader -list -separator "$tab" "$db" "$@"; }
+sql_mem() { sqlite3 -init /dev/null -batch -noheader -list :memory: "$@"; }
+
+# Quote a value as an SQL string literal.
+q() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/''/g")"; }
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+# SQL list of the meeting ids whose audio is still on disk.
+audio_ids() {
+    local f ids="''"
+    for f in "$flow_dir"/meetings/*/upload.ogg; do
+        [ -e "$f" ] || continue
+        ids="$ids, $(q "$(basename "$(dirname "$f")")")"
+    done
+    echo "$ids"
+}
+
+# SQL expression for one Meetings row as a meeting object (see --help).
+meeting_json() {
+    local audio
+    audio="$(audio_ids)"
+    echo "json_object(
+        'id', id,
+        'date', date(createdAt, 'localtime'),
+        'title', title,
+        'ended', json(CASE finalized WHEN 1 THEN 'true' ELSE 'false' END),
+        'has_audio', json(CASE WHEN id IN ($audio) THEN 'true' ELSE 'false' END),
+        'audio_deleted_around', CASE WHEN id IN ($audio) THEN date(createdAt, 'localtime', '+14 days') END,
+        'share_url', 'https://notes.wisprflow.ai/shared/' || shareSlug)"
+}
+
+list() {
+    local page="$1" per_page=25 total pages rows
+    case "$page" in
+        '' | *[!0-9]* | 0) die "page must be a positive number, got \"$page\"" ;;
+    esac
+    total="$(sql "SELECT count(*) FROM Meetings WHERE isDeleted = 0;")"
+    pages=$(((total + per_page - 1) / per_page))
+    [ "$total" = 0 ] || [ "$page" -le "$pages" ] || die "page $page is past the last page ($pages)"
+    rows="SELECT * FROM Meetings WHERE isDeleted = 0 ORDER BY createdAt DESC
+          LIMIT $per_page OFFSET $(((page - 1) * per_page))"
+
+    if [ "$json" = 1 ]; then
+        sql "SELECT json_object('page', $page, 'pages', $pages, 'total', $total,
+                                'meetings', json_group_array(json($(meeting_json))))
+             FROM ($rows);"
+        return
+    fi
+    if [ "$total" = 0 ]; then
+        echo "no meetings yet"
+        return
+    fi
+    sql "SELECT json_extract(m, '\$.date'),
+                CASE WHEN json_extract(m, '\$.has_audio')
+                     THEN 'audio to ~' || json_extract(m, '\$.audio_deleted_around')
+                     ELSE 'no audio' END,
+                json_extract(m, '\$.title'), json_extract(m, '\$.id')
+         FROM (SELECT $(meeting_json) AS m FROM ($rows));" |
+        while IFS="$tab" read -r day audio title id; do
+            printf '%s  %-20s  %s  (%s)\n' "$day" "$audio" "$title" "$id"
+        done
+    echo "-- page $page of $pages ($total meetings)"
+    [ "$page" -ge "$pages" ] || echo "-- next: wispr-save --page $((page + 1))"
+}
+
+# Print the ids of meetings matching an id, share slug/URL, or title substring.
+# An exact id or slug wins outright; otherwise every title match, newest first.
+resolve() {
+    local m="$1" exact
+    case "$m" in
+        http://* | https://*) m="${m%%\?*}"; m="${m%/}"; m="${m##*/}" ;;
+    esac
+    exact="$(sql "SELECT id FROM Meetings WHERE isDeleted = 0 AND (id = $(q "$m") OR shareSlug = $(q "$m"));")"
+    if [ -n "$exact" ]; then
+        echo "$exact"
+        return
+    fi
+    sql "SELECT id FROM Meetings WHERE isDeleted = 0 AND title LIKE $(q "%$m%") ORDER BY createdAt DESC;"
+}
+
+ambiguous() {
+    local query="$1" ids="$2" in_list="''" id
+    for id in $ids; do in_list="$in_list, $(q "$id")"; done
+    if [ "$json" = 1 ]; then
+        sql "SELECT json_object('error', 'ambiguous', 'query', $(q "$query"),
+                                'matches', json_group_array(json($(meeting_json))))
+             FROM (SELECT * FROM Meetings WHERE id IN ($in_list) ORDER BY createdAt DESC);"
+    else
+        echo "\"$query\" matches several meetings; pass one of these ids:"
+        sql "SELECT '  ' || date(createdAt, 'localtime') || '  ' || title || '  (' || id || ')'
+             FROM Meetings WHERE id IN ($in_list) ORDER BY createdAt DESC;"
+    fi
+    exit 2
+}
+
+slugify() {
+    local s
+    s="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+    echo "${s:-untitled}"
+}
+
+# Wispr Flow's summaries mention people as <@person3:c=...;n=Name> and
+# <@speaker:2>; turn those back into plain names.
+clean_mentions() {
+    sed -E 's/<@speaker:([0-9]+)>/Speaker \1/g; s/<@person[0-9]*:([^>]*;)?n=([^;>]*)[^>]*>/\2/g; s/%20/ /g'
+}
+
+write_transcript_md() {
+    local ndjson="$1" title="$2" out="$3"
+    # ndjson -> one JSON array, so sqlite's json_each can walk it.
+    grep -v '^[[:space:]]*$' "$ndjson" | sed '1s/^/[/; $!s/$/,/; $s/$/]/' >"$tmp"
+    {
+        printf '# %s -- transcript\n\n' "$title"
+        sql_mem "SELECT '[' || json_extract(value, '\$.timestamp') || '] '
+                     || coalesce(json_extract(value, '\$.speaker.name'),
+                                 'Speaker ' || json_extract(value, '\$.speaker.id'), 'Unknown')
+                     || ': ' || trim(json_extract(value, '\$.text')) || char(10)
+                 FROM json_each(readfile($(q "$tmp")))
+                 WHERE json_extract(value, '\$.text') IS NOT NULL
+                 ORDER BY key;"
+    } >"$out"
+}
+
+write_summary_md() {
+    local id="$1" title="$2" out="$3" when people share summary
+    when="$(sql "SELECT datetime(createdAt, 'localtime') FROM Meetings WHERE id = $(q "$id");")"
+    people="$(sql "SELECT group_concat(value, ', ') FROM Meetings, json_each(Meetings.participantNames)
+                   WHERE Meetings.id = $(q "$id") AND json_valid(participantNames);")"
+    share="$(sql "SELECT shareSlug FROM Meetings WHERE id = $(q "$id");")"
+    summary="$(sql "SELECT summary FROM Meetings WHERE id = $(q "$id");")"
+    {
+        printf '# %s\n\n' "$title"
+        printf -- '- Date: %s\n' "$when"
+        [ -z "$people" ] || printf -- '- Participants: %s\n' "$people"
+        [ -z "$share" ] || printf -- '- Share link: https://notes.wisprflow.ai/shared/%s\n' "$share"
+        [ -z "$summary" ] || printf '\n%s\n' "$summary" | clean_mentions
+    } >"$out"
+}
+
+# The save result as JSON (see --help): the meeting plus where its files went.
+saved_json() {
+    local id="$1" dest="$2" key name files="" warns="" w
+    for key in recording:recording.ogg transcript:transcript.md \
+        transcript_ndjson:transcript.ndjson summary:summary.md; do
+        name="${key#*:}"
+        if [ -f "$dest/$name" ]; then
+            files="$files, '${key%%:*}', $(q "$dest/$name")"
+        else
+            files="$files, '${key%%:*}', NULL"
+        fi
+    done
+    for w in ${warnings[@]+"${warnings[@]}"}; do warns="$warns, $(q "$w")"; done
+    # json_set, not json_patch: a merge patch would drop the null files.
+    sql "SELECT json_set($(meeting_json),
+             '\$.dest', $(q "$dest"),
+             '\$.files', json_object(${files#, }),
+             '\$.warnings', json_array(${warns#, }))
+         FROM Meetings WHERE id = $(q "$id");"
+}
+
+save() {
+    local id="$1" dest="${2:-}" src="$flow_dir/meetings/$1" day finalized title ndjson
+    warnings=()
+    IFS="$tab" read -r day finalized title < <(
+        sql "SELECT date(createdAt, 'localtime'), finalized, title FROM Meetings WHERE id = $(q "$id");"
+    )
+    if [ -z "$dest" ]; then
+        dest="$save_root/$day-$(slugify "$title")"
+        # Two same-titled meetings on one day (eg a split standup) get their own dirs.
+        if [ -f "$dest/.meeting-id" ] && [ "$(cat "$dest/.meeting-id")" != "$id" ]; then
+            dest="$dest-${id:0:8}"
+        fi
+    fi
+    mkdir -p "$dest"
+    echo "$id" >"$dest/.meeting-id"
+
+    # A paused meeting isn't ended: its audio is still growing and hasn't been
+    # uploaded. End it in the app, then save again.
+    [ "$finalized" = 1 ] || warn "\"$title\" is still open in Wispr Flow (paused, not ended); audio may be incomplete"
+
+    if [ -f "$src/upload.ogg" ]; then
+        cmp -s "$src/upload.ogg" "$dest/recording.ogg" || cp -p "$src/upload.ogg" "$dest/recording.ogg"
+    else
+        warn "\"$title\" has no local audio left (Wispr Flow deletes it ~14 days after the meeting)"
+    fi
+
+    ndjson="$src/refined.ndjson"
+    [ -s "$ndjson" ] || ndjson="$src/live.ndjson"
+    if [ -s "$ndjson" ]; then
+        cp -p "$ndjson" "$dest/transcript.ndjson"
+        write_transcript_md "$ndjson" "$title" "$dest/transcript.md"
+    else
+        warn "\"$title\" has no local transcript"
+    fi
+
+    write_summary_md "$id" "$title" "$dest/summary.md"
+    if [ "$json" = 1 ]; then
+        saved_json "$id" "$dest"
+    else
+        echo "$dest"
+    fi
+}
+
+save_all() {
+    local f id
+    for f in "$flow_dir"/meetings/*/upload.ogg; do
+        [ -e "$f" ] || continue
+        id="$(basename "$(dirname "$f")")"
+        [ "$(sql "SELECT count(*) FROM Meetings WHERE id = $(q "$id") AND isDeleted = 0;")" = 1 ] || continue
+        save "$id"
+    done
+}
+
+args=()
+for a in "$@"; do
+    if [ "$a" = --json ]; then json=1; else args+=("$a"); fi
+done
+set -- ${args[@]+"${args[@]}"}
+
+case "${1:-}" in
+    "") list 1 ;;
+    -p | --page) list "${2:-}" ;;
+    -h | --help) sed -n '2,/^set -euo/{/^set -euo/d;s/^# \{0,1\}//;p;}' "$0" ;;
+    --all) save_all ;;
+    -*) die "unknown option \"$1\" (see --help)" ;;
+    *)
+        ids="$(resolve "$1")"
+        [ -n "$ids" ] || die "no meeting matches \"$1\""
+        [ "$(printf '%s\n' "$ids" | wc -l | tr -d ' ')" = 1 ] || ambiguous "$1" "$ids"
+        save "$ids" "${2:-}"
+        ;;
+esac
