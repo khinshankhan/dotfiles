@@ -19,10 +19,23 @@
             # explicitly-allowed unfree packages (allowlist, not blanket allowUnfree):
             #   symbola - emacs unicode fallback font
             #   ngrok   - tunneling CLI, unfree license
-            config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
-              "symbola"
-              "ngrok"
-            ];
+            #   android - SDK pieces ship under the Android SDK license
+            config.allowUnfreePredicate = pkg:
+              builtins.elem (nixpkgs.lib.getName pkg) [
+                "symbola"
+                "ngrok"
+              ]
+              || nixpkgs.lib.hasPrefix "android-sdk" (nixpkgs.lib.getName pkg)
+              || builtins.elem (nixpkgs.lib.getName pkg) [
+                "androidsdk"
+                "build-tools"
+                "cmdline-tools"
+                "platform-tools"
+                "platforms"
+                "tools"
+              ];
+            # androidenv refuses to build until this is set
+            config.android_sdk.accept_license = true;
           };
           modules = [ host.module ];
         };

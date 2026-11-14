@@ -12,6 +12,7 @@
   module = { pkgs, ... }: {
     imports = [
       # dev, languages and their entourage
+      ../../modules/dev/android.nix
       ../../modules/dev/go.nix
       ../../modules/dev/nix.nix
       ../../modules/dev/node.nix
@@ -63,6 +64,7 @@
 
     # importing a module says it exists. enabling it says it's on. yes, both.
     # yes, every time. the readme calls this flexibility.
+    modules.dev.android.enable = true;
     modules.dev.go.enable = true;
     modules.dev.nix.enable = true;
     modules.dev.node.enable = true;
