@@ -6,6 +6,12 @@ case "$-" in
     *) return ;;
 esac
 
+# Ctrl+Arrow word navigation in Zsh's line editor.
+if [ -n "${ZSH_VERSION-}" ]; then
+    bindkey -M emacs '\e[1;5D' backward-word
+    bindkey -M emacs '\e[1;5C' forward-word
+fi
+
 # Auto-activate default nvm version in interactive shells
 if command -v nvm >/dev/null 2>&1; then
     nvm use --silent default >/dev/null 2>&1 || \
