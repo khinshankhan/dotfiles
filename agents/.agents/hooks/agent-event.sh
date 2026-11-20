@@ -3,9 +3,11 @@
 #
 # Usage: agent-event.sh <agent> <event> <hook>...    agent's hook JSON on stdin
 #
-# Agents and the events their config maps to done/blocked:
-#   claude  done (Stop), blocked (Notification)       ~/.claude/settings.json
-#   codex   done (Stop), blocked (PermissionRequest)  ~/.codex/hooks.json
+# Agents and the events their config maps to done/blocked/start:
+#   claude  done (Stop), blocked (Notification), start (UserPromptSubmit)
+#                                    ~/.claude/settings.json
+#   codex   done (Stop), blocked (PermissionRequest), start (UserPromptSubmit)
+#                                    ~/.codex/hooks.json
 #   pi      done (agent_settled), blocked (ui_prompt_start)
 #                                    ~/.pi/agent/extensions/agent-event.ts
 #   opencode  done (session.idle), blocked (permission.asked)
@@ -16,12 +18,14 @@
 # waits on them:
 #   chime       agent-chime.sh <state>: chime, unless herdr plays its own
 #   toast       agent-toast.sh: banner
-#   tab-rename  agent-tab-rename.sh: name an unnamed tab (done only)
+#   tab-rename  agent-tab-rename.sh: on start, label an unnamed tab
+#               ~pending; on done, name it after the work
 #
 # Each agent's payload is turned into one shape, which every hook gets on
 # stdin:
 #   agent    "claude", "codex", ...
-#   state    "done" (finished a turn) or "blocked" (waiting on a permission)
+#   state    "done" (finished a turn), "blocked" (waiting on a permission)
+#            or "start" (a prompt was submitted)
 #   reply    the agent's last message, when done
 #   message  what it's waiting for, when blocked
 #   prompt   the session's first real prompt, 3+ words (for tab names)
@@ -42,7 +46,7 @@ PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin${PATH:+:$PATH}"
 export PATH
 
 agent="${1:-}" state="${2:-}"
-case "$state" in done | blocked) ;; *) exit 0 ;; esac
+case "$state" in done | blocked | start) ;; *) exit 0 ;; esac
 [ -n "$agent" ] || exit 0
 shift 2
 command -v jq >/dev/null 2>&1 || exit 0
@@ -170,7 +174,12 @@ for name in "$@"; do
   case "$name" in
     chime) run agent-chime.sh "$state" ;;
     toast) run agent-toast.sh ;;
-    tab-rename) [ "$state" = "done" ] && run agent-tab-rename.sh ;;
+    tab-rename)
+      case "$state" in
+        done) run agent-tab-rename.sh ;;
+        start) run agent-tab-rename.sh --pending ;;
+      esac
+      ;;
     *) printf '%s unknown hook %s\n' "$(date '+%F %T')" "$name" >>"$log_file" 2>/dev/null ;;
   esac
 done

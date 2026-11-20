@@ -124,6 +124,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.agents/hooks/agent-event.sh claude start tab-rename",
+            "async": true
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
