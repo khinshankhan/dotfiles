@@ -8,6 +8,7 @@
 #   active         exit 0 when running inside a tmux pane
 #   session        session name
 #   window         window index
+#   label          window name
 #   pane           pane index
 #   panes          number of panes in the window
 #   title          pane title, set by the app via the terminal title escape
@@ -53,6 +54,7 @@ case "${1:-}" in
   active) exit 0 ;;
   session) show session_name ;;
   window) show window_index ;;
+  label) show window_name ;;
   pane) show pane_index ;;
   panes) show window_panes ;;
   title) show pane_title ;;

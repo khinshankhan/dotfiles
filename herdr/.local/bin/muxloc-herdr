@@ -8,6 +8,7 @@
 #   active         exit 0 inside a herdr pane or a herdr key binding
 #   session        workspace label
 #   window         tab label, else tab number
+#   label          tab label
 #   pane           pane label, else its position in the tab
 #   panes          number of panes in the tab
 #   agent          coding agent herdr detected in the pane
@@ -70,6 +71,9 @@ case "${1:-}" in
   window)
     herdr tab get "$tab" 2>/dev/null \
       | jq -r '.result.tab.label // .result.tab.number // empty'
+    ;;
+  label)
+    herdr tab get "$tab" 2>/dev/null | jq -r '.result.tab.label // empty'
     ;;
   panes)
     herdr tab get "$tab" 2>/dev/null \

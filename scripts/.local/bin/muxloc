@@ -9,6 +9,7 @@
 #   mux            which multiplexer is active, eg herdr or tmux
 #   session        herdr workspace / tmux session
 #   window         herdr tab / tmux window
+#   label          name of this tab/window, as shown
 #   pane           pane label or position within the tab/window
 #   panes          how many panes share this tab/window
 #   where          session:window, plus .pane when the tab/window is split
@@ -103,7 +104,7 @@ done
 case "${1:-where}" in
   mux) out="$mux" ;;
   where) out="$(where)" ;;
-  session | window | pane | panes | title | autoname) out="$(get "$1")" ;;
+  session | window | label | pane | panes | title | autoname) out="$(get "$1")" ;;
   id) out="$(get id)" && out="$mux:$out" ;;
   rename)
     [ -n "${2:-}" ] || exit 1
