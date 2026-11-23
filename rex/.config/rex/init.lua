@@ -1,0 +1,2 @@
+-- Rex configuration. Bind keys with rex.bind, remove defaults with rex.unbind.
+-- Check with `rex config check`, apply with `rex config reload`.
