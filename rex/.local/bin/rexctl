@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# rexctl -- copy things about this Rex pane.
+#
+# Usage: rexctl id [-c|--copy]        this pane's block id
+#        rexctl session [-c|--copy]   this pane's Claude session id
+#
+# The pane is the one named by REX_BLOCK, which Rex sets in every terminal. A
+# Rex key binding has no terminal, so the binding passes REX_BLOCK itself.
+# With -c the value goes to the clipboard (pbcopy) and a macOS notification
+# confirms it, since a key binding has nowhere to print.
+#
+# session finds Claude through the pane's foreground process: Claude writes
+# ~/.claude/sessions/<pid>.json for each running instance. Other agents are
+# not supported, and a pane at a shell prompt has no session.
+set -uo pipefail
+
+PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin"
+PATH="$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+# rex itself lives in the app bundle. Rex puts it on the PATH of terminals it
+# starts (and sets REX_BIN_DIR), but a config action runs in the server, which
+# has neither; the Current link is the same bundle.
+rex_app="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current"
+PATH="$PATH${REX_BIN_DIR:+:$REX_BIN_DIR}:$rex_app/Rex Server.app/Contents/MacOS"
+
+cmd="${1:-}"
+copy=false
+case "${2:-}" in
+  -c | --copy) copy=true ;;
+  "") ;;
+  *) echo "rexctl: unknown option: $2" >&2; exit 2 ;;
+esac
+case "$cmd" in
+  id | session) ;;
+  -h | --help | help)
+    sed -n '2,/^$/{/^$/d; s/^# \{0,1\}//; p;}' "$0"
+    exit 0
+    ;;
+  *) echo "rexctl: usage: rexctl id|session [-c]" >&2; exit 2 ;;
+esac
+
+notify() {
+  /usr/bin/osascript -e 'on run {t, b}' -e 'display notification b with title t' \
+    -e 'end run' "$1" "$2" >/dev/null 2>&1
+}
+
+fail() {
+  echo "rexctl $cmd: $1" >&2
+  $copy && notify "Nothing to copy" "$1"
+  exit 1
+}
+
+command -v rex >/dev/null && command -v jq >/dev/null || fail "needs rex and jq"
+[ -n "${REX_BLOCK:-}" ] || fail "not in a Rex pane"
+
+case "$cmd" in
+  id)
+    value="$REX_BLOCK" what="pane id"
+    ;;
+  session)
+    pid="$(rex block call -b "$REX_BLOCK" process 2>/dev/null \
+      | jq -r '.foreground.pid // empty')"
+    [ -n "$pid" ] || fail "no foreground process in this pane"
+    file="$HOME/.claude/sessions/$pid.json"
+    [ -f "$file" ] || fail "no Claude session in this pane"
+    value="$(jq -r '.sessionId // empty' "$file")"
+    [ -n "$value" ] || fail "no Claude session in this pane"
+    what="Claude session id"
+    ;;
+esac
+
+if ! $copy; then
+  printf '%s\n' "$value"
+  exit 0
+fi
+
+printf '%s' "$value" | pbcopy || fail "pbcopy failed"
+notify "Copied $what" "$value"
+exit 0

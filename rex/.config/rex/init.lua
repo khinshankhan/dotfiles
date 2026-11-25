@@ -87,3 +87,29 @@ rex.bind("cmd+.", "client.sidebar.activity.toggle")
 rex.bind("shift+cmd+s", "client.tab_style.toggle")
 rex.bind("alt+cmd+t", "client.toolbar.reveal")
 rex.bind("alt+shift+cmd+t", "client.pane_header.reveal")
+
+-- Copy helpers, same idea as herdr's prefix+i and prefix+y. rexctl does the
+-- work (rex/.local/bin/rexctl); a binding has no terminal, so pass the pane.
+local function rexctl(what)
+  return function(ctx)
+    local r, err = rex.exec(
+      { "sh", "-c", 'exec "$HOME/.local/bin/rexctl" "$1" --copy', "sh", what },
+      { env = { REX_BLOCK = ctx.block_id } })
+    if r == nil then error(err, 0) end
+    return { ok = r.ok, err = r.stderr }
+  end
+end
+
+rex.action{
+  name = "copy_pane_id",
+  title = "Copy Pane ID",
+  run = rexctl("id"),
+}
+rex.action{
+  name = "copy_claude_session",
+  title = "Copy Claude Session ID",
+  run = rexctl("session"),
+}
+
+rex.bind("ctrl+shift+i", "copy_pane_id")
+rex.bind("ctrl+shift+y", "copy_claude_session")

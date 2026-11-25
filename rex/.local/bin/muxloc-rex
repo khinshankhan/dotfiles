@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# muxloc-rex -- Rex backend for muxloc.
+#
+# Usage: muxloc-rex <field>
+#        muxloc-rex <action> [arg]
+#
+# Rex calls a tab a window and a pane a block; muxloc's window is Rex's
+# window (a tab) and muxloc's pane is a Rex block.
+#
+# Fields:
+#   active         exit 0 inside a Rex pane (REX_BLOCK is set)
+#   session        session label
+#   window         tab label
+#   label          tab label
+#   pane           block label if it was set, else its position in the tab
+#   panes          number of tiled blocks in the tab
+#   title          terminal title of the pane
+#   autoname       "yes" while the tab label is still Rex's default
+#   id             the block id, eg block:01a2...
+#
+# Actions:
+#   rename <name>  set the tab label
+#   reset-name     restore Rex's default tab label ("Window <id suffix>")
+#   focus <id>     jump to that block; works outside Rex too. Always updates
+#                  the server; also switches the app to it when Rex.app's
+#                  Remote Control allows client actions
+#
+# The pane is the one named by REX_BLOCK, which Rex sets in every terminal it
+# starts. A caller that has no such terminal (eg a Rex key binding running a
+# script) passes REX_BLOCK itself.
+
+# Executable only: sourcing would leak its functions/variables into your
+# shell and its `exit` would close it.
+if (return 0 2>/dev/null); then
+  echo "muxloc-rex: run it, don't source it" >&2
+  return 1
+fi
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+block="${REX_BLOCK:-}"
+
+active() {
+  [ -n "$block" ] && have rex && have jq
+}
+
+# focus needs no pane of our own: it runs from anywhere, eg a notification
+# click. Rex's block focus takes the id, and the server resolves it.
+if [ "${1:-}" = focus ]; then
+  [ -n "${2:-}" ] && have rex && have jq || exit 1
+  rex block focus "$2" >/dev/null 2>&1 || exit 1
+  # Showing the session is a client action; it needs Remote Control, so a
+  # refusal is not a failure of the focus itself.
+  read -r s w < <(rex block inspect "$2" --json 2>/dev/null \
+    | jq -r '.session_id as $s | .block | "\($s) \(.window_id)"')
+  if [ -n "${s:-}" ] && [ "$s" != null ]; then
+    rex do session.select "session_id=$s" "window_id=$w" >/dev/null 2>&1
+  fi
+  exit 0
+fi
+
+active || exit 1
+[ "${1:-}" = active ] && exit 0
+
+# Where is this block? One call gives its session and tab.
+read -r session_id window_id < <(rex block inspect "$block" --json 2>/dev/null \
+  | jq -r '.session_id as $s | .block | "\($s) \(.window_id)"')
+[ -n "${window_id:-}" ] && [ "$window_id" != null ] || exit 1
+
+window_json() { rex window inspect "$window_id" --json 2>/dev/null; }
+
+# A new tab is labelled "Window <last 8 characters of its id>".
+default_label="Window ${window_id: -8}"
+
+case "${1:-}" in
+  session)
+    rex session ls --json 2>/dev/null \
+      | jq -r --arg s "$session_id" \
+          '.sessions[] | select(.session_id == $s) | .label // empty'
+    ;;
+  window | label)
+    window_json | jq -r '.label // empty'
+    ;;
+  panes)
+    window_json \
+      | jq -r '[.layers[] | select(.kind == "tiled") | .blocks[]] | length'
+    ;;
+  pane)
+    window_json | jq -r --arg b "$block" '
+      [.layers[] | select(.kind == "tiled") | .blocks[]] as $bs
+      | ($bs | map(.block_id) | index($b)) as $i
+      | if $i == null then empty
+        elif ($bs[$i].label // "shell") != "shell" then $bs[$i].label
+        else ($i + 1 | tostring) end'
+    ;;
+  title)
+    rex block call -b "$block" title 2>/dev/null | jq -r '.title // empty'
+    ;;
+  autoname)
+    [ "$(window_json | jq -r '.label // empty')" = "$default_label" ] && echo yes
+    ;;
+  rename)
+    [ -n "${2:-}" ] || exit 1
+    rex window rename "$window_id" "$2" >/dev/null
+    ;;
+  reset-name)
+    rex window rename "$window_id" "$default_label" >/dev/null
+    ;;
+  id) echo "$block" ;;
+  *) exit 1 ;;
+esac
