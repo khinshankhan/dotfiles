@@ -32,13 +32,15 @@ usage() {
   echo "(\$LANES_ROOT, default ~/den) or anywhere else, every lane."
   echo "  -a, --all   Every lane under the root, wherever you are"
   echo ""
-  echo "New: run from anywhere inside a project (the folder holding lane.0)."
-  echo "Takes the next free lane.N and adds a worktree from lane.0, without"
+  echo "New: run from anywhere inside a project (the folder holding lane.0 or"
+  echo "lane.0.<name>, eg lane.0.main). Takes the next free lane number and adds a"
+  echo "worktree from the base lane, without"
   echo "touching lane.0's files (it only fetches). A new branch starts from"
   echo "origin/<default> when there's a remote, else the local default branch;"
   echo "an existing branch is checked out as is. Copies untracked .env-style"
   echo "files from lane.0 and prints the lane's ports and db name."
   echo "  branch            Branch for the lane (default: wip/lane-N)"
+  echo "  -s, --slug <name> Name the folder lane.N.<name> (default: lane.N)"
   echo "  --from <ref>      Start a new branch from <ref> instead"
   echo "  -n, --dry-run     Show what would happen, change nothing"
   echo ""
@@ -69,6 +71,24 @@ default_branch() {
     fi
   fi
   echo "$b"
+}
+
+# A project's base lane: lane.0, or lane.0.<name> (eg lane.0.main).
+base_lane() {
+  local d
+  for d in "$1"/lane.0 "$1"/lane.0.*; do
+    [[ -d "$d" ]] && { echo "$d"; return 0; }
+  done
+  return 1
+}
+
+# The lane numbered $2 in project $1: lane.N, or lane.N.<name>.
+lane_by_number() {
+  local d
+  for d in "$1"/lane."$2" "$1"/lane."$2".*; do
+    [[ -d "$d" ]] && { echo "$d"; return 0; }
+  done
+  return 1
 }
 
 cmd_list() {
@@ -157,10 +177,11 @@ cmd_list() {
 }
 
 cmd_new() {
-  local branch="" from="" dry=false
+  local branch="" from="" slug="" dry=false
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -h|--help) usage; return 0 ;;
+      -s|--slug) [[ $# -ge 2 ]] || { echo "--slug needs a name" >&2; return 1; }; slug="$2"; shift 2 ;;
       --from) [[ $# -ge 2 ]] || { echo "--from needs a ref" >&2; return 1; }; from="$2"; shift 2 ;;
       -n|--dry-run) dry=true; shift ;;
       -*) echo "Unknown option: $1" >&2; return 1 ;;
@@ -168,25 +189,31 @@ cmd_new() {
     esac
   done
 
-  # The project is the nearest folder, at or above here, that holds lane.0.
+  if [[ -n "$slug" && ! "$slug" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+    echo -e "${RED}Error:${RESET} not a valid slug: $slug" >&2
+    return 1
+  fi
+
+  # The project is the nearest folder, at or above here, that holds a base lane.
   local project
   project="$(pwd -P)"
-  while [[ "$project" != "/" && ! -d "$project/lane.0" ]]; do
+  while [[ "$project" != "/" ]] && ! base_lane "$project" >/dev/null; do
     project="$(dirname "$project")"
   done
-  if [[ ! -d "$project/lane.0" ]]; then
+  if [[ "$project" == "/" ]]; then
     echo -e "${RED}Error:${RESET} not inside a project (no lane.0 here or above)." >&2
     return 1
   fi
-  local lane0="$project/lane.0"
+  local lane0
+  lane0="$(base_lane "$project")"
   if ! git -C "$lane0" rev-parse --git-dir >/dev/null 2>&1; then
     echo -e "${RED}Error:${RESET} $lane0 is not a git repo." >&2
     return 1
   fi
 
   local n=1
-  while [[ -e "$project/lane.$n" ]]; do n=$((n + 1)); done
-  local path="$project/lane.$n"
+  while lane_by_number "$project" "$n" >/dev/null; do n=$((n + 1)); done
+  local path="$project/lane.$n${slug:+.$slug}"
   branch="${branch:-wip/lane-$n}"
 
   if ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then
@@ -255,7 +282,7 @@ cmd_new() {
   name="$(basename "$project")"
   db="$(echo "${name}_${n}" | tr -c 'A-Za-z0-9_\n' '_')"
 
-  echo -e "${BOLD}lane.$n${RESET}  ${path}"
+  echo -e "${BOLD}$(basename "$path")${RESET}  ${path}"
   echo -e "  branch   ${branch}  ${DIM}(${mode})${RESET}"
   if [[ -n "$port_base" ]]; then
     echo -e "  ports    $((port_base + 10 * n))-$((port_base + 10 * n + 9))  ${DIM}(base $port_base + 10*$n)${RESET}"
@@ -318,11 +345,11 @@ cmd_rm() {
     esac
   done
 
-  # Find the project (the folder holding lane.0) at or above here.
+  # Find the project (the folder holding a base lane) at or above here.
   local here project
   here="$(pwd -P)"
   project="$here"
-  while [[ "$project" != "/" && ! -d "$project/lane.0" ]]; do
+  while [[ "$project" != "/" ]] && ! base_lane "$project" >/dev/null; do
     project="$(dirname "$project")"
   done
 
@@ -330,7 +357,7 @@ cmd_rm() {
   local lane=""
   if [[ -n "$target" ]]; then
     if [[ -d "$target" ]]; then lane="$(cd "$target" && pwd -P)"
-    elif [[ "$target" =~ ^[0-9]+$ ]]; then lane="$project/lane.$target"
+    elif [[ "$target" =~ ^(lane\.)?[0-9]+$ ]]; then lane="$(lane_by_number "$project" "${target#lane.}" || echo "$project/lane.${target#lane.}")"
     else lane="$project/${target##*/}"
     fi
   elif [[ "$here" == "$project"/lane.* || "$here" == "$project"/lane.*/* ]]; then
@@ -346,14 +373,15 @@ cmd_rm() {
     return 1
   fi
   project="$(dirname "$lane")"
-  if [[ ! -d "$project/lane.0" || "$(basename "$lane")" != lane.* ]]; then
+  if ! base_lane "$project" >/dev/null || [[ "$(basename "$lane")" != lane.* ]]; then
     echo -e "${RED}Error:${RESET} $lane isn't a lane (a lane.N folder beside a lane.0)." >&2
     return 1
   fi
-  local lane0="$project/lane.0" name
+  local lane0 name
+  lane0="$(base_lane "$project")"
   name="$(basename "$lane")"
 
-  if [[ "$name" == "lane.0" ]]; then
+  if [[ "$name" == "lane.0" || "$name" == lane.0.* ]]; then
     echo -e "${RED}Error:${RESET} lane.0 is the clean clone every other lane hangs off; it isn't removed." >&2
     return 1
   fi
