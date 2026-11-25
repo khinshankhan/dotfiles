@@ -33,10 +33,19 @@ alias g='git'
 alias gl='git lanes'
 alias y='yui'
 
+# might be antiquated
 alias c='claude'
 alias cc='claude --dangerously-skip-permissions'
+# thinking: specs and reviews
+alias co='claude --model opus --effort medium'
+# chores: fixes, tests, notes, git
+alias cs='claude --model sonnet --effort low'
+# coordinator: briefs and dispatch for roundhouse, writes no product code
+alias cr='claude --model opus --effort medium --append-system-prompt-file ~/den/khinshankhan/roundhouse/lane.0/coordinator.md'
+
 alias x='codex'
 alias xx='codex --approval-mode full-auto'
+
 alias o='opencode'
 
 # validate the ghostty config before reloading it with ctrl+shift+,
