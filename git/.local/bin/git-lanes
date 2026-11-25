@@ -114,6 +114,19 @@ lane_status() {
   done < <(git -C "$lane" status --short)
 }
 
+# What to compare lanes against: origin/<default> when it exists (so a stale
+# local default branch doesn't inflate the counts), else the local branch.
+base_ref() {
+  local repo="$1" b
+  b="$(default_branch "$repo")"
+  [[ -n "$b" ]] || return 0
+  if git -C "$repo" rev-parse --quiet --verify "refs/remotes/origin/$b" >/dev/null; then
+    echo "origin/$b"
+  else
+    echo "$b"
+  fi
+}
+
 cmd_list() {
   local dir="" all=false
   while [[ $# -gt 0 ]]; do
@@ -181,7 +194,7 @@ cmd_list() {
     branch="$(git -C "$l" branch --show-current)"
     branch="${branch:-(detached)}"
 
-    base="$(default_branch "$l")"
+    base="$(base_ref "$l")"
     ab="-"
     if [[ -n "$base" ]]; then
       ab="$(git -C "$l" rev-list --left-right --count "${base}...HEAD" 2>/dev/null | awk '{print "+"$2"/-"$1}' || echo "-")"
@@ -440,7 +453,7 @@ cmd_rm() {
 
   local branch base dirty unmerged merged=false
   branch="$(git -C "$lane" branch --show-current)"
-  base="$(default_branch "$lane0")"
+  base="$(base_ref "$lane0")"
   dirty="$(lane_status "$lane" "$project" | wc -l | tr -d ' ')"
   if [[ -n "$branch" && -n "$base" ]]; then
     unmerged="$(git -C "$lane" rev-list --count "$branch" --not "$base" 2>/dev/null || echo "?")"
